@@ -63,9 +63,7 @@ void step_post()
 
     step_run(s);
 
-    ASSERT(*step_post_arg == 1338,
-           "step_post FAIL: step_post_fn did not increment the counter\n"
-           "  expected: %d\n" "  observed: %d\n", 1338, *step_post_arg);
+    ASSERT_EQ_integer(1338, *step_post_arg);
 }
 
 static void step_post_fn(int *there)

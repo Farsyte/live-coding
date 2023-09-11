@@ -52,4 +52,13 @@
 
 -TTau
 
+-TpSubs
+-TSubs
+
+-TStepAp
+-TStepFp
+-TpStep
 -TStep
+
+-TpStepAt
+-TStepAt

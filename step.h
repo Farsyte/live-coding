@@ -8,12 +8,9 @@
 typedef void       *StepAp;
 
 // The typedef "StepFn" is the data type that a step uses to
-// store the pointer to the function. To avoid a small tangle
-// of parentheses, the typedef "StepFn" is defined to be the
-// type of the function itself.
+// store the pointer to the function.
 
-typedef void        StepFn(StepAp);
-typedef StepFn     *StepFp;
+typedef void        (*StepFp)(StepAp);
 
 // The typedef "pStep" is a pointer to the storage for
 // a step; defining a variable of this type allocates
