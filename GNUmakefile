@@ -32,7 +32,7 @@ WAITF		:= ${CSRC} ${HSRC} ${INST}
 WAITE		:= modify delete
 
 run::		${PROG:%=log/run-%.log}
-#	$C ${INST} > log/run-${PROG}.log 2> log/run-${PROG}.stderr
+	$C ${INST} > log/run-${PROG}.log 2> log/run-${PROG}.stderr
 
 TEST_OBS	:= ${PROG:%=log/run-%.log}
 TEST_EXP	:= ${PROG:%=log/run-%.log.expected}
@@ -43,6 +43,9 @@ log/run-%.log:	bin/%
 
 log/run-%.log.difference:	log/run-%.log
 	$Q bin/check.sh log/run-$*.log.expected $< $@
+
+clean::
+	${RF} log/run-*.stderr
 
 # Set up a build rule that I can run in a loop,
 # usually with a "make await" between iteraions.

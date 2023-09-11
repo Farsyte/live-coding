@@ -1,6 +1,12 @@
 #include "step.h"
 #include "support.h"
 
+void step_invar(Step s)
+{
+    assert(s);
+    assert(s->fp);
+}
+
 void step_run(Step s)
 {
     s->fp(s->ap);
@@ -83,9 +89,9 @@ void step_bist()
         STEP_INIT(step_fn3, step_args + 2)
     };
 
-    Step                step_bench = STEP_INIT(step_fn_all, step_arg);
+    Step                bench_step = STEP_INIT(step_fn_all, step_arg);
 
-    step_run(step_bench);
+    step_run(bench_step);
 
     ASSERT_EQ_integer(start_val + 1, step_args[0]);
     ASSERT_EQ_integer(start_val + 10, step_args[1]);
@@ -108,11 +114,11 @@ void step_bench()
         STEP_INIT(step_fn3, step_args + 2)
     };
 
-    Step                step_bench = STEP_INIT(step_fn_all, step_arg);
+    Step                bench_step = STEP_INIT(step_fn_all, step_arg);
 
-    double              dt = step_elapsed(step_bench);
+    double              dt = step_elapsed(bench_step);
 
-    STUB("step_bench: %8.3f ns per step_fn_all call", dt);
+    fprintf(stderr, "BENCH: %8.3f ns per step_run() call\n", dt / 4.0);
 }
 
 // === === === === === === === === === === === === === === === ===

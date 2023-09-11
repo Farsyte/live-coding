@@ -98,4 +98,5 @@ clean::
 	${RF} *.err *.log
 	${RF} ${EXEC}
 	${RF} *.o
+	${RF} log/cc-*.stderr
 	${RF} dep/*.d

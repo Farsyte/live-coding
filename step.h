@@ -35,6 +35,10 @@ typedef struct {
 
 #define STEP_INIT(fp,ap) {{ ((StepFp)(fp)), ((StepAp)(ap)) }}
 
+// The "step_invar(Step s)" method checks invariants on the step.
+
+extern void         step_invar(Step s);
+
 // The "step_run(Step s)" method executes the step.
 
 extern void         step_run(Step s);
