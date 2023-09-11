@@ -30,19 +30,19 @@ Tau rtc_ns()
 
 void rtc_post()
 {
-    Tau prec = rtc_prec_ns();
+    Tau                 prec = rtc_prec_ns();
     ASSERT(prec >= 0, "RTC: host returns ZERO for RTC precision");
-    ASSERT(prec <= 1000, "RTC: host precision is %8.3f μs, need 1μs or better.", prec/1000.0);
+    ASSERT(prec <= 1000, "RTC: host precision is %8.3f μs, need 1μs or better.", prec / 1000.0);
 
-    Tau dtmin = TAU_MAX;
-    Tau dtmax = TAU_MIN;
-    int maxreps = 10;
+    Tau                 dtmin = TAU_MAX;
+    Tau                 dtmax = TAU_MIN;
+    int                 maxreps = 10;
 
     for (int reps = 0; reps < maxreps; ++reps) {
-        Tau t0 = rtc_ns();
-        Tau t1 = rtc_ns();
+        Tau                 t0 = rtc_ns();
+        Tau                 t1 = rtc_ns();
         ASSERT(t0 < t1, "RTC: values from RTC must be monotonically increasing.");
-        Tau dt = t1 - t0;
+        Tau                 dt = t1 - t0;
         if (dtmin > dt)
             dtmin = dt;
         if (dtmax < dt)
@@ -87,11 +87,12 @@ void rtc_bist()
 
 // rtc_bench: benchmark the RTC facility.
 
-void rtc_bench() {
+void rtc_bench()
+{
 
     int                 maxreps = 1000;
-    Tau t0, t1, dt;
-    double target_ns = 5.0e7;
+    Tau                 t0, t1, dt;
+    double              target_ns = 5.0e7;
 
     while (1) {
 
