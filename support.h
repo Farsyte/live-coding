@@ -42,7 +42,21 @@ extern int          _stub(int fatal, Str file, int line, Str func, Str fmt, ...)
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
 
 extern int          _fail(Str file, int line, Str func, Str cond, Str fmt, ...);
+
 #define	ASSERT(cond, ...)	if (0 != (cond)) ; else _fail(__FILE__, __LINE__, __func__, #cond, __VA_ARGS__)
+
+#define	ASSERT_EQ_integer(expected, observed)                   \
+    if ((expected) == (observed))                               \
+        ;                                                       \
+    else                                                        \
+        _fail(__FILE__, __LINE__, __func__,                     \
+              "" #observed " == " #expected,                    \
+              "Equality Comparison Failed\n"                    \
+              "  Expected value: %llu (%s)\n"                   \
+              "  Observed value: %llu (%s)\n"                   \
+              , ((long long)(expected)), #expected              \
+              , ((long long)(observed)), #observed              \
+            )
 
 // === === === === === === === === === === === === === === === ===
 //                  SUPPORT TESTS AND TEST SUPPORT

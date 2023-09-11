@@ -31,6 +31,7 @@ Tau rtc_ns()
 void rtc_post()
 {
     Tau                 prec = rtc_prec_ns();
+
     ASSERT(prec >= 0, "RTC: host returns ZERO for RTC precision");
     ASSERT(prec <= 1000, "RTC: host precision is %8.3f μs, need 1μs or better.", prec / 1000.0);
 
