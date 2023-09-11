@@ -1,0 +1,48 @@
+* live-coding
+
+This is the project I will use for live-coding.
+
+** Project Goal
+
+The goal of this project is to use Old School software engineering
+techniques to build a Discrete Event Simulation of an Old School small
+computer system.
+
+** Character Set: UTF-8 encoding of UNICODE
+
+I suggest installing Fira Code, or some variant; then configuring your
+editing system to enable Ligature support. While I will be sticking
+with plain ASCII for program text, I will freely use greek letters and
+special symbols in comments, string literals, and documentation.
+
+- 1 μs is a microsecond.
+- Δτ is an elapsed time.
+
+At a minimum, be sure you can read the above. Having greek letters in
+your font is sufficient.
+
+** Programming Language: C99 with GNU extensions.
+
+This project is intended to be Old School Coding; it will be
+written to the ISO/IEC 9899:1999 standard, also known as C99, with
+selected GNU GCC extensions.
+
+** Testing Philosophy
+
+I believe in test-as-you-go as a tool that helps me achieve and
+maintain appropriate code correctness and performance. Some tests run
+and must pass for a build to be successful. Some tests run every time
+you run the program. Some tests are run on demand, which take longer
+but perform deeper and more complicated testing.
+
+** Build Tools
+
+I use shell scripting to trigger my builds, and GNU Make to do the
+build commands; this gives me a level of build system flexibility
+beyond what I have been able to achieve with other tools.
+
+** Editing Environment
+
+I edit in GNU Emacs, and typically have an Xterm open on the side that
+runs scripts that run the build and test system.
+

@@ -1,0 +1,101 @@
+# -*- Makefile -*-
+#
+# Big Bunch of Make rules that I have accumulated
+
+# Allow me to use "make Q=" to expose the commands
+# being executed, but normally have them hidden.
+
+Q               = @
+I               = -
+C               = $Q $I
+
+# RF and RD exist because some versions of this file
+# were tuned to deal with operating systems where these
+# operations did not involve typing "/bin/rm ..."
+RF              = $C /bin/rm -f
+RD              = $C /bin/rm -fr
+
+
+MAKEFLAGS	:= --no-print-directory
+
+# Allow me to override certain items from the command line.
+NOOP            = $C true
+E               = $C echo
+P		= $C printf
+
+# LIBS            = util                        # add personal libraries
+# SYSLIBS         = pthread ncurses m           # add system libraries
+SYSLIBS         = ncurses           # add system libraries
+
+ALLLIBS         = $(LIBS) $(SYSLIBS)
+
+HSRC            := ${wildcard *.h}
+CSRC            := ${wildcard *.c}
+EXEC		:= ${PROG:%=bin/%}
+
+OBJS		:= ${CSRC:%.c=%.o}
+DEPS		:= ${CSRC:%.c=dep/%.d}
+
+INCDIRS		:= 
+
+IFLAGS		:= ${INCDIRS:%=-I%}
+
+DBGOPT		:= $(DBG) $(PRO) $(OPT) $(COV)
+
+CFLAGS		:= ${STD} ${IFLAGS} ${DBGOPT} ${WFLAGS}
+
+LDFLAGS		:= ${PRO} ${COV}
+LDLIBS		:= ${ALLLIBS:%=-l%}
+
+LINK.c		:= $(CC) $(CFLAGS) $(LDFLAGS)
+
+# Start building up the "make" targets that I like to always have.
+
+default::               		; ${NOOP}
+all::			default         ; ${NOOP}
+clean::                                 ; ${NOOP}
+
+# Create a "make world" target that first builds
+# the whole "clean" target, then when it is done
+# successfully, works on the "all" target.
+
+world::
+	$C ${MAKE} clean
+	$C ${MAKE} all
+
+# Include any and all dependency files. This starts empty with
+# a fresh (or cleaned) area, but adds dependencies so we can
+# recompile sources that depend on headers that changed.
+
+include ${wildcard dep/*.d} /dev/null
+
+objs::		${OBJS}
+default::	objs
+clean::
+	${RF} *.o dep/*.d
+
+exec::		${EXEC}
+default::	exec
+clean::
+	${RF} ${EXEC}
+
+# Modified compile rule
+# - generate a breadcrumb output line
+# - do not echo the (potentially very long) command lines
+# - maintain a dependency file for each source file
+# 
+
+%.o:    %.c
+	$E 'cc $* ...'
+	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > dep/$*.d
+	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
+
+${EXEC}:	${OBJS}
+	$E 'link ${PROG} ...'
+	$Q ${LINK.c} ${OBJS} ${LOADLIBES} ${LDLIBS} -o '$@'
+
+clean::
+	${RF} *.err *.log
+	${RF} ${EXEC}
+	${RF} *.o
+	${RF} dep/*.d
