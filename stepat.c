@@ -121,7 +121,6 @@ void stepat_bench()
 
     int                 stepat_args[3] = { start_val, start_val, start_val };
 
-    Tau                 t0 = TAU;
     Tau                 t1 = TAU + 10;
     Tau                 t2 = TAU + 20;
     Tau                 t3 = TAU + 30;
@@ -132,10 +131,7 @@ void stepat_bench()
         STEPAT_INIT(t3, stepat_fn3, stepat_args + 2)
     };
 
-    StepAt              bench_stepat =
-      STEPAT_INIT(t0, stepat_fn_all, stepat_arg);
-
-    double              dt = stepat_elapsed(bench_stepat);
+    double              dt = RTC_ELAPSED(stepat_fn_all, stepat_arg);
 
     fprintf(stderr, "BENCH: %8.3f ns per stepat_run() call\n", dt / 4.0);
 }

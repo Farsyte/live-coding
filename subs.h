@@ -7,6 +7,7 @@ typedef struct {
     pStep               list;
     int                 cap;
     int                 len;
+    int                 bubble;
 }                  *pSubs, Subs[1];
 
 extern void         subs_invar(Subs);

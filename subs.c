@@ -1,17 +1,24 @@
 #include "subs.h"
 #include "support.h"
 
+static int          subs_extend(Subs);
+
 void subs_invar(Subs s)
 {
     assert(s);
     assert(s->cap >= s->len);
-    if (s->cap > 0) {
+    assert(s->len >= 0);
+    assert(s->bubble >= -1);
+    assert(s->bubble <= s->len);
+
+    if (s->cap)
         assert(s->list);
-        if (s->len > 0) {
-            for (int i = 0; i < s->len; ++i) {
-                step_invar(s->list + i);
-            }
-        }
+
+    for (int i = 0; i < s->len; ++i) {
+        if (i == s->bubble)
+            continue;
+
+        step_invar(s->list + i);
     }
 }
 
@@ -20,45 +27,73 @@ void subs_init(Subs s)
     s->list = 0;
     s->cap = 0;
     s->len = 0;
+    s->bubble = -1;
     subs_invar(s);
 }
 
 void subs_add(Subs s, StepFp fp, StepAp ap)
 {
-    (void)fp;
-    (void)ap;
+    subs_invar(s);
+
+    int                 slot = s->bubble;
+
+    if ((slot >= 0) && (slot < s->len)) {
+        s->bubble = -1;
+    } else {
+        slot = subs_extend(s);
+    }
 
     subs_invar(s);
 
-    int                 cap = s->cap;
-    int                 len = s->len;
     pStep               list = s->list;
 
-    if (len == cap) {
-        cap = (cap < 8) ? 8 : 2 * cap;
-        void               *copy = realloc(list, cap * sizeof(list[0]));
-        ASSERT(copy, "unable to realloc %p to %d entries\n", (void *)list, cap);
-        list = copy;
-        s->list = list;
-        s->cap = cap;
-        subs_invar(s);
-    }
+    list[slot].fp = fp;
+    list[slot].ap = ap;
 
-    ASSERT(len < cap,
-           "after expansion, cap %d not big enough to expand to %d items", cap,
-           len);
+    if (slot == s->bubble)
+        s->bubble = -1;
 
-    list[len].fp = fp;
-    list[len].ap = ap;
-    s->len = len + 1;
     subs_invar(s);
 }
 
 void subs_run(Subs s)
 {
+    // NOTE: This is in the critical timing path.
+
     for (int i = 0; i < s->len; ++i) {
         step_run(s->list + i);
     }
+}
+
+static int subs_extend(Subs s)
+{
+    subs_invar(s);
+    assert(s->bubble == -1);
+
+    int                 slot = s->len;
+    int                 cap = s->cap;
+    pStep               list = s->list;
+
+    if (slot == cap) {
+        void               *copy;
+        cap = (cap < 8) ? 8 : 2 * cap;
+        copy = realloc(list, cap * sizeof(list[0]));
+        ASSERT(copy, "unable to realloc %p to %d entries\n", (void *)list, cap);
+        s->list = copy;
+        s->cap = cap;
+        subs_invar(s);
+    }
+
+    ASSERT(slot < cap,
+           "after expansion, cap %d not big enough to expand to %d items", cap,
+           slot);
+
+    s->bubble = slot;
+    s->len = slot + 1;
+
+    subs_invar(s);
+
+    return slot;
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -134,9 +169,7 @@ void subs_bench()
     for (int i = 0; i < TEST_LEN; ++i)
         SUBS_ADD(s, subs_fn1, subs_args + i);
 
-    Step                bench_subs = STEP_INIT(subs_run, s);
-
-    double              dt = step_elapsed(bench_subs);
+    double              dt = RTC_ELAPSED(subs_run, s);
 
     fprintf(stderr, "BENCH: %8.3f ns per subs_run() call\n", dt);
     fprintf(stderr, "  ...  %8.3f ns per step_run() call via the subs list\n",

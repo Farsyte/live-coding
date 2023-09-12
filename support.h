@@ -80,3 +80,8 @@ extern Tau          rtc_ns();                   // wall time (ns) since epoch
 extern Tau          rtc_prec_ns();              // wall time (ns) since epoch
 
 extern void         rtc_bench();                // measure RTC facility performance
+
+typedef void        BenchFn(void *);
+
+extern double       rtc_elapsed(BenchFn *, void *);
+#define RTC_ELAPSED(fn, ap)	(rtc_elapsed((BenchFn *)(fn), (void *)(ap)))

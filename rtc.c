@@ -123,3 +123,30 @@ void rtc_bench()
 
     fprintf(stderr, "BENCH: %8.3f ns per rtc_ns() call\n", dt * 1.0 / maxreps);
 }
+
+double rtc_elapsed(void (*func)(void *), void *arg)
+{
+    Tau                 maxreps = 1000;
+    Tau                 t0, t1, dt;
+    double              target_ns = 5.0e7;
+
+    while (1) {
+
+        t0 = rtc_ns();
+        for (Tau reps = 0; reps < maxreps; ++reps)
+            func(arg);
+        t1 = rtc_ns();
+
+        dt = t1 - t0;
+        if (dt >= target_ns)
+            break;
+        else if (dt < target_ns / 10)
+            maxreps *= 10;
+        else
+            maxreps *= target_ns * 2.0 / dt;
+
+        assert(maxreps > 0);
+    }
+
+    return dt * 1.0 / maxreps;
+}

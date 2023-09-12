@@ -40,13 +40,6 @@ extern void         step_invar(Step s);
 
 extern void         step_run(Step s);
 
-// The "step_elapsed(Step s)" exectues the step many times, and
-// returns the average elapsed wall clock time per call as a floating
-// point number of nanoseconds. This method will be used by
-// benchmarking code within this program.
-
-extern double       step_elapsed(Step s);
-
 // The step_post() function performs a very rapid check to assure
 // that the step facility is not obviously broken, and must be
 // called by the program before depending on step to work.
