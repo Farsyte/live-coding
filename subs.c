@@ -37,11 +37,8 @@ void subs_add(Subs s, StepFp fp, StepAp ap)
 
     int                 slot = s->bubble;
 
-    if ((slot >= 0) && (slot < s->len)) {
-        s->bubble = -1;
-    } else {
+    if (slot < 0 || slot >= s->len)
         slot = subs_extend(s);
-    }
 
     subs_invar(s);
 

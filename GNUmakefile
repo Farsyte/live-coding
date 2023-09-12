@@ -13,18 +13,15 @@ PRO             :=
 # (NOT TESTED)
 COV		:=
 
-# set DBG to -g for debugging.
+# set DBG to -g for debugging. including this flag
+# does not seem to reduce performance significantly.
 DBG             := -g
 
-# set OPT to -O0, -O1, -O2, -O3, or -Ofast
-# for increasing performace.
-OPT             := -O3
+# set OPT to -O0, -O1, -O2, -O3, or -Ofast.
+OPT             := -Ofast
 
 STD		:= --std=gnu99
-WFLAGS		:= -W -Wall
-# could add  -Wextra
-# could add -Wpedantic
-# if so, may need -Wno-missing-field-initializers
+WFLAGS		:= -W -Wall -Wextra -Wpedantic
 
 include GNUmakefile.rules
 
