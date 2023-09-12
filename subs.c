@@ -56,10 +56,10 @@ void subs_add(Subs s, StepFp fp, StepAp ap)
     subs_invar(s);
 }
 
+// subs_run(s): run all steps in the subs list.
+// NOTE: This is in the critical timing path.
 void subs_run(Subs s)
 {
-    // NOTE: This is in the critical timing path.
-
     for (int i = 0; i < s->len; ++i) {
         step_run(s->list + i);
     }
