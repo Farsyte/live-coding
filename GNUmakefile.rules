@@ -23,6 +23,9 @@ NOOP            = $C true
 E               = $C echo
 P		= $C printf
 
+OBJDIR		:= obj/
+DEPDIR		:= dep/
+
 # LIBS            = util                        # add personal libraries
 # SYSLIBS         = pthread ncurses m           # add system libraries
 SYSLIBS         = ncurses           # add system libraries
@@ -33,8 +36,8 @@ HSRC            := ${wildcard *.h}
 CSRC            := ${wildcard *.c}
 EXEC		:= ${PROG:%=bin/%}
 
-OBJS		:= ${CSRC:%.c=%.o}
-DEPS		:= ${CSRC:%.c=dep/%.d}
+OBJS		:= ${CSRC:%.c=${OBJDIR}%.o}
+DEPS		:= ${CSRC:%.c=${DEPDIR}%.d}
 
 INCDIRS		:= 
 
@@ -67,12 +70,12 @@ world::
 # a fresh (or cleaned) area, but adds dependencies so we can
 # recompile sources that depend on headers that changed.
 
-include ${wildcard dep/*.d} /dev/null
+include ${wildcard ${DEPDIR}*.d} /dev/null
 
 objs::		${OBJS}
 default::	objs
 clean::
-	${RF} *.o dep/*.d
+	${RF} ${OBJDIR}*.o ${DEPDIR}*.d
 
 exec::		${EXEC}
 default::	exec
@@ -85,9 +88,9 @@ clean::
 # - maintain a dependency file for each source file
 # 
 
-%.o:    %.c
+${OBJDIR}%.o:    %.c
 	$E 'cc $* ...'
-	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > dep/$*.d
+	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
 
 ${EXEC}:	${OBJS}
@@ -97,6 +100,6 @@ ${EXEC}:	${OBJS}
 clean::
 	${RF} *.err *.log
 	${RF} ${EXEC}
-	${RF} *.o
+	${RF} ${OBJDIR}*.o
 	${RF} log/cc-*.stderr
-	${RF} dep/*.d
+	${RF} ${DEPDIR}*.d
