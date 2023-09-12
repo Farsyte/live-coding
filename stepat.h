@@ -36,13 +36,6 @@ extern void         stepat_invar(StepAt s);
 
 extern void         stepat_run(StepAt s);
 
-// The "stepat_elapsed(StepAt s)" exectues the stepat many times, and
-// returns the average elapsed wall clock time per call as a floating
-// point number of nanoseconds. This method will be used by
-// benchmarking code within this program.
-
-extern double       stepat_elapsed(StepAt s);
-
 // The stepat_post() function performs a very rapid check to assure
 // that the stepat facility is not obviously broken, and must be
 // called by the program before depending on stepat to work.

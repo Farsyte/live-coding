@@ -3,6 +3,13 @@
 
 static int          subs_extend(Subs);
 
+// subs_invar(s): verify the invariants for a Subs.
+// - length does not exceed capacity
+// - bubble is within the range, or just one outside it
+// - if capacity is nonzero, list must not be null
+// - each Step on the list must satisfy its invariant
+// bubble indicates a step to skip when checking invariants.
+
 void subs_invar(Subs s)
 {
     assert(s);
@@ -22,6 +29,8 @@ void subs_invar(Subs s)
     }
 }
 
+// subs_init(s): initialize the given Subs to be empty.
+
 void subs_init(Subs s)
 {
     s->list = 0;
@@ -30,6 +39,14 @@ void subs_init(Subs s)
     s->bubble = -1;
     subs_invar(s);
 }
+
+// subs_add(s, fp, ap): add a subsciber to the list.
+//
+// This code should only be used during set-up time,
+// and subscription lists should remain unmodified during
+// the bulk of a run.
+//
+// This code is not performance critical.
 
 void subs_add(Subs s, StepFp fp, StepAp ap)
 {
@@ -55,12 +72,16 @@ void subs_add(Subs s, StepFp fp, StepAp ap)
 
 // subs_run(s): run all steps in the subs list.
 // NOTE: This is in the critical timing path.
+
 void subs_run(Subs s)
 {
     for (int i = 0; i < s->len; ++i) {
         step_run(s->list + i);
     }
 }
+
+// subs_extend: increase the length of the active list.
+// allocates additional memory as needed.
 
 static int subs_extend(Subs s)
 {
@@ -105,6 +126,11 @@ static void         subs_fn3(int *);
 //                    POWER-ON SELF TEST SUPPORT
 // === === === === === === === === === === === === === === === ===
 
+// subs_post: Power-On Self Test for the Subs code
+//
+// This function should be called every time the program starts
+// before any code relies on Subs not being completely broken.
+
 void subs_post()
 {
     Subs                s;
@@ -125,6 +151,12 @@ void subs_post()
 // === === === === === === === === === === === === === === === ===
 //                        BUILT-IN SELF TEST
 // === === === === === === === === === === === === === === === ===
+
+// subs_bist: Power-On Self Test for the Subs code
+//
+// This function should be called by the program on a run made during
+// the build process, to generate a build error if the Subs code is
+// not working correctly.
 
 void subs_bist()
 {
@@ -152,6 +184,11 @@ void subs_bist()
 // === === === === === === === === === === === === === === === ===
 //                   BENCHMARK THE SUBS FACILITY
 // === === === === === === === === === === === === === === === ===
+
+// subs_bench: performance verification for the Subs code
+//
+// This function should be called as needed to measure the performance
+// of the time critical parts of Subs.
 
 void subs_bench()
 {

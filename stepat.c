@@ -16,34 +16,6 @@ void stepat_run(StepAt s)
     s->fp(s->ap);
 }
 
-double stepat_elapsed(StepAt s)
-{
-    Tau                 maxreps = 1000;
-    Tau                 t0, t1, dt;
-    double              target_ns = 5.0e7;
-
-    while (1) {
-
-        t0 = rtc_ns();
-        for (Tau reps = 0; reps < maxreps; ++reps) {
-            s->fp(s->ap);
-        }
-        t1 = rtc_ns();
-
-        dt = t1 - t0;
-        if (dt >= target_ns)
-            break;
-        else if (dt < target_ns / 10)
-            maxreps *= 10;
-        else
-            maxreps *= target_ns * 2.0 / dt;
-
-        assert(maxreps > 0);
-    }
-
-    return dt * 1.0 / maxreps;
-}
-
 // === === === === === === === === === === === === === === === ===
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
