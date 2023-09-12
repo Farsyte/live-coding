@@ -37,7 +37,8 @@ extern Str          format(Str fmt, ...);
 //                          DEBUG SUPPORT
 // === === === === === === === === === === === === === === === ===
 
-extern int          _stub(int fatal, Str file, int line, Str func, Str fmt, ...);
+extern int          _stub(int fatal, Str file, int line, Str func, Str fmt,
+                          ...);
 #define STUB(...)	(_stub(0, __FILE__, __LINE__, __func__, __VA_ARGS__))
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
 

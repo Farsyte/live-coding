@@ -58,7 +58,8 @@ extern int _stub(int fatal, Str file, int line, Str func, Str fmt, ...)
 // generate test failure report that next-error can parse, maybe abort.
 extern int _fail(Str file, int line, Str func, Str cond, Str fmt, ...)
 {
-    fprintf(stderr, "%s:%d: (in %s): test condition failed\n    (%s)\n", file, line, func, cond);
+    fprintf(stderr, "%s:%d: (in %s): test condition failed\n    (%s)\n", file,
+            line, func, cond);
 
     va_list             ap;
     va_start(ap, fmt);

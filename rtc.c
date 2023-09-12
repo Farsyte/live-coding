@@ -7,7 +7,8 @@ Tau rtc_prec_ns()
 {
     struct timespec     tp[1];
     if (0 > clock_getres(CLOCK_MONOTONIC, tp))
-        FAIL("clock_getres(CLOCK_MONOTONIC, tp) failed with errno %d: %s", errno, strerror(errno));
+        FAIL("clock_getres(CLOCK_MONOTONIC, tp) failed with errno %d: %s",
+             errno, strerror(errno));
     return tp->tv_sec * 1000000000 + tp->tv_nsec;
 }
 
@@ -19,7 +20,8 @@ Tau rtc_ns()
 {
     struct timespec     tp[1];
     if (0 < clock_gettime(CLOCK_MONOTONIC, tp))
-        FAIL("clock_gettime(CLOCK_MONOTONIC, tp) failed with errno %d: %s", errno, strerror(errno));
+        FAIL("clock_gettime(CLOCK_MONOTONIC, tp) failed with errno %d: %s",
+             errno, strerror(errno));
     return tp->tv_sec * 1000000000 + tp->tv_nsec;
 }
 
@@ -33,7 +35,9 @@ void rtc_post()
     Tau                 prec = rtc_prec_ns();
 
     ASSERT(prec >= 0, "RTC: host returns ZERO for RTC precision");
-    ASSERT(prec <= 1000, "RTC: host precision is %8.3f μs, need 1μs or better.", prec / 1000.0);
+    ASSERT(prec <= 1000,
+           "RTC: host precision is %8.3f μs, need 1μs or better.",
+           prec / 1000.0);
 
     Tau                 dtmin = TAU_MAX;
     Tau                 dtmax = TAU_MIN;
@@ -42,7 +46,8 @@ void rtc_post()
     for (int reps = 0; reps < maxreps; ++reps) {
         Tau                 t0 = rtc_ns();
         Tau                 t1 = rtc_ns();
-        ASSERT(t0 < t1, "RTC: values from RTC must be monotonically increasing.");
+        ASSERT(t0 < t1,
+               "RTC: values from RTC must be monotonically increasing.");
         Tau                 dt = t1 - t0;
         if (dtmin > dt)
             dtmin = dt;
@@ -65,7 +70,9 @@ void rtc_bist()
     Tau                 prec = rtc_prec_ns();
 
     ASSERT(prec > 0, "RTC: precision must be a positive number of ns");
-    ASSERT(prec <= 1000, "RTC: precision must be 1 μs or better; RTC reports %.3f μs", prec / 1000.0);
+    ASSERT(prec <= 1000,
+           "RTC: precision must be 1 μs or better; RTC reports %.3f μs",
+           prec / 1000.0);
 
     Tau                 dtmin = TAU_MAX;
     Tau                 dtmax = TAU_MIN;
@@ -74,7 +81,8 @@ void rtc_bist()
     for (int reps = 0; reps < maxreps; ++reps) {
         Tau                 t0 = rtc_ns();
         Tau                 t1 = rtc_ns();
-        ASSERT(t0 < t1, "RTC: values from RTC must be monotonically increasing.");
+        ASSERT(t0 < t1,
+               "RTC: values from RTC must be monotonically increasing.");
         Tau                 dt = t1 - t0;
         if (dtmin > dt)
             dtmin = dt;

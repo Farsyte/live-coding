@@ -65,7 +65,8 @@ void stepat_post()
 
     Tau                 TAU_expected = TAU + 24;
 
-    StepAt              s = STEPAT_INIT(TAU_expected, stepat_post_fn, stepat_post_arg);
+    StepAt              s =
+      STEPAT_INIT(TAU_expected, stepat_post_fn, stepat_post_arg);
 
     stepat_run(s);
 
@@ -98,7 +99,8 @@ void stepat_bist()
         STEPAT_INIT(t3, stepat_fn3, stepat_args + 2)
     };
 
-    StepAt              bench_stepat = STEPAT_INIT(0, stepat_fn_all, stepat_arg);
+    StepAt              bench_stepat =
+      STEPAT_INIT(0, stepat_fn_all, stepat_arg);
 
     stepat_run(bench_stepat);
 
@@ -130,7 +132,8 @@ void stepat_bench()
         STEPAT_INIT(t3, stepat_fn3, stepat_args + 2)
     };
 
-    StepAt              bench_stepat = STEPAT_INIT(t0, stepat_fn_all, stepat_arg);
+    StepAt              bench_stepat =
+      STEPAT_INIT(t0, stepat_fn_all, stepat_arg);
 
     double              dt = stepat_elapsed(bench_stepat);
 

@@ -44,7 +44,9 @@ void subs_add(Subs s, StepFp fp, StepAp ap)
         subs_invar(s);
     }
 
-    ASSERT(len < cap, "after expansion, cap %d not big enough to expand to %d items", cap, len);
+    ASSERT(len < cap,
+           "after expansion, cap %d not big enough to expand to %d items", cap,
+           len);
 
     list[len].fp = fp;
     list[len].ap = ap;
@@ -137,7 +139,8 @@ void subs_bench()
     double              dt = step_elapsed(bench_subs);
 
     fprintf(stderr, "BENCH: %8.3f ns per subs_run() call\n", dt);
-    fprintf(stderr, "  ...  %8.3f ns per step_run() call via the subs list\n", dt / TEST_LEN);
+    fprintf(stderr, "  ...  %8.3f ns per step_run() call via the subs list\n",
+            dt / TEST_LEN);
 }
 
 // === === === === === === === === === === === === === === === ===
