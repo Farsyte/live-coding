@@ -363,7 +363,7 @@ static int sched_push_to_tail(Sched s, int slot, Tau at)
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
 
-typedef struct {
+typedef struct sRepCtx {
     int                 counter;
     int                 period;
     int                 until;

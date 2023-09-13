@@ -4,7 +4,7 @@
 
 // fifo: a place for things to do next
 
-typedef struct {
+typedef struct sFifo {
     pStep               ring;
     Tau                 mask;
     Tau                 prod;

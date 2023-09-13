@@ -21,7 +21,7 @@ typedef void        (*StepFp)(StepAp);
 // the storage for the step; but where the variable
 // is used, it looks like a pointer.
 
-typedef struct {
+typedef struct sStep {
     StepFp              fp;
     StepAp              ap;
 }                  *pStep, Step[1];

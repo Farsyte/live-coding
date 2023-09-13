@@ -16,7 +16,8 @@
 //                        UTILITY DATA TYPES
 // === === === === === === === === === === === === === === === ===
 
-typedef const char *Str;                        // C string (immutable with \0 at end)
+// C string -- immutable, with ACII NUL ('\0') at end.
+typedef const char *Cstr;
 
 // Elapsed time in arbitrary units, with sufficient range to store
 // a nanosecond elapsed time of days ... weeks ... years even.
@@ -30,34 +31,51 @@ typedef long long Tau;
 //                          UTILITY FUNCTIONS
 // === === === === === === === === === === === === === === === ===
 
-// printf but to a freshly allocated Str.
-extern Str          format(Str fmt, ...);
+// printf but to a freshly allocated Cstr.
+extern Cstr         format(Cstr fmt, ...);
 
 // === === === === === === === === === === === === === === === ===
 //                          DEBUG SUPPORT
 // === === === === === === === === === === === === === === === ===
 
-extern int          _stub(int fatal, Str file, int line, Str func, Str fmt,
+extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt,
                           ...);
 #define STUB(...)	(_stub(0, __FILE__, __LINE__, __func__, __VA_ARGS__))
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
 
-extern int          _fail(Str file, int line, Str func, Str cond, Str fmt, ...);
+extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt,
+                          ...);
 
 #define	ASSERT(cond, ...)	if (0 != (cond)) ; else _fail(__FILE__, __LINE__, __func__, #cond, __VA_ARGS__)
 
-#define	ASSERT_EQ_integer(expected, observed)                   \
-    if ((expected) == (observed))                               \
+#define	ASSERT_OP_integer(expected, op, observed)               \
+    if ((observed) op (expected))                               \
         ;                                                       \
     else                                                        \
         _fail(__FILE__, __LINE__, __func__,                     \
-              "" #observed " == " #expected,                    \
-              "Equality Comparison Failed\n"                    \
-              "  Expected value: %llu (%s)\n"                   \
-              "  Observed value: %llu (%s)\n"                   \
+              "" #observed " " #op " " #expected,               \
+              "Comparison Failed:\n"                            \
+              "  Expected value: %2s %llu (%s)\n"               \
+              "  Observed value:    %llu (%s)\n"                \
+              , #op                                             \
               , ((long long)(expected)), #expected              \
               , ((long long)(observed)), #observed              \
             )
+
+#define	ASSERT_EQ_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, ==, observed)
+
+#define	ASSERT_LT_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, <, observed)
+
+#define	ASSERT_GT_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, >, observed)
+
+#define	ASSERT_LE_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, <=, observed)
+
+#define	ASSERT_GE_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, >=, observed)
 
 // === === === === === === === === === === === === === === === ===
 //                  SUPPORT TESTS AND TEST SUPPORT

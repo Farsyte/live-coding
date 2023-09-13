@@ -3,7 +3,7 @@
 
 // subs: a place for things to do
 
-typedef struct {
+typedef struct sSubs {
     pStep               list;
     int                 cap;
     int                 len;

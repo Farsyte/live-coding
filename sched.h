@@ -3,7 +3,7 @@
 
 // sched: a place for things to do in order
 
-typedef struct {
+typedef struct sSched {
     pStepAt             heap;
     int                 cap;
     int                 len;

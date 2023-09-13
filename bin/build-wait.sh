@@ -9,7 +9,7 @@ cat <<EOF
 
 EOF
 
-if make -kj loop && make logs && make bench && make format
+if make -kj loop
 then bs="COMPLETED"
 else bs="FAILED"
 fi

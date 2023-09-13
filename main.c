@@ -1,3 +1,4 @@
+#include "edge.h"
 #include "fifo.h"
 #include "sched.h"
 #include "step.h"
@@ -14,6 +15,7 @@ static int main_post()
     subs_post();
     fifo_post();
     sched_post();
+    edge_post();
     return 0;
 }
 
@@ -28,6 +30,7 @@ static int main_bist(int argc, char **argv)
     subs_bist();
     fifo_bist();
     sched_bist();
+    edge_bist();
     return 0;
 }
 
@@ -42,6 +45,7 @@ static int main_bench(int argc, char **argv)
     subs_bench();
     fifo_bench();
     sched_bench();
+    edge_bench();
     return 0;
 }
 

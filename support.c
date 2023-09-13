@@ -1,7 +1,7 @@
 #include "support.h"
 
 // printf but to a freshly allocated Str.
-Str format(Str fmt, ...)
+Cstr format(Cstr fmt, ...)
 {
     va_list             ap;
     char               *result;
@@ -38,7 +38,7 @@ Str format(Str fmt, ...)
 }
 
 // generate a useful message that next-error can parse, maybe abort.
-extern int _stub(int fatal, Str file, int line, Str func, Str fmt, ...)
+extern int _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, ...)
 {
 
     fprintf(stderr, "%s:%d: (in %s): ", file, line, func);
@@ -56,7 +56,7 @@ extern int _stub(int fatal, Str file, int line, Str func, Str fmt, ...)
 }
 
 // generate test failure report that next-error can parse, maybe abort.
-extern int _fail(Str file, int line, Str func, Str cond, Str fmt, ...)
+extern int _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...)
 {
     fprintf(stderr, "%s:%d: (in %s): test condition failed\n    (%s)\n", file,
             line, func, cond);

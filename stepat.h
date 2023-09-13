@@ -22,7 +22,7 @@ extern Tau          TAU;
 // the storage for the stepat; but where the variable
 // is used, it looks like a pointer.
 
-typedef struct {
+typedef struct sStepAt {
     Tau                 at;
     StepFp              fp;
     StepAp              ap;

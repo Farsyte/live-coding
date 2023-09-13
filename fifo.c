@@ -169,7 +169,7 @@ static void fifo_double(Fifo f)
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
 
-typedef struct {
+typedef struct sRepCtx {
     int                 counter;
     int                 until;
     pFifo               f;
