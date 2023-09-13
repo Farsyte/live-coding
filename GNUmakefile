@@ -25,18 +25,18 @@ WFLAGS		:= -W -Wall -Wextra -Wpedantic
 
 include GNUmakefile.rules
 
-WAITF		:= ${CSRC} ${HSRC} ${INST}
+WAITF		:= ${CSRC} ${HSRC} ${EXEC}
 WAITE		:= modify delete
 
-run::		${PROG:%=log/run-%.log}
-	$C ${INST} > log/run-${PROG}.log 2> log/run-${PROG}.stderr
+run::		${EXEC}
+	$C ${EXEC} > log/run-${PROG}.log 2> log/run-${PROG}.stderr
 
 TEST_OBS	:= ${PROG:%=log/run-%.log}
 TEST_EXP	:= ${PROG:%=log/run-%.log.expected}
 TEST_CMP	:= ${PROG:%=log/run-%.log.difference}
 
 log/run-%.log:	bin/%
-	$< > $@ 2>log/run-$*.stderr
+	$< bist > $@ 2>log/run-$*.stderr
 
 log/run-%.log.difference:	log/run-%.log
 	$Q bin/check.sh log/run-$*.log.expected $< $@
@@ -49,6 +49,9 @@ clean::
 
 loop::
 	$C ${MAKE} cmp
+
+bench::		log/run-${PROG}.log.difference
+	$C ${EXEC} bench
 
 # Set up a "make cmp" rule that always
 # runs the program and compares the results.
@@ -74,13 +77,13 @@ clean::
 # Set up a "make gdb" rule that makes sure
 # we are built, and starts GDB.
 
-gdb::		${INST}
-	gdb ${INST}
+gdb::		${EXEC}
+	gdb ${EXEC}
 
 # Set up a "make format" rule that fixes the
 # formatting in all source files.
 
-format::	${INST}
+format::	${EXEC}
 	$E 'fix c headers ...'
 	$C bin/fix-c-includes.sh ${CSRC} ${BSRC} ${ASRC}
 	$E 'fix h headers ...'

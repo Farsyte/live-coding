@@ -378,8 +378,6 @@ static void         sched_inc_repeat(RepCtx);
 
 void sched_post()
 {
-    PRINT_TOP();
-
     RepCtx              ctx;
     Tau                 t0 = TAU;
 
@@ -432,8 +430,6 @@ void sched_post()
     sched_invar(s);
     ASSERT_EQ_integer(t0 + 100, TAU);
     ASSERT_EQ_integer(10, ctx->counter);
-
-    PRINT_END();
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -442,8 +438,6 @@ void sched_post()
 
 void sched_bist()
 {
-    PRINT_TOP();
-
     RepCtx              ctx1;
     RepCtx              ctx2;
     Tau                 t0 = TAU;
@@ -547,8 +541,6 @@ void sched_bist()
     ASSERT_EQ_integer(t0 + 180, TAU);
     ASSERT_EQ_integer(17, ctx1->counter);
     ASSERT_EQ_integer(10, ctx2->counter);
-
-    PRINT_END();
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -578,8 +570,6 @@ void bench_sched(Sched s)
 
 void sched_bench()
 {
-    PRINT_TOP();
-
     Sched               s;
     sched_init(s);
     sched_invar(s);
@@ -605,8 +595,6 @@ void sched_bench()
     dt = RTC_ELAPSED(bench_sched, s);
     fprintf(stderr, "BENCH: %8.3f ns per scheduled stepat (heap size %d)\n",
             dt * 1.0 / bench_sched_runs, bench_sched_jobs);
-
-    PRINT_END();
 }
 
 // === === === === === === === === === === === === === === === ===
