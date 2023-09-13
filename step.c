@@ -1,6 +1,8 @@
 #include "step.h"
 #include "support.h"
 
+// step: a function to call, and a pointer to pass it.
+
 void step_invar(Step s)
 {
     assert(s);
@@ -9,6 +11,7 @@ void step_invar(Step s)
 
 // step_run(s): run the referenced step.
 // NOTE: This is in the critical timing path.
+
 void step_run(Step s)
 {
     s->fp(s->ap);
@@ -27,22 +30,15 @@ static void         step_fn3(int *there);
 //                    POWER-ON SELF TEST SUPPORT
 // === === === === === === === === === === === === === === === ===
 
-static void         step_post_fn(int *there);
-
 void step_post()
 {
     int                 step_post_arg[1] = { 1337 };
 
-    Step                s = STEP_INIT(step_post_fn, step_post_arg);
+    Step                post_step = STEP_INIT(step_fn1, step_post_arg);
 
-    step_run(s);
+    step_run(post_step);
 
     ASSERT_EQ_integer(1338, *step_post_arg);
-}
-
-static void step_post_fn(int *there)
-{
-    ++*there;
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -61,9 +57,9 @@ void step_bist()
         STEP_INIT(step_fn3, step_args + 2)
     };
 
-    Step                bench_step = STEP_INIT(step_fn_all, step_arg);
+    Step                bist_step = STEP_INIT(step_fn_all, step_arg);
 
-    step_run(bench_step);
+    step_run(bist_step);
 
     ASSERT_EQ_integer(start_val + 1, step_args[0]);
     ASSERT_EQ_integer(start_val + 10, step_args[1]);
@@ -86,9 +82,13 @@ void step_bench()
         STEP_INIT(step_fn3, step_args + 2)
     };
 
-    double              dt = RTC_ELAPSED(step_fn_all, step_arg);
+    Step                bench_step = STEP_INIT(step_fn_all, step_arg);
 
-    fprintf(stderr, "BENCH: %8.3f ns per step_run() call\n", dt / 4.0);
+    double              dt = RTC_ELAPSED(step_run, bench_step);
+
+    BENCH_TOP("ns per step run");
+    BENCH_VAL(dt / 4.0);
+    BENCH_END();
 }
 
 // === === === === === === === === === === === === === === === ===

@@ -48,46 +48,28 @@ runs scripts that run the build and test system.
 
 * Code Tour from Bottom to Top
 
+** headers: include the Standard C headers I expect to need
+
+This most but not all of the headers in the C99 standard.
+
+True "Old School" code would only include, in each .c file,
+the exact headers needed by that file; failure to do so would
+have caused build times to grow large.
+
 ** support: the rock below our feet (including rtc and tau)
 
-This is a "catch all" for the sort of minor macros and facilities that
-end up being helpful during development, or have grown from such need
-in the past. This tends to have stuff I have "passed down" from project
-to project over time.
+This is a "catch all" for support code imported into the project
+before starting on the project itself. This includes typedefs for
+convenience types like "Cstr" and "Tau", declarations for utility
+functions like "format", and the interface to bedrock facilities such
+as "tau" and "rtc", and improved debug macros such as "STUB", "FAIL",
+and "ASSERT".
 
-Typedefs for "awkward" types; for example, in modern C, if you want to
-pass around a pointer to a string literal, "const char *" is the
-magical incantation. I provide a "Cstr" typedef, which not only
-encapsulates the use of const, but also advertises that we expect the
-string to end with an ASCII NUL character (a zero byte).
+** rtc: real time clock (host system wall-clock elapsed time)
 
-Typedefs that encapsulate porting decisions, because I will always be
-mindful of the issues surrounding movement between platforms that do
-not agree on sizes of pointers, or longs, or ints.
-
-In this case, I include the "Tau" type, which represents a value that
-monotonically increases over time, and must not wrap around during the
-course of a normal program run.
-
-Support for string operations is minimal, so additional operations end
-up here as well. For now, I'm just using "format(fmt, ...)" which uses
-a printf-style format string to format a bunch of data items, into a
-string that is dynamically allocated. Caller must retain the pointer
-or free the memory, or there will be a leak.
-
-Macros for producing output -- single lines, such as the ones
-indicating entry into or exit from a facility, or more interesting
-ones that generate arbitrary messages that include the filename, line
-number, and function name; a variant that calls "abort" after doing so
-to simplify the trivial reporting of a fatal problem.
-
-Macros in support of testing. ASSERT(cond, ...) adds printing of a
-useful message to the otherwise terse C "assert(cond)" macro; and
-additional versions like "ASSERT_EQ_integer(exp, obs)" which handle
-working out what the additional useful text should be.
-
-Benchmarking support in the form of an RTC package, providing rtc_ns()
-for elapsed time computation, and rtc_elapsed() for benchmarking.
+Provide methods for callers to obtain the advertised precision
+of the elapsed time measurements; and to obtain the elapsed time
+since an arbitrary starting point.
 
 ** step: a function to call, and a pointer to pass it.
 
@@ -96,15 +78,37 @@ the most time critical code in this system. This mainly exists as a
 separate entity as an exercise and a way to improve the development
 process, but knowing it works and how fast it works is helpful.
 
-** stepat: a step with an associated simulation tau
+** stepat: a function to call, a pointer to pass it, and a Tau.
 
 This is also nearly trivial, and nearly identical to step; it adds a
 field indicating what the simulation TAU should be when the function
-is called.
+is called. The method that activates the stepat is similar to the
+method in step, with the addition that it sets TAU before calling
+the target function.
 
-** subs: a list of steps that can be extended and executed
+** subs: a place for things to do
 
 This structure accumulates steps to be called, and allows a caller to
 trigger all of those steps. Subscribers should be added during
-initialization of the significant facility using subs.
+initialization of each significant facility using subs.
 
+** fifo: a place for things to do next
+
+This facility allows a caller to append an entry to a list of things
+to do; to run the next entry on the list; and to run entries from
+the list until it is empty. Entries are called in the order they were
+added to the list.
+
+** sched: a place for things to do in order
+
+This facility allows a caller to schedule a call to be made at a
+specific simulation time; to run an item from the schedule; and to run
+items from the schedule until it is empty. Entries are activated in
+ascending TAU order. If two entries have the same TAU value, it is
+UNDEFINED which will be activated first.
+
+** main: program entry point
+
+- Runs POST methods.
+- On request, runs BIST methods.
+- On request, runs BENCH methods.

@@ -9,13 +9,16 @@ cat <<EOF
 
 EOF
 
-make -kj loop
-make logs
+if make -kj loop && make logs && make bench && make format
+then bs="COMPLETED"
+else bs="FAILED"
+fi
+
 
 cat <<EOF
 
      --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-                           BUILD COMPLETED
+                           BUILD $bs
                    $(date)
      --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 

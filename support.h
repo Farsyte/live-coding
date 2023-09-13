@@ -85,3 +85,7 @@ typedef void        BenchFn(void *);
 
 extern double       rtc_elapsed(BenchFn *, void *);
 #define RTC_ELAPSED(fn, ap)	(rtc_elapsed((BenchFn *)(fn), (void *)(ap)))
+
+#define BENCH_TOP(item)	fprintf(stderr, "BENCH: %-24s", item)
+#define BENCH_VAL(dt)	fprintf(stderr, "%5.1f ", (double)(dt))
+#define BENCH_END()	fprintf(stderr, "\n")

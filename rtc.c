@@ -1,5 +1,7 @@
 #include "support.h"
 
+// rtc: real time clock (host system wall-clock elapsed time)
+
 // rtc_prec_ns returns the precision of the real time clock
 // as advertised by the host system, in integer nanoseconds.
 
@@ -100,7 +102,7 @@ void rtc_bench()
 {
     Tau                 maxreps = 100;
     Tau                 t0, t1, dt;
-    double              target_ns = 1.0e8;
+    double              target_ns = 1.0e7;
 
     while (1) {
 
@@ -108,6 +110,8 @@ void rtc_bench()
         for (Tau reps = 0; reps < maxreps; ++reps)
             (void)rtc_ns();
         t1 = rtc_ns();
+        assert(t0 > 0);
+        assert(t1 > t0);
 
         dt = t1 - t0;
         if (dt >= target_ns)
@@ -120,14 +124,18 @@ void rtc_bench()
         assert(maxreps > 0);
     }
 
-    fprintf(stderr, "BENCH: %8.3f ns per rtc_ns() call\n", dt * 1.0 / maxreps);
+    double              avg = dt * 1.0 / maxreps;
+
+    BENCH_TOP("ns per rtc sample");
+    BENCH_VAL(avg);
+    BENCH_END();
 }
 
 double rtc_elapsed(void (*func)(void *), void *arg)
 {
     Tau                 maxreps = 100;
     Tau                 t0, t1, dt;
-    double              target_ns = 1.0e8;
+    double              target_ns = 1.0e7;
 
     while (1) {
 

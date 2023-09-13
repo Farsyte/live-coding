@@ -2,6 +2,12 @@
 #include "step.h"
 #include "support.h"
 
+// stepat: a function to call, a pointer to pass it, and a Tau.
+
+// The "stepat" facility owns the global TAU singleton, which
+// represents the current simulated time, which is set when the
+// item is activated.
+
 extern Tau          TAU;
 
 // A "stepat" is a function to call, a pointer to pass it,

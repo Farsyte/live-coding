@@ -1,6 +1,8 @@
 #include "subs.h"
 #include "support.h"
 
+// subs: a place for things to do
+
 static int          subs_extend(Subs);
 
 // subs_invar(s): verify the invariants for a Subs.
@@ -205,9 +207,9 @@ void subs_bench()
 
     double              dt = RTC_ELAPSED(subs_run, s);
 
-    fprintf(stderr, "BENCH: %8.3f ns per subs_run() call\n", dt);
-    fprintf(stderr, "  ...  %8.3f ns per step_run() call via the subs list\n",
-            dt / TEST_LEN);
+    BENCH_TOP("ns per subs iter");
+    BENCH_VAL(dt / TEST_LEN);
+    BENCH_END();
 }
 
 // === === === === === === === === === === === === === === === ===

@@ -5,35 +5,44 @@
 #include "subs.h"
 #include "support.h"
 
-static void main_post()
+static int main_post()
 {
     tau_post();
     rtc_post();
     step_post();
-    subs_post();
     stepat_post();
+    subs_post();
     fifo_post();
     sched_post();
+    return 0;
 }
 
-static void main_bist()
+static int main_bist(int argc, char **argv)
 {
+    (void)argc;         // not used to select BIST methods (yet)
+    (void)argv;         // not used to select BIST methods (yet)
+
     rtc_bist();
     step_bist();
-    subs_bist();
     stepat_bist();
+    subs_bist();
     fifo_bist();
     sched_bist();
+    return 0;
 }
 
-static void main_bench()
+static int main_bench(int argc, char **argv)
 {
+    (void)argc;         // not used to select BENCH methods (yet)
+    (void)argv;         // not used to select BENCH methods (yet)
+
     rtc_bench();
     step_bench();
-    subs_bench();
     stepat_bench();
+    subs_bench();
     fifo_bench();
     sched_bench();
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -42,11 +51,11 @@ int main(int argc, char **argv)
 
     for (int argi = 1; argi < argc; ++argi) {
         if (!strcmp("bist", argv[argi]))
-            main_bist();
-        else if (!strcmp("bench", argv[argi]))
-            main_bench();
-        else
-            FAIL("unrecoginzed request: '%s'", argv[argi]);
+            return main_bist(argc - argi, argv + argi);
+        if (!strcmp("bench", argv[argi]))
+            return main_bench(argc - argi, argv + argi);
+
+        FAIL("unrecognized request: '%s'", argv[argi]);
     }
 
     return 0;

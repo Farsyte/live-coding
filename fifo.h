@@ -2,7 +2,7 @@
 #include "step.h"
 #include "support.h"
 
-// fifo is a place to register things you want to do next
+// fifo: a place for things to do next
 
 typedef struct {
     pStep               ring;

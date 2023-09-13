@@ -1,6 +1,6 @@
 #pragma once
 
-// A "step" is a function to call, and a pointer to pass it.
+// step: a function to call, and a pointer to pass it.
 
 // The typedef "StepAp" is the data type that a step uses to
 // store the function parameter value.

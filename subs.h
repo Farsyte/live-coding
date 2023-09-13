@@ -1,7 +1,7 @@
 #pragma once
 #include "step.h"
 
-// subs is a list of steps that can be extended, and executed.
+// subs: a place for things to do
 
 typedef struct {
     pStep               list;
@@ -30,7 +30,9 @@ extern void         subs_init(Subs);
 // and subscription lists should remain unmodified during
 // the bulk of a run.
 
-#define SUBS_ADD(s, fp, ap)	subs_add(s, ((StepFp)(fp)), ((StepAp)(ap)))
+#define SUBS_ADD(s, fp, ap)                     \
+    subs_add(s, ((StepFp)(fp)), ((StepAp)(ap)))
+
 extern void         subs_add(Subs, StepFp, StepAp);
 
 // subs_run(s): run all steps in the subs list.

@@ -1,7 +1,7 @@
 #pragma once
 #include "stepat.h"
 
-// sched is 
+// sched: a place for things to do in order
 
 typedef struct {
     pStepAt             heap;

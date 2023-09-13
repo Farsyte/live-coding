@@ -1,7 +1,15 @@
 #include "stepat.h"
 #include "support.h"
 
+// stepat: a function to call, a pointer to pass it, and a Tau.
+
+// The "stepat" facility owns the global TAU singleton, which
+// represents the current simulated time, which is set when the
+// item is activated.
+
 Tau                 TAU = 0;
+
+// The "stepat_invar(StepAt s)" method checks invariants on the stepat.
 
 void stepat_invar(StepAt s)
 {
@@ -9,6 +17,8 @@ void stepat_invar(StepAt s)
     assert(s->at >= TAU);
     assert(s->fp);
 }
+
+// The "stepat_run(StepAt s)" method executes the stepat.
 
 void stepat_run(StepAt s)
 {
@@ -29,7 +39,9 @@ static void         stepat_fn3(int *there);
 //                    POWER-ON SELF TEST SUPPORT
 // === === === === === === === === === === === === === === === ===
 
-static void         stepat_post_fn(int *there);
+// The stepat_post() function performs a very rapid check to assure
+// that the stepat facility is not obviously broken, and must be
+// called by the program before depending on stepat to work.
 
 void stepat_post()
 {
@@ -38,17 +50,12 @@ void stepat_post()
     Tau                 TAU_expected = TAU + 24;
 
     StepAt              s =
-      STEPAT_INIT(TAU_expected, stepat_post_fn, stepat_post_arg);
+      STEPAT_INIT(TAU_expected, stepat_fn1, stepat_post_arg);
 
     stepat_run(s);
 
     ASSERT_EQ_integer(1338, *stepat_post_arg);
     ASSERT_EQ_integer(TAU_expected, TAU);
-}
-
-static void stepat_post_fn(int *there)
-{
-    ++*there;
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -105,7 +112,9 @@ void stepat_bench()
 
     double              dt = RTC_ELAPSED(stepat_fn_all, stepat_arg);
 
-    fprintf(stderr, "BENCH: %8.3f ns per stepat_run() call\n", dt / 4.0);
+    BENCH_TOP("ns per stepat run");
+    BENCH_VAL(dt / 4.0);
+    BENCH_END();
 }
 
 // === === === === === === === === === === === === === === === ===

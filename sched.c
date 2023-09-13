@@ -1,6 +1,8 @@
 #include "sched.h"
 #include "support.h"
 
+// sched: a place for things to do in order
+
 static int          sched_extend(Sched);
 
 static int          sched_push_to_head(Sched s, int slot, Tau at);
@@ -576,25 +578,24 @@ void sched_bench()
 
     double              dt;
 
+    BENCH_TOP("ns per sched iter");
+
     bench_sched_jobs = 1;
-    dt = RTC_ELAPSED(bench_sched, s);
-    fprintf(stderr, "BENCH: %8.3f ns per scheduled stepat (heap size %d)\n",
-            dt * 1.0 / bench_sched_runs, bench_sched_jobs);
+    dt = RTC_ELAPSED(bench_sched, s) / bench_sched_runs;
+    BENCH_VAL(dt);
 
     bench_sched_jobs = 3;
-    dt = RTC_ELAPSED(bench_sched, s);
-    fprintf(stderr, "BENCH: %8.3f ns per scheduled stepat (heap size %d)\n",
-            dt * 1.0 / bench_sched_runs, bench_sched_jobs);
+    dt = RTC_ELAPSED(bench_sched, s) / bench_sched_runs;
+    BENCH_VAL(dt);
 
     bench_sched_jobs = 50;
-    dt = RTC_ELAPSED(bench_sched, s);
-    fprintf(stderr, "BENCH: %8.3f ns per scheduled stepat (heap size %d)\n",
-            dt * 1.0 / bench_sched_runs, bench_sched_jobs);
+    dt = RTC_ELAPSED(bench_sched, s) / bench_sched_runs;
+    BENCH_VAL(dt);
 
     bench_sched_jobs = 100;
-    dt = RTC_ELAPSED(bench_sched, s);
-    fprintf(stderr, "BENCH: %8.3f ns per scheduled stepat (heap size %d)\n",
-            dt * 1.0 / bench_sched_runs, bench_sched_jobs);
+    dt = RTC_ELAPSED(bench_sched, s) / bench_sched_runs;
+    BENCH_VAL(dt);
+    BENCH_END();
 }
 
 // === === === === === === === === === === === === === === === ===

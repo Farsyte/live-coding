@@ -329,25 +329,24 @@ void fifo_bench()
 
     double              dt;
 
+    BENCH_TOP("ns per fifo iter");
+
     bench_fifo_jobs = 1;
-    dt = RTC_ELAPSED(bench_fifo, f);
-    fprintf(stderr, "BENCH: %8.3f ns per fifo served step (starting jobs %d)\n",
-            dt * 1.0 / bench_fifo_runs, bench_fifo_jobs);
+    dt = RTC_ELAPSED(bench_fifo, f) / bench_fifo_runs;
+    BENCH_VAL(dt);
 
     bench_fifo_jobs = 3;
-    dt = RTC_ELAPSED(bench_fifo, f);
-    fprintf(stderr, "BENCH: %8.3f ns per fifo served step (starting jobs %d)\n",
-            dt * 1.0 / bench_fifo_runs, bench_fifo_jobs);
+    dt = RTC_ELAPSED(bench_fifo, f) / bench_fifo_runs;
+    BENCH_VAL(dt);
 
     bench_fifo_jobs = 50;
-    dt = RTC_ELAPSED(bench_fifo, f);
-    fprintf(stderr, "BENCH: %8.3f ns per fifo served step (starting jobs %d)\n",
-            dt * 1.0 / bench_fifo_runs, bench_fifo_jobs);
+    dt = RTC_ELAPSED(bench_fifo, f) / bench_fifo_runs;
+    BENCH_VAL(dt);
 
     bench_fifo_jobs = 100;
-    dt = RTC_ELAPSED(bench_fifo, f);
-    fprintf(stderr, "BENCH: %8.3f ns per fifo served step (starting jobs %d)\n",
-            dt * 1.0 / bench_fifo_runs, bench_fifo_jobs);
+    dt = RTC_ELAPSED(bench_fifo, f) / bench_fifo_runs;
+    BENCH_VAL(dt);
+    BENCH_END();
 }
 
 // === === === === === === === === === === === === === === === ===
