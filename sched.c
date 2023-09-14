@@ -89,8 +89,7 @@ void sched_add(Sched s, Tau at, StepFp fp, StepAp ap)
                  "adding a scheduled event in the past is not allowed.\n"
                  "  current TAU: %lld\n  request Tau: %lld\n", TAU, at);
 
-    DEBUG_ASSERT(at < TAU_MAX,
-                 "adding a scheduled event at TAU_MAX is not allowed.");
+    DEBUG_ASSERT(at < TAU_MAX, "adding a scheduled event at TAU_MAX is not allowed.");
 
     int                 slot = s->bubble;
 
@@ -102,8 +101,7 @@ void sched_add(Sched s, Tau at, StepFp fp, StepAp ap)
                      s->bubble, slot);
 
         DEBUG_ASSERT(slot == s->len - 1,
-                     "someone broke sched_extend: slot (%d) != tail (%d)",
-                     slot, s->len - 1);
+                     "someone broke sched_extend: slot (%d) != tail (%d)", slot, s->len - 1);
 
         slot = sched_push_to_head(s, slot, at);
         DEBUG_ASSERT(slot == s->bubble);
@@ -111,8 +109,7 @@ void sched_add(Sched s, Tau at, StepFp fp, StepAp ap)
         DEBUG_SCHED_INVAR(s);
     } else {
         DEBUG_ASSERT(slot == 0,
-                     "sched_add: if bubble exists, must be at zero, not at %d",
-                     slot);
+                     "sched_add: if bubble exists, must be at zero, not at %d", slot);
 
         slot = sched_push_to_tail(s, slot, at);
         DEBUG_ASSERT(slot == s->bubble);
@@ -155,8 +152,7 @@ void sched_run_one(Sched s)
     if (bubble != -1) {
 
         DEBUG_ASSERT(bubble == 0,
-                     "sched_run_one: bubble is at %d, must be at head (0)",
-                     bubble);
+                     "sched_run_one: bubble is at %d, must be at head (0)", bubble);
 
         if (len == 1) {
             s->len = 0;
@@ -185,8 +181,7 @@ void sched_run_one(Sched s)
         DEBUG_SCHED_INVAR(s);
 
         DEBUG_ASSERT(slot == s->bubble,
-                     "sched_run_one: after push, slot (%d) != bubble (%d)",
-                     slot, s->bubble);
+                     "sched_run_one: after push, slot (%d) != bubble (%d)", slot, s->bubble);
 
         heap[slot].at = at;
         heap[slot].fp = fp;
@@ -288,8 +283,7 @@ static int sched_push_to_head(Sched s, int slot, Tau at)
     while (slot > 0) {
 
         DEBUG_ASSERT(slot == s->bubble,
-                     "loop invariant failed: slot (%d) != bubble (%d)",
-                     slot, s->bubble);
+                     "loop invariant failed: slot (%d) != bubble (%d)", slot, s->bubble);
 
         int                 p = (slot - 1) / 2;
         if (at >= heap[p].at)
@@ -324,8 +318,7 @@ static int sched_push_to_tail(Sched s, int slot, Tau at)
     while (1) {
 
         DEBUG_ASSERT(slot == s->bubble,
-                     "loop invariant failed: slot (%d) != bubble (%d)",
-                     slot, s->bubble);
+                     "loop invariant failed: slot (%d) != bubble (%d)", slot, s->bubble);
 
         // consider the first child.
         int                 c = 2 * slot + 1;
@@ -578,7 +571,7 @@ void sched_bench()
 
     double              dt;
 
-    BENCH_TOP("ns per sched iter");
+    BENCH_TOP("sched");
 
     bench_sched_jobs = 1;
     dt = RTC_ELAPSED(bench_sched, s) / bench_sched_runs;

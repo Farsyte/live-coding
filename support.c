@@ -1,5 +1,13 @@
 #include "support.h"
 
+// The "support" facility owns the global TAU singleton, which
+// represents the current simulated time in undefined units with
+// undefined zero point.
+//
+// TAU is set by "stepat" to the TAU for the step being run.
+
+Tau                 TAU = 0;
+
 // printf but to a freshly allocated Str.
 Cstr format(Cstr fmt, ...)
 {

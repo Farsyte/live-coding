@@ -105,8 +105,7 @@ static int subs_extend(Subs s)
     }
 
     ASSERT(slot < cap,
-           "after expansion, cap %d not big enough to expand to %d items", cap,
-           slot);
+           "after expansion, cap %d not big enough to expand to %d items", cap, slot);
 
     s->bubble = slot;
     s->len = slot + 1;
@@ -207,7 +206,7 @@ void subs_bench()
 
     double              dt = RTC_ELAPSED(subs_run, s);
 
-    BENCH_TOP("ns per subs iter");
+    BENCH_TOP("subs");
     BENCH_VAL(dt / TEST_LEN);
     BENCH_END();
 }

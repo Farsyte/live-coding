@@ -329,7 +329,7 @@ void fifo_bench()
 
     double              dt;
 
-    BENCH_TOP("ns per fifo iter");
+    BENCH_TOP("fifo");
 
     bench_fifo_jobs = 1;
     dt = RTC_ELAPSED(bench_fifo, f) / bench_fifo_runs;

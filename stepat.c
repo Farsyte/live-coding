@@ -3,12 +3,6 @@
 
 // stepat: a function to call, a pointer to pass it, and a Tau.
 
-// The "stepat" facility owns the global TAU singleton, which
-// represents the current simulated time, which is set when the
-// item is activated.
-
-Tau                 TAU = 0;
-
 // The "stepat_invar(StepAt s)" method checks invariants on the stepat.
 
 void stepat_invar(StepAt s)
@@ -49,8 +43,7 @@ void stepat_post()
 
     Tau                 TAU_expected = TAU + 24;
 
-    StepAt              s =
-      STEPAT_INIT(TAU_expected, stepat_fn1, stepat_post_arg);
+    StepAt              s = STEPAT_INIT(TAU_expected, stepat_fn1, stepat_post_arg);
 
     stepat_run(s);
 
@@ -78,8 +71,7 @@ void stepat_bist()
         STEPAT_INIT(t3, stepat_fn3, stepat_args + 2)
     };
 
-    StepAt              bench_stepat =
-      STEPAT_INIT(0, stepat_fn_all, stepat_arg);
+    StepAt              bench_stepat = STEPAT_INIT(0, stepat_fn_all, stepat_arg);
 
     stepat_run(bench_stepat);
 
@@ -112,7 +104,7 @@ void stepat_bench()
 
     double              dt = RTC_ELAPSED(stepat_fn_all, stepat_arg);
 
-    BENCH_TOP("ns per stepat run");
+    BENCH_TOP("stepat");
     BENCH_VAL(dt / 4.0);
     BENCH_END();
 }

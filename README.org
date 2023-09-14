@@ -107,6 +107,19 @@ items from the schedule until it is empty. Entries are activated in
 ascending TAU order. If two entries have the same TAU value, it is
 UNDEFINED which will be activated first.
 
+** edge: a signal with callbacks for rising and falling edges
+
+This facility tracks the value of a signal in the simulated system,
+and triggers callbacks on rising and falling edges. It has built-in
+protection against infinite recursion (where the value of the edge is
+changed during a callback), and detection of some hazards.
+
+** clock: provide an Edge that oscillates
+
+This facility provides an Edge, a function that cause it to oscillate
+between high and low, and functions that relate cycles of this CLOCK
+to the simulation time.
+
 ** main: program entry point
 
 - Runs POST methods.

@@ -2,6 +2,19 @@
 #include "stepat.h"
 #include "support.h"
 
+// edge: a signal with callbacks for rising and falling edges
+//
+// This facility tracks the value of a signal in the simulated system,
+// and triggers callbacks on rising and falling edges. It has built-in
+// protection against infinite recursion (where the value of the edge is
+// changed during a callback), and detection of some hazards.
+
+// edge_invar(e): check invariants for the Edge
+// - edge is either high or low
+// - subs_invar succeeds on rise and fall lists
+// - edge is not currently "busy"
+// - last change tau is not in the future
+
 void edge_invar(Edge e)
 {
     assert(e);
@@ -17,6 +30,12 @@ void edge_invar(Edge e)
     assert(e->when <= TAU);
 }
 
+// edge_init(e): initialise edge
+// - initial state is LOW
+// - subscriber lists (rise and fall) are empty
+// - edge is not busy
+// - last value set tau is in the past
+
 void edge_init(Edge e)
 {
     e->value = 0;
@@ -27,7 +46,13 @@ void edge_init(Edge e)
     edge_invar(e);
 }
 
-// This function is not used in any time-critical path.
+// edge_on_rise(e,fp,ap): call fp(ap) on rising edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
 void edge_on_rise(Edge e, StepFp fp, StepAp ap)
 {
     edge_invar(e);
@@ -35,7 +60,13 @@ void edge_on_rise(Edge e, StepFp fp, StepAp ap)
     edge_invar(e);
 }
 
-// This function is not used in any time-critical path.
+// edge_on_fall(e,fp,ap): call fp(ap) on falling edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
 void edge_on_fall(Edge e, StepFp fp, StepAp ap)
 {
     edge_invar(e);
@@ -43,7 +74,16 @@ void edge_on_fall(Edge e, StepFp fp, StepAp ap)
     edge_invar(e);
 }
 
+// edge_hi(e): set the edge value to HIGH.
+// if it was low, notify subscribers on the "rise" list.
+// recursion protection: assert busy is not set, then
+// set busy during the subscriber notification.
+// hazard detect: if the value is changing, assert that
+// the "when" value is in the past; whether changing or
+// not, set "when" to the current time.
+//
 // This is a time-critical function.
+
 void edge_hi(Edge e)
 {
     if (!e->value) {
@@ -64,7 +104,16 @@ void edge_hi(Edge e)
     e->when = TAU;
 }
 
+// edge_lo(e): set the edge value to LOW.
+// if it was high, notify subscribers on the "fall" list.
+// recursion protection: assert busy is not set, then
+// set busy during the subscriber notification.
+// hazard detect: if the value is changing, assert that
+// the "when" value is in the past; whether changing or
+// not, set "when" to the current time.
+//
 // This is a time-critical function.
+
 void edge_lo(Edge e)
 {
     if (e->value) {
@@ -96,6 +145,11 @@ static void         edgectx_free(EdgeCtx);
 
 static void         edge_saw_rise(EdgeCtx);
 static void         edge_saw_fall(EdgeCtx);
+
+// edge_post: Power-On Self Test for the Edge code
+//
+// This function should be called every time the program starts
+// before any code relies on Edge not being completely broken.
 
 void edge_post()
 {
@@ -167,6 +221,12 @@ void edge_post()
     edgectx_free(fall_ctx);
     edgectx_free(rise_ctx);
 }
+
+// edge_bist: Power-On Self Test for the Edge code
+//
+// This function should be called by the program on a run made during
+// the build process, to generate a build error if the Edge code is
+// not working correctly.
 
 void edge_bist()
 {
@@ -258,6 +318,11 @@ static void bench_edge(Edge e)
     edge_lo(e);
 }
 
+// edge_bench: performance verification for the Edge code
+//
+// This function should be called as needed to measure the performance
+// of the time critical parts of Edge.
+
 void edge_bench()
 {
     Edge                e;
@@ -293,7 +358,7 @@ void edge_bench()
         EDGE_ON_FALL(e, edge_saw_fall, fall_ctx[sub]);
     }
 
-    BENCH_TOP("ns per edge iter");
+    BENCH_TOP("edge");
     double              dt = RTC_ELAPSED(bench_edge, e);
     BENCH_VAL(dt / (rise_subs + fall_subs));
     BENCH_END();

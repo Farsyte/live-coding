@@ -27,6 +27,14 @@ typedef long long Tau;
 #define TAU_MIN		LLONG_MIN
 #define TAU_MAX		LLONG_MAX
 
+// The "support" facility owns the global TAU singleton, which
+// represents the current simulated time in undefined units with
+// undefined zero point.
+//
+// TAU is set by "stepat" to the TAU for the step being run.
+
+extern Tau          TAU;
+
 // === === === === === === === === === === === === === === === ===
 //                          UTILITY FUNCTIONS
 // === === === === === === === === === === === === === === === ===
@@ -38,13 +46,11 @@ extern Cstr         format(Cstr fmt, ...);
 //                          DEBUG SUPPORT
 // === === === === === === === === === === === === === === === ===
 
-extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt,
-                          ...);
+extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, ...);
 #define STUB(...)	(_stub(0, __FILE__, __LINE__, __func__, __VA_ARGS__))
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
 
-extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt,
-                          ...);
+extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...);
 
 #define	ASSERT(cond, ...)	if (0 != (cond)) ; else _fail(__FILE__, __LINE__, __func__, #cond, __VA_ARGS__)
 

@@ -86,7 +86,7 @@ void step_bench()
 
     double              dt = RTC_ELAPSED(step_run, bench_step);
 
-    BENCH_TOP("ns per step run");
+    BENCH_TOP("step");
     BENCH_VAL(dt / 4.0);
     BENCH_END();
 }
