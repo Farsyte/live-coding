@@ -7,8 +7,10 @@ static void         i8224_on_reset_rise(i8224 gen);
 static void         i8224_on_reset_fall(i8224 gen);
 
 // i8224_invar: verify the invariants for a i8224.
-// - none of the pEdge fields are NULL.
-// - state is in a valid range.
+// - input pointer is not NULL
+// - it has a name that is not empty
+// - state is 0 during init, and 1-9 when ready to run
+// - when state is not zero, all pEdge fields point at valid Edge structs
 
 void i8224_invar(i8224 gen)
 {
@@ -35,7 +37,8 @@ void i8224_invar(i8224 gen)
     (void)gen;
 }
 
-// i8224_init(s): initialize the given i8224 to an initial state.
+// i8224_init(s): initialize the given i8224 to have this name
+// and an initial state.
 
 void i8224_init(i8224 gen, Cstr name)
 {
@@ -51,24 +54,19 @@ void i8224_init(i8224 gen, Cstr name)
     pEdge               RESET = gen->RESET;
     pEdge               READY = gen->READY;
 
-    EDGE_INIT(PHI1);
-    PHI1->name = format("%s_%s", name, PHI1->name);
+    edge_init(PHI1, format("%s:Φ₁", name));
     edge_lo(PHI1);
 
-    EDGE_INIT(PHI2);
-    PHI2->name = format("%s_%s", name, PHI2->name);
+    edge_init(PHI2, format("%s:Φ₂", name));
     edge_lo(PHI2);
 
-    EDGE_INIT(STSTB_);
-    STSTB_->name = format("%s_%s", name, STSTB_->name);
+    edge_init(STSTB_, format("%s:/STSTB", name));
     edge_lo(STSTB_);
 
-    EDGE_INIT(RESET);
-    RESET->name = format("%s_%s", name, RESET->name);
+    edge_init(RESET, format("%s:RESET", name));
     edge_hi(RESET);
 
-    EDGE_INIT(READY);
-    READY->name = format("%s_%s", name, READY->name);
+    edge_init(READY, format("%s:READY", name));
     edge_lo(READY);
 
     gen->state = 0;
@@ -76,7 +74,7 @@ void i8224_init(i8224 gen, Cstr name)
     i8224_invar(gen);
 }
 
-// i8224_linked(s): initialize the given i8224 to an initial state.
+// i8224_linked(s): finish initialization, called after pEdge fields are set.
 
 void i8224_linked(i8224 gen)
 {
@@ -100,6 +98,10 @@ static void i8224_on_osc_rise(i8224 gen)
 
       default:
           FAIL("state (%d) is invalid, must be 1 <= state <= 9", state);
+          break;
+
+      case 0:
+          FAIL("received OSC RISE before initialization was complete");
           break;
 
       case 1:

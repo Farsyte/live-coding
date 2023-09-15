@@ -8,6 +8,15 @@ The goal of this project is to use Old School software engineering
 techniques to build a Discrete Event Simulation of an Old School small
 computer system.
 
+This is not a redesign of Verilog or Spice. Huzzah!
+
+For all simulated items, the simuliation will differ from the hardware
+in that signal rise and fall times are fixed at 0 ns (where in real
+life, rise and fall times are several nanoseconds). Additionally, with
+very few exceptions, the rising and falling edges of generated signals
+will be at the same time as the rising edge of the primary CLOCK
+signal within the simualtion.
+
 ** Character Set: UTF-8 encoding of UNICODE
 
 I suggest installing Fira Code, or some variant; then configuring your
@@ -114,6 +123,23 @@ and triggers callbacks on rising and falling edges. It has built-in
 protection against infinite recursion (where the value of the edge is
 changed during a callback), and detection of some hazards.
 
+Each edge is "owned" either by a single simulation module, or by the
+simulation environment as a whole. The full formal name of an edge is
+the name of the module that owns it, combined with the name given to
+that signal in the reference sheet for the simulated item; the two
+parts are separated by a colon.
+
+Modules are often "owned" by other modules; their names follow the
+same conventions, with the name of the owning module, a colon, and the
+name that the owning module uses for the owned module.
+
+Greek characters in signal names will be used in the name string of
+the edge as-is, but must be written out when the symbol name occurs as
+a C identifier. Similarly, signals that are active-low are represented
+on diagrams with a line above their name. The C identifier is the name
+with a single underscore appended; add a "/" to the start to construct
+the display name.
+
 ** clock: provide an Edge that oscillates
 
 This facility provides an Edge, a function that cause it to oscillate
@@ -144,3 +170,11 @@ On 14 Sep 2023 I fetched this 43049640-byte document from:
 I also have in my archives a 42838473-byte version with the same content,
 but I did not record where it came from; while the size differs, it has the
 same hand-written annotation.
+
+*** i8224: Clock Generator and Driver for 8080A CPU
+
+This module expects to see rising edges on its OSC input. Based on
+these edges, it constructs a two-phase clock; it synchronizes RESET
+and READY to a specific phase of the clock; and generates /STSTB, when
+SYNC is active, with appropriate timing.
+

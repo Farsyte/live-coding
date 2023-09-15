@@ -1,6 +1,13 @@
 #pragma once
 #include "edge.h"
 
+// i8224: Clock Generator and Driver for 8080A CPU
+//
+// This module expects to see rising edges on its OSC input. Based on
+// these edges, it constructs a two-phase clock; it synchronizes RESET
+// and READY to a specific phase of the clock; and generates /STSTB, when
+// SYNC is active, with appropriate timing.
+
 typedef struct s8224 {
     Cstr                name;
 
@@ -20,8 +27,6 @@ typedef struct s8224 {
 }                  *p8224, i8224[1];
 
 // i8224_invar: verify the invariants for a i8224.
-// - none of the pEdge fields are NULL.
-// - state is in a valid range.
 
 extern void         i8224_invar(i8224);
 
@@ -35,7 +40,7 @@ extern void         i8224_init(i8224, Cstr name);
 
 #define I8224_INIT(gen) i8224_init(gen, #gen)
 
-// i8224_linked(s): initialize the given i8224 to an initial state.
+// i8224_linked(s): finish initialization, called after pEdge fields are set.
 
 extern void         i8224_linked(i8224);
 
