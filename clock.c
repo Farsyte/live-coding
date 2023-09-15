@@ -31,6 +31,24 @@ void clock_init(Tau clock_hz)
     EDGE_INIT(CLOCK);
 }
 
+// clock_ns_to_tau(ns): exact tau counts for given nanoseconds
+// floating point so caller can round up or down as desiredc
+double clock_ns_to_tau(double ns)
+{
+    double              raw = (ns * clock_freq_hz) / NS_PER_SEC;
+    // somehow deal with tiny tiny rounding errors:
+    // if we are within a very tiny bit of an integer,
+    // then round to that integer.
+    return raw;
+}
+
+// clock_tau_to_ns(tau): exact nanoseconds for given tau counts
+// floating point so caller can round up or down as desired
+double clock_tau_to_ns(double tau)
+{
+    return (tau * NS_PER_SEC) / clock_freq_hz;
+}
+
 // clock_elapsed_ns(Tau, Tau): compute elapsed time
 // Converts the difference in the tau values to nanoseconds using
 // the configured clock frequency, rounding DOWN.

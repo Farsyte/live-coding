@@ -86,6 +86,19 @@ extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, .
 #define	ASSERT_GE_integer(expected, observed)                   \
     ASSERT_OP_integer(expected, >=, observed)
 
+#define	ASSERT_EQ_string(expected, observed)                    \
+    if (!strcmp(expected, observed))                            \
+        ;                                                       \
+    else                                                        \
+        _fail(__FILE__, __LINE__, __func__,                     \
+              "\"" #observed "\" == \"" #expected "\"",         \
+              "String Equaltiy Comparison Failed:\n"            \
+              "  Expected value: \"%s\"\n"                      \
+              "  Observed value: \"%s\"\n"                      \
+              , ((long long)(expected))                         \
+              , ((long long)(observed))                         \
+           )
+
 // === === === === === === === === === === === === === === === ===
 //                  SUPPORT TESTS AND TEST SUPPORT
 // === === === === === === === === === === === === === === === ===

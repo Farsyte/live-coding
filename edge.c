@@ -81,6 +81,34 @@ void edge_on_fall(Edge e, StepFp fp, StepAp ap)
     edge_invar(e);
 }
 
+// edge_first_on_rise(e,fp,ap): call fp(ap) on rising edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+void edge_first_on_rise(Edge e, StepFp fp, StepAp ap)
+{
+    edge_invar(e);
+    SUBS_FIRST(e->rise, fp, ap);
+    edge_invar(e);
+}
+
+// edge_first_on_fall(e,fp,ap): call fp(ap) on falling edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+void edge_first_on_fall(Edge e, StepFp fp, StepAp ap)
+{
+    edge_invar(e);
+    SUBS_FIRST(e->fall, fp, ap);
+    edge_invar(e);
+}
+
 // edge_to(e,v): set the edge value to the value v.
 // if it changes, notify subscribers on the appropriate list.
 // recursion protection: assert busy is not set, then
@@ -190,6 +218,26 @@ void edge_post()
     ASSERT_EQ_integer(1, e->fall->len);
     edge_invar(e);
 
+    EdgeCtx             rise_1st_ctx;
+    edgectx_init(rise_1st_ctx, 0);
+    EDGE_FIRST_ON_RISE(e, edge_saw_rise, rise_1st_ctx);
+    edge_invar(e);
+    ASSERT_EQ_integer(0, e->value);
+    ASSERT_LT_integer(TAU, e->when);
+    ASSERT_EQ_integer(2, e->rise->len);
+
+    EdgeCtx             fall_1st_ctx;
+    edgectx_init(fall_1st_ctx, 0);
+    EDGE_FIRST_ON_FALL(e, edge_saw_fall, fall_1st_ctx);
+    ASSERT_EQ_integer(0, e->value);
+    ASSERT_LT_integer(TAU, e->when);
+    ASSERT_EQ_integer(2, e->fall->len);
+    edge_invar(e);
+
+    // TODO: verify that the "1st" variants are in fact
+    // being activated first. subs stuff is tested but
+    // edge may be calling the wrong entry point.
+
     edge_lo(e);
     ASSERT_EQ_integer(0, e->value);
     ASSERT_EQ_integer(TAU, e->when);
@@ -229,6 +277,8 @@ void edge_post()
     ASSERT_EQ_integer(0, e->value);
     ASSERT_EQ_integer(TAU, e->when);
 
+    edgectx_free(fall_1st_ctx);
+    edgectx_free(rise_1st_ctx);
     edgectx_free(fall_ctx);
     edgectx_free(rise_ctx);
 }

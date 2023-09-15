@@ -63,11 +63,53 @@ void subs_add(Subs s, StepFp fp, StepAp ap)
 
     pStep               list = s->list;
 
+    assert(slot == s->bubble);
+    list[slot].fp = fp;
+    list[slot].ap = ap;
+    s->bubble = -1;
+
+    subs_invar(s);
+}
+
+// subs_first(s, fp, ap): add a subsciber to the START of the list (function)
+//
+// This function extends the list by one, moves all content down the
+// list maintaining order, and places the new item at the start of the
+// list.
+//
+// This code should only be used during set-up time,
+// and subscription lists should remain unmodified during
+// the bulk of a run.
+//
+// This code is not performance critical.
+
+void subs_first(Subs s, StepFp fp, StepAp ap)
+{
+    subs_invar(s);
+
+    int                 slot = s->bubble;
+
+    if (slot < 0 || slot >= s->len)
+        slot = subs_extend(s);
+
+    subs_invar(s);
+
+    pStep               list = s->list;
+
+    assert(slot == s->bubble);
+    while (slot > 0) {
+        list[slot].fp = list[slot - 1].fp;
+        list[slot].ap = list[slot - 1].ap;
+        slot--;
+        s->bubble--;
+        subs_invar(s);
+    }
+
     list[slot].fp = fp;
     list[slot].ap = ap;
 
-    if (slot == s->bubble)
-        s->bubble = -1;
+    assert(slot == s->bubble);
+    s->bubble = -1;
 
     subs_invar(s);
 }
@@ -119,6 +161,13 @@ static int subs_extend(Subs s)
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
 
+#define SUBS_WHICH_SIZE 72
+static char         subs_which[SUBS_WHICH_SIZE + 1];
+static int          subs_which_ct = 0;
+static void         subs_which_add(char);
+static void         subs_which_cap();
+
+static void         subs_fnB(int *);
 static void         subs_fn1(int *);
 static void         subs_fn2(int *);
 static void         subs_fn3(int *);
@@ -140,11 +189,17 @@ void subs_post()
 
     const int           start_val = 1337;
 
-    int                 subs_args[1] = { start_val };
+    int                 subs_args[3] = { start_val, start_val, start_val };
 
-    SUBS_ADD(s, subs_fn1, subs_args + 0);
+    SUBS_ADD(s, subs_fn2, subs_args + 1);
+    SUBS_ADD(s, subs_fn3, subs_args + 2);
+    SUBS_FIRST(s, subs_fn1, subs_args + 0);
 
+    subs_which_ct = 0;
     subs_run(s);
+    subs_which_cap();
+
+    ASSERT_EQ_string("123", subs_which);
 
     ASSERT_EQ_integer(start_val + 1, subs_args[0]);
 }
@@ -169,13 +224,16 @@ void subs_bist()
 
     int                 subs_args[3] = { start_val, start_val, start_val };
 
-    SUBS_ADD(s, subs_fn1, subs_args + 0);
     SUBS_ADD(s, subs_fn2, subs_args + 1);
     SUBS_ADD(s, subs_fn3, subs_args + 2);
+    SUBS_FIRST(s, subs_fn1, subs_args + 0);
 
+    subs_which_ct = 0;
     subs_run(s);
     subs_run(s);
     subs_run(s);
+    subs_which_cap();
+    ASSERT_EQ_string("123123123", subs_which);
 
     ASSERT_EQ_integer(start_val + 3, subs_args[0]);
     ASSERT_EQ_integer(start_val + 30, subs_args[1]);
@@ -202,7 +260,7 @@ void subs_bench()
     assert(subs_args);
 
     for (int i = 0; i < TEST_LEN; ++i)
-        SUBS_ADD(s, subs_fn1, subs_args + i);
+        SUBS_ADD(s, subs_fnB, subs_args + i);
 
     double              dt = RTC_ELAPSED(subs_run, s);
 
@@ -215,15 +273,32 @@ void subs_bench()
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
 
+static void subs_fnB(int *arg)
+{
+    *arg += 1;
+}
 static void subs_fn1(int *arg)
 {
     *arg += 1;
+    subs_which_add('1');
 }
 static void subs_fn2(int *arg)
 {
     *arg += 10;
+    subs_which_add('2');
 }
 static void subs_fn3(int *arg)
 {
     *arg += 100;
+    subs_which_add('3');
+}
+static void subs_which_add(char ch)
+{
+    if (subs_which_ct <= SUBS_WHICH_SIZE)
+        subs_which[subs_which_ct++] = ch;
+}
+static void subs_which_cap()
+{
+    subs_which_add('\0');
+    subs_which[SUBS_WHICH_SIZE] = '\0';
 }

@@ -80,6 +80,44 @@ extern void         edge_on_fall(Edge, StepFp, StepAp);
 #define EDGE_ON_FALL(e,fp,ap) \
     edge_on_fall(e, ((StepFp)(fp)), ((StepAp)(ap)))
 
+// edge_first_on_rise(e,fp,ap): call fp(ap) on rising edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+extern void         edge_first_on_rise(Edge, StepFp, StepAp);
+
+// edge_first_on_fall(e,fp,ap): call fp(ap) on falling edges.
+// This is the function entry point, which demands the
+// parameters are of the data type being stored.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+extern void         edge_first_on_fall(Edge, StepFp, StepAp);
+
+// EDGE_FIRST_ON_RISE(e,fp,ap): call fp(ap) on rising edges.
+// This is the macro entry point, which converts the
+// function and argument pointer to the storage type.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+#define EDGE_FIRST_ON_RISE(e,fp,ap) \
+    edge_first_on_rise(e, ((StepFp)(fp)), ((StepAp)(ap)))
+
+// EDGE_FIRST_ON_FALL(e,fp,ap): call fp(ap) on falling edges.
+// This is the macro entry point, which converts the
+// function and argument pointer to the storage type.
+//
+// Intended to be used during initialization.
+// Do not use in any any time-critical path.
+
+#define EDGE_FIRST_ON_FALL(e,fp,ap) \
+    edge_first_on_fall(e, ((StepFp)(fp)), ((StepAp)(ap)))
+
 // edge_hi(e): set the edge value to HIGH.
 // if it was low, notify subscribers on the "rise" list.
 // recursion protection: assert busy is not set, then

@@ -146,7 +146,20 @@ This facility provides an Edge, a function that cause it to oscillate
 between high and low, and functions that relate cycles of this CLOCK
 to the simulation time.
 
-** main: program entry point
+** timing: check simulated signal timing
+
+This facility verifies that the elapsed time from a start call to a
+final call is within a specified range. The duration of the interval
+is checked when the end of an interval is noted, and the start of the
+interval is present. The timing checker will terminate the run if it
+sees an interval with a bad duration.
+
+A summary can be printed for each checker, and a final check can be
+made that the range of values, converted to nanoseconds, is within the
+originally requested range, as the runtime checks are done in terms of
+TAU counts with limits computed from the requested durations.
+
+** Main: program entry point
 
 - Runs POST methods.
 - On request, runs BIST methods.

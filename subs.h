@@ -35,6 +35,22 @@ extern void         subs_init(Subs);
 
 extern void         subs_add(Subs, StepFp, StepAp);
 
+// SUBS_FIRST(s, fp, ap): add a subsciber to the START of the list (macro with casting)
+// subs_first(s, fp, ap): add a subsciber to the START of the list (function)
+//
+// This function extends the list by one, moves all content down the
+// list maintaining order, and places the new item at the start of the
+// list.
+//
+// This code should only be used during set-up time,
+// and subscription lists should remain unmodified during
+// the bulk of a run.
+
+#define SUBS_FIRST(s, fp, ap)                     \
+    subs_first(s, ((StepFp)(fp)), ((StepAp)(ap)))
+
+extern void         subs_first(Subs, StepFp, StepAp);
+
 // subs_run(s): run all steps in the subs list.
 // NOTE: This is in the critical timing path.
 

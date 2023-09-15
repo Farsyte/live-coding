@@ -198,6 +198,38 @@ edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 46
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 47
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 48
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 49
+Timing observe milliclock:
+         30 samples observed.
+          9 ..        27 TAU observed interval
+      0.500 ..     1.500 μs observed interval
+Timing observe strobe:
+        200 samples observed.
+          2 ..         3 TAU observed interval
+      0.111 ..     0.167 μs observed interval
+Timing milliclock check:
+         30 samples observed.
+          9 ..        27 TAU observed interval
+          9 ..        27 TAU expected interval
+      0.500 ..     1.500 μs observed interval
+      0.500 ..     1.500 μs expected interval
+Timing strobe check:
+        200 samples observed.
+          2 ..         3 TAU observed interval
+          2 ..         3 TAU expected interval
+      0.111 ..     0.167 μs observed interval
+      0.100 ..     0.200 μs expected interval
+Timing milliclock max:
+         30 samples observed.
+          9 ..        27 TAU observed interval
+  unbounded ..        27 TAU expected interval
+      0.500 ..     1.500 μs observed interval
+  unbounded ..     1.500 μs expected interval
+Timing strobe min:
+        200 samples observed.
+          2 ..         3 TAU observed interval
+          2 .. unbounded TAU expected interval
+      0.111 ..     0.167 μs observed interval
+      0.100 .. unbounded μs expected interval
    0.000 μs rise gen:Φ₁
    0.111 μs fall gen:Φ₁
    0.111 μs rise gen:Φ₂

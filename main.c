@@ -7,6 +7,7 @@
 #include "stepat.h"
 #include "subs.h"
 #include "support.h"
+#include "timing.h"
 
 static int main_post()
 {
@@ -19,6 +20,7 @@ static int main_post()
     sched_post();
     edge_post();
     clock_post();
+    timing_post();
     i8224_post();
     return 0;
 }
@@ -36,6 +38,7 @@ static int main_bist(int argc, char **argv)
     sched_bist();
     edge_bist();
     clock_bist();
+    timing_bist();
     i8224_bist();
     return 0;
 }
@@ -53,6 +56,7 @@ static int main_bench(int argc, char **argv)
     sched_bench();
     edge_bench();
     clock_bench();
+    timing_bench();
     i8224_bench();
     return 0;
 }
