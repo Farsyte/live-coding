@@ -25,7 +25,6 @@ WFLAGS		:= -W -Wall -Wextra -Wpedantic
 
 include GNUmakefile.rules
 
-WAITF		:= ${CSRC} ${HSRC} ${EXEC}
 WAITE		:= modify delete
 
 run::		${EXEC}
@@ -64,7 +63,10 @@ cmp::
 # wait until it is time to build again.
 
 wait::
-	$C inotifywait -q -e modify -e delete ${HSRC} ${CSRC} GNUmakefile GNUmakefile.rules
+	$C inotifywait \
+		-q ${WAITE:%=-e %} \
+		GNUmakefile GNUmakefile.rules \
+		*.h *.c bin/*.sh
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::
