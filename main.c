@@ -1,6 +1,7 @@
 #include "clock.h"
 #include "edge.h"
 #include "fifo.h"
+#include "i8224.h"
 #include "sched.h"
 #include "step.h"
 #include "stepat.h"
@@ -18,6 +19,7 @@ static int main_post()
     sched_post();
     edge_post();
     clock_post();
+    i8224_post();
     return 0;
 }
 
@@ -34,6 +36,7 @@ static int main_bist(int argc, char **argv)
     sched_bist();
     edge_bist();
     clock_bist();
+    i8224_bist();
     return 0;
 }
 
@@ -50,6 +53,7 @@ static int main_bench(int argc, char **argv)
     sched_bench();
     edge_bench();
     clock_bench();
+    i8224_bench();
     return 0;
 }
 

@@ -71,6 +71,9 @@ extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, .
 #define	ASSERT_EQ_integer(expected, observed)                   \
     ASSERT_OP_integer(expected, ==, observed)
 
+#define	ASSERT_NE_integer(expected, observed)                   \
+    ASSERT_OP_integer(expected, !=, observed)
+
 #define	ASSERT_LT_integer(expected, observed)                   \
     ASSERT_OP_integer(expected, <, observed)
 

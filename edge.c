@@ -74,6 +74,39 @@ void edge_on_fall(Edge e, StepFp fp, StepAp ap)
     edge_invar(e);
 }
 
+// edge_to(e,v): set the edge value to the value v.
+// if it changes, notify subscribers on the appropriate list.
+// recursion protection: assert busy is not set, then
+// set busy during the subscriber notification.
+// hazard detect: if the value is changing, assert that
+// the "when" value is in the past; whether changing or
+// not, set "when" to the current time.
+//
+// This is a time-critical function.
+
+void edge_to(Edge e, Bit v)
+{
+    if (e->value != v) {
+        // do real work if state changes
+
+        assert(e->when < TAU);  // detect hazard
+        assert(!e->busy);       // protect vs infinite recursion
+        e->busy = 1;
+
+        e->value = v;
+
+        if (v)
+            subs_run(e->rise);
+        else
+            subs_run(e->fall);
+
+        e->busy = 0;
+    }
+    // remember tau from every time someone specifies
+    // the value, even if the value does not change.
+    e->when = TAU;
+}
+
 // edge_hi(e): set the edge value to HIGH.
 // if it was low, notify subscribers on the "rise" list.
 // recursion protection: assert busy is not set, then
@@ -86,22 +119,7 @@ void edge_on_fall(Edge e, StepFp fp, StepAp ap)
 
 void edge_hi(Edge e)
 {
-    if (!e->value) {
-        // do real work if state changes
-
-        assert(e->when < TAU);  // detect hazard
-
-        assert(!e->busy);       // protect vs infinite recursion
-        e->busy = 1;
-
-        e->value = 1;
-        subs_run(e->rise);
-
-        e->busy = 0;
-    }
-    // remember tau from every time someone specifies
-    // the value, even if the value does not change.
-    e->when = TAU;
+    edge_to(e, 1);
 }
 
 // edge_lo(e): set the edge value to LOW.
@@ -116,21 +134,7 @@ void edge_hi(Edge e)
 
 void edge_lo(Edge e)
 {
-    if (e->value) {
-        // do real work if state changes
-
-        assert(e->when < TAU);  // detect hazard
-        assert(!e->busy);       // protect vs infinite recursion
-        e->busy = 1;
-
-        e->value = 0;
-        subs_run(e->fall);
-
-        e->busy = 0;
-    }
-    // remember tau from every time someone specifies
-    // the value, even if the value does not change.
-    e->when = TAU;
+    edge_to(e, 0);
 }
 
 typedef struct sEdgeCtx {

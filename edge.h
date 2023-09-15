@@ -96,6 +96,18 @@ extern void         edge_hi(Edge);
 
 extern void         edge_lo(Edge);
 
+// edge_to(e,v): set the edge value to the value v.
+// if it changes, notify subscribers on the appropriate list.
+// recursion protection: assert busy is not set, then
+// set busy during the subscriber notification.
+// hazard detect: if the value is changing, assert that
+// the "when" value is in the past; whether changing or
+// not, set "when" to the current time.
+//
+// This is a time-critical function.
+
+extern void         edge_to(Edge, Bit);
+
 // edge_post: Power-On Self Test for the Edge code
 //
 // This function should be called every time the program starts

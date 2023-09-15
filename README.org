@@ -125,3 +125,22 @@ to the simulation time.
 - Runs POST methods.
 - On request, runs BIST methods.
 - On request, runs BENCH methods.
+  
+* Simulated Systems
+
+** A hypothetical 8080 based microcomputer
+
+This is the first simulation being considered, and will be a rough
+collection of components described in:
+
+    Intel 8080 Microcomputer Systems User's Manual
+    September 1975
+
+This document is available from several source on the Internet;
+On 14 Sep 2023 I fetched this 43049640-byte document from:
+
+    http://bitsavers.trailing-edge.com/components/intel/MCS80/98-153B_Intel_8080_Microcomputer_Systems_Users_Manual_197509.pdf
+
+I also have in my archives a 42838473-byte version with the same content,
+but I did not record where it came from; while the size differs, it has the
+same hand-written annotation.
