@@ -198,262 +198,262 @@ edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 46
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 47
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 48
 edge_saw_fall: 6 Δτ, 2 count, in fall-subscriber 49
-i8224 bist: at    0.000 μs, PHI1 rises
-i8224 bist: at    0.222 μs, PHI1 falls
-i8224 bist: at    0.222 μs, PHI2 rises
-i8224 bist: at    0.777 μs, PHI2 falls
-i8224 bist: at    1.000 μs, PHI1 rises
-i8224 bist: at    1.222 μs, PHI1 falls
-i8224 bist: at    1.222 μs, PHI2 rises
-i8224 bist: at    1.777 μs, PHI2 falls
-i8224 bist: at    2.000 μs, PHI1 rises
-i8224 bist: at    2.222 μs, PHI1 falls
-i8224 bist: at    2.222 μs, PHI2 rises
-i8224 bist: at    2.777 μs, PHI2 falls
-i8224 bist: at    3.000 μs, PHI1 rises
-i8224 bist: at    3.222 μs, PHI1 falls
-i8224 bist: at    3.222 μs, PHI2 rises
-i8224 bist: at    3.333 μs, STSTB_ rises
-i8224 bist: at    3.333 μs, RESET falls
-i8224 bist: at    3.777 μs, PHI2 falls
-i8224 bist: at    4.000 μs, PHI1 rises
-i8224 bist: at    4.222 μs, PHI1 falls
-i8224 bist: at    4.222 μs, SYNC rises
-i8224 bist: at    4.222 μs, PHI2 rises
-i8224 bist: at    4.777 μs, PHI2 falls
-i8224 bist: at    4.888 μs, STSTB_ falls
-i8224 bist: at    5.000 μs, STSTB_ rises
-i8224 bist: at    5.000 μs, PHI1 rises
-i8224 bist: at    5.222 μs, PHI1 falls
-i8224 bist: at    5.222 μs, SYNC falls
-i8224 bist: at    5.222 μs, PHI2 rises
-i8224 bist: at    5.777 μs, PHI2 falls
-i8224 bist: at    6.000 μs, PHI1 rises
-i8224 bist: at    6.222 μs, PHI1 falls
-i8224 bist: at    6.222 μs, PHI2 rises
-i8224 bist: at    6.777 μs, PHI2 falls
-i8224 bist: at    7.000 μs, PHI1 rises
-i8224 bist: at    7.222 μs, PHI1 falls
-i8224 bist: at    7.222 μs, PHI2 rises
-i8224 bist: at    7.777 μs, PHI2 falls
-i8224 bist: at    8.000 μs, PHI1 rises
-i8224 bist: at    8.222 μs, PHI1 falls
-i8224 bist: at    8.222 μs, SYNC rises
-i8224 bist: at    8.222 μs, PHI2 rises
-i8224 bist: at    8.777 μs, PHI2 falls
-i8224 bist: at    8.888 μs, STSTB_ falls
-i8224 bist: at    9.000 μs, STSTB_ rises
-i8224 bist: at    9.000 μs, PHI1 rises
-i8224 bist: at    9.222 μs, PHI1 falls
-i8224 bist: at    9.222 μs, SYNC falls
-i8224 bist: at    9.222 μs, PHI2 rises
-i8224 bist: at    9.777 μs, PHI2 falls
-i8224 bist: at   10.000 μs, PHI1 rises
-i8224 bist: at   10.222 μs, PHI1 falls
-i8224 bist: at   10.222 μs, PHI2 rises
-i8224 bist: at   10.777 μs, PHI2 falls
-i8224 bist: at   11.000 μs, PHI1 rises
-i8224 bist: at   11.222 μs, PHI1 falls
-i8224 bist: at   11.222 μs, PHI2 rises
-i8224 bist: at   11.333 μs, READY rises
-i8224 bist: at   11.777 μs, PHI2 falls
-i8224 bist: at   12.000 μs, PHI1 rises
-i8224 bist: at   12.222 μs, PHI1 falls
-i8224 bist: at   12.222 μs, SYNC rises
-i8224 bist: at   12.222 μs, PHI2 rises
-i8224 bist: at   12.777 μs, PHI2 falls
-i8224 bist: at   12.888 μs, STSTB_ falls
-i8224 bist: at   13.000 μs, STSTB_ rises
-i8224 bist: at   13.000 μs, PHI1 rises
-i8224 bist: at   13.222 μs, PHI1 falls
-i8224 bist: at   13.222 μs, SYNC falls
-i8224 bist: at   13.222 μs, PHI2 rises
-i8224 bist: at   13.777 μs, PHI2 falls
-i8224 bist: at   14.000 μs, PHI1 rises
-i8224 bist: at   14.222 μs, PHI1 falls
-i8224 bist: at   14.222 μs, PHI2 rises
-i8224 bist: at   14.777 μs, PHI2 falls
-i8224 bist: at   15.000 μs, PHI1 rises
-i8224 bist: at   15.222 μs, PHI1 falls
-i8224 bist: at   15.222 μs, PHI2 rises
-i8224 bist: at   15.777 μs, PHI2 falls
-i8224 bist: at   16.000 μs, PHI1 rises
-i8224 bist: at   16.222 μs, PHI1 falls
-i8224 bist: at   16.222 μs, SYNC rises
-i8224 bist: at   16.222 μs, PHI2 rises
-i8224 bist: at   16.777 μs, PHI2 falls
-i8224 bist: at   16.888 μs, STSTB_ falls
-i8224 bist: at   17.000 μs, STSTB_ rises
-i8224 bist: at   17.000 μs, PHI1 rises
-i8224 bist: at   17.222 μs, PHI1 falls
-i8224 bist: at   17.222 μs, SYNC falls
-i8224 bist: at   17.222 μs, PHI2 rises
-i8224 bist: at   17.777 μs, PHI2 falls
-i8224 bist: at   18.000 μs, PHI1 rises
-i8224 bist: at   18.222 μs, PHI1 falls
-i8224 bist: at   18.222 μs, PHI2 rises
-i8224 bist: at   18.777 μs, PHI2 falls
-i8224 bist: at   19.000 μs, PHI1 rises
-i8224 bist: at   19.222 μs, PHI1 falls
-i8224 bist: at   19.222 μs, PHI2 rises
-i8224 bist: at   19.777 μs, PHI2 falls
-i8224 bist: at   20.000 μs, PHI1 rises
-i8224 bist: at   20.222 μs, PHI1 falls
-i8224 bist: at   20.222 μs, SYNC rises
-i8224 bist: at   20.222 μs, PHI2 rises
-i8224 bist: at   20.777 μs, PHI2 falls
-i8224 bist: at   20.888 μs, STSTB_ falls
-i8224 bist: at   21.000 μs, STSTB_ rises
-i8224 bist: at   21.000 μs, PHI1 rises
-i8224 bist: at   21.222 μs, PHI1 falls
-i8224 bist: at   21.222 μs, SYNC falls
-i8224 bist: at   21.222 μs, PHI2 rises
-i8224 bist: at   21.777 μs, PHI2 falls
-i8224 bist: at   22.000 μs, PHI1 rises
-i8224 bist: at   22.222 μs, PHI1 falls
-i8224 bist: at   22.222 μs, PHI2 rises
-i8224 bist: at   22.777 μs, PHI2 falls
-i8224 bist: at   23.000 μs, PHI1 rises
-i8224 bist: at   23.222 μs, PHI1 falls
-i8224 bist: at   23.222 μs, PHI2 rises
-i8224 bist: at   23.777 μs, PHI2 falls
-i8224 bist: at   24.000 μs, PHI1 rises
-i8224 bist: at   24.222 μs, PHI1 falls
-i8224 bist: at   24.222 μs, SYNC rises
-i8224 bist: at   24.222 μs, PHI2 rises
-i8224 bist: at   24.777 μs, PHI2 falls
-i8224 bist: at   24.888 μs, STSTB_ falls
-i8224 bist: at   25.000 μs, STSTB_ rises
-i8224 bist: at   25.000 μs, PHI1 rises
-i8224 bist: at   25.222 μs, PHI1 falls
-i8224 bist: at   25.222 μs, SYNC falls
-i8224 bist: at   25.222 μs, PHI2 rises
-i8224 bist: at   25.777 μs, PHI2 falls
-i8224 bist: at   26.000 μs, PHI1 rises
-i8224 bist: at   26.222 μs, PHI1 falls
-i8224 bist: at   26.222 μs, PHI2 rises
-i8224 bist: at   26.777 μs, PHI2 falls
-i8224 bist: at   27.000 μs, PHI1 rises
-i8224 bist: at   27.222 μs, PHI1 falls
-i8224 bist: at   27.222 μs, PHI2 rises
-i8224 bist: at   27.777 μs, PHI2 falls
-i8224 bist: at   28.000 μs, PHI1 rises
-i8224 bist: at   28.222 μs, PHI1 falls
-i8224 bist: at   28.222 μs, SYNC rises
-i8224 bist: at   28.222 μs, PHI2 rises
-i8224 bist: at   28.777 μs, PHI2 falls
-i8224 bist: at   28.888 μs, STSTB_ falls
-i8224 bist: at   29.000 μs, STSTB_ rises
-i8224 bist: at   29.000 μs, PHI1 rises
-i8224 bist: at   29.222 μs, PHI1 falls
-i8224 bist: at   29.222 μs, SYNC falls
-i8224 bist: at   29.222 μs, PHI2 rises
-i8224 bist: at   29.777 μs, PHI2 falls
-i8224 bist: at   30.000 μs, PHI1 rises
-i8224 bist: at   30.222 μs, PHI1 falls
-i8224 bist: at   30.222 μs, PHI2 rises
-i8224 bist: at   30.777 μs, PHI2 falls
-i8224 bist: at   31.000 μs, PHI1 rises
-i8224 bist: at   31.222 μs, PHI1 falls
-i8224 bist: at   31.222 μs, PHI2 rises
-i8224 bist: at   31.777 μs, PHI2 falls
-i8224 bist: at   32.000 μs, PHI1 rises
-i8224 bist: at   32.222 μs, PHI1 falls
-i8224 bist: at   32.222 μs, SYNC rises
-i8224 bist: at   32.222 μs, PHI2 rises
-i8224 bist: at   32.777 μs, PHI2 falls
-i8224 bist: at   32.888 μs, STSTB_ falls
-i8224 bist: at   33.000 μs, STSTB_ rises
-i8224 bist: at   33.000 μs, PHI1 rises
-i8224 bist: at   33.222 μs, PHI1 falls
-i8224 bist: at   33.222 μs, SYNC falls
-i8224 bist: at   33.222 μs, PHI2 rises
-i8224 bist: at   33.777 μs, PHI2 falls
-i8224 bist: at   34.000 μs, PHI1 rises
-i8224 bist: at   34.222 μs, PHI1 falls
-i8224 bist: at   34.222 μs, PHI2 rises
-i8224 bist: at   34.777 μs, PHI2 falls
-i8224 bist: at   35.000 μs, PHI1 rises
-i8224 bist: at   35.222 μs, PHI1 falls
-i8224 bist: at   35.222 μs, PHI2 rises
-i8224 bist: at   35.777 μs, PHI2 falls
-i8224 bist: at   36.000 μs, PHI1 rises
-i8224 bist: at   36.222 μs, PHI1 falls
-i8224 bist: at   36.222 μs, SYNC rises
-i8224 bist: at   36.222 μs, PHI2 rises
-i8224 bist: at   36.777 μs, PHI2 falls
-i8224 bist: at   36.888 μs, STSTB_ falls
-i8224 bist: at   37.000 μs, STSTB_ rises
-i8224 bist: at   37.000 μs, PHI1 rises
-i8224 bist: at   37.222 μs, PHI1 falls
-i8224 bist: at   37.222 μs, SYNC falls
-i8224 bist: at   37.222 μs, PHI2 rises
-i8224 bist: at   37.777 μs, PHI2 falls
-i8224 bist: at   38.000 μs, PHI1 rises
-i8224 bist: at   38.222 μs, PHI1 falls
-i8224 bist: at   38.222 μs, PHI2 rises
-i8224 bist: at   38.777 μs, PHI2 falls
-i8224 bist: at   39.000 μs, PHI1 rises
-i8224 bist: at   39.222 μs, PHI1 falls
-i8224 bist: at   39.222 μs, PHI2 rises
-i8224 bist: at   39.777 μs, PHI2 falls
-i8224 bist: at   40.000 μs, PHI1 rises
-i8224 bist: at   40.222 μs, PHI1 falls
-i8224 bist: at   40.222 μs, SYNC rises
-i8224 bist: at   40.222 μs, PHI2 rises
-i8224 bist: at   40.777 μs, PHI2 falls
-i8224 bist: at   40.888 μs, STSTB_ falls
-i8224 bist: at   41.000 μs, STSTB_ rises
-i8224 bist: at   41.000 μs, PHI1 rises
-i8224 bist: at   41.222 μs, PHI1 falls
-i8224 bist: at   41.222 μs, SYNC falls
-i8224 bist: at   41.222 μs, PHI2 rises
-i8224 bist: at   41.777 μs, PHI2 falls
-i8224 bist: at   42.000 μs, PHI1 rises
-i8224 bist: at   42.222 μs, PHI1 falls
-i8224 bist: at   42.222 μs, PHI2 rises
-i8224 bist: at   42.777 μs, PHI2 falls
-i8224 bist: at   43.000 μs, PHI1 rises
-i8224 bist: at   43.222 μs, PHI1 falls
-i8224 bist: at   43.222 μs, PHI2 rises
-i8224 bist: at   43.777 μs, PHI2 falls
-i8224 bist: at   44.000 μs, PHI1 rises
-i8224 bist: at   44.222 μs, PHI1 falls
-i8224 bist: at   44.222 μs, SYNC rises
-i8224 bist: at   44.222 μs, PHI2 rises
-i8224 bist: at   44.777 μs, PHI2 falls
-i8224 bist: at   44.888 μs, STSTB_ falls
-i8224 bist: at   45.000 μs, STSTB_ rises
-i8224 bist: at   45.000 μs, PHI1 rises
-i8224 bist: at   45.222 μs, PHI1 falls
-i8224 bist: at   45.222 μs, SYNC falls
-i8224 bist: at   45.222 μs, PHI2 rises
-i8224 bist: at   45.777 μs, PHI2 falls
-i8224 bist: at   46.000 μs, PHI1 rises
-i8224 bist: at   46.222 μs, PHI1 falls
-i8224 bist: at   46.222 μs, PHI2 rises
-i8224 bist: at   46.777 μs, PHI2 falls
-i8224 bist: at   47.000 μs, PHI1 rises
-i8224 bist: at   47.222 μs, PHI1 falls
-i8224 bist: at   47.222 μs, PHI2 rises
-i8224 bist: at   47.777 μs, PHI2 falls
-i8224 bist: at   48.000 μs, PHI1 rises
-i8224 bist: at   48.222 μs, PHI1 falls
-i8224 bist: at   48.222 μs, SYNC rises
-i8224 bist: at   48.222 μs, PHI2 rises
-i8224 bist: at   48.777 μs, PHI2 falls
-i8224 bist: at   48.888 μs, STSTB_ falls
-i8224 bist: at   49.000 μs, STSTB_ rises
-i8224 bist: at   49.000 μs, PHI1 rises
-i8224 bist: at   49.222 μs, PHI1 falls
-i8224 bist: at   49.222 μs, SYNC falls
-i8224 bist: at   49.222 μs, PHI2 rises
-i8224 bist: at   49.777 μs, PHI2 falls
-i8224 bist: at   50.000 μs, PHI1 rises
-i8224 bist: at   50.222 μs, PHI1 falls
-i8224 bist: at   50.222 μs, PHI2 rises
-i8224 bist: at   50.777 μs, PHI2 falls
-i8224 bist: at   51.000 μs, PHI1 rises
-i8224 bist: at   51.222 μs, PHI1 falls
-i8224 bist: at   51.222 μs, PHI2 rises
-i8224 bist: at   51.777 μs, PHI2 falls
+   0.000 μs rise gen_PHI1
+   0.111 μs fall gen_PHI1
+   0.111 μs rise gen_PHI2
+   0.388 μs fall gen_PHI2
+   0.500 μs rise gen_PHI1
+   0.611 μs fall gen_PHI1
+   0.611 μs rise gen_PHI2
+   0.888 μs fall gen_PHI2
+   1.000 μs rise gen_PHI1
+   1.111 μs fall gen_PHI1
+   1.111 μs rise gen_PHI2
+   1.388 μs fall gen_PHI2
+   1.500 μs rise gen_PHI1
+   1.611 μs fall gen_PHI1
+   1.611 μs rise gen_PHI2
+   1.666 μs rise gen_STSTB_
+   1.666 μs fall gen_RESET
+   1.888 μs fall gen_PHI2
+   2.000 μs rise gen_PHI1
+   2.111 μs fall gen_PHI1
+   2.111 μs rise SYNC
+   2.111 μs rise gen_PHI2
+   2.388 μs fall gen_PHI2
+   2.444 μs fall gen_STSTB_
+   2.500 μs rise gen_STSTB_
+   2.500 μs rise gen_PHI1
+   2.611 μs fall gen_PHI1
+   2.611 μs fall SYNC
+   2.611 μs rise gen_PHI2
+   2.888 μs fall gen_PHI2
+   3.000 μs rise gen_PHI1
+   3.111 μs fall gen_PHI1
+   3.111 μs rise gen_PHI2
+   3.388 μs fall gen_PHI2
+   3.500 μs rise gen_PHI1
+   3.611 μs fall gen_PHI1
+   3.611 μs rise gen_PHI2
+   3.888 μs fall gen_PHI2
+   4.000 μs rise gen_PHI1
+   4.111 μs fall gen_PHI1
+   4.111 μs rise SYNC
+   4.111 μs rise gen_PHI2
+   4.388 μs fall gen_PHI2
+   4.444 μs fall gen_STSTB_
+   4.500 μs rise gen_STSTB_
+   4.500 μs rise gen_PHI1
+   4.611 μs fall gen_PHI1
+   4.611 μs fall SYNC
+   4.611 μs rise gen_PHI2
+   4.888 μs fall gen_PHI2
+   5.000 μs rise gen_PHI1
+   5.111 μs fall gen_PHI1
+   5.111 μs rise gen_PHI2
+   5.388 μs fall gen_PHI2
+   5.500 μs rise gen_PHI1
+   5.611 μs fall gen_PHI1
+   5.611 μs rise gen_PHI2
+   5.666 μs rise gen_READY
+   5.888 μs fall gen_PHI2
+   6.000 μs rise gen_PHI1
+   6.111 μs fall gen_PHI1
+   6.111 μs rise SYNC
+   6.111 μs rise gen_PHI2
+   6.388 μs fall gen_PHI2
+   6.444 μs fall gen_STSTB_
+   6.500 μs rise gen_STSTB_
+   6.500 μs rise gen_PHI1
+   6.611 μs fall gen_PHI1
+   6.611 μs fall SYNC
+   6.611 μs rise gen_PHI2
+   6.888 μs fall gen_PHI2
+   7.000 μs rise gen_PHI1
+   7.111 μs fall gen_PHI1
+   7.111 μs rise gen_PHI2
+   7.388 μs fall gen_PHI2
+   7.500 μs rise gen_PHI1
+   7.611 μs fall gen_PHI1
+   7.611 μs rise gen_PHI2
+   7.888 μs fall gen_PHI2
+   8.000 μs rise gen_PHI1
+   8.111 μs fall gen_PHI1
+   8.111 μs rise SYNC
+   8.111 μs rise gen_PHI2
+   8.388 μs fall gen_PHI2
+   8.444 μs fall gen_STSTB_
+   8.500 μs rise gen_STSTB_
+   8.500 μs rise gen_PHI1
+   8.611 μs fall gen_PHI1
+   8.611 μs fall SYNC
+   8.611 μs rise gen_PHI2
+   8.888 μs fall gen_PHI2
+   9.000 μs rise gen_PHI1
+   9.111 μs fall gen_PHI1
+   9.111 μs rise gen_PHI2
+   9.388 μs fall gen_PHI2
+   9.500 μs rise gen_PHI1
+   9.611 μs fall gen_PHI1
+   9.611 μs rise gen_PHI2
+   9.888 μs fall gen_PHI2
+  10.000 μs rise gen_PHI1
+  10.111 μs fall gen_PHI1
+  10.111 μs rise SYNC
+  10.111 μs rise gen_PHI2
+  10.388 μs fall gen_PHI2
+  10.444 μs fall gen_STSTB_
+  10.500 μs rise gen_STSTB_
+  10.500 μs rise gen_PHI1
+  10.611 μs fall gen_PHI1
+  10.611 μs fall SYNC
+  10.611 μs rise gen_PHI2
+  10.888 μs fall gen_PHI2
+  11.000 μs rise gen_PHI1
+  11.111 μs fall gen_PHI1
+  11.111 μs rise gen_PHI2
+  11.388 μs fall gen_PHI2
+  11.500 μs rise gen_PHI1
+  11.611 μs fall gen_PHI1
+  11.611 μs rise gen_PHI2
+  11.888 μs fall gen_PHI2
+  12.000 μs rise gen_PHI1
+  12.111 μs fall gen_PHI1
+  12.111 μs rise SYNC
+  12.111 μs rise gen_PHI2
+  12.388 μs fall gen_PHI2
+  12.444 μs fall gen_STSTB_
+  12.500 μs rise gen_STSTB_
+  12.500 μs rise gen_PHI1
+  12.611 μs fall gen_PHI1
+  12.611 μs fall SYNC
+  12.611 μs rise gen_PHI2
+  12.888 μs fall gen_PHI2
+  13.000 μs rise gen_PHI1
+  13.111 μs fall gen_PHI1
+  13.111 μs rise gen_PHI2
+  13.388 μs fall gen_PHI2
+  13.500 μs rise gen_PHI1
+  13.611 μs fall gen_PHI1
+  13.611 μs rise gen_PHI2
+  13.888 μs fall gen_PHI2
+  14.000 μs rise gen_PHI1
+  14.111 μs fall gen_PHI1
+  14.111 μs rise SYNC
+  14.111 μs rise gen_PHI2
+  14.388 μs fall gen_PHI2
+  14.444 μs fall gen_STSTB_
+  14.500 μs rise gen_STSTB_
+  14.500 μs rise gen_PHI1
+  14.611 μs fall gen_PHI1
+  14.611 μs fall SYNC
+  14.611 μs rise gen_PHI2
+  14.888 μs fall gen_PHI2
+  15.000 μs rise gen_PHI1
+  15.111 μs fall gen_PHI1
+  15.111 μs rise gen_PHI2
+  15.388 μs fall gen_PHI2
+  15.500 μs rise gen_PHI1
+  15.611 μs fall gen_PHI1
+  15.611 μs rise gen_PHI2
+  15.888 μs fall gen_PHI2
+  16.000 μs rise gen_PHI1
+  16.111 μs fall gen_PHI1
+  16.111 μs rise SYNC
+  16.111 μs rise gen_PHI2
+  16.388 μs fall gen_PHI2
+  16.444 μs fall gen_STSTB_
+  16.500 μs rise gen_STSTB_
+  16.500 μs rise gen_PHI1
+  16.611 μs fall gen_PHI1
+  16.611 μs fall SYNC
+  16.611 μs rise gen_PHI2
+  16.888 μs fall gen_PHI2
+  17.000 μs rise gen_PHI1
+  17.111 μs fall gen_PHI1
+  17.111 μs rise gen_PHI2
+  17.388 μs fall gen_PHI2
+  17.500 μs rise gen_PHI1
+  17.611 μs fall gen_PHI1
+  17.611 μs rise gen_PHI2
+  17.888 μs fall gen_PHI2
+  18.000 μs rise gen_PHI1
+  18.111 μs fall gen_PHI1
+  18.111 μs rise SYNC
+  18.111 μs rise gen_PHI2
+  18.388 μs fall gen_PHI2
+  18.444 μs fall gen_STSTB_
+  18.500 μs rise gen_STSTB_
+  18.500 μs rise gen_PHI1
+  18.611 μs fall gen_PHI1
+  18.611 μs fall SYNC
+  18.611 μs rise gen_PHI2
+  18.888 μs fall gen_PHI2
+  19.000 μs rise gen_PHI1
+  19.111 μs fall gen_PHI1
+  19.111 μs rise gen_PHI2
+  19.388 μs fall gen_PHI2
+  19.500 μs rise gen_PHI1
+  19.611 μs fall gen_PHI1
+  19.611 μs rise gen_PHI2
+  19.888 μs fall gen_PHI2
+  20.000 μs rise gen_PHI1
+  20.111 μs fall gen_PHI1
+  20.111 μs rise SYNC
+  20.111 μs rise gen_PHI2
+  20.388 μs fall gen_PHI2
+  20.444 μs fall gen_STSTB_
+  20.500 μs rise gen_STSTB_
+  20.500 μs rise gen_PHI1
+  20.611 μs fall gen_PHI1
+  20.611 μs fall SYNC
+  20.611 μs rise gen_PHI2
+  20.888 μs fall gen_PHI2
+  21.000 μs rise gen_PHI1
+  21.111 μs fall gen_PHI1
+  21.111 μs rise gen_PHI2
+  21.388 μs fall gen_PHI2
+  21.500 μs rise gen_PHI1
+  21.611 μs fall gen_PHI1
+  21.611 μs rise gen_PHI2
+  21.888 μs fall gen_PHI2
+  22.000 μs rise gen_PHI1
+  22.111 μs fall gen_PHI1
+  22.111 μs rise SYNC
+  22.111 μs rise gen_PHI2
+  22.388 μs fall gen_PHI2
+  22.444 μs fall gen_STSTB_
+  22.500 μs rise gen_STSTB_
+  22.500 μs rise gen_PHI1
+  22.611 μs fall gen_PHI1
+  22.611 μs fall SYNC
+  22.611 μs rise gen_PHI2
+  22.888 μs fall gen_PHI2
+  23.000 μs rise gen_PHI1
+  23.111 μs fall gen_PHI1
+  23.111 μs rise gen_PHI2
+  23.388 μs fall gen_PHI2
+  23.500 μs rise gen_PHI1
+  23.611 μs fall gen_PHI1
+  23.611 μs rise gen_PHI2
+  23.888 μs fall gen_PHI2
+  24.000 μs rise gen_PHI1
+  24.111 μs fall gen_PHI1
+  24.111 μs rise SYNC
+  24.111 μs rise gen_PHI2
+  24.388 μs fall gen_PHI2
+  24.444 μs fall gen_STSTB_
+  24.500 μs rise gen_STSTB_
+  24.500 μs rise gen_PHI1
+  24.611 μs fall gen_PHI1
+  24.611 μs fall SYNC
+  24.611 μs rise gen_PHI2
+  24.888 μs fall gen_PHI2
+  25.000 μs rise gen_PHI1
+  25.111 μs fall gen_PHI1
+  25.111 μs rise gen_PHI2
+  25.388 μs fall gen_PHI2
+  25.500 μs rise gen_PHI1
+  25.611 μs fall gen_PHI1
+  25.611 μs rise gen_PHI2
+  25.888 μs fall gen_PHI2

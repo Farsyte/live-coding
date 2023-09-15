@@ -18,6 +18,8 @@
 void edge_invar(Edge e)
 {
     assert(e);
+    assert(e->name);
+    assert(e->name[0]);
 
     Bit                 value = e->value;
     pSubs               rise = e->rise;
@@ -36,8 +38,13 @@ void edge_invar(Edge e)
 // - edge is not busy
 // - last value set tau is in the past
 
-void edge_init(Edge e)
+void edge_init(Edge e, Cstr name)
 {
+    assert(e);
+    assert(name);
+    assert(name[0]);
+
+    e->name = name;
     e->value = 0;
     subs_init(e->rise);
     subs_init(e->fall);
@@ -82,7 +89,7 @@ void edge_on_fall(Edge e, StepFp fp, StepAp ap)
 // the "when" value is in the past; whether changing or
 // not, set "when" to the current time.
 //
-// This is a time-critical function.
+// THIS IS A TIME-CRITICAL FUNCTION.
 
 void edge_to(Edge e, Bit v)
 {
@@ -158,7 +165,7 @@ static void         edge_saw_fall(EdgeCtx);
 void edge_post()
 {
     Edge                e;
-    edge_init(e);
+    EDGE_INIT(e);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);
@@ -235,7 +242,7 @@ void edge_post()
 void edge_bist()
 {
     Edge                e;
-    edge_init(e);
+    EDGE_INIT(e);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);
@@ -330,7 +337,7 @@ static void bench_edge(Edge e)
 void edge_bench()
 {
     Edge                e;
-    edge_init(e);
+    EDGE_INIT(e);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);

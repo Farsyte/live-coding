@@ -28,7 +28,7 @@ void clock_init(Tau clock_hz)
 
     clock_freq_hz = clock_hz;
 
-    edge_init(CLOCK);
+    EDGE_INIT(CLOCK);
 }
 
 // clock_elapsed_ns(Tau, Tau): compute elapsed time
@@ -42,7 +42,7 @@ void clock_init(Tau clock_hz)
 
 Tau clock_elapsed_ns(Tau start, Tau end)
 {
-    return (end - start) * NS_PER_SEC / (2 * clock_freq_hz);
+    return (end - start) * NS_PER_SEC / (clock_freq_hz);
 }
 
 // clock_future_tau(Tau ns): compute TAU for some ns in the future
@@ -53,28 +53,27 @@ Tau clock_elapsed_ns(Tau start, Tau end)
 //
 // For example, for an 18.00 MHz clock, which has a true period of
 // 55.555… ns, the ending TAU for something 55 ns in the future is
-// TAU+2 (two half-periods of the clock), matching the conversion of
+// TAU+1 (one period of the clock), matching the conversion of
 // two TAU increments back to 55 ns. The ending TAU for something
 // that is 100 ns in the future is TAU+4, as it is rounded up, which
 // is actually a span of 111.11… ns.
 
 Tau clock_future_tau(Tau delta_ns)
 {
-    return TAU + (delta_ns * 2 * clock_freq_hz + NS_PER_SEC - 1) / NS_PER_SEC;
+    return TAU + (delta_ns * clock_freq_hz + NS_PER_SEC - 1) / NS_PER_SEC;
 }
 
 // clock_run_one(): cycle the clock signal high then low, updating TAU.
 //
-// Note that this increments TAU by 2.
+// Note that this increments TAU by 1.
 //
 // This is time critical.
 
 void clock_run_one()
 {
     TAU++;
+    CLOCK->value = 0;
     edge_hi(CLOCK);
-    TAU++;
-    edge_lo(CLOCK);
 }
 
 // clock_run_until(Tau): cycle until the given TAU
@@ -101,24 +100,24 @@ void clock_post()
 
     clock_init(CLOCK_STANDARD_HZ);
     clock_invar();
-    ASSERT_EQ_integer(1000, clock_elapsed_ns(100, 136));
+    ASSERT_EQ_integer(1000, clock_elapsed_ns(100, 118));
 
     // clock_future_tau takes a nominal number of nanonseconds and
-    // computes the number of half-period times, rounding up; so
-    // for 18.00 MHz, where half-period is 27.7… ns, asking for 50 ns
-    // would return 2 cycles.
+    // computes the number of periods, rounding up; so for 18.00 MHz,
+    // where period is 55.5… ns, asking for 50 ns would return 2
+    // cycles.
 
-    ASSERT_EQ_integer(2, clock_future_tau(50) - TAU);
+    ASSERT_EQ_integer(1, clock_future_tau(50) - TAU);
 
     // clock_elapsed_ns takes a starting and ending number of
-    // half-period times, and returns the number of nanoseconds they
+    // period counts, and returns the number of nanoseconds they
     // span, rounding down. As the above sample, if we ask for the
-    // elapsed ns for two half-period times, which is 55.5… ns, then
-    // we get 55 ns as the result.
+    // elapsed ns for two period times, which is 111.1… ns, then
+    // we get 111 ns as the result.
 
-    ASSERT_EQ_integer(55, clock_elapsed_ns(TAU - 2, TAU));
-    ASSERT_EQ_integer(555, clock_elapsed_ns(TAU - 20, TAU));
-    ASSERT_EQ_integer(5555, clock_elapsed_ns(TAU - 200, TAU));
+    ASSERT_EQ_integer(111, clock_elapsed_ns(TAU - 2, TAU));
+    ASSERT_EQ_integer(1111, clock_elapsed_ns(TAU - 20, TAU));
+    ASSERT_EQ_integer(11111, clock_elapsed_ns(TAU - 200, TAU));
 
     // If we take a number of half-period times, convert to ns, then
     // convert back to a future TAU, the change in TAU we get out is
@@ -130,10 +129,10 @@ void clock_post()
 
     t0 = TAU;
     clock_run_one();
-    ASSERT_EQ_integer(t0 + 2, TAU);
+    ASSERT_EQ_integer(t0 + 1, TAU);
 
-    clock_run_until(t0 + 72);
-    ASSERT_EQ_integer(t0 + 72, TAU);
+    clock_run_until(t0 + 36);
+    ASSERT_EQ_integer(t0 + 36, TAU);
 
 }
 
@@ -152,14 +151,14 @@ void clock_bist()
 
     clock_init(CLOCK_STANDARD_HZ);
     clock_invar();
-    ASSERT_EQ_integer(1000, clock_elapsed_ns(100, 136));
+    ASSERT_EQ_integer(1000, clock_elapsed_ns(100, 118));
 
     // clock_future_tau takes a nominal number of nanonseconds and
     // computes the number of half-period times, rounding up; so
-    // for 18.00 MHz, where half-period is 27.7… ns, asking for 50 ns
+    // for 18.00 MHz, where half-period is 55.5… ns, asking for 50 ns
     // would return 2 cycles.
 
-    ASSERT_EQ_integer(2, clock_future_tau(50) - TAU);
+    ASSERT_EQ_integer(1, clock_future_tau(50) - TAU);
 
     // clock_elapsed_ns takes a starting and ending number of
     // half-period times, and returns the number of nanoseconds they
@@ -167,9 +166,9 @@ void clock_bist()
     // elapsed ns for two half-period times, which is 55.5… ns, then
     // we get 55 ns as the result.
 
-    ASSERT_EQ_integer(55, clock_elapsed_ns(TAU - 2, TAU));
-    ASSERT_EQ_integer(555, clock_elapsed_ns(TAU - 20, TAU));
-    ASSERT_EQ_integer(5555, clock_elapsed_ns(TAU - 200, TAU));
+    ASSERT_EQ_integer(55, clock_elapsed_ns(TAU - 1, TAU));
+    ASSERT_EQ_integer(555, clock_elapsed_ns(TAU - 10, TAU));
+    ASSERT_EQ_integer(5555, clock_elapsed_ns(TAU - 100, TAU));
 
     // If we take a number of half-period times, convert to ns, then
     // convert back to a future TAU, the change in TAU we get out is
@@ -180,10 +179,10 @@ void clock_bist()
 
     t0 = TAU;
     clock_run_one();
-    ASSERT_EQ_integer(t0 + 2, TAU);
+    ASSERT_EQ_integer(t0 + 1, TAU);
 
-    clock_run_until(t0 + 72);
-    ASSERT_EQ_integer(t0 + 72, TAU);
+    clock_run_until(t0 + 36);
+    ASSERT_EQ_integer(t0 + 36, TAU);
 
     // NOTE: for this to work, long_run_ns must be a multiple
     // of the actual real period of the clock (not a multiple
@@ -230,7 +229,7 @@ void clock_bench()
     BENCH_TOP("clock");
 
     dt = RTC_ELAPSED(bench_clock, 0);
-    BENCH_VAL(dt * 2.0 / (bench_final_tau - bench_start_tau));
+    BENCH_VAL(dt * 1.0 / (bench_final_tau - bench_start_tau));
 
     EDGE_ON_RISE(CLOCK, inc, tick_count);
     dt = RTC_ELAPSED(bench_clock, 0);

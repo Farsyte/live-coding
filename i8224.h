@@ -2,6 +2,7 @@
 #include "edge.h"
 
 typedef struct s8224 {
+    Cstr                name;
 
     pEdge               OSC;
     pEdge               SYNC;
@@ -24,9 +25,15 @@ typedef struct s8224 {
 
 extern void         i8224_invar(i8224);
 
-// i8224_init(s): initialize the given i8224 to an initial state.
+// i8224_init(s): initialize the given i8224 to have this name
+// and an initial state.
 
-extern void         i8224_init(i8224);
+extern void         i8224_init(i8224, Cstr name);
+
+// I8224_INIT(s): initialize the given i8224 to have this name
+// and an initial state.
+
+#define I8224_INIT(gen) i8224_init(gen, #gen)
 
 // i8224_linked(s): initialize the given i8224 to an initial state.
 

@@ -37,24 +37,39 @@ void i8224_invar(i8224 gen)
 
 // i8224_init(s): initialize the given i8224 to an initial state.
 
-void i8224_init(i8224 gen)
+void i8224_init(i8224 gen, Cstr name)
 {
     assert(gen);
+    assert(name);
+    assert(name[0]);
 
-    edge_init(gen->PHI1);
-    edge_lo(gen->PHI1);
+    gen->name = name;
 
-    edge_init(gen->PHI2);
-    edge_lo(gen->PHI2);
+    pEdge               PHI1 = gen->PHI1;
+    pEdge               PHI2 = gen->PHI2;
+    pEdge               STSTB_ = gen->STSTB_;
+    pEdge               RESET = gen->RESET;
+    pEdge               READY = gen->READY;
 
-    edge_init(gen->STSTB_);
-    edge_lo(gen->STSTB_);
+    EDGE_INIT(PHI1);
+    PHI1->name = format("%s_%s", name, PHI1->name);
+    edge_lo(PHI1);
 
-    edge_init(gen->RESET);
-    edge_hi(gen->RESET);
+    EDGE_INIT(PHI2);
+    PHI2->name = format("%s_%s", name, PHI2->name);
+    edge_lo(PHI2);
 
-    edge_init(gen->READY);
-    edge_lo(gen->READY);
+    EDGE_INIT(STSTB_);
+    STSTB_->name = format("%s_%s", name, STSTB_->name);
+    edge_lo(STSTB_);
+
+    EDGE_INIT(RESET);
+    RESET->name = format("%s_%s", name, RESET->name);
+    edge_hi(RESET);
+
+    EDGE_INIT(READY);
+    READY->name = format("%s_%s", name, READY->name);
+    edge_lo(READY);
 
     gen->state = 0;
 
@@ -147,18 +162,7 @@ static Tau          i8224_test_mcycle_ns = 0;
 static void         i8224_post_on_phi1_rise(i8224 gen);
 static void         i8224_post_on_phi2_rise(i8224 gen);
 
-static void         i8224_bist_on_phi1_rise(i8224 gen);
-static void         i8224_bist_on_phi1_fall(i8224 gen);
-static void         i8224_bist_on_phi2_rise(i8224 gen);
-static void         i8224_bist_on_phi2_fall(i8224 gen);
-static void         i8224_bist_on_sync_rise(i8224 gen);
-static void         i8224_bist_on_sync_fall(i8224 gen);
-static void         i8224_bist_on_ststb_rise(i8224 gen);
-static void         i8224_bist_on_ststb_fall(i8224 gen);
-static void         i8224_bist_on_reset_rise(i8224 gen);
-static void         i8224_bist_on_reset_fall(i8224 gen);
-static void         i8224_bist_on_ready_rise(i8224 gen);
-static void         i8224_bist_on_ready_fall(i8224 gen);
+static void         edge_change(pEdge e);
 
 static void         test_incr(int *ctr);
 
@@ -309,18 +313,18 @@ void i8224_bist()
     // - cycling the clock once moves us to a new state.
     // - after nine cycles, we are back at the initial state.
 
-    EDGE_ON_RISE(gen->PHI1, i8224_bist_on_phi1_rise, gen);
-    EDGE_ON_FALL(gen->PHI1, i8224_bist_on_phi1_fall, gen);
-    EDGE_ON_RISE(gen->PHI2, i8224_bist_on_phi2_rise, gen);
-    EDGE_ON_FALL(gen->PHI2, i8224_bist_on_phi2_fall, gen);
-    EDGE_ON_RISE(gen->SYNC, i8224_bist_on_sync_rise, gen);
-    EDGE_ON_FALL(gen->SYNC, i8224_bist_on_sync_fall, gen);
-    EDGE_ON_RISE(gen->STSTB_, i8224_bist_on_ststb_rise, gen);
-    EDGE_ON_FALL(gen->STSTB_, i8224_bist_on_ststb_fall, gen);
-    EDGE_ON_RISE(gen->RESET, i8224_bist_on_reset_rise, gen);
-    EDGE_ON_FALL(gen->RESET, i8224_bist_on_reset_fall, gen);
-    EDGE_ON_RISE(gen->READY, i8224_bist_on_ready_rise, gen);
-    EDGE_ON_FALL(gen->READY, i8224_bist_on_ready_fall, gen);
+    EDGE_ON_RISE(gen->PHI1, edge_change, gen->PHI1);
+    EDGE_ON_FALL(gen->PHI1, edge_change, gen->PHI1);
+    EDGE_ON_RISE(gen->PHI2, edge_change, gen->PHI2);
+    EDGE_ON_FALL(gen->PHI2, edge_change, gen->PHI2);
+    EDGE_ON_RISE(gen->SYNC, edge_change, gen->SYNC);
+    EDGE_ON_FALL(gen->SYNC, edge_change, gen->SYNC);
+    EDGE_ON_RISE(gen->STSTB_, edge_change, gen->STSTB_);
+    EDGE_ON_FALL(gen->STSTB_, edge_change, gen->STSTB_);
+    EDGE_ON_RISE(gen->RESET, edge_change, gen->RESET);
+    EDGE_ON_FALL(gen->RESET, edge_change, gen->RESET);
+    EDGE_ON_RISE(gen->READY, edge_change, gen->READY);
+    EDGE_ON_FALL(gen->READY, edge_change, gen->READY);
 
     assert(0 == gen->RESIN_->value);
     assert(0 == gen->RDYIN->value);
@@ -383,14 +387,24 @@ void i8224_bist()
 
     ASSERT_EQ_integer(13, *count_ststb_rise);
     ASSERT_EQ_integer(12, *count_ststb_fall);
+}
 
-    // simulate a few more 8080 instruction cycles.
+static const int    bench_mcycles = 10000;
 
-    for (int i = 0; i < 6; ++i) {
+static void bench_i8224(void *arg)
+{
+    (void)arg;
 
-    }
+    Tau                 final_tau = clock_future_tau(i8224_test_mcycle_ns * bench_mcycles);
 
-    fprintf(stderr, "at end of post, tau = t0+%lld\n", (long long)TAU - t0);
+    clock_run_until(clock_future_tau(i8224_test_mcycle_ns));
+    edge_hi(gen->RESIN_);
+    clock_run_until(clock_future_tau(i8224_test_mcycle_ns));
+    clock_run_until(clock_future_tau(i8224_test_mcycle_ns));
+    clock_run_until(clock_future_tau(i8224_test_mcycle_ns));
+    edge_hi(gen->RDYIN);
+
+    clock_run_until(final_tau);
 }
 
 // i8224_bench: performance verification for the I8224 code
@@ -401,31 +415,37 @@ void i8224_bist()
 void i8224_bench()
 {
     i8224_test_init();
+
+    double              dt = RTC_ELAPSED(bench_i8224, 0);
+
+    BENCH_TOP("i8224");
+    BENCH_VAL(dt / bench_mcycles);
+    BENCH_END();
 }
 
 // support code for test and bench
 
 static void i8224_test_init()
 {
-    i8224_init(gen);
+    I8224_INIT(gen);
     i8224_invar(gen);
 
-    i8224_test_osc_freq_hz = 9000000;
+    i8224_test_osc_freq_hz = 18000000;
     i8224_test_mcycle_ns = 9000000000 / i8224_test_osc_freq_hz;
 
     clock_init(i8224_test_osc_freq_hz);
 
     gen->OSC = CLOCK;
 
-    edge_init(SYNC);
+    EDGE_INIT(SYNC);
     edge_lo(SYNC);
     gen->SYNC = SYNC;
 
-    edge_init(RESIN_);
+    EDGE_INIT(RESIN_);
     edge_lo(RESIN_);
     gen->RESIN_ = RESIN_;
 
-    edge_init(RDYIN);
+    EDGE_INIT(RDYIN);
     edge_lo(RDYIN);
     gen->RDYIN = RDYIN;
 
@@ -454,76 +474,11 @@ static void i8224_post_on_phi2_rise(i8224 gen)
     }
 
 }
-static void i8224_bist_on_phi1_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, PHI1 rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
 
-static void i8224_bist_on_phi1_fall(i8224 gen)
+static void edge_change(pEdge e)
 {
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, PHI1 falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_phi2_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, PHI2 rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_phi2_fall(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, PHI2 falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_sync_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, SYNC rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_sync_fall(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, SYNC falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_ststb_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, STSTB_ rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_ststb_fall(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, STSTB_ falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_reset_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, RESET rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_reset_fall(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, RESET falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_ready_rise(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, READY rises\n", clock_elapsed_ns(t0, TAU) / 1000.0);
-}
-
-static void i8224_bist_on_ready_fall(i8224 gen)
-{
-    (void)gen;
-    printf("i8224 bist: at %8.3f μs, READY falls\n", clock_elapsed_ns(t0, TAU) / 1000.0);
+    printf("%8.3f μs %s %s\n", clock_elapsed_ns(t0, TAU) / 1000.0, e->value ? "rise" : "fall",
+           e->name);
 }
 
 static void test_incr(int *ctr)

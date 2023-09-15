@@ -11,6 +11,8 @@
 // changed during a callback), and detection of some hazards.
 
 typedef struct sEdge {
+    Cstr                name;
+
     Bit                 value;
     Subs                rise;
     Subs                fall;
@@ -26,13 +28,19 @@ typedef struct sEdge {
 
 extern void         edge_invar(Edge);
 
-// edge_init(e): initialise edge
+// edge_init(e): initialise edge, function call entry
+// - name is the given string
 // - initial state is LOW
 // - subscriber lists (rise and fall) are empty
 // - edge is not busy
 // - last value set tau is in the past
 
-extern void         edge_init(Edge);
+extern void         edge_init(Edge, Cstr name);
+
+// edge_init(e): initialise edge, macro entry
+// - uses string form of e for the name.
+
+#define EDGE_INIT(e)	edge_init(e, #e)
 
 // edge_on_rise(e,fp,ap): call fp(ap) on rising edges.
 // This is the function entry point, which demands the
