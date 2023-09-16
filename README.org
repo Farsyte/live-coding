@@ -191,3 +191,12 @@ these edges, it constructs a two-phase clock; it synchronizes RESET
 and READY to a specific phase of the clock; and generates /STSTB, when
 SYNC is active, with appropriate timing.
 
+*** i8228: System Controller and Bus Driver 8080A CPU
+
+This module expects to see a status strobe, during which time
+the Data bus contains status bits. Based the latched value of
+those status bits, the control signals are asserted at the
+correct time (when enabled).
+
+Timing is similar to the 8228 (but quantized).
+

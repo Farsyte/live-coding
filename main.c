@@ -2,6 +2,7 @@
 #include "edge.h"
 #include "fifo.h"
 #include "i8224.h"
+#include "i8228.h"
 #include "sched.h"
 #include "step.h"
 #include "stepat.h"
@@ -22,6 +23,7 @@ static int main_post()
     clock_post();
     timing_post();
     i8224_post();
+    i8228_post();
     return 0;
 }
 
@@ -40,6 +42,7 @@ static int main_bist(int argc, char **argv)
     clock_bist();
     timing_bist();
     i8224_bist();
+    i8228_bist();
     return 0;
 }
 
@@ -58,6 +61,7 @@ static int main_bench(int argc, char **argv)
     clock_bench();
     timing_bench();
     i8224_bench();
+    i8228_bench();
     return 0;
 }
 
