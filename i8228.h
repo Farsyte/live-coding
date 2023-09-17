@@ -9,6 +9,12 @@
 // correct time (when enabled).
 //
 // Timing is similar to the 8228 (but quantized).
+//
+// MAJOR DEVIATION IN TIMING: The 8228 asserts MEMR IOR INTA
+// very shortly after STSTB. However, in the simulation, our
+// devices have little they can do with the address until it
+// is time to return the data.
+//
 
 typedef struct s8228 {
     Cstr                name;

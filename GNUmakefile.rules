@@ -28,7 +28,7 @@ DEPDIR		:= dep/
 
 # LIBS            = util                        # add personal libraries
 # SYSLIBS         = pthread ncurses m           # add system libraries
-SYSLIBS         = ncurses           # add system libraries
+SYSLIBS         = ncurses m     # add system libraries
 
 ALLLIBS         = $(LIBS) $(SYSLIBS)
 

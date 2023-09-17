@@ -45,19 +45,19 @@ void i8228_init(i8228 ctl, Cstr name)
     pEdge               IOW_ = ctl->IOW_;
     pEdge               INTA_ = ctl->INTA_;
 
-    edge_init(MEMR_, format("%s:/MEMR"));
+    edge_init(MEMR_, format("%s:/MEMR", name));
     edge_hi(MEMR_);
 
-    edge_init(MEMW_, format("%s:/MEMW"));
+    edge_init(MEMW_, format("%s:/MEMW", name));
     edge_hi(MEMW_);
 
-    edge_init(IOR_, format("%s:/IOR"));
+    edge_init(IOR_, format("%s:/IOR", name));
     edge_hi(IOR_);
 
-    edge_init(IOW_, format("%s:/IOW"));
+    edge_init(IOW_, format("%s:/IOW", name));
     edge_hi(IOW_);
 
-    edge_init(INTA_, format("%s:/INTA"));
+    edge_init(INTA_, format("%s:/INTA", name));
     edge_hi(INTA_);
 
     ctl->status = STATUS_RESET;
@@ -81,6 +81,8 @@ void i8228_linked(i8228 ctl)
     assert(0 == HLDA->value);
 
     EDGE_ON_FALL(STSTB_, latch_status, ctl);
+
+    EDGE_ON_RISE(DBIN, start_reads, ctl);
     EDGE_ON_FALL(WR_, start_writes, ctl);
 
     EDGE_ON_FALL(DBIN, release_ctls, ctl);
@@ -96,8 +98,6 @@ void i8228_linked(i8228 ctl)
 static void latch_status(i8228 ctl)
 {
     ctl->status = *ctl->DATA;
-
-    start_reads(ctl);
 }
 
 // start_reads(ctl): activate the "read" cycle controls
@@ -109,6 +109,7 @@ static void start_reads(i8228 ctl)
 {
     pEdge               activated = 0;
     Byte                status = ctl->status;
+
     if ((status & STATUS_MEMR) && !(status & STATUS_HLTA))
         activated = ctl->MEMR_;
     else if (status & STATUS_INP)
@@ -371,12 +372,12 @@ static void check_case_rd(Edge e, Byte status)
     *DATA = status;
 
     edge_lo(STSTB_);
-    check_outputs(e);
+    check_outputs(0);
 
     TAU += 1;
 
     edge_hi(STSTB_);
-    check_outputs(e);
+    check_outputs(0);
 
     TAU += 1;
 
@@ -396,12 +397,12 @@ static void check_case_rd_hlda(Edge e, Byte status)
     *DATA = status;
 
     edge_lo(STSTB_);
-    check_outputs(e);
+    check_outputs(0);
 
     TAU += 1;
 
     edge_hi(STSTB_);
-    check_outputs(e);
+    check_outputs(0);
 
     TAU += 1;
 

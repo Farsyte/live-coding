@@ -19,6 +19,7 @@ DBG             := -g
 
 # set OPT to -O0, -O1, -O2, -O3, or -Ofast.
 OPT             := -Ofast
+# OPT             := -O0
 
 STD		:= --std=gnu99
 WFLAGS		:= -W -Wall -Wextra -Wpedantic

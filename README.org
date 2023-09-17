@@ -26,6 +26,7 @@ special symbols in comments, string literals, and documentation.
 
 - 1 μs is a microsecond.
 - Δτ is an elapsed time.
+- Φ₁ is the phase-1 clock.
 
 At a minimum, be sure you can read the above. Having greek letters in
 your font is sufficient.
@@ -200,3 +201,10 @@ correct time (when enabled).
 
 Timing is similar to the 8228 (but quantized).
 
+*** decoder: efficient enables for mem pages and i/o ports
+
+This module monitors the control bus and the address bus,
+triggering edges registered for each page of memory and
+each I/O port, separately for read and write, to avoid the
+performance issues around having every memory and device
+monitoring DBIN and/or /WR.

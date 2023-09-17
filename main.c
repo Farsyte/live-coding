@@ -1,4 +1,5 @@
 #include "clock.h"
+#include "decoder.h"
 #include "edge.h"
 #include "fifo.h"
 #include "i8224.h"
@@ -24,6 +25,7 @@ static int main_post()
     timing_post();
     i8224_post();
     i8228_post();
+    decoder_post();
     return 0;
 }
 
@@ -43,6 +45,7 @@ static int main_bist(int argc, char **argv)
     timing_bist();
     i8224_bist();
     i8228_bist();
+    decoder_bist();
     return 0;
 }
 
@@ -62,6 +65,7 @@ static int main_bench(int argc, char **argv)
     timing_bench();
     i8224_bench();
     i8228_bench();
+    decoder_bench();
     return 0;
 }
 
