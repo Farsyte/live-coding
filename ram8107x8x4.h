@@ -62,7 +62,6 @@ extern void         ram8107x8x4_linked(Ram8107x8x4);
 extern void         ram8107x8x4_post();
 
 // ram8107x8x4_bist: Power-On Self Test for the ram8107x8x4 code
-
 //
 // This function should be called by the program on a run made during
 // the build process, to generate a build error if the ram8107x8x4 code is

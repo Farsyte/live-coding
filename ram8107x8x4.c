@@ -18,7 +18,7 @@ static void         ram8107x8x4_wr(Ram8107x8x4);
 
 // ram8107x8x4_invar: verify the invariants for a ram8107x8x4.
 // - valid pointer, valid name, not empty name.
-// - valid signals attached, in a non-invalid configuration.
+// - valid signals exported, in a non-invalid configuration.
 
 void ram8107x8x4_invar(Ram8107x8x4 ram)
 {

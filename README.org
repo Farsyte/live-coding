@@ -160,7 +160,14 @@ made that the range of values, converted to nanoseconds, is within the
 originally requested range, as the runtime checks are done in terms of
 TAU counts with limits computed from the requested durations.
 
-** Main: program entry point
+** hex: parse the content of a hex file
+
+Intel HEX format files provide a way, using somewhat readable plain
+text, to store and transfer blobs of binary data. Each line defines a
+small amount of data, explicitly giving its address, with a checksum
+to protect against transmission errors.
+
+** main: program entry point
 
 - Runs POST methods.
 - On request, runs BIST methods.

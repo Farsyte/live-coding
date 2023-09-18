@@ -120,6 +120,7 @@ static void start_reads(i8228 ctl)
         return;
 
     ctl->activated = activated;
+    activated->value = 1;
     edge_lo(activated);
 }
 
@@ -136,6 +137,7 @@ static void start_writes(i8228 ctl)
     else
         activated = ctl->MEMW_;
     ctl->activated = activated;
+    activated->value = 1;
     edge_lo(activated);
 }
 

@@ -5,6 +5,7 @@
 #include "i8224.h"
 #include "i8228.h"
 #include "ram8107x8x4.h"
+#include "rom8316.h"
 #include "sched.h"
 #include "step.h"
 #include "stepat.h"
@@ -28,6 +29,7 @@ static int main_post()
     i8228_post();
     decoder_post();
     ram8107x8x4_post();
+    rom8316_post();
     return 0;
 }
 
@@ -49,6 +51,7 @@ static int main_bist(int argc, char **argv)
     i8228_bist();
     decoder_bist();
     ram8107x8x4_bist();
+    rom8316_bist();
     return 0;
 }
 
@@ -70,6 +73,7 @@ static int main_bench(int argc, char **argv)
     i8228_bench();
     decoder_bench();
     ram8107x8x4_bench();
+    rom8316_bench();
     return 0;
 }
 
