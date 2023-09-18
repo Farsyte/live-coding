@@ -5,9 +5,9 @@
 // some kind of 8080 based microcomputer that would have been sane in
 // the late 80s through early 90s.
 
-typedef uint8_t     Bit;
-typedef uint8_t     Byte;
-typedef uint16_t    Word;
+typedef uint8_t    *pBit, Bit;
+typedef uint8_t    *pByte, Byte;
+typedef uint16_t   *pWord, Word;
 
 typedef Byte       *pData, Data[1];
 typedef Word       *pAddr, Addr[1];

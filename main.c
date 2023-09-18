@@ -4,6 +4,7 @@
 #include "fifo.h"
 #include "i8224.h"
 #include "i8228.h"
+#include "ram8107x8x4.h"
 #include "sched.h"
 #include "step.h"
 #include "stepat.h"
@@ -26,6 +27,7 @@ static int main_post()
     i8224_post();
     i8228_post();
     decoder_post();
+    ram8107x8x4_post();
     return 0;
 }
 
@@ -46,6 +48,7 @@ static int main_bist(int argc, char **argv)
     i8224_bist();
     i8228_bist();
     decoder_bist();
+    ram8107x8x4_bist();
     return 0;
 }
 
@@ -66,6 +69,7 @@ static int main_bench(int argc, char **argv)
     i8224_bench();
     i8228_bench();
     decoder_bench();
+    ram8107x8x4_bench();
     return 0;
 }
 
