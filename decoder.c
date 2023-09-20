@@ -61,8 +61,6 @@ void decoder_invar(Decoder dec)
         if (dev_wr[dev])
             edge_invar(dev_wr[dev]);
     }
-
-    dec->shadow = 0;
 }
 
 // decoder_init(s): initialize the given decoder to have this name
@@ -144,6 +142,10 @@ static void dec_memr_fall(Decoder dec)
         e = dec->mem_rd[MEM_PAGE(*dec->ADDR)];
     if (!e)
         return;
+
+    // force a falling edge,
+    // needed during WAIT states.
+    e->value = 1;
     edge_lo(e);
 }
 
@@ -160,6 +162,9 @@ static void dec_memw_fall(Decoder dec)
     pEdge               e = dec->mem_wr[MEM_PAGE(*dec->ADDR)];
     if (!e)
         return;
+    // force a falling edge,
+    // needed during WAIT states.
+    e->value = 1;
     edge_lo(e);
 }
 
@@ -176,6 +181,9 @@ static void dec_ior_fall(Decoder dec)
     pEdge               e = dec->dev_rd[DEV_PORT(*dec->ADDR)];
     if (!e)
         return;
+    // force a falling edge,
+    // needed during WAIT states.
+    e->value = 1;
     edge_lo(e);
 }
 
@@ -192,6 +200,9 @@ static void dec_iow_fall(Decoder dec)
     pEdge               e = dec->dev_wr[DEV_PORT(*dec->ADDR)];
     if (!e)
         return;
+    // force a falling edge,
+    // needed during WAIT states.
+    e->value = 1;
     edge_lo(e);
 }
 

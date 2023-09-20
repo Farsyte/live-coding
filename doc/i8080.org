@@ -1,0 +1,38 @@
+* i8080: Single Chip 8-bit Microprocessor
+
+** Coming out of RESET
+
+The initial condition for all simulation modules is the expected
+initial power-on state, which for the 8080 means that RESET is high
+and READY is low. We expect the startup cycle to be, first, releasing
+the RESET signal, then raising READY.
+
+This simulation currently does not allow for the environment to
+prevent the memory chip from sending a rising edge on RDYIN. This
+might be changed but only if it could be done without impacting
+the performance during normal operation.
+
+Note that we are executing from ROM, and the ROM simulation is set up
+to set RDYIN low until it sees two /RD edges with the same address;
+the last four T-states here are the first instruction in the next
+plot.
+
+[[file:img/i8080_bist_reset.png]]
+
+** Execute EI, DI, and NOP instructions
+
+Execution continues from above, with one machine cycle overlap; the
+evidence that the instructions are exeucting is seen in the INTE
+signal at the bottom: EI, NOP, DI, and EI.
+
+[[file:img/i8080_bist_ei_di_ei.png]]
+
+** Execute a HLT instruction
+
+This plot includes the last T-state of the final EI instruction above,
+then fetches and executes a HLT instruction, leading into a HALTACK
+machine cycle, which issues a SYNC, but no DBIN, then simply locks
+itself up into repeated "T_WH" sycles, until the next reset or
+interrupt (and interrupts are not yet implemented).
+
+[[file:img/i8080_bist_hlt.png]]

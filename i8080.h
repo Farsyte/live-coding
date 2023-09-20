@@ -7,7 +7,11 @@
 // the external signals (within simulation quantization) and modeling
 // some but not all known internal state.
 
+// forward declare s8080, so we can forward declare
+// the type of our functions that manage each T-state.
 struct s8080;
+
+// T-state management functions are given the cpu and the phase.
 
 typedef void        f8080State(struct s8080 *cpu, int phase);
 typedef f8080State *p8080State;
@@ -35,13 +39,26 @@ typedef struct s8080 {
 
     pEdge               RESET;                  // owned by i8224
 
-    p8080State          state;
-    p8080State          state_next;
-    p8080State          state_m1t1;
+    // programmer visible state
+    Addr                PC;                     // program counter
 
+    // internal architectural state
+    Data                IR;                     // instruction register
     Edge                RESET_INT;              // officially "INTERNAL RESET"
-    Edge                RETM1_INT;
-    Edge                INH_PC_INC;
+    Edge                RETM1_INT;              // officially "RETURN M1"
+    Edge                INH_PC_INC;             // officially "INHIBIT STORE OF PC+1"
+
+    // T-state management functions
+    p8080State          state_reset;            // entry T-state for reset
+    p8080State          state_fetch;            // entry T-state for STATUS_FETCH cycles
+
+    p8080State          state;                  // function for the current T-state
+    p8080State          state_next;             // function for the next T-state
+    p8080State          state_m1t1;             // function for the next T1 state
+
+    // opcode decode table giving the T-state function to use
+    // for M1 T4 (op decode is in M1 T3).
+    p8080State          m1t4[256];
 
 }                  *p8080, i8080[1];
 

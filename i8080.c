@@ -1,26 +1,19 @@
 #include "clock.h"
 #include "decoder.h"
 #include "i8080.h"
+#include "i8080_impl.h"
 #include "i8224.h"
 #include "i8228.h"
+#include "ram8107x8x4.h"
+#include "rom8316.h"
 #include "sigtrace.h"
 #include "target.h"
 
-// phase numbers
-// NOTE: name is short because these will appear EVERYWHERE.
-#define	PHI1_RISE	1
-#define	PHI2_RISE	3
-#define	PHI2_FALL	7
+static void         i8080_phi1_rise(i8080 cpu);
+static void         i8080_phi2_rise(i8080 cpu);
+static void         i8080_phi2_fall(i8080 cpu);
 
-static void         cpu_phi1_rise(i8080 cpu);
-static void         cpu_phi2_rise(i8080 cpu);
-static void         cpu_phi2_fall(i8080 cpu);
-
-static f8080State   i8080_state_reset;
-static f8080State   i8080_state_pc_out_status;
-static f8080State   i8080_state_pc_inc;
-static f8080State   i8080_state_op_rd;
-static f8080State   i8080_state_x;
+static f8080State   i8080_state_poweron;
 
 // i8080: Single Chip 8-bit Microprocessor
 //
@@ -111,9 +104,12 @@ void i8080_init(i8080 cpu, Cstr name)
     edge_init(INH_PC_INC, format("%s:INH_PC_INC", name));
     edge_lo(INH_PC_INC);
 
-    cpu->state = i8080_state_reset;
-    cpu->state_next = i8080_state_reset;
-    cpu->state_m1t1 = i8080_state_pc_out_status;
+    cpu->state = i8080_state_poweron;
+    cpu->state_next = i8080_state_poweron;
+    cpu->state_m1t1 = i8080_state_poweron;
+
+    for (unsigned inst = 0; inst < 0400; inst++)
+        cpu->m1t4[inst] = i8080_state_poweron;
 }
 
 // I8080_INIT(s): initialize the given i8080 to have this name
@@ -133,12 +129,18 @@ void i8080_linked(i8080 cpu)
     ASSERT_EQ_integer(0, cpu->RETM1_INT->value);
     ASSERT_EQ_integer(0, cpu->INH_PC_INC->value);
 
-    EDGE_ON_RISE(cpu->PHI1, cpu_phi1_rise, cpu);
-    EDGE_ON_RISE(cpu->PHI2, cpu_phi2_rise, cpu);
-    EDGE_ON_FALL(cpu->PHI2, cpu_phi2_fall, cpu);
+    i8080_reset_init(cpu);
+    i8080_fetch_init(cpu);
+    i8080_eidihlt_init(cpu);
+
+    EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
+    EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);
+    EDGE_ON_FALL(cpu->PHI2, i8080_phi2_fall, cpu);
 }
 
-static void cpu_phi1_rise(i8080 cpu)
+// i8080_phi1_rise: actions at start of T-state
+
+static void i8080_phi1_rise(i8080 cpu)
 {
     if (cpu->RETM1_INT->value) {
         cpu->state_next = cpu->state_m1t1;
@@ -149,95 +151,34 @@ static void cpu_phi1_rise(i8080 cpu)
     cpu->state(cpu, PHI1_RISE);
 }
 
-static void cpu_phi2_rise(i8080 cpu)
+// i8080_phi2_rise: actions early in T-state
+
+static void i8080_phi2_rise(i8080 cpu)
 {
     cpu->state(cpu, PHI2_RISE);
 }
 
-static void cpu_phi2_fall(i8080 cpu)
+// i8080_phi2_rise: actions late in T-state
+
+static void i8080_phi2_fall(i8080 cpu)
 {
     cpu->state(cpu, PHI2_FALL);
     // if in last T-state of a M-cycle,
     // then set state_next to state_m1t1.
 }
 
-static void i8080_state_reset(i8080 cpu, int phase)
-{
-    switch (phase) {
-      case PHI1_RISE:
-          if (0 == cpu->RESET->value)
-              edge_lo(cpu->RESET_INT);
-          break;
-      case PHI2_FALL:
-          if (0 == cpu->RESET_INT->value)
-              cpu->state_next = i8080_state_pc_out_status;
-          break;
-    }
-}
+// i8080_state_poweron: T-state control default
+//
+// Pointers to this method are used to indicate that
+// the processor is in a state not yet simulated.
+//
+// for example, after decoding an opcode for which
+// the M1-T4 control function is not yet set up.
 
-static void i8080_state_pc_out_status(i8080 cpu, int phase)
+static void i8080_state_poweron(i8080 cpu, int phase)
 {
-    STUB("cpu %s phase %d", cpu->name, phase);
-    switch (phase) {
-      case PHI1_RISE:
-          break;
-      case PHI2_RISE:
-          *cpu->DATA = STATUS_FETCH;
-          edge_hi(cpu->SYNC);
-          break;
-      case PHI2_FALL:
-          cpu->state_next = i8080_state_pc_inc;
-          break;
-    }
-}
-
-static void i8080_state_pc_inc(i8080 cpu, int phase)
-{
-    STUB("cpu %s phase %d", cpu->name, phase);
-    switch (phase) {
-      case PHI1_RISE:
-          break;
-      case PHI2_RISE:
-          *cpu->DATA = ~0;
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
-          break;
-      case PHI2_FALL:
-          cpu->state_next = i8080_state_op_rd;
-          break;
-    }
-}
-
-static void i8080_state_op_rd(i8080 cpu, int phase)
-{
-    STUB("cpu %s phase %d", cpu->name, phase);
-    switch (phase) {
-      case PHI1_RISE:
-          break;
-      case PHI2_RISE:
-          edge_lo(cpu->DBIN);
-          break;
-      case PHI2_FALL:
-          cpu->state_next = i8080_state_x;
-          break;
-    }
-}
-
-//    Edge RETM1_INT;
-//    Edge INH_PC_INC;
-
-static void i8080_state_x(i8080 cpu, int phase)
-{
-    STUB("cpu %s phase %d", cpu->name, phase);
-    switch (phase) {
-      case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          break;
-      case PHI2_RISE:
-          break;
-      case PHI2_FALL:
-          break;
-    }
+    STUB("cpu '%s' in phase %d", cpu->name, phase);
+    abort();
 }
 
 // Test code below this line.
@@ -250,6 +191,12 @@ static i8080        cpu;
 static i8224        gen;
 static i8228        ctl;
 static Decoder      dec;
+
+#define ROM_CHIPS	8
+static Rom8316      rom[ROM_CHIPS];
+
+#define RAM_BOARDS	2
+static Ram8107x8x4  ram[RAM_BOARDS];
 
 static Edge         RESIN_;                     // owned by environment
 static Edge         RDYIN;                      // owned by environment
@@ -323,20 +270,35 @@ void i8080_post()
 // the build process, to generate a build error if the i8080 code is
 // not working correctly.
 
+static Byte         i8080_reset_program[] = {
+    OP_EI,
+    OP_NOP,
+    OP_DI,
+    OP_EI,
+    OP_HLT,
+    0377,
+};
+
 void i8080_bist()
 {
+    Tau                 t0;
+
     i8080_test_init();
     i8080_trace_init();
 
-    Tau                 t0 = TAU + 0;
+    // put some data in rom zero.
+
+    memcpy(rom[0]->cells, i8080_reset_program, sizeof(i8080_reset_program));
+
+    t0 = TAU;
 
     clock_run_until(t0 + 1 + 9 * 1 + 6);
     edge_hi(RESIN_);
-    clock_run_until(t0 + 9 * 100);
+    clock_run_until(t0 + 9 * 60);
 
     sigplot_init(sp, ss, "i8080_bist_reset",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
-                 "Coming out of RESET in BIST context", t0, 146);
+                 "Coming out of RESET into a NOP in BIST context", t0, 81);
     sigplot_sig(sp, trace_PHI1);
     sigplot_sig(sp, trace_PHI2);
     sigplot_sig(sp, trace_RESIN_);
@@ -346,6 +308,42 @@ void i8080_bist()
     sigplot_sig(sp, trace_STSTB_);
     sigplot_sig(sp, trace_DBIN);
     sigplot_sig(sp, trace_MEMR_);
+    sigplot_sig(sp, trace_RDYIN);
+    sigplot_sig(sp, trace_WAIT);
+    sigplot_fini(sp);
+
+    sigplot_init(sp, ss, "i8080_bist_ei_di_ei", "Intel 8080 Single Chip 8-bit Microprocessor",
+                 // "NOP, DI, EI", t0 + 9 * 4, 9 * 12);
+                 "NOP, DI, EI", t0 + 9 * 4, 9 * 24);
+    sigplot_sig(sp, trace_PHI1);
+    sigplot_sig(sp, trace_PHI2);
+    sigplot_sig(sp, trace_RESIN_);
+    sigplot_sig(sp, trace_RESET);
+    sigplot_sig(sp, trace_RESET_INT);
+    sigplot_sig(sp, trace_SYNC);
+    sigplot_sig(sp, trace_STSTB_);
+    sigplot_sig(sp, trace_DBIN);
+    sigplot_sig(sp, trace_MEMR_);
+    sigplot_sig(sp, trace_RDYIN);
+    sigplot_sig(sp, trace_WAIT);
+    sigplot_sig(sp, trace_INTE);
+    sigplot_fini(sp);
+
+    sigplot_init(sp, ss, "i8080_bist_hlt", "Intel 8080 Single Chip 8-bit Microprocessor",
+                 // "NOP, DI, EI", t0 + 9 * 4, 9 * 12);
+                 "HLT and following", t0 + 9 * 23, 9 * 16);
+    sigplot_sig(sp, trace_PHI1);
+    sigplot_sig(sp, trace_PHI2);
+    sigplot_sig(sp, trace_RESIN_);
+    sigplot_sig(sp, trace_RESET);
+    sigplot_sig(sp, trace_RESET_INT);
+    sigplot_sig(sp, trace_SYNC);
+    sigplot_sig(sp, trace_STSTB_);
+    sigplot_sig(sp, trace_DBIN);
+    sigplot_sig(sp, trace_MEMR_);
+    sigplot_sig(sp, trace_RDYIN);
+    sigplot_sig(sp, trace_WAIT);
+    sigplot_sig(sp, trace_INTE);
     sigplot_fini(sp);
 
     i8080_trace_fini();
@@ -368,6 +366,14 @@ static void i8080_test_init()
     I8224_INIT(gen);
     I8228_INIT(ctl);
     DECODER_INIT(dec);
+
+    for (int chip = 0; chip < ROM_CHIPS; ++chip) {
+        rom8316_init(rom[chip], format("rom%d", chip + 1));
+    }
+
+    for (int board = 0; board < RAM_BOARDS; ++board) {
+        ram8107x8x4_init(ram[board], format("ram%d", board + 1));
+    }
 
     EDGE_INIT(RESIN_);
     edge_lo(RESIN_);
@@ -397,6 +403,35 @@ static void i8080_test_init()
     dec->IOR_ = IOR_;
     dec->IOW_ = IOW_;
 
+    for (int chip = 0; chip < ROM_CHIPS; ++chip) {
+        rom[chip]->RDYIN = RDYIN;
+        rom[chip]->ADDR = ADDR;
+        rom[chip]->DATA = DATA;
+
+        // each rom chip is 2 KiB
+        // each mem page is 1 KiB
+
+        int                 base = DEC_MEM_PAGES - (ROM_CHIPS - chip) * 2;
+        dec->mem_rd[base + 2] = rom[chip]->RD_;
+        dec->mem_rd[base + 1] = rom[chip]->RD_;
+    }
+
+    for (int board = 0; board < RAM_BOARDS; ++board) {
+        ram[board]->ADDR = ADDR;
+        ram[board]->DATA = DATA;
+
+        // each ram board is 16 KiB
+        // each mem page is 1 KiB
+
+        int                 base = board * 16;
+        for (int bp = 0; bp < 16; ++bp) {
+            dec->mem_rd[base + bp] = ram[board]->RD_;
+            dec->mem_wr[base + bp] = ram[board]->WR_;
+        }
+    }
+
+    dec->shadow = rom[0]->RD_;
+
     i8080_linked(cpu);
     i8224_linked(gen);
     i8228_linked(ctl);
@@ -406,6 +441,14 @@ static void i8080_test_init()
     i8224_invar(gen);
     i8228_invar(ctl);
     decoder_invar(dec);
+
+    for (int chip = 0; chip < ROM_CHIPS; ++chip) {
+        rom8316_linked(rom[chip]);
+    }
+
+    for (int board = 0; board < RAM_BOARDS; ++board) {
+        ram8107x8x4_linked(ram[board]);
+    }
 
     (void)WAIT;         // output: "we are in a wait state."
     (void)HOLD;         // input: "please hold for DMA"

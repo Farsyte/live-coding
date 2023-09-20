@@ -81,4 +81,5 @@ typedef Word       *pAddr, Addr[1];
 #define STATUS_INTACK   0043    // [/INTA]  (8)      M1        INTA
 #define STATUS_HALTACK  0212    // [     ]  (9) MEMR    HLTA
 #define STATUS_INTACKW  0053    // [/INTA]  (10)     M1 HLTA   INTA
+
 #endif
