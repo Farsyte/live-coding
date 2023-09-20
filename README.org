@@ -58,22 +58,20 @@ runs scripts that run the build and test system.
 
 ** Signal Display
 
-I have chosen to use the Python "schemdraw" package for display of my
-timing waveforms, using "matplotlib" for the backend.
+A python script "bin/timing.py" handles conversion of logged timing
+data into WaveJSON and rendering it using "schemdraw", giving PNG
+files that can be included in documentation.
 
+For more information on WaveJSON, WaveDrom, and schemdraw, see:
+
+[[https://github.com/RonSheely/schemdraw]]
 [[https://schemdraw.readthedocs.io]]
+[[https://wavedrom.com/]]
+[[https://github.com/wavedrom/wavedrom/wiki/WaveJSON]]
 
 #+begin_src text
   $ pip install 'schemdraw[matplotlib]'
 #+end_src
-
-A python script "bin/timing.py" handles conversion of logged timing
-data as directed by timing plot definitions, giving PNG files that
-can be included in documentation.
-
-The plot itself is defined using WaveDrom JSON.
-
-[[https://wavedrom.com/]]
 
 *** Timing Plot Definitions: log/timing/{name}.txt
 
@@ -114,7 +112,41 @@ Examples:
   it as the label (the UNICODE COMBINING OVERBAR over each character
   does not do this justice).
 
+*** Trace Data Records: log/timing/{session}/{signal}.log
 
+These files contain TAU values, and signal values in the form defined
+for the "wave" field of WaveJSON as extened by schemdraw. Generally
+data are presented as a sequence of signal values, associated with
+an incrementing tau. A new tau is set by placing the new tau value
+at the start of a line, followed by a colon.
+
+Some of the signal codes are used to represent multibit data, and
+require text to place on the plot. This text follows the signal
+code and extends to the next newline.
+
+**** Some of the signal wave codes:
+
+- 'p': positive edged clock wave (P adds an arrow on the rising edge)
+- 'n': negative edged clock wave (N adds an arrow on the falling edge)
+- '0': signal value is 0 or "low"
+- '1': signal value is 1 or "high"
+
+- 'z': high impedence state
+- 'x': unknown state
+- 'u': pull-up
+- 'd': pull-down
+- '.': extend previous cycle
+- '|': extend previous cycle and draw a gap on it
+
+- '=': multibyte data, default color
+- '2': multibyte data, color 2
+- '3': multibyte data, color 3
+- '4': multibyte data, color 4
+- '5': multibyte data, color 5
+- '6': multibyte data, color 6
+- '7': multibyte data, color 7
+- '8': multibyte data, color 8
+- '9': multibyte data, color 9
 
 * Code Tour from Bottom to Top
 

@@ -2,6 +2,7 @@
 #include "decoder.h"
 #include "edge.h"
 #include "fifo.h"
+#include "i8080.h"
 #include "i8224.h"
 #include "i8228.h"
 #include "ram8107x8x4.h"
@@ -30,6 +31,7 @@ static int main_post()
     decoder_post();
     ram8107x8x4_post();
     rom8316_post();
+    i8080_post();
     return 0;
 }
 
@@ -52,6 +54,7 @@ static int main_bist(int argc, char **argv)
     decoder_bist();
     ram8107x8x4_bist();
     rom8316_bist();
+    i8080_bist();
     return 0;
 }
 
@@ -74,6 +77,7 @@ static int main_bench(int argc, char **argv)
     decoder_bench();
     ram8107x8x4_bench();
     rom8316_bench();
+    i8080_bench();
     return 0;
 }
 

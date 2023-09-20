@@ -107,7 +107,8 @@ clean::
 	${RF} log/cc-*.stderr
 	${RF} ${DEPDIR}*.d
 
-doc/img/%.png:	log/timing/%.txt bin/timing.py
+# doc/img/%.png:	log/timing/%.txt bin/timing.py
+doc/img/%.png:		bin/timing.py
 	$C bin/timing.py $*
 
 plots::		${PPNG}

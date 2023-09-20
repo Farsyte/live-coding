@@ -23,7 +23,7 @@ def draw_from_json_string(json, fbase):
     with schemdraw.Drawing() as d:
         d += logic.TimingDiagram.from_json(json, risetime = 0.05)
     d.save(fname)
-    print(f'Figure plotted into {fname}')
+    # print(f'Figure plotted into {fname}')
     return fname
 
 def tosigname(s):
