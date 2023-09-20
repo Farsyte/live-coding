@@ -39,6 +39,9 @@ EXEC		:= ${PROG:%=bin/%}
 OBJS		:= ${CSRC:%.c=${OBJDIR}%.o}
 DEPS		:= ${CSRC:%.c=${DEPDIR}%.d}
 
+PSRC		:= ${wildcard log/timing/*.txt}
+PPNG		:= ${PSRC:log/timing/%.txt=doc/img/%.png}
+
 INCDIRS		:= 
 
 IFLAGS		:= ${INCDIRS:%=-I%}
@@ -103,3 +106,8 @@ clean::
 	${RF} ${OBJDIR}*.o
 	${RF} log/cc-*.stderr
 	${RF} ${DEPDIR}*.d
+
+doc/img/%.png:	log/timing/%.txt bin/timing.py
+	$C bin/timing.py $*
+
+plots::		${PPNG}

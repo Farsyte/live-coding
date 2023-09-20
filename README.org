@@ -56,6 +56,66 @@ beyond what I have been able to achieve with other tools.
 I edit in GNU Emacs, and typically have an Xterm open on the side that
 runs scripts that run the build and test system.
 
+** Signal Display
+
+I have chosen to use the Python "schemdraw" package for display of my
+timing waveforms, using "matplotlib" for the backend.
+
+[[https://schemdraw.readthedocs.io]]
+
+#+begin_src text
+  $ pip install 'schemdraw[matplotlib]'
+#+end_src
+
+A python script "bin/timing.py" handles conversion of logged timing
+data as directed by timing plot definitions, giving PNG files that
+can be included in documentation.
+
+The plot itself is defined using WaveDrom JSON.
+
+[[https://wavedrom.com/]]
+
+*** Timing Plot Definitions: log/timing/{name}.txt
+
+These text files describe the construction of a timing plot, with
+the lines containing:
+
+- Title of the plot, printed at the top of the plot.
+- Caption of the plot, printed at the bottom of the plot.
+- The "session name" where the data can be found
+- Minimum TAU for the plot, and width of the plot in TAU units
+
+Following those four required lines are the lines containing the names
+of the signals to include. Simple rules are used to convert these
+names into nice labels and into the names of the files containing the
+data.
+
+- Trailing underbar and leading slash indicate an "active low" signal.
+  These are discarded when building the filename, and are converted to
+  an "overline" when rendering the label.
+
+- The first underbar (if any) indicates that the remainder of the
+  string is a subscript. This causes no change in the trace file name.
+  Appropriate annotations are made when plotting to obtain the
+  subscript effect.
+
+- A leading backslash indicates that the signal name starts with a
+  special character such as Φ. The backslash is stripped when
+  constructing the filename, and is passed along to the label
+  rendering engine.
+
+Examples:
+
+- "\Phi_1" uses "Phi_1" in the filename, and "Φ₁" as the label for the
+  row of the graph (rendered properly, not just using the Unicode
+  characters from this document).
+
+- "/STSTB" uses "STSTB" in the filename, and "STSTB" with a line over
+  it as the label (the UNICODE COMBINING OVERBAR over each character
+  does not do this justice).
+
+
+
 * Code Tour from Bottom to Top
 
 ** headers: include the Standard C headers I expect to need
@@ -215,3 +275,4 @@ triggering edges registered for each page of memory and
 each I/O port, separately for read and write, to avoid the
 performance issues around having every memory and device
 monitoring DBIN and/or /WR.
+

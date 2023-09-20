@@ -1,5 +1,6 @@
 #include "clock.h"
 #include "i8224.h"
+#include "sigtrace.h"
 #include "support.h"
 
 static void         i8224_on_osc_rise(i8224 gen);
@@ -54,10 +55,10 @@ void i8224_init(i8224 gen, Cstr name)
     pEdge               RESET = gen->RESET;
     pEdge               READY = gen->READY;
 
-    edge_init(PHI1, format("%s:Φ₁", name));
+    edge_init(PHI1, format("%s:\\Phi_1", name));
     edge_lo(PHI1);
 
-    edge_init(PHI2, format("%s:Φ₂", name));
+    edge_init(PHI2, format("%s:\\Phi_2", name));
     edge_lo(PHI2);
 
     edge_init(STSTB_, format("%s:/STSTB", name));
@@ -281,8 +282,20 @@ void i8224_bist()
 {
 
     i8224_test_init();
-    ASSERT_EQ_integer(1, gen->OSC->rise->len);
-    ASSERT_EQ_integer(0, gen->OSC->fall->len);
+
+    pEdge               OSC = gen->OSC;
+    pEdge               SYNC = gen->SYNC;
+    pEdge               RESIN_ = gen->RESIN_;
+    pEdge               RDYIN = gen->RDYIN;
+
+    pEdge               PHI1 = gen->PHI1;
+    pEdge               PHI2 = gen->PHI2;
+    pEdge               STSTB_ = gen->STSTB_;
+    pEdge               RESET = gen->RESET;
+    pEdge               READY = gen->READY;
+
+    ASSERT_EQ_integer(1, OSC->rise->len);
+    ASSERT_EQ_integer(0, OSC->fall->len);
 
     int                 state = gen->state;
     clock_run_one();
@@ -293,48 +306,48 @@ void i8224_bist()
     ASSERT_EQ_integer(state, gen->state);
 
     int                 count_phi1_rise[1] = { 0 };
-    EDGE_ON_RISE(gen->PHI1, test_incr, count_phi1_rise);
-    EDGE_ON_RISE(gen->PHI1, i8224_post_on_phi1_rise, gen);
+    EDGE_ON_RISE(PHI1, test_incr, count_phi1_rise);
+    EDGE_ON_RISE(PHI1, i8224_post_on_phi1_rise, gen);
 
     int                 count_phi1_fall[1] = { 0 };
-    EDGE_ON_FALL(gen->PHI1, test_incr, count_phi1_fall);
+    EDGE_ON_FALL(PHI1, test_incr, count_phi1_fall);
 
     int                 count_phi2_rise[1] = { 0 };
-    EDGE_ON_RISE(gen->PHI2, test_incr, count_phi2_rise);
-    EDGE_ON_RISE(gen->PHI2, i8224_post_on_phi2_rise, gen);
+    EDGE_ON_RISE(PHI2, test_incr, count_phi2_rise);
+    EDGE_ON_RISE(PHI2, i8224_post_on_phi2_rise, gen);
 
     int                 count_phi2_fall[1] = { 0 };
-    EDGE_ON_FALL(gen->PHI2, test_incr, count_phi2_fall);
+    EDGE_ON_FALL(PHI2, test_incr, count_phi2_fall);
 
     int                 count_ststb_rise[1] = { 0 };
-    EDGE_ON_RISE(gen->STSTB_, test_incr, count_ststb_rise);
+    EDGE_ON_RISE(STSTB_, test_incr, count_ststb_rise);
 
     int                 count_ststb_fall[1] = { 0 };
-    EDGE_ON_FALL(gen->STSTB_, test_incr, count_ststb_fall);
+    EDGE_ON_FALL(STSTB_, test_incr, count_ststb_fall);
 
     // - cycling the clock once moves us to a new state.
     // - after nine cycles, we are back at the initial state.
 
-    EDGE_ON_RISE(gen->PHI1, edge_change, gen->PHI1);
-    EDGE_ON_FALL(gen->PHI1, edge_change, gen->PHI1);
-    EDGE_ON_RISE(gen->PHI2, edge_change, gen->PHI2);
-    EDGE_ON_FALL(gen->PHI2, edge_change, gen->PHI2);
-    EDGE_ON_RISE(gen->SYNC, edge_change, gen->SYNC);
-    EDGE_ON_FALL(gen->SYNC, edge_change, gen->SYNC);
-    EDGE_ON_RISE(gen->STSTB_, edge_change, gen->STSTB_);
-    EDGE_ON_FALL(gen->STSTB_, edge_change, gen->STSTB_);
-    EDGE_ON_RISE(gen->RESET, edge_change, gen->RESET);
-    EDGE_ON_FALL(gen->RESET, edge_change, gen->RESET);
-    EDGE_ON_RISE(gen->READY, edge_change, gen->READY);
-    EDGE_ON_FALL(gen->READY, edge_change, gen->READY);
+    EDGE_ON_RISE(PHI1, edge_change, PHI1);
+    EDGE_ON_FALL(PHI1, edge_change, PHI1);
+    EDGE_ON_RISE(PHI2, edge_change, PHI2);
+    EDGE_ON_FALL(PHI2, edge_change, PHI2);
+    EDGE_ON_RISE(SYNC, edge_change, SYNC);
+    EDGE_ON_FALL(SYNC, edge_change, SYNC);
+    EDGE_ON_RISE(STSTB_, edge_change, STSTB_);
+    EDGE_ON_FALL(STSTB_, edge_change, STSTB_);
+    EDGE_ON_RISE(RESET, edge_change, RESET);
+    EDGE_ON_FALL(RESET, edge_change, RESET);
+    EDGE_ON_RISE(READY, edge_change, READY);
+    EDGE_ON_FALL(READY, edge_change, READY);
 
-    assert(0 == gen->RESIN_->value);
-    assert(0 == gen->RDYIN->value);
-    assert(0 == gen->SYNC->value);
+    assert(0 == RESIN_->value);
+    assert(0 == RDYIN->value);
+    assert(0 == SYNC->value);
 
-    assert(1 == gen->RESET->value);
-    assert(0 == gen->READY->value);
-    assert(0 == gen->STSTB_->value);
+    assert(1 == RESET->value);
+    assert(0 == READY->value);
+    assert(0 == STSTB_->value);
 
     Bit                 expected_RESIN_ = 0;
     Bit                 expected_RDYIN = 0;
@@ -342,6 +355,28 @@ void i8224_bist()
     Bit                 expected_RESET = 1;
     Bit                 expected_READY = 0;
     Bit                 expected_STSTB_ = 0;
+
+    SigSess             ss;
+
+    SigTrace            trace_PHI1;
+    SigTrace            trace_PHI2;
+    SigTrace            trace_SYNC;
+    SigTrace            trace_STSTB;
+    SigTrace            trace_RESIN;
+    SigTrace            trace_RESET;
+    SigTrace            trace_RDYIN;
+    SigTrace            trace_READY;
+
+    sigsess_init(ss, "i8224_bist");
+
+    sigtrace_init(trace_PHI1, ss, PHI1);
+    sigtrace_init(trace_PHI2, ss, PHI2);
+    sigtrace_init(trace_SYNC, ss, SYNC);
+    sigtrace_init(trace_STSTB, ss, STSTB_);
+    sigtrace_init(trace_RESIN, ss, RESIN_);
+    sigtrace_init(trace_RESET, ss, RESET);
+    sigtrace_init(trace_RDYIN, ss, RDYIN);
+    sigtrace_init(trace_READY, ss, READY);
 
     // set t0 to the value of TAU that will be present
     // when we expect run the first rising edge of PHI1.
@@ -355,14 +390,14 @@ void i8224_bist()
               break;
 
           case 4:
-              edge_hi(gen->RESIN_);
+              edge_hi(RESIN_);
               expected_RESIN_ = 1;
               expected_RESET = 0;
               expected_STSTB_ = 1;
               break;
 
           case 12:
-              edge_hi(gen->RDYIN);
+              edge_hi(RDYIN);
               expected_RDYIN = 1;
               expected_READY = 1;
               break;
@@ -374,12 +409,12 @@ void i8224_bist()
 
         clock_run_until(clock_future_tau(i8224_test_mcycle_ns));
 
-        ASSERT_EQ_integer(expected_RESIN_, gen->RESIN_->value);
-        ASSERT_EQ_integer(expected_RDYIN, gen->RDYIN->value);
-        ASSERT_EQ_integer(expected_SYNC, gen->SYNC->value);
-        ASSERT_EQ_integer(expected_RESET, gen->RESET->value);
-        ASSERT_EQ_integer(expected_READY, gen->READY->value);
-        ASSERT_EQ_integer(expected_STSTB_, gen->STSTB_->value);
+        ASSERT_EQ_integer(expected_RESIN_, RESIN_->value);
+        ASSERT_EQ_integer(expected_RDYIN, RDYIN->value);
+        ASSERT_EQ_integer(expected_SYNC, SYNC->value);
+        ASSERT_EQ_integer(expected_RESET, RESET->value);
+        ASSERT_EQ_integer(expected_READY, READY->value);
+        ASSERT_EQ_integer(expected_STSTB_, STSTB_->value);
     }
 
     ASSERT_EQ_integer(52, *count_phi1_rise);
@@ -389,6 +424,52 @@ void i8224_bist()
 
     ASSERT_EQ_integer(13, *count_ststb_rise);
     ASSERT_EQ_integer(12, *count_ststb_fall);
+
+    sigtrace_fini(trace_PHI1);
+    sigtrace_fini(trace_PHI2);
+    sigtrace_fini(trace_SYNC);
+    sigtrace_fini(trace_STSTB);
+    sigtrace_fini(trace_RESIN);
+    sigtrace_fini(trace_RESET);
+    sigtrace_fini(trace_RDYIN);
+    sigtrace_fini(trace_READY);
+
+    SigPlot             p1;
+    sigplot_init(p1, ss, "i8224_bist_reset",
+                 "Intel 8224 Clock Generator and Driver for 8080A CPU",
+                 "Coming out of RESET in BIST context", t0, 72);
+    sigplot_sig(p1, trace_PHI1);
+    sigplot_sig(p1, trace_PHI2);
+    sigplot_sig(p1, trace_SYNC);
+    sigplot_sig(p1, trace_STSTB);
+    sigplot_sig(p1, trace_RESIN);
+    sigplot_sig(p1, trace_RESET);
+    sigplot_fini(p1);
+
+    SigPlot             p2;
+    sigplot_init(p2, ss, "i8224_bist_ready",
+                 "Intel 8224 Clock Generator and Driver for 8080A CPU",
+                 "Initial rise of READY in BIST context", t0 + 72, 72);
+    sigplot_sig(p2, trace_PHI1);
+    sigplot_sig(p2, trace_PHI2);
+    sigplot_sig(p2, trace_SYNC);
+    sigplot_sig(p2, trace_STSTB);
+    sigplot_sig(p2, trace_RDYIN);
+    sigplot_sig(p2, trace_READY);
+    sigplot_fini(p2);
+
+    SigPlot             p3;
+    sigplot_init(p3, ss, "i8224_bist_steady",
+                 "Intel 8224 Clock Generator and Driver for 8080A CPU",
+                 "Steady state operation in BIST context", t0 + 288, 72);
+    sigplot_sig(p3, trace_PHI1);
+    sigplot_sig(p3, trace_PHI2);
+    sigplot_sig(p3, trace_SYNC);
+    sigplot_sig(p3, trace_STSTB);
+    sigplot_fini(p3);
+
+    sigsess_fini(ss);
+
 }
 
 static const int    bench_mcycles = 10000;

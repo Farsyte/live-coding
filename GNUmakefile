@@ -101,3 +101,9 @@ world::
 
 logs:
 	$C bin/logs.sh log
+
+cycle::
+	$C $(MAKE) logs
+	$C $(MAKE) plots
+	$C $(MAKE) bench
+	$C $(MAKE) format

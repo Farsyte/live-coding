@@ -1,0 +1,51 @@
+* i8228: System Controller and Bus Driver 8080A CPU
+
+** Latch STATUS byte from CPU during SYNC
+
+The 8228 lives to latch STATUS bits, using the /STSTB signal from the
+8224 to clock the data in from the DATA bus.
+
+Based on the data received, and gated by DBIN and WR_, it generates
+the MEMR MEMW IOR IOW and INTA signals. HLDA going active will end
+activation of the control signals.
+
+The built-in self test of the module checks operation for each of
+the ten possible status words from the 8080, testing a second time
+when appropriate with HLDA terminating the cycle.
+
+Note that the i8228 does not receive any of the clock signals, and
+is driven purely by the edges on its input signals. When these signals
+are later plotted against actual clocks and T-states, the ordering of
+events will match the plots below, but the widths of various pulses
+will be corrected.
+
+[[file:img/i8228_bist_fetch.png]]
+
+[[file:img/i8228_bist_fetch_with_hold.png]]
+
+[[file:img/i8228_bist_mread.png]]
+
+[[file:img/i8228_bist_mread_with_hold.png]]
+
+[[file:img/i8228_bist_mwrite.png]]
+
+[[file:img/i8228_bist_sread.png]]
+
+[[file:img/i8228_bist_sread_with_hold.png]]
+
+[[file:img/i8228_bist_swrite.png]]
+
+[[file:img/i8228_bist_inputrd.png]]
+
+[[file:img/i8228_bist_inputrd_with_hold.png]]
+
+[[file:img/i8228_bist_outputwr.png]]
+
+[[file:img/i8228_bist_intack.png]]
+
+[[file:img/i8228_bist_intack_with_hold.png]]
+
+[[file:img/i8228_bist_intackw.png]]
+
+[[file:img/i8228_bist_intackw_with_hold.png]]
+

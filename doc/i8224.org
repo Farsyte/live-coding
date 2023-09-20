@@ -1,0 +1,42 @@
+* i8224: Clock Generator and Driver for 8080A CPU
+
+** Generate Phi 1, Phi 2, and Status Strobe
+
+Generally while running, the 8224 is responsible for generating
+the two-phase clock for the 8080, and for issuing a Status Strobe
+at a specific time when the CPU is asserting SYNC.
+
+[[file:img/i8224_bist_steady.png]]
+
+** Synchronize the RESET signal
+
+The 8224 also provides synchronization of the RESET signal. In the hardware
+this is an analog signal that starts at zero and is pulled upward against
+a capacitor, and the chip uses a Schmitt trigger to turn it into an edge,
+which is then sampled at a specific time in each T-state.
+
+While the simulation does not model the analog aspect, it still has to
+latch the value of the input at the correct time. The timing diagram
+constrains the output edge timing based on the falling /STSTB edge and
+the falling Φ₂ edge, in such a way that the only viable location for us
+to do this is one OSC period after the rising Φ₂ edge.
+
+The following plot shows the initial rise of /RESIN and consequently
+the initial falling edge of RESET after power-on.
+
+Note that this is in the context of Built-In Self-Test of the module,
+the actual timing of SYNC from the 8080 will be different.
+
+[[file:img/i8224_bist_reset.png]]
+
+** Synchronize the READY signal
+
+The 8224 also provides synchronization of the READY signal, with the
+same timing as the READY signal above. The following plot shows the
+initial rise of READY after power-up.
+
+Note that this is in the context of Built-In Self-Test of the module,
+the actual timing of SYNC from the 8080 will be different.
+
+[[file:img/i8224_bist_ready.png]]
+
