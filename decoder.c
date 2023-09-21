@@ -128,8 +128,11 @@ void decoder_linked(Decoder dec)
 static void dec_memr_rise(Decoder dec)
 {
     pEdge               e = dec->shadow;
-    if (!e)
-        e = dec->mem_rd[MEM_PAGE(*dec->ADDR)];
+    if (!e) {
+        Word                addr = dec->ADDR->value;
+        Word                page = MEM_PAGE(addr);
+        e = dec->mem_rd[page];
+    }
     if (!e)
         return;
     edge_hi(e);
@@ -138,8 +141,11 @@ static void dec_memr_rise(Decoder dec)
 static void dec_memr_fall(Decoder dec)
 {
     pEdge               e = dec->shadow;
-    if (!e)
-        e = dec->mem_rd[MEM_PAGE(*dec->ADDR)];
+    if (!e) {
+        Word                addr = dec->ADDR->value;
+        Word                page = MEM_PAGE(addr);
+        e = dec->mem_rd[page];
+    }
     if (!e)
         return;
 
@@ -151,7 +157,10 @@ static void dec_memr_fall(Decoder dec)
 
 static void dec_memw_rise(Decoder dec)
 {
-    pEdge               e = dec->mem_wr[MEM_PAGE(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Word                page = MEM_PAGE(addr);
+    pEdge               e = dec->mem_wr[page];
+
     if (!e)
         return;
     edge_hi(e);
@@ -159,7 +168,9 @@ static void dec_memw_rise(Decoder dec)
 
 static void dec_memw_fall(Decoder dec)
 {
-    pEdge               e = dec->mem_wr[MEM_PAGE(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Word                page = MEM_PAGE(addr);
+    pEdge               e = dec->mem_wr[page];
     if (!e)
         return;
     // force a falling edge,
@@ -170,7 +181,9 @@ static void dec_memw_fall(Decoder dec)
 
 static void dec_ior_rise(Decoder dec)
 {
-    pEdge               e = dec->dev_rd[DEV_PORT(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Byte                port = DEV_PORT(addr);
+    pEdge               e = dec->dev_rd[port];
     if (!e)
         return;
     edge_hi(e);
@@ -178,7 +191,9 @@ static void dec_ior_rise(Decoder dec)
 
 static void dec_ior_fall(Decoder dec)
 {
-    pEdge               e = dec->dev_rd[DEV_PORT(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Byte                port = DEV_PORT(addr);
+    pEdge               e = dec->dev_rd[port];
     if (!e)
         return;
     // force a falling edge,
@@ -189,7 +204,9 @@ static void dec_ior_fall(Decoder dec)
 
 static void dec_iow_rise(Decoder dec)
 {
-    pEdge               e = dec->dev_wr[DEV_PORT(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Byte                port = DEV_PORT(addr);
+    pEdge               e = dec->dev_wr[port];
     if (!e)
         return;
     edge_hi(e);
@@ -197,7 +214,9 @@ static void dec_iow_rise(Decoder dec)
 
 static void dec_iow_fall(Decoder dec)
 {
-    pEdge               e = dec->dev_wr[DEV_PORT(*dec->ADDR)];
+    Word                addr = dec->ADDR->value;
+    Byte                port = DEV_PORT(addr);
+    pEdge               e = dec->dev_wr[port];
     if (!e)
         return;
     // force a falling edge,
@@ -259,14 +278,14 @@ void decoder_post()
 
     // test case: access via NULL edge does not crash.
 
-    dec_test_trigger(MEMR_, 0, 0);
-    dec_test_trigger(MEMR_, 0177777, 0);
-    dec_test_trigger(MEMW_, 0, 0);
-    dec_test_trigger(MEMR_, 0177777, 0);
-    dec_test_trigger(IOR_, 0, 0);
-    dec_test_trigger(IOR_, 0177777, 0);
-    dec_test_trigger(IOW_, 0, 0);
-    dec_test_trigger(IOR_, 0177777, 0);
+    dec_test_trigger(MEMR_, 0x0000, 0);
+    dec_test_trigger(MEMR_, 0xFFFF, 0);
+    dec_test_trigger(MEMW_, 0x0000, 0);
+    dec_test_trigger(MEMR_, 0xFFFF, 0);
+    dec_test_trigger(IOR_, 0x0000, 0);
+    dec_test_trigger(IOR_, 0xFFFF, 0);
+    dec_test_trigger(IOW_, 0x0000, 0);
+    dec_test_trigger(IOR_, 0xFFFF, 0);
 
     // hook up the memories and devices
 
@@ -342,14 +361,14 @@ void decoder_bist()
 
     // test case: access via NULL edge does not crash.
 
-    dec_test_trigger(MEMR_, 0, 0);
-    dec_test_trigger(MEMR_, 0177777, 0);
-    dec_test_trigger(MEMW_, 0, 0);
-    dec_test_trigger(MEMR_, 0177777, 0);
-    dec_test_trigger(IOR_, 0, 0);
-    dec_test_trigger(IOR_, 0177777, 0);
-    dec_test_trigger(IOW_, 0, 0);
-    dec_test_trigger(IOR_, 0177777, 0);
+    dec_test_trigger(MEMR_, 0x0000, 0);
+    dec_test_trigger(MEMR_, 0xFFFF, 0);
+    dec_test_trigger(MEMW_, 0x0000, 0);
+    dec_test_trigger(MEMR_, 0xFFFF, 0);
+    dec_test_trigger(IOR_, 0x0000, 0);
+    dec_test_trigger(IOR_, 0xFFFF, 0);
+    dec_test_trigger(IOW_, 0x0000, 0);
+    dec_test_trigger(IOR_, 0xFFFF, 0);
 
     // hook up the memories and devices
 
@@ -463,20 +482,20 @@ void decoder_bench()
 
 static void decoder_test_init()
 {
-    EDGE_INIT(MEMR_);
-    EDGE_INIT(MEMW_);
-    EDGE_INIT(IOR_);
-    EDGE_INIT(IOW_);
+    EDGE_INIT(MEMR_, 0);
+    EDGE_INIT(MEMW_, 0);
+    EDGE_INIT(IOR_, 0);
+    EDGE_INIT(IOW_, 0);
 
-    EDGE_INIT(mem_rd_first);
-    EDGE_INIT(mem_rd_final);
-    EDGE_INIT(mem_wr_first);
-    EDGE_INIT(mem_wr_final);
-    EDGE_INIT(dev_rd_first);
-    EDGE_INIT(dev_rd_final);
-    EDGE_INIT(dev_wr_first);
-    EDGE_INIT(dev_wr_final);
-    EDGE_INIT(rom_shadow);
+    EDGE_INIT(mem_rd_first, 0);
+    EDGE_INIT(mem_rd_final, 0);
+    EDGE_INIT(mem_wr_first, 0);
+    EDGE_INIT(mem_wr_final, 0);
+    EDGE_INIT(dev_rd_first, 0);
+    EDGE_INIT(dev_rd_final, 0);
+    EDGE_INIT(dev_wr_first, 0);
+    EDGE_INIT(dev_wr_final, 0);
+    EDGE_INIT(rom_shadow, 0);
 
     edge_hi(MEMR_);
     edge_hi(MEMW_);
@@ -577,7 +596,7 @@ static void check_outputs(pEdge e, Bit expected)
 static void dec_test_trigger(pEdge e, Word a, pEdge o)
 {
     TAU += 1;
-    *ADDR = a;
+    addr_to(ADDR, a);
     edge_lo(e);
     check_outputs(o, 0);
     TAU += 1;
@@ -588,7 +607,7 @@ static void dec_test_trigger(pEdge e, Word a, pEdge o)
 static void dec_bench_trigger(pEdge e, Word a)
 {
     TAU += 1;
-    *ADDR = a;
+    addr_to(ADDR, a);
     edge_lo(e);
     TAU += 1;
     edge_hi(e);

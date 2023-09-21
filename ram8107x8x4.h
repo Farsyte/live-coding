@@ -1,4 +1,6 @@
 #pragma once
+#include "addr.h"
+#include "data.h"
 #include "edge.h"
 #include "support.h"
 #include "target.h"

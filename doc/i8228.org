@@ -1,7 +1,5 @@
 * i8228: System Controller and Bus Driver 8080A CPU
 
-** Latch STATUS byte from CPU during SYNC
-
 The 8228 lives to latch STATUS bits, using the /STSTB signal from the
 8224 to clock the data in from the DATA bus.
 

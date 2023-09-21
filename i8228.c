@@ -46,20 +46,11 @@ void i8228_init(i8228 ctl, Cstr name)
     pEdge               IOW_ = ctl->IOW_;
     pEdge               INTA_ = ctl->INTA_;
 
-    edge_init(MEMR_, format("%s:/MEMR", name));
-    edge_hi(MEMR_);
-
-    edge_init(MEMW_, format("%s:/MEMW", name));
-    edge_hi(MEMW_);
-
-    edge_init(IOR_, format("%s:/IOR", name));
-    edge_hi(IOR_);
-
-    edge_init(IOW_, format("%s:/IOW", name));
-    edge_hi(IOW_);
-
-    edge_init(INTA_, format("%s:/INTA", name));
-    edge_hi(INTA_);
+    edge_init(MEMR_, format("%s:/MEMR", name), 1);
+    edge_init(MEMW_, format("%s:/MEMW", name), 1);
+    edge_init(IOR_, format("%s:/IOR", name), 1);
+    edge_init(IOW_, format("%s:/IOW", name), 1);
+    edge_init(INTA_, format("%s:/INTA", name), 1);
 
     ctl->status = STATUS_RESET;
     ctl->activated = 0;
@@ -98,7 +89,7 @@ void i8228_linked(i8228 ctl)
 
 static void latch_status(i8228 ctl)
 {
-    ctl->status = *ctl->DATA;
+    ctl->status = ctl->DATA->value;
 }
 
 // start_reads(ctl): activate the "read" cycle controls
@@ -247,6 +238,7 @@ void i8228_post()
 void i8228_bist()
 {
     SigSess             ss;
+    SigTrace            trace_DATA;
     SigTrace            trace_STSTB_;
     SigTrace            trace_DBIN;
     SigTrace            trace_WR_;
@@ -268,15 +260,16 @@ void i8228_bist()
     pEdge               INTA_ = ctl->INTA_;
 
     sigsess_init(ss, "i8228_bist");
-    sigtrace_init(trace_STSTB_, ss, STSTB_);
-    sigtrace_init(trace_DBIN, ss, DBIN);
-    sigtrace_init(trace_WR_, ss, WR_);
-    sigtrace_init(trace_HLDA, ss, HLDA);
-    sigtrace_init(trace_MEMR_, ss, MEMR_);
-    sigtrace_init(trace_MEMW_, ss, MEMW_);
-    sigtrace_init(trace_IOR_, ss, IOR_);
-    sigtrace_init(trace_IOW_, ss, IOW_);
-    sigtrace_init(trace_INTA_, ss, INTA_);
+    sigtrace_init_data(trace_DATA, ss, DATA);
+    sigtrace_init_edge(trace_STSTB_, ss, STSTB_);
+    sigtrace_init_edge(trace_DBIN, ss, DBIN);
+    sigtrace_init_edge(trace_WR_, ss, WR_);
+    sigtrace_init_edge(trace_HLDA, ss, HLDA);
+    sigtrace_init_edge(trace_MEMR_, ss, MEMR_);
+    sigtrace_init_edge(trace_MEMW_, ss, MEMW_);
+    sigtrace_init_edge(trace_IOR_, ss, IOR_);
+    sigtrace_init_edge(trace_IOW_, ss, IOW_);
+    sigtrace_init_edge(trace_INTA_, ss, INTA_);
 
     // initially, NONE of our control outputs are active.
     check_outputs(0);
@@ -298,6 +291,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_fetch",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical FETCH cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_MEMR_);
@@ -308,6 +302,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_fetch_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a FETCH ended by HOLD", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
@@ -319,6 +314,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mread",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MREAD cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_MEMR_);
@@ -329,6 +325,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mread_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a MREAD ended by HOLD", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
@@ -340,6 +337,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mwrite",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MWRITE cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_WR_);
     sigplot_sig(pl, trace_MEMW_);
@@ -350,6 +348,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_sread",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MREAD cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_MEMR_);
@@ -360,6 +359,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_sread_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a MREAD ended by HOLD", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
@@ -371,6 +371,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_swrite",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MWRITE cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_WR_);
     sigplot_sig(pl, trace_MEMW_);
@@ -381,6 +382,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_inputrd",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INPUTRD cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_IOR_);
@@ -391,6 +393,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_inputrd_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INPUTRD cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
@@ -402,6 +405,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_outputwr",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical OUTPUTWR cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_WR_);
     sigplot_sig(pl, trace_IOW_);
@@ -412,6 +416,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intack",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INTACK cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_INTA_);
@@ -422,6 +427,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intack_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during an INTACK ended by HOLD", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
@@ -435,6 +441,7 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intackw",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INTACKW cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_INTA_);
@@ -445,12 +452,14 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intackw_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during an INTACKW ended by HOLD", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
     sigplot_sig(pl, trace_STSTB_);
     sigplot_sig(pl, trace_DBIN);
     sigplot_sig(pl, trace_HLDA);
     sigplot_sig(pl, trace_INTA_);
     sigplot_fini(pl);
 
+    sigtrace_fini(trace_DATA);
     sigtrace_fini(trace_STSTB_);
     sigtrace_fini(trace_DBIN);
     sigtrace_fini(trace_WR_);
@@ -493,17 +502,12 @@ void i8228_bench()
 
 static void i8228_test_init()
 {
-    EDGE_INIT(STSTB_);
-    EDGE_INIT(DBIN);
-    EDGE_INIT(WR_);
-    EDGE_INIT(HLDA);
+    DATA_INIT(DATA);
 
-    DATA[0] = STATUS_RESET;
-
-    edge_lo(STSTB_);
-    edge_lo(DBIN);
-    edge_hi(WR_);
-    edge_lo(HLDA);
+    EDGE_INIT(STSTB_, 0);
+    EDGE_INIT(DBIN, 0);
+    EDGE_INIT(WR_, 1);
+    EDGE_INIT(HLDA, 0);
 
     I8228_INIT(ctl);
 
@@ -520,15 +524,19 @@ static void i8228_test_init()
 static void check_case_nil(Byte status)
 {
     TAU += 1;
+    data_to(DATA, status);
+    check_outputs(0);
 
-    *DATA = status;
-
+    TAU += 1;
     edge_lo(STSTB_);
     check_outputs(0);
 
     TAU += 1;
-
     edge_hi(STSTB_);
+    check_outputs(0);
+
+    TAU += 1;
+    data_z(DATA);
     check_outputs(0);
 
     TAU += 1;
@@ -537,24 +545,26 @@ static void check_case_nil(Byte status)
 static void check_case_rd(Edge e, Byte status)
 {
     TAU += 1;
+    data_to(DATA, status);
+    check_outputs(0);
 
-    *DATA = status;
-
+    TAU += 1;
     edge_lo(STSTB_);
     check_outputs(0);
 
     TAU += 1;
-
     edge_hi(STSTB_);
     check_outputs(0);
 
     TAU += 1;
+    data_z(DATA);
+    check_outputs(0);
 
+    TAU += 1;
     edge_hi(DBIN);
     check_outputs(e);
 
     TAU += 1;
-
     edge_lo(DBIN);
     check_outputs(0);
 
@@ -564,34 +574,34 @@ static void check_case_rd(Edge e, Byte status)
 static void check_case_rd_hlda(Edge e, Byte status)
 {
     TAU += 1;
+    data_to(DATA, status);
+    check_outputs(0);
 
-    *DATA = status;
-
+    TAU += 1;
     edge_lo(STSTB_);
     check_outputs(0);
 
     TAU += 1;
-
     edge_hi(STSTB_);
     check_outputs(0);
 
     TAU += 1;
+    data_z(DATA);
+    check_outputs(0);
 
+    TAU += 1;
     edge_hi(DBIN);
     check_outputs(e);
 
     TAU += 1;
-
     edge_hi(HLDA);
     check_outputs(0);
 
     TAU += 1;
-
     edge_lo(DBIN);
     check_outputs(0);
 
     TAU += 1;
-
     edge_lo(HLDA);
     check_outputs(0);
 
@@ -601,24 +611,26 @@ static void check_case_rd_hlda(Edge e, Byte status)
 static void check_case_wr(Edge e, Byte status)
 {
     TAU += 1;
+    data_to(DATA, status);
+    check_outputs(0);
 
-    *DATA = status;
-
+    TAU += 1;
     edge_lo(STSTB_);
     check_outputs(0);
 
     TAU += 1;
-
     edge_hi(STSTB_);
     check_outputs(0);
 
     TAU += 1;
+    data_z(DATA);
+    check_outputs(0);
 
+    TAU += 1;
     edge_lo(WR_);
     check_outputs(e);
 
     TAU += 1;
-
     edge_hi(WR_);
     check_outputs(0);
 

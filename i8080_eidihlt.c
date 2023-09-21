@@ -71,10 +71,11 @@ static void i8080_state_hlt_m2t1(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
+          data_z(cpu->IR);
           break;
       case PHI2_RISE:
-          *cpu->ADDR = *cpu->PC;
-          *cpu->DATA = STATUS_HALTACK;
+          addr_to(cpu->ADDR, cpu->PC->value);
+          data_to(cpu->DATA, STATUS_HALTACK);
           edge_hi(cpu->SYNC);
           break;
       case PHI2_FALL:
@@ -91,7 +92,7 @@ static void i8080_state_hlt_m2t2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          *cpu->DATA = ~0;
+          data_z(cpu->DATA);
           edge_lo(cpu->SYNC);
           cpu->state_next = i8080_state_hlt_m2wh;
           break;

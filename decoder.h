@@ -1,4 +1,5 @@
 #pragma once
+#include "addr.h"
 #include "edge.h"
 #include "support.h"
 

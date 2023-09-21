@@ -2,6 +2,7 @@
 #include "rom8316.h"
 
 static void         rom8316_rd(Rom8316);
+static void         rom8316_dz(Rom8316);
 static void         rom_load_byte(void *ctx, unsigned addr, unsigned data);
 
 // rom8316: 2 KiB read-only memory for 8080-like microcomputer system
@@ -47,7 +48,7 @@ void rom8316_init(Rom8316 rom, Cstr name)
     assert(rom->cells != NULL);
 
     rom->name = name;
-    edge_init(rom->RD_, format("%s:/RD", name));
+    edge_init(rom->RD_, format("%s:/RD", name), 0);
     edge_hi(rom->RD_);
 
     rom->prev = ~0;
@@ -55,7 +56,7 @@ void rom8316_init(Rom8316 rom, Cstr name)
     rom->rombase = 0;
     rom->hexfile = 0;
 
-    memset(rom->cells, 0377, sizeof(rom->cells));
+    memset(rom->cells, 0xFF, sizeof(rom->cells));
 }
 
 // rom8316_load(rom, base, file): load data into rom
@@ -70,7 +71,7 @@ void rom8316_load(Rom8316 rom, Word base, Cstr file)
 
     rom->rombase = base;
 
-    memset(rom->cells, 0377, sizeof(rom->cells));
+    memset(rom->cells, 0xFF, sizeof(rom->cells));
 
     int                 rv = hex_parse(file, rom_load_byte, rom);
     if (rv < 0) {
@@ -93,6 +94,7 @@ void rom8316_linked(Rom8316 rom)
     assert(0 == rom->RDYIN->value);
 
     EDGE_ON_FALL(rom->RD_, rom8316_rd, rom);
+    EDGE_ON_RISE(rom->RD_, rom8316_dz, rom);
 
     rom8316_invar(rom);
 }
@@ -110,13 +112,22 @@ static void rom8316_rd(Rom8316 rom)
     // the last change to decide when to produce data
     // and raise RDYIN.
 
-    if (rom->prev != *rom->ADDR) {
-        rom->prev = *rom->ADDR;
+    if (rom->prev != rom->ADDR->value) {
+        rom->prev = rom->ADDR->value;
         edge_lo(rom->RDYIN);
     } else {
-        *rom->DATA = rom->cells[ROM8316_MASK & *rom->ADDR];
+        data_to(rom->DATA, rom->cells[ROM8316_MASK & rom->ADDR->value]);
         edge_hi(rom->RDYIN);
     }
+}
+
+// rom8316_dz(rom): react to the /RD rising edge.
+//
+// release the data bus.
+
+static void rom8316_dz(Rom8316 rom)
+{
+    data_z(rom->DATA);
 }
 
 // rom_load_byte: callback used when loading the rom.
@@ -187,17 +198,17 @@ void rom8316_post()
     rom8316_test_init();
     rom8316_invar(rom);
 
-    rom->cells[0] = 0125;
-    rom->cells[e] = 0252;
+    rom->cells[0] = 0x55;
+    rom->cells[e] = 0xAA;
 
-    rom8316_test_rd(0, 0125);
-    rom8316_test_rd(e, 0252);
+    rom8316_test_rd(0, 0x55);
+    rom8316_test_rd(e, 0xAA);
 
-    rom->cells[0] = 0252;
-    rom->cells[e] = 0125;
+    rom->cells[0] = 0xAA;
+    rom->cells[e] = 0x55;
 
-    rom8316_test_rd(0, 0252);
-    rom8316_test_rd(e, 0125);
+    rom8316_test_rd(0, 0xAA);
+    rom8316_test_rd(e, 0x55);
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -227,16 +238,16 @@ void rom8316_bist()
     // different pattern.
 
     for (unsigned a = 0; a < ROM8316_SIZE; ++a)
-        rom->cells[a] = 0125 ^ (a & 0377) ^ ((a >> 8) ^ 0377);
+        rom->cells[a] = 0x55 ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF);
 
     for (unsigned a = 0; a < ROM8316_SIZE; ++a)
-        rom8316_test_rd(a, 0125 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        rom8316_test_rd(a, 0x55 ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
 
     for (unsigned a = 0; a < ROM8316_SIZE; ++a)
-        rom->cells[a] = 0252 ^ (a & 0377) ^ ((a >> 8) ^ 0377);
+        rom->cells[a] = 0xAA ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF);
 
     for (unsigned a = 0; a < ROM8316_SIZE; ++a)
-        rom8316_test_rd(a, 0252 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        rom8316_test_rd(a, 0xAA ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -285,9 +296,12 @@ static void rom8316_test_init()
 {
     ROM8316_INIT(rom);
 
+    EDGE_INIT(RDYIN, 0);
+    ADDR_INIT(ADDR);
+    DATA_INIT(DATA);
+
     RD_ = rom->RD_;
-    EDGE_INIT(RDYIN);
-    edge_lo(RDYIN);
+
     rom->RDYIN = RDYIN;
     rom->ADDR = ADDR;
     rom->DATA = DATA;
@@ -302,8 +316,8 @@ static void rom8316_test_init()
 static void rom8316_test_rd(Word addr, Byte data)
 {
     TAU += 1;
-    *ADDR = addr;
-    *DATA = data ^ 0125;
+    addr_to(ADDR, addr);
+    data_z(DATA);
     edge_lo(RD_);
 
     while (0 == RDYIN->value) {
@@ -312,7 +326,7 @@ static void rom8316_test_rd(Word addr, Byte data)
         edge_lo(RD_);
     }
 
-    ASSERT_EQ_integer(data, *DATA);
+    ASSERT_EQ_integer(data, DATA->value);
     TAU += 1;
     edge_hi(RD_);
 }
@@ -326,7 +340,7 @@ static Byte rom8316_rd_for_bench(Word addr)
     Byte                data;
 
     TAU += 1;
-    *ADDR = addr;
+    addr_to(ADDR, addr);
     edge_lo(RD_);
 
     while (0 == RDYIN->value) {
@@ -335,7 +349,7 @@ static Byte rom8316_rd_for_bench(Word addr)
         edge_lo(RD_);
     }
 
-    data = *DATA;
+    data = DATA->value;
     TAU += 1;
     edge_hi(RD_);
 

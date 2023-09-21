@@ -40,6 +40,10 @@ static void i8080_reset_rise(i8080 cpu)
     cpu->state = i8080_state_reset;
     cpu->state_next = i8080_state_reset;
     cpu->state_m1t1 = i8080_state_reset;
+    addr_z(cpu->PC);
+    addr_z(cpu->ADDR);
+    data_z(cpu->DATA);
+    data_z(cpu->IR);
 }
 
 // i8080_state_reset: T-State handler for RESET states
@@ -59,7 +63,7 @@ static void i8080_state_reset(i8080 cpu, int phase)
     // We get here when RESET is finally released. Reset the PC to
     // zero and deliver control to the STATUS_FETCH machine cycle.
 
-    *cpu->PC = 0;
+    addr_to(cpu->PC, 0);
     cpu->state_m1t1 = cpu->state_fetch;
 
     // Drop the internal reset signal and activate "RETURN M1"

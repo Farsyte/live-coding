@@ -49,12 +49,10 @@ void ram8107x8x4_init(Ram8107x8x4 ram, Cstr name)
     assert(ram->cells != NULL);
 
     ram->name = name;
-    edge_init(ram->RD_, format("%s:/RD", name));
-    edge_hi(ram->RD_);
-    edge_init(ram->WR_, format("%s:/WR", name));
-    edge_hi(ram->WR_);
+    edge_init(ram->RD_, format("%s:/RD", name), 1);
+    edge_init(ram->WR_, format("%s:/WR", name), 1);
 
-    memset(ram->cells, 0377, sizeof(ram->cells));
+    memset(ram->cells, 0xFF, sizeof(ram->cells));
 
 }
 
@@ -73,12 +71,15 @@ void ram8107x8x4_linked(Ram8107x8x4 ram)
 
 static void ram8107x8x4_rd(Ram8107x8x4 ram)
 {
-    *ram->DATA = ram->cells[RAM8107x8x4_MASK & *ram->ADDR];
+    // assert (!addr_is_z(ram->ADDR));
+    data_to(ram->DATA, ram->cells[RAM8107x8x4_MASK & ram->ADDR->value]);
 }
 
 static void ram8107x8x4_wr(Ram8107x8x4 ram)
 {
-    ram->cells[RAM8107x8x4_MASK & *ram->ADDR] = *ram->DATA;
+    // assert (!addr_is_z(ram->ADDR));
+    // assert (!data_is_z(ram->ADDR));
+    ram->cells[RAM8107x8x4_MASK & ram->ADDR->value] = ram->DATA->value;
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -112,15 +113,15 @@ void ram8107x8x4_post()
     ram8107x8x4_test_init();
     ram8107x8x4_invar(ram);
 
-    ram8107x8x4_test_wr(0, 0);
-    ram8107x8x4_test_wr(~0, 0377);
-    ram8107x8x4_test_rd(0, 0);
-    ram8107x8x4_test_rd(~0, 0377);
+    ram8107x8x4_test_wr(0x0000, 0x00);
+    ram8107x8x4_test_wr(0xFFFF, 0xFF);
+    ram8107x8x4_test_rd(0x0000, 0x00);
+    ram8107x8x4_test_rd(0xFFFF, 0xFF);
 
-    ram8107x8x4_test_wr(0, 0377);
-    ram8107x8x4_test_wr(~0, 0);
-    ram8107x8x4_test_rd(0, 0377);
-    ram8107x8x4_test_rd(~0, 0);
+    ram8107x8x4_test_wr(0x0000, 0xFF);
+    ram8107x8x4_test_wr(0xFFFF, 0x00);
+    ram8107x8x4_test_rd(0x0000, 0xFF);
+    ram8107x8x4_test_rd(0xFFFF, 0x00);
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -139,14 +140,14 @@ void ram8107x8x4_bist()
     ram8107x8x4_invar(ram);
 
     for (unsigned a = 0; a < RAM8107x8x4_SIZE; ++a)
-        ram8107x8x4_test_wr(a, 0125 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        ram8107x8x4_test_wr(a, 0x55 ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
     for (unsigned a = 0; a < RAM8107x8x4_SIZE; ++a)
-        ram8107x8x4_test_rd(a, 0125 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        ram8107x8x4_test_rd(a, 0x55 ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
 
     for (unsigned a = 0; a < RAM8107x8x4_SIZE; ++a)
-        ram8107x8x4_test_wr(a, 0252 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        ram8107x8x4_test_wr(a, 0xAA ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
     for (unsigned a = 0; a < RAM8107x8x4_SIZE; ++a)
-        ram8107x8x4_test_rd(a, 0252 ^ (a & 0377) ^ ((a >> 8) ^ 0377));
+        ram8107x8x4_test_rd(a, 0xAA ^ (a & 0xFF) ^ ((a >> 8) ^ 0xFF));
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -204,6 +205,10 @@ void ram8107x8x4_bench()
 static void ram8107x8x4_test_init()
 {
     RAM8107X8X4_INIT(ram);
+
+    ADDR_INIT(ADDR);
+    DATA_INIT(DATA);
+
     RD_ = ram->RD_;
     WR_ = ram->WR_;
     ram->ADDR = ADDR;
@@ -214,33 +219,36 @@ static void ram8107x8x4_test_init()
 static void ram8107x8x4_test_wr(Word addr, Byte data)
 {
     TAU += 1;
-    *ADDR = addr;
-    *DATA = data;
+    addr_to(ADDR, addr);
+    data_to(DATA, data);
     edge_lo(WR_);
 
     TAU += 1;
-    *DATA ^= 0125;
     edge_hi(WR_);
-    ASSERT_NE_integer(data, *DATA);
+    addr_z(ADDR);
+    data_z(DATA);
+    assert(data_is_z(DATA));
 }
 
 static void ram8107x8x4_test_rd(Word addr, Byte data)
 {
     TAU += 1;
-    *ADDR = addr;
-    *DATA = data ^ 0125;
+    addr_to(ADDR, addr);
+    data_z(DATA);
     edge_lo(RD_);
-    ASSERT_EQ_integer(data, *DATA);
+
+    ASSERT_EQ_integer(data, DATA->value);
 
     TAU += 1;
     edge_hi(RD_);
+    addr_z(ADDR);
 }
 
 static void ram8107x8x4_wr_for_bench(Word addr, Byte data)
 {
     TAU += 1;
-    *ADDR = addr;
-    *DATA = data;
+    addr_to(ADDR, addr);
+    data_to(DATA, data);
     edge_lo(WR_);
 
     TAU += 1;
@@ -252,9 +260,9 @@ static Byte ram8107x8x4_rd_for_bench(Word addr)
     Byte                data;
 
     TAU += 1;
-    *ADDR = addr;
+    addr_to(ADDR, addr);
     edge_lo(RD_);
-    data = *DATA;
+    data = DATA->value;
 
     TAU += 1;
     edge_hi(RD_);

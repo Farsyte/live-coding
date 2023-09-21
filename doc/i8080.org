@@ -36,3 +36,10 @@ itself up into repeated "T_WH" sycles, until the next reset or
 interrupt (and interrupts are not yet implemented).
 
 [[file:img/i8080_bist_hlt.png]]
+
+** The whole thing (so far) in one plot
+
+This plot shows the whole test run.
+
+[[file:img/i8080_bist_all.png]]
+

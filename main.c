@@ -1,4 +1,6 @@
+#include "addr.h"
 #include "clock.h"
+#include "data.h"
 #include "decoder.h"
 #include "edge.h"
 #include "fifo.h"
@@ -24,6 +26,8 @@ static int main_post()
     fifo_post();
     sched_post();
     edge_post();
+    addr_post();
+    data_post();
     clock_post();
     timing_post();
     i8224_post();
@@ -47,6 +51,8 @@ static int main_bist(int argc, char **argv)
     fifo_bist();
     sched_bist();
     edge_bist();
+    addr_bist();
+    data_bist();
     clock_bist();
     timing_bist();
     i8224_bist();
@@ -70,6 +76,8 @@ static int main_bench(int argc, char **argv)
     fifo_bench();
     sched_bench();
     edge_bench();
+    addr_bench();
+    data_bench();
     clock_bench();
     timing_bench();
     i8224_bench();

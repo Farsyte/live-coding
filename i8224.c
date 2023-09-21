@@ -55,20 +55,11 @@ void i8224_init(i8224 gen, Cstr name)
     pEdge               RESET = gen->RESET;
     pEdge               READY = gen->READY;
 
-    edge_init(PHI1, format("%s:\\Phi_1", name));
-    edge_lo(PHI1);
-
-    edge_init(PHI2, format("%s:\\Phi_2", name));
-    edge_lo(PHI2);
-
-    edge_init(STSTB_, format("%s:/STSTB", name));
-    edge_lo(STSTB_);
-
-    edge_init(RESET, format("%s:RESET", name));
-    edge_hi(RESET);
-
-    edge_init(READY, format("%s:READY", name));
-    edge_lo(READY);
+    edge_init(PHI1, format("%s:\\Phi_1", name), 0);
+    edge_init(PHI2, format("%s:\\Phi_2", name), 0);
+    edge_init(STSTB_, format("%s:/STSTB", name), 0);
+    edge_init(RESET, format("%s:RESET", name), 1);
+    edge_init(READY, format("%s:READY", name), 0);
 
     gen->state = 0;
 
@@ -369,14 +360,14 @@ void i8224_bist()
 
     sigsess_init(ss, "i8224_bist");
 
-    sigtrace_init(trace_PHI1, ss, PHI1);
-    sigtrace_init(trace_PHI2, ss, PHI2);
-    sigtrace_init(trace_SYNC, ss, SYNC);
-    sigtrace_init(trace_STSTB, ss, STSTB_);
-    sigtrace_init(trace_RESIN, ss, RESIN_);
-    sigtrace_init(trace_RESET, ss, RESET);
-    sigtrace_init(trace_RDYIN, ss, RDYIN);
-    sigtrace_init(trace_READY, ss, READY);
+    sigtrace_init_edge(trace_PHI1, ss, PHI1);
+    sigtrace_init_edge(trace_PHI2, ss, PHI2);
+    sigtrace_init_edge(trace_SYNC, ss, SYNC);
+    sigtrace_init_edge(trace_STSTB, ss, STSTB_);
+    sigtrace_init_edge(trace_RESIN, ss, RESIN_);
+    sigtrace_init_edge(trace_RESET, ss, RESET);
+    sigtrace_init_edge(trace_RDYIN, ss, RDYIN);
+    sigtrace_init_edge(trace_READY, ss, READY);
 
     // set t0 to the value of TAU that will be present
     // when we expect run the first rising edge of PHI1.
@@ -518,18 +509,13 @@ static void i8224_test_init()
 
     clock_init(i8224_test_osc_freq_hz);
 
+    EDGE_INIT(SYNC, 0);
+    EDGE_INIT(RESIN_, 0);
+    EDGE_INIT(RDYIN, 0);
+
     gen->OSC = CLOCK;
-
-    EDGE_INIT(SYNC);
-    edge_lo(SYNC);
     gen->SYNC = SYNC;
-
-    EDGE_INIT(RESIN_);
-    edge_lo(RESIN_);
     gen->RESIN_ = RESIN_;
-
-    EDGE_INIT(RDYIN);
-    edge_lo(RDYIN);
     gen->RDYIN = RDYIN;
 
     i8224_linked(gen);

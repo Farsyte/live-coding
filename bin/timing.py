@@ -21,7 +21,7 @@ def draw_from_json_string(json, fbase):
     """
     fname = f'doc/img/{fbase}.png'
     with schemdraw.Drawing() as d:
-        d += logic.TimingDiagram.from_json(json, risetime = 0.05)
+        d += logic.TimingDiagram.from_json(json, risetime = 0)
     d.save(fname)
     # print(f'Figure plotted into {fname}')
     return fname
@@ -89,6 +89,7 @@ def parse_from_trace(sfn, tau_min, tau_len):
     wa[0] = 'x'
     prior_state = None
     prior_data = None
+    boring = True
     try:
         with open(sfn) as sf:
             lines = [s.strip() for s in sf.readlines()]
@@ -134,8 +135,17 @@ def parse_from_trace(sfn, tau_min, tau_len):
         if wa[1] == '.':
             wa[0] = 'z'
             wa[1] = 'x'
-
+            
     return "".join(wa), data
+
+def boring(wave):
+    """return true if the wave is boring.
+    """
+    boring_states = { '.', 'z', 'x' }
+    for ch in wave[1:]:
+        if ch not in boring_states:
+            return False
+    return True
 
 def draw_from_json_file(fbase):
     """Update a timing diagram.
@@ -200,6 +210,11 @@ def draw_from_json_file(fbase):
                 continue
             stx, sfn = tosigname(s), tosigfile(s, session)
             wave, data = parse_from_trace(sfn, tau_min, tau_len)
+            if boring(wave):
+                # print(f'signal {stx} is boring in {tau_min}..{tau_min+tau_len-1}!')
+                # print(f'  {wave=!r}')
+                continue
+            
             json_bits = ['    { name: "', stx, '",\n'
                          '      wave: "', wave, '"']
             if len(data) > 0:

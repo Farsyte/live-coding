@@ -1,4 +1,6 @@
 #pragma once
+#include "addr.h"
+#include "data.h"
 #include "edge.h"
 #include "headers.h"
 #include "support.h"
@@ -12,7 +14,10 @@ typedef struct sSigSess {
 
 typedef struct sSigTrace {
     pSigSess            sess;
+    Cstr                name;
     pEdge               edge;
+    pAddr               addr;
+    pData               data;
     Tau                 next_tau;
     int                 curr_line_len;
     Cstr                filename;
@@ -26,7 +31,11 @@ typedef struct sSigPlot {
 }                  *pSigPlot, SigPlot[1];
 
 extern void         sigsess_init(SigSess sess, Cstr name);
-extern void         sigtrace_init(SigTrace trc, SigSess sess, pEdge edge);
+
+extern void         sigtrace_init_edge(SigTrace trc, SigSess sess, pEdge edge);
+extern void         sigtrace_init_addr(SigTrace trc, SigSess sess, pAddr addr);
+extern void         sigtrace_init_data(SigTrace trc, SigSess sess, pData data);
+
 extern void         sigplot_init(SigPlot plot, SigSess sess, Cstr name,
                                  Cstr title, Cstr caption, Tau tau_min, Tau tau_len);
 extern void         sigtrace_log(SigTrace trc, char ch, Cstr data);

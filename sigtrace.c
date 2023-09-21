@@ -4,6 +4,10 @@
 
 static void         sig_rise(SigTrace trc);
 static void         sig_fall(SigTrace trc);
+static void         sig_dv(SigTrace trc);
+static void         sig_dz(SigTrace trc);
+static void         sig_av(SigTrace trc);
+static void         sig_az(SigTrace trc);
 
 static void         sigtrace_putc(SigTrace trc, char ch);
 
@@ -27,44 +31,46 @@ void sigsess_init(SigSess sess, Cstr name)
     }
 }
 
-void sigtrace_init(SigTrace trc, SigSess sess, pEdge edge)
+void sigtrace_init(SigTrace trc, SigSess sess, Cstr name)
 {
     assert(trc);
     assert(sess);
-    edge_invar(edge);
 
     trc->sess = sess;
-    trc->edge = edge;
+    trc->name = name;
+    trc->edge = 0;
+    trc->addr = 0;
+    trc->data = 0;
     trc->next_tau = -TAU_SKIP_MAX - 1;
     trc->curr_line_len = 0;
 
-    Cstr                en = edge->name;
-    Cstr                path_start = en;
-    Cstr                path_end = en;
+    Cstr                sn = name;
+    Cstr                path_start = sn;
+    Cstr                path_end = sn;
 
     // if there are colons, advance past the last one.
-    for (Cstr p = en; *p; ++p)
+    for (Cstr p = sn; *p; ++p)
         if (*p == ':') {
-            en = p + 1;
-            path_start = edge->name;
-            path_end = en;
+            sn = p + 1;
+            path_start = name;
+            path_end = sn;
         }
     // Exclude leading / and \ from the filename.
-    if (*en == '/')
-        ++en;
-    if (*en == '\\')
-        ++en;
+    if (*sn == '/')
+        ++sn;
+    if (*sn == '\\')
+        ++sn;
 
     // Exclude trailing _ from the filename.
-    Cstr                ee = en;
+    Cstr                ee = sn;
     while (*ee)
         ++ee;
-    if (ee > en && ee[-1] == '_')
+    if (ee > sn && ee[-1] == '_')
         --ee;
 
     size_t              ep = path_end - path_start;
-    size_t              el = ee - en;
-    trc->filename = format("%s/%*.*s%*.*s.log", sess->dirname, ep, ep, path_start, el, el, en);
+    size_t              el = ee - sn;
+    trc->filename = format("%s/%*.*s%*.*s.log", sess->dirname, ep, ep, path_start, el, el, sn);
     trc->fp = fopen(trc->filename, "w");
 
     if (NULL == trc->fp) {
@@ -73,6 +79,17 @@ void sigtrace_init(SigTrace trc, SigSess sess, pEdge edge)
         abort();
     }
 
+}
+
+void sigtrace_init_edge(SigTrace trc, SigSess sess, pEdge edge)
+{
+    assert(trc);
+    assert(sess);
+    edge_invar(edge);
+
+    sigtrace_init(trc, sess, edge->name);
+    trc->edge = edge;
+
     EDGE_ON_RISE(edge, sig_rise, trc);
     EDGE_ON_FALL(edge, sig_fall, trc);
 
@@ -80,7 +97,34 @@ void sigtrace_init(SigTrace trc, SigSess sess, pEdge edge)
         sig_rise(trc);
     else
         sig_fall(trc);
+}
 
+void sigtrace_init_addr(SigTrace trc, SigSess sess, pAddr addr)
+{
+    assert(trc);
+    assert(sess);
+    addr_invar(addr);
+
+    sigtrace_init(trc, sess, addr->name);
+    trc->addr = addr;
+
+    ADDR_ON_VALID(addr, sig_av, trc);
+    ADDR_ON_Z(addr, sig_az, trc);
+    sig_az(trc);
+}
+
+void sigtrace_init_data(SigTrace trc, SigSess sess, pData data)
+{
+    assert(trc);
+    assert(sess);
+    data_invar(data);
+
+    sigtrace_init(trc, sess, data->name);
+    trc->data = data;
+
+    DATA_ON_VALID(data, sig_dv, trc);
+    DATA_ON_Z(data, sig_dz, trc);
+    sig_dz(trc);
 }
 
 void sigplot_init(SigPlot plot, SigSess sess, Cstr name,
@@ -126,7 +170,7 @@ void sigplot_sig(SigPlot plot, SigTrace trc)
         return;
     }
 
-    fprintf(plot->fp, "%s\n", trc->edge->name);
+    fprintf(plot->fp, "%s\n", trc->name);
 }
 
 void sigplot_fini(SigPlot plot)
@@ -155,6 +199,23 @@ static void sig_rise(SigTrace trc)
 static void sig_fall(SigTrace trc)
 {
     sigtrace_log(trc, '0', 0);
+}
+
+static void sig_dv(SigTrace trc)
+{
+    sigtrace_log(trc, '=', format("%02X", trc->data->value));
+}
+static void sig_dz(SigTrace trc)
+{
+    sigtrace_log(trc, 'z', 0);
+}
+static void sig_av(SigTrace trc)
+{
+    sigtrace_log(trc, '=', format("%04X", trc->addr->value));
+}
+static void sig_az(SigTrace trc)
+{
+    sigtrace_log(trc, 'z', 0);
 }
 
 static void sigtrace_putc(SigTrace trc, char ch)

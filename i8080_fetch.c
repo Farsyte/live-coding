@@ -26,7 +26,7 @@ void i8080_fetch_init(i8080 cpu)
 {
     cpu->state_fetch = i8080_state_pc_out_status;
 
-    for (unsigned inst = 0; inst < 0400; inst++)
+    for (unsigned inst = 0x00; inst <= 0xff; inst++)
         cpu->m1t4[inst] = i8080_state_x;
 }
 
@@ -36,10 +36,11 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
+          data_z(cpu->IR);
           break;
       case PHI2_RISE:
-          *cpu->ADDR = *cpu->PC;
-          *cpu->DATA = STATUS_FETCH;
+          addr_to(cpu->ADDR, cpu->PC->value);
+          data_to(cpu->DATA, STATUS_FETCH);
           edge_hi(cpu->SYNC);
           break;
       case PHI2_FALL:
@@ -56,8 +57,8 @@ static void i8080_state_pc_inc(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          *cpu->PC = *cpu->PC + 1;
-          *cpu->DATA = ~0;
+          addr_to(cpu->PC, cpu->PC->value + 1);
+          data_z(cpu->DATA);
           edge_lo(cpu->SYNC);
           edge_hi(cpu->DBIN);
           break;
@@ -100,12 +101,12 @@ static void i8080_state_op_rd(i8080 cpu, int phase)
           edge_lo(cpu->WAIT);
           break;
       case PHI2_RISE:
-          *cpu->IR = *cpu->DATA;
-          // STUB("%9lld TAU: fetch %07o: %04o", TAU, *cpu->ADDR, *cpu->DATA);
+          data_to(cpu->IR, cpu->DATA->value);
           edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
           break;
       case PHI2_FALL:
-          cpu->state_next = cpu->m1t4[*cpu->IR];
+          cpu->state_next = cpu->m1t4[cpu->IR->value];
           break;
     }
 }

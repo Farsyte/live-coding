@@ -28,7 +28,7 @@ void clock_init(Tau clock_hz)
 
     clock_freq_hz = clock_hz;
 
-    EDGE_INIT(CLOCK);
+    EDGE_INIT(CLOCK, 0);
 }
 
 // clock_ns_to_tau(ns): exact tau counts for given nanoseconds

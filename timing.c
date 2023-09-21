@@ -519,8 +519,8 @@ static void timing_test_init()
     // service functions on their rising and falling edges,
     // then attach the system clock to drive them.
 
-    EDGE_INIT(milliclock);
-    EDGE_INIT(strobe);
+    EDGE_INIT(milliclock, 0);
+    EDGE_INIT(strobe, 0);
 
     *mc_rise_ct = 0;
     EDGE_ON_RISE(milliclock, just_inc, mc_rise_ct);

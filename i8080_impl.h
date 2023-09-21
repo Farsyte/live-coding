@@ -34,7 +34,7 @@ extern void         i8080_eidihlt_init(i8080 cpu);
 
 // 8080 OP codes
 
-#define	OP_NOP		(0000)
-#define	OP_HLT		(0166)
-#define	OP_DI		(0363)
-#define	OP_EI		(0373)
+#define	OP_NOP		(0x00)
+#define	OP_HLT		(0x76)
+#define	OP_DI		(0xF3)
+#define	OP_EI		(0xFB)

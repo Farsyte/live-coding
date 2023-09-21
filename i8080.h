@@ -1,4 +1,6 @@
 #pragma once
+#include "addr.h"
+#include "data.h"
 #include "edge.h"
 
 // i8080: Single Chip 8-bit Microprocessor

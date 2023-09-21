@@ -38,14 +38,14 @@ void edge_invar(Edge e)
 // - edge is not busy
 // - last value set tau is in the past
 
-void edge_init(Edge e, Cstr name)
+void edge_init(Edge e, Cstr name, Bit v)
 {
     assert(e);
     assert(name);
     assert(name[0]);
 
     e->name = name;
-    e->value = 0;
+    e->value = v;
     subs_init(e->rise);
     subs_init(e->fall);
     e->busy = 0;
@@ -172,6 +172,8 @@ void edge_lo(Edge e)
     edge_to(e, 0);
 }
 
+// test code below this line
+
 typedef struct sEdgeCtx {
     int                 counter;
     Tau                 init_tau;
@@ -193,7 +195,7 @@ static void         edge_saw_fall(EdgeCtx);
 void edge_post()
 {
     Edge                e;
-    EDGE_INIT(e);
+    EDGE_INIT(e, 0);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);
@@ -292,7 +294,7 @@ void edge_post()
 void edge_bist()
 {
     Edge                e;
-    EDGE_INIT(e);
+    EDGE_INIT(e, 0);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);
@@ -387,7 +389,7 @@ static void bench_edge(Edge e)
 void edge_bench()
 {
     Edge                e;
-    EDGE_INIT(e);
+    EDGE_INIT(e, 0);
     edge_invar(e);
 
     ASSERT_EQ_integer(0, e->value);
