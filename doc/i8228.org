@@ -43,6 +43,8 @@ will be corrected.
 
 [[file:img/i8228_bist_intack_with_hold.png]]
 
+[[file:img/i8228_bist_haltack.png]]
+
 [[file:img/i8228_bist_intackw.png]]
 
 [[file:img/i8228_bist_intackw_with_hold.png]]

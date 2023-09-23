@@ -434,7 +434,16 @@ void i8228_bist()
     sigplot_sig(pl, trace_INTA_);
     sigplot_fini(pl);
 
+    tau_min = TAU;
     check_case_nil(STATUS_HALTACK);
+    sigplot_init(pl, ss, "i8228_bist_haltack",
+                 "Intel 8228 System Controller and Bus Driver 8080A CPU",
+                 "Behavior during a typical HALTACK cycle", tau_min, TAU - tau_min);
+    sigplot_sig(pl, trace_DATA);
+    sigplot_sig(pl, trace_STSTB_);
+    sigplot_sig(pl, trace_DBIN);
+    sigplot_sig(pl, trace_INTA_);
+    sigplot_fini(pl);
 
     tau_min = TAU;
     check_case_rd(INTA_, STATUS_INTACKW);
@@ -539,7 +548,7 @@ static void check_case_nil(Byte status)
     data_z(DATA);
     check_outputs(0);
 
-    TAU += 1;
+    TAU += 5;
 }
 
 static void check_case_rd(Edge e, Byte status)

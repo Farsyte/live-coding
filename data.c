@@ -2,16 +2,6 @@
 #include "stepat.h"
 #include "support.h"
 
-// This compile time option disables the code that runs the subscriber
-// lists, and can be used for an unmeasured but potentially modest
-// performance boost when the simulation involves frequent changes
-// to "Data" items, which includes not only the Data bus but all of
-// the eight-bit registers and latches.
-//
-// If this is on, timing diagrams will not show updates to these values.
-
-#undef	DATA_NO_SUBS
-
 // data: a signal bus with callbacks for changes in state.
 //
 // This facility tracks the value of an dataess bus in the simulated
@@ -24,8 +14,9 @@
 // within the same TAU.
 //
 // This facility exists to support display and validation of the
-// timing of signals. Callbacks on bus valid and bus "Z" should not
-// be used to drive simulation logic.
+// timing of signals. Callbacks on bus valid and bus "Z" can be used
+// to record transitions into a trace, but should not be used to drive
+// simulation logic.
 
 // data_invar(d): check invariants for the Data
 // - subs_invar succeeds on valid and z lists
@@ -62,14 +53,9 @@ void data_init(Data d, Cstr name)
     subs_init(d->valid);
     subs_init(d->z);
     d->busy = 0;
-#ifndef	DATA_NO_SUBS
     d->when = TAU - 2;
     d->when_z = TAU - 1;
     data_invar(d);
-#else                                           /* DATA_NO_SUBS */
-    d->when = 0;
-    d->when_z = 0;
-#endif                                          /* DATA_NO_SUBS */
 }
 
 // data_on_valid(a,fp,ap): call fp(ap) on new value.
@@ -116,7 +102,6 @@ void data_on_z(Data d, StepFp fp, StepAp ap)
 
 void data_to(Data d, Byte v)
 {
-#ifndef	DATA_NO_SUBS
     if (data_is_z(d) || (d->value != v)) {
         // do real work if state changes
 
@@ -137,9 +122,6 @@ void data_to(Data d, Byte v)
         // at this time is this value, for hazard detection.
         d->when = TAU;
     }
-#else                                           /* DATA_NO_SUBS */
-    d->value = v;
-#endif                                          /* DATA_NO_SUBS */
 }
 
 // data_z(d): set the bus to the Z state.
@@ -160,7 +142,6 @@ void data_to(Data d, Byte v)
 
 void data_z(Data d)
 {
-#ifndef	DATA_NO_SUBS
     if (!data_is_z(d)) {
         // do real work if state changes
 
@@ -178,10 +159,6 @@ void data_z(Data d)
     }
     // NOTE: if we are already Z, we do not even care about recording
     // the time for additional "I'm releasing this bus" events.
-#else                                           /* DATA_NO_SUBS */
-    // continue to provide the weak indicator of high-z stats
-    d->value = ~0;
-#endif                                          /* DATA_NO_SUBS */
 }
 
 // data_is_z(Data): return true if Data is not driven
@@ -230,18 +207,11 @@ void data_bist()
     assert(0 == d->valid->len);
     assert(0 == d->z->len);
     assert(0 == d->busy);
-#ifndef	DATA_NO_SUBS
     assert(d->when_z > d->when);
     assert(data_is_z(d));
 
     DATA_ON_VALID(d, snap_v, d);
     DATA_ON_Z(d, snap_z, d);
-#else                                           /* DATA_NO_SUBS */
-    ASSERT_EQ_integer(0, d->when);
-    ASSERT_EQ_integer(0, d->when_z);
-    (void)snap_v(d);
-    (void)snap_z(d);
-#endif                                          /* DATA_NO_SUBS */
 
     check_data_to_z(d);
     check_data_to_v(d, 0x00);
@@ -267,11 +237,7 @@ void data_bench()
 
 static void snap_v(Data d)
 {
-#ifndef	DATA_NO_SUBS
     assert(!data_is_z(d));
-#else                                           /* DATA_NO_SUBS */
-    (void)a;
-#endif                                          /* DATA_NO_SUBS */
     saw_v_count++;
     saw_v_data = d->value;
     saw_v_at = TAU;
@@ -279,18 +245,13 @@ static void snap_v(Data d)
 
 static void snap_z(Data d)
 {
-#ifndef	DATA_NO_SUBS
     assert(data_is_z(d));
-#else                                           /* DATA_NO_SUBS */
-    (void)a;
-#endif                                          /* DATA_NO_SUBS */
     saw_z_count++;
     saw_z_at = TAU;
 }
 
 static void check_data_to_v(Data d, Byte v)
 {
-#ifndef	DATA_NO_SUBS
     unsigned            sv_v_count = saw_v_count;
     Byte                sv_v_data = saw_v_data;
     Tau                 sv_v_at = saw_v_at;
@@ -313,16 +274,10 @@ static void check_data_to_v(Data d, Byte v)
     ASSERT_EQ_integer(TAU, d->when);
 
     TAU++;
-#else                                           /* DATA_NO_SUBS */
-    data_to(d, v);
-    TAU++;
-#endif                                          /* DATA_NO_SUBS */
 }
 
 static void check_data_to_z(Data d)
 {
-#ifndef	DATA_NO_SUBS
-
     unsigned            sv_z_count = saw_z_count;
     Tau                 sv_z_at = saw_z_at;
     Bit                 was_z = data_is_z(d);
@@ -336,8 +291,4 @@ static void check_data_to_z(Data d)
         ASSERT_EQ_integer(sv_z_count + 1, saw_z_count);
         ASSERT_EQ_integer(TAU, saw_z_at);
     }
-
-#else                                           /* DATA_NO_SUBS */
-    data_z(d);
-#endif                                          /* DATA_NO_SUBS */
 }

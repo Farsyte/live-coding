@@ -2,16 +2,6 @@
 #include "stepat.h"
 #include "support.h"
 
-// This compile time option disables the code that runs the subscriber
-// lists, and can be used for an unmeasured but potentially modest
-// performance boost when the simulation involves frequent changes
-// to "Addr" items, which includes not only the Addr bus but all of
-// the sixteen-bit registers and latches.
-//
-// If this is on, timing diagrams will not show updates to these values.
-
-#undef	ADDR_NO_SUBS
-
 // addr: a signal bus with callbacks for changes in state.
 //
 // This facility tracks the value of an address bus in the simulated
@@ -24,8 +14,9 @@
 // within the same TAU.
 //
 // This facility exists to support display and validation of the
-// timing of signals. Callbacks on bus valid and bus "Z" should not
-// be used to drive simulation logic.
+// timing of signals. Callbacks on bus valid and bus "Z" can be used
+// to record transitions into a trace, but should not be used to drive
+// simulation logic.
 
 // addr_invar(a): check invariants for the Addr
 // - subs_invar succeeds on valid and z lists
@@ -62,13 +53,8 @@ void addr_init(Addr a, Cstr name)
     subs_init(a->valid);
     subs_init(a->z);
     a->busy = 0;
-#ifndef	ADDR_NO_SUBS
     a->when = TAU - 2;
     a->when_z = TAU - 1;
-#else                                           /* ADDR_NO_SUBS */
-    a->when = 0;
-    a->when_z = 0;
-#endif                                          /* ADDR_NO_SUBS */
     addr_invar(a);
 }
 
@@ -116,7 +102,6 @@ void addr_on_z(Addr a, StepFp fp, StepAp ap)
 
 void addr_to(Addr a, Word v)
 {
-#ifndef	ADDR_NO_SUBS
     if (addr_is_z(a) || (a->value != v)) {
         // do real work if state changes
 
@@ -137,9 +122,6 @@ void addr_to(Addr a, Word v)
         // at this time is this value, for hazard detection.
         a->when = TAU;
     }
-#else                                           /* ADDR_NO_SUBS */
-    a->value = v;
-#endif                                          /* ADDR_NO_SUBS */
 }
 
 // addr_z(a): set the bus to the Z state.
@@ -160,7 +142,6 @@ void addr_to(Addr a, Word v)
 
 void addr_z(Addr a)
 {
-#ifndef	ADDR_NO_SUBS
     if (!addr_is_z(a)) {
         // do real work if state changes
 
@@ -178,10 +159,6 @@ void addr_z(Addr a)
     }
     // NOTE: if we are already Z, we do not even care about recording
     // the time for additional "I'm releasing this bus" events.
-#else                                           /* ADDR_NO_SUBS */
-    // continue to provide the weak indicator of high-z stats
-    a->value = ~0;
-#endif                                          /* ADDR_NO_SUBS */
 }
 
 // addr_is_z(Addr): return true if Addr is not driven
@@ -230,18 +207,11 @@ void addr_bist()
     assert(0 == a->valid->len);
     assert(0 == a->z->len);
     assert(0 == a->busy);
-#ifndef	ADDR_NO_SUBS
     assert(a->when_z > a->when);
     assert(addr_is_z(a));
 
     ADDR_ON_VALID(a, snap_v, a);
     ADDR_ON_Z(a, snap_z, a);
-#else                                           /* ADDR_NO_SUBS */
-    ASSERT_EQ_integer(0, a->when);
-    ASSERT_EQ_integer(0, a->when_z);
-    (void)snap_v(a);
-    (void)snap_z(a);
-#endif                                          /* ADDR_NO_SUBS */
 
     check_addr_to_z(a);
     check_addr_to_v(a, 0x0000);
@@ -267,11 +237,7 @@ void addr_bench()
 
 static void snap_v(Addr a)
 {
-#ifndef	ADDR_NO_SUBS
     assert(!addr_is_z(a));
-#else                                           /* ADDR_NO_SUBS */
-    (void)a;
-#endif                                          /* ADDR_NO_SUBS */
     saw_v_count++;
     saw_v_data = a->value;
     saw_v_at = TAU;
@@ -279,18 +245,13 @@ static void snap_v(Addr a)
 
 static void snap_z(Addr a)
 {
-#ifndef	ADDR_NO_SUBS
     assert(addr_is_z(a));
-#else                                           /* ADDR_NO_SUBS */
-    (void)a;
-#endif                                          /* ADDR_NO_SUBS */
     saw_z_count++;
     saw_z_at = TAU;
 }
 
 static void check_addr_to_v(Addr a, Word v)
 {
-#ifndef	ADDR_NO_SUBS
     unsigned            sv_v_count = saw_v_count;
     Word                sv_v_data = saw_v_data;
     Tau                 sv_v_at = saw_v_at;
@@ -313,16 +274,10 @@ static void check_addr_to_v(Addr a, Word v)
     ASSERT_EQ_integer(TAU, a->when);
 
     TAU++;
-#else                                           /* ADDR_NO_SUBS */
-    addr_to(a, v);
-    TAU++;
-#endif                                          /* ADDR_NO_SUBS */
 }
 
 static void check_addr_to_z(Addr a)
 {
-#ifndef	ADDR_NO_SUBS
-
     unsigned            sv_z_count = saw_z_count;
     Tau                 sv_z_at = saw_z_at;
     Bit                 was_z = addr_is_z(a);
@@ -336,8 +291,4 @@ static void check_addr_to_z(Addr a)
         ASSERT_EQ_integer(sv_z_count + 1, saw_z_count);
         ASSERT_EQ_integer(TAU, saw_z_at);
     }
-
-#else                                           /* ADDR_NO_SUBS */
-    addr_z(a);
-#endif                                          /* ADDR_NO_SUBS */
 }

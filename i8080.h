@@ -44,8 +44,20 @@ typedef struct s8080 {
     // programmer visible state
     Addr                PC;                     // program counter
 
+    Data                A;
+
+    Data                B;
+    Data                C;
+    Data                D;
+    Data                E;
+    Data                H;
+    Data                L;
+
     // internal architectural state
+
     Data                IR;                     // instruction register
+    Data                TMP;                    // TEMP REG feeding ALU upper operand
+
     Edge                RESET_INT;              // officially "INTERNAL RESET"
     Edge                RETM1_INT;              // officially "RETURN M1"
     Edge                INH_PC_INC;             // officially "INHIBIT STORE OF PC+1"
@@ -61,6 +73,10 @@ typedef struct s8080 {
     // opcode decode table giving the T-state function to use
     // for M1 T4 (op decode is in M1 T3).
     p8080State          m1t4[256];
+
+    // in some cases, the m1t4 needs to decode IR again
+    // to pick the m1t5.
+    p8080State          m1t5[256];
 
 }                  *p8080, i8080[1];
 

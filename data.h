@@ -15,8 +15,9 @@
 // within the same TAU.
 //
 // This facility exists to support display and validation of the
-// timing of signals. Callbacks on bus valid and bus "Z" should not
-// be used to drive simulation logic.
+// timing of signals. Callbacks on bus valid and bus "Z" can be used
+// to record transitions into a trace, but should not be used to drive
+// simulation logic.
 
 typedef struct sData {
     Cstr                name;

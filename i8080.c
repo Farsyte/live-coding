@@ -74,6 +74,15 @@ void i8080_init(i8080 cpu, Cstr name)
 
     pAddr               PC = cpu->PC;
 
+    pData               A = cpu->A;
+
+    pData               B = cpu->B;
+    pData               C = cpu->C;
+    pData               D = cpu->D;
+    pData               E = cpu->E;
+    pData               H = cpu->H;
+    pData               L = cpu->L;
+
     pData               IR = cpu->IR;
 
     pEdge               RESET_INT = cpu->RESET_INT;
@@ -85,6 +94,8 @@ void i8080_init(i8080 cpu, Cstr name)
     addr_init(ADDR, format("%s:ADDR", name));
     data_init(DATA, format("%s:DATA", name));
 
+    data_init(DATA, format("%s:DATA", name));
+
     edge_init(SYNC, format("%s:SYNC", name), 0);
     edge_init(DBIN, format("%s:DBIN", name), 0);
     edge_init(WR_, format("%s:/WR", name), 1);
@@ -93,7 +104,18 @@ void i8080_init(i8080 cpu, Cstr name)
     edge_init(HLDA, format("%s:HLDA", name), 0);
     edge_init(INT, format("%s:INT", name), 0);
     edge_init(INTE, format("%s:INTE", name), 0);
+
     addr_init(PC, format("%s:PC", name));
+
+    data_init(A, format("%s:A", name));
+
+    data_init(B, format("%s:B", name));
+    data_init(C, format("%s:C", name));
+    data_init(D, format("%s:D", name));
+    data_init(E, format("%s:E", name));
+    data_init(H, format("%s:H", name));
+    data_init(L, format("%s:L", name));
+
     data_init(IR, format("%s:IR", name));
 
     edge_init(RESET_INT, format("%s:RESET_INT", name), 1);
@@ -106,6 +128,8 @@ void i8080_init(i8080 cpu, Cstr name)
 
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
         cpu->m1t4[inst] = i8080_state_poweron;
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++)
+        cpu->m1t5[inst] = i8080_state_poweron;
 }
 
 // I8080_INIT(s): initialize the given i8080 to have this name
@@ -128,6 +152,7 @@ void i8080_linked(i8080 cpu)
     i8080_reset_init(cpu);
     i8080_fetch_init(cpu);
     i8080_eidihlt_init(cpu);
+    i8080_mov_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
     EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);
@@ -183,23 +208,30 @@ static void         i8080_test_init();
 static void         i8080_trace_init();
 static void         i8080_trace_fini();
 
-static i8080        cpu;
-static i8224        gen;
-static i8228        ctl;
-static Decoder      dec;
+static CpuTestSys   ts;
 
-#define ROM_CHIPS	8
-static Rom8316      rom[ROM_CHIPS];
+static const p8080  cpu = ts->cpu;
+static const p8224  gen = ts->gen;
+static const p8228  ctl = ts->ctl;
+static const pDecoder dec = ts->dec;
 
-#define RAM_BOARDS	2
-static Ram8107x8x4  ram[RAM_BOARDS];
+static Rom8316     *rom = ts->rom;
 
-static Edge         RESIN_;                     // owned by environment
-static Edge         RDYIN;                      // owned by environment
+static Ram8107x8x4 *ram = ts->ram;
+
+static const pEdge  RESIN_ = ts->RESIN_;
+static const pEdge  RDYIN = ts->RDYIN;
 
 static const pAddr  ADDR = cpu->ADDR;
 static const pData  DATA = cpu->DATA;
 static const pAddr  PC = cpu->PC;
+static const pData  A = cpu->A;
+static const pData  B = cpu->B;
+static const pData  C = cpu->C;
+static const pData  D = cpu->D;
+static const pData  E = cpu->E;
+static const pData  H = cpu->H;
+static const pData  L = cpu->L;
 static const pData  IR = cpu->IR;
 
 static const pEdge  SYNC = cpu->SYNC;
@@ -224,7 +256,7 @@ static const pEdge  IOR_ = ctl->IOR_;
 static const pEdge  IOW_ = ctl->IOW_;
 static const pEdge  INTA_ = ctl->INTA_;
 
-static SigSess      ss;
+static pSigSess     ss = ts->ss;
 
 static SigTrace     trace_ADDR;
 static SigTrace     trace_DATA;
@@ -248,6 +280,14 @@ static SigTrace     trace_RDYIN;
 static SigTrace     trace_READY;
 
 static SigTrace     trace_PC;
+static SigTrace     trace_A;
+static SigTrace     trace_B;
+static SigTrace     trace_C;
+static SigTrace     trace_D;
+static SigTrace     trace_E;
+static SigTrace     trace_H;
+static SigTrace     trace_L;
+
 static SigTrace     trace_IR;
 
 static SigTrace     trace_MEMR_;
@@ -255,8 +295,6 @@ static SigTrace     trace_MEMW_;
 static SigTrace     trace_IOR_;
 static SigTrace     trace_IOW_;
 static SigTrace     trace_INTA_;
-
-static SigPlot      sp;
 
 // i8080_post: Power-On Self Test for the i8080 code
 //
@@ -274,151 +312,50 @@ void i8080_post()
 // the build process, to generate a build error if the i8080 code is
 // not working correctly.
 
-static Byte         i8080_reset_program[] = {
-    OP_EI,
-    OP_NOP,
-    OP_DI,
-    OP_EI,
-    OP_HLT,
-    0xFF,               // make this look like uninitialized memory
-};
+void i8080_plot_sigs(SigPlot sp)
+{
+    sigplot_sig(sp, trace_PHI1);
+    sigplot_sig(sp, trace_PHI2);
+    sigplot_sig(sp, trace_RESIN_);
+    sigplot_sig(sp, trace_RESET);
+    sigplot_sig(sp, trace_RESET_INT);
+    sigplot_sig(sp, trace_RDYIN);
+    sigplot_sig(sp, trace_READY);
+    sigplot_sig(sp, trace_HOLD);
+    sigplot_sig(sp, trace_HLDA);
+    sigplot_sig(sp, trace_PC);
+    sigplot_sig(sp, trace_A);
+    sigplot_sig(sp, trace_B);
+    sigplot_sig(sp, trace_C);
+    sigplot_sig(sp, trace_D);
+    sigplot_sig(sp, trace_E);
+    sigplot_sig(sp, trace_H);
+    sigplot_sig(sp, trace_L);
+    sigplot_sig(sp, trace_ADDR);
+    sigplot_sig(sp, trace_SYNC);
+    sigplot_sig(sp, trace_STSTB_);
+    sigplot_sig(sp, trace_DATA);
+    sigplot_sig(sp, trace_INTE);
+    sigplot_sig(sp, trace_INT);
+    sigplot_sig(sp, trace_DBIN);
+    sigplot_sig(sp, trace_WR_);
+    sigplot_sig(sp, trace_WAIT);
+    sigplot_sig(sp, trace_MEMR_);
+    sigplot_sig(sp, trace_MEMW_);
+    sigplot_sig(sp, trace_IOR_);
+    sigplot_sig(sp, trace_IOW_);
+    sigplot_sig(sp, trace_INTA_);
+    sigplot_sig(sp, trace_IR);
+}
 
 void i8080_bist()
 {
-    Tau                 t0;
-
     i8080_test_init();
     i8080_trace_init();
 
-    // put some data in rom zero.
-
-    memcpy(rom[0]->cells, i8080_reset_program, sizeof(i8080_reset_program));
-
-    t0 = TAU;
-
-    clock_run_until(t0 + 1 + 9 * 1 + 6);
-    edge_hi(RESIN_);
-    clock_run_until(t0 + 9 * 40);
-
-    sigplot_init(sp, ss, "i8080_bist_reset",
-                 "Intel 8080 Single Chip 8-bit Microprocessor",
-                 "Coming out of RESET into a NOP in BIST context", t0, 81);
-    sigplot_sig(sp, trace_PHI1);
-    sigplot_sig(sp, trace_PHI2);
-    sigplot_sig(sp, trace_RESIN_);
-    sigplot_sig(sp, trace_RESET);
-    sigplot_sig(sp, trace_RESET_INT);
-    sigplot_sig(sp, trace_RDYIN);
-    sigplot_sig(sp, trace_READY);
-    sigplot_sig(sp, trace_HOLD);
-    sigplot_sig(sp, trace_HLDA);
-    sigplot_sig(sp, trace_PC);
-    sigplot_sig(sp, trace_ADDR);
-    sigplot_sig(sp, trace_SYNC);
-    sigplot_sig(sp, trace_STSTB_);
-    sigplot_sig(sp, trace_DATA);
-    sigplot_sig(sp, trace_INTE);
-    sigplot_sig(sp, trace_INT);
-    sigplot_sig(sp, trace_DBIN);
-    sigplot_sig(sp, trace_WR_);
-    sigplot_sig(sp, trace_WAIT);
-    sigplot_sig(sp, trace_MEMR_);
-    sigplot_sig(sp, trace_MEMW_);
-    sigplot_sig(sp, trace_IOR_);
-    sigplot_sig(sp, trace_IOW_);
-    sigplot_sig(sp, trace_INTA_);
-    sigplot_sig(sp, trace_IR);
-    sigplot_fini(sp);
-
-    sigplot_init(sp, ss, "i8080_bist_ei_di_ei", "Intel 8080 Single Chip 8-bit Microprocessor",
-                 // "NOP, DI, EI", t0 + 9 * 4, 9 * 12);
-                 "NOP, DI, EI", t0 + 9 * 4, 9 * 24);
-    sigplot_sig(sp, trace_PHI1);
-    sigplot_sig(sp, trace_PHI2);
-    sigplot_sig(sp, trace_RESIN_);
-    sigplot_sig(sp, trace_RESET);
-    sigplot_sig(sp, trace_RESET_INT);
-    sigplot_sig(sp, trace_RDYIN);
-    sigplot_sig(sp, trace_READY);
-    sigplot_sig(sp, trace_HOLD);
-    sigplot_sig(sp, trace_HLDA);
-    sigplot_sig(sp, trace_PC);
-    sigplot_sig(sp, trace_ADDR);
-    sigplot_sig(sp, trace_SYNC);
-    sigplot_sig(sp, trace_STSTB_);
-    sigplot_sig(sp, trace_DATA);
-    sigplot_sig(sp, trace_INTE);
-    sigplot_sig(sp, trace_INT);
-    sigplot_sig(sp, trace_DBIN);
-    sigplot_sig(sp, trace_WR_);
-    sigplot_sig(sp, trace_WAIT);
-    sigplot_sig(sp, trace_MEMR_);
-    sigplot_sig(sp, trace_MEMW_);
-    sigplot_sig(sp, trace_IOR_);
-    sigplot_sig(sp, trace_IOW_);
-    sigplot_sig(sp, trace_INTA_);
-    sigplot_sig(sp, trace_IR);
-    sigplot_fini(sp);
-
-    sigplot_init(sp, ss, "i8080_bist_hlt", "Intel 8080 Single Chip 8-bit Microprocessor",
-                 // "NOP, DI, EI", t0 + 9 * 4, 9 * 12);
-                 "HLT and post-HLT behavior", t0 + 9 * 23, 9 * 16);
-    sigplot_sig(sp, trace_PHI1);
-    sigplot_sig(sp, trace_PHI2);
-    sigplot_sig(sp, trace_RESIN_);
-    sigplot_sig(sp, trace_RESET);
-    sigplot_sig(sp, trace_RESET_INT);
-    sigplot_sig(sp, trace_RDYIN);
-    sigplot_sig(sp, trace_READY);
-    sigplot_sig(sp, trace_HOLD);
-    sigplot_sig(sp, trace_HLDA);
-    sigplot_sig(sp, trace_PC);
-    sigplot_sig(sp, trace_ADDR);
-    sigplot_sig(sp, trace_SYNC);
-    sigplot_sig(sp, trace_STSTB_);
-    sigplot_sig(sp, trace_DATA);
-    sigplot_sig(sp, trace_INTE);
-    sigplot_sig(sp, trace_INT);
-    sigplot_sig(sp, trace_DBIN);
-    sigplot_sig(sp, trace_WR_);
-    sigplot_sig(sp, trace_WAIT);
-    sigplot_sig(sp, trace_MEMR_);
-    sigplot_sig(sp, trace_MEMW_);
-    sigplot_sig(sp, trace_IOR_);
-    sigplot_sig(sp, trace_IOW_);
-    sigplot_sig(sp, trace_INTA_);
-    sigplot_sig(sp, trace_IR);
-    sigplot_fini(sp);
-
-    sigplot_init(sp, ss, "i8080_bist_all", "Intel 8080 Single Chip 8-bit Microprocessor",
-                 // "NOP, DI, EI", t0 + 9 * 4, 9 * 12);
-                 "Whole Test", t0, TAU - t0);
-    sigplot_sig(sp, trace_PHI1);
-    sigplot_sig(sp, trace_PHI2);
-    sigplot_sig(sp, trace_RESIN_);
-    sigplot_sig(sp, trace_RESET);
-    sigplot_sig(sp, trace_RESET_INT);
-    sigplot_sig(sp, trace_RDYIN);
-    sigplot_sig(sp, trace_READY);
-    sigplot_sig(sp, trace_HOLD);
-    sigplot_sig(sp, trace_HLDA);
-    sigplot_sig(sp, trace_PC);
-    sigplot_sig(sp, trace_ADDR);
-    sigplot_sig(sp, trace_SYNC);
-    sigplot_sig(sp, trace_STSTB_);
-    sigplot_sig(sp, trace_DATA);
-    sigplot_sig(sp, trace_INTE);
-    sigplot_sig(sp, trace_INT);
-    sigplot_sig(sp, trace_DBIN);
-    sigplot_sig(sp, trace_WR_);
-    sigplot_sig(sp, trace_WAIT);
-    sigplot_sig(sp, trace_MEMR_);
-    sigplot_sig(sp, trace_MEMW_);
-    sigplot_sig(sp, trace_IOR_);
-    sigplot_sig(sp, trace_IOW_);
-    sigplot_sig(sp, trace_INTA_);
-    sigplot_sig(sp, trace_IR);
-    sigplot_fini(sp);
+    i8080_reset_bist(ts);
+    i8080_mov_bist(ts);
+    i8080_eidihlt_bist(ts);     // leaves us in HLT state.
 
     i8080_trace_fini();
 }
@@ -545,6 +482,13 @@ static void i8080_trace_init()
     sigtrace_init_edge(trace_HOLD, ss, HOLD);
     sigtrace_init_edge(trace_HLDA, ss, HLDA);
     sigtrace_init_addr(trace_PC, ss, PC);
+    sigtrace_init_data(trace_A, ss, A);
+    sigtrace_init_data(trace_B, ss, B);
+    sigtrace_init_data(trace_C, ss, C);
+    sigtrace_init_data(trace_D, ss, D);
+    sigtrace_init_data(trace_E, ss, E);
+    sigtrace_init_data(trace_H, ss, H);
+    sigtrace_init_data(trace_L, ss, L);
     sigtrace_init_addr(trace_ADDR, ss, ADDR);
     sigtrace_init_edge(trace_SYNC, ss, SYNC);
     sigtrace_init_edge(trace_STSTB_, ss, STSTB_);
@@ -574,6 +518,13 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_HOLD);
     sigtrace_fini(trace_HLDA);
     sigtrace_fini(trace_PC);
+    sigtrace_fini(trace_A);
+    sigtrace_fini(trace_B);
+    sigtrace_fini(trace_C);
+    sigtrace_fini(trace_D);
+    sigtrace_fini(trace_E);
+    sigtrace_fini(trace_H);
+    sigtrace_fini(trace_L);
     sigtrace_fini(trace_ADDR);
     sigtrace_fini(trace_SYNC);
     sigtrace_fini(trace_STSTB_);

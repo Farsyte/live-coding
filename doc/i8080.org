@@ -19,27 +19,11 @@ plot.
 
 [[file:img/i8080_bist_reset.png]]
 
-** Execute EI, DI, and NOP instructions
+** TODO Execute MOV instructions
 
-Execution continues from above, with one machine cycle overlap; the
-evidence that the instructions are exeucting is seen in the INTE
-signal at the bottom: EI, NOP, DI, and EI.
+Testing the MOV instructions will be much easier once we get a few other
+instructions set up.
 
-[[file:img/i8080_bist_ei_di_ei.png]]
+** Execute EI, DI, and HLT instructions
 
-** Execute a HLT instruction
-
-This plot includes the last T-state of the final EI instruction above,
-then fetches and executes a HLT instruction, leading into a HALTACK
-machine cycle, which issues a SYNC, but no DBIN, then simply locks
-itself up into repeated "T_WH" sycles, until the next reset or
-interrupt (and interrupts are not yet implemented).
-
-[[file:img/i8080_bist_hlt.png]]
-
-** The whole thing (so far) in one plot
-
-This plot shows the whole test run.
-
-[[file:img/i8080_bist_all.png]]
-
+[[file:img/i8080_bist_eidihlt.png]]

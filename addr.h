@@ -15,18 +15,19 @@
 // within the same TAU.
 //
 // This facility exists to support display and validation of the
-// timing of signals. Callbacks on bus valid and bus "Z" should not
-// be used to drive simulation logic.
+// timing of signals. Callbacks on bus valid and bus "Z" can be used
+// to record transitions into a trace, but should not be used to drive
+// simulation logic.
 
 typedef struct sAddr {
     Cstr                name;
 
     Word                value;
+    Tau                 when;
+    Tau                 when_z;
     Subs                valid;
     Subs                z;
     int                 busy;
-    Tau                 when;
-    Tau                 when_z;
 }                  *pAddr, Addr[1];
 
 // addr_invar(a): check invariants for the Addr

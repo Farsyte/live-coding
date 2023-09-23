@@ -148,6 +148,10 @@ code and extends to the next newline.
 - '8': multibyte data, color 8
 - '9': multibyte data, color 9
 
+* PENDING ITEMS
+** TODO test the "MOV r1, r2" instructions (i8080_mov.c)
+** TODO assert some conditions in i8080_eidihlt_bist()
+** TODO assert some conditions in i8080_reset_bist()
 * Code Tour from Bottom to Top
 
 ** headers: include the Standard C headers I expect to need
@@ -232,6 +236,38 @@ a C identifier. Similarly, signals that are active-low are represented
 on diagrams with a line above their name. The C identifier is the name
 with a single underscore appended; add a "/" to the start to construct
 the display name.
+
+** addr: a signal bus with callbacks for changes in state.
+
+This facility tracks the value of an address bus in the simulated
+system, and triggers callbacks on change in state. It has built-in
+protection against infinite recursion (where the value of the addr
+is changed during a callback), and detection of some hazards.
+
+The state of the bus includes an implicit "Z" (high impedence)
+state where a transition to "Z" can be followed by a valid value
+within the same TAU.
+
+This facility exists to support display and validation of the
+timing of signals. Callbacks on bus valid and bus "Z" can be used
+to record transitions into a trace, but should not be used to drive
+simulation logic.
+
+** data: a signal bus with callbacks for changes in state.
+
+This facility tracks the value of an dataess bus in the simulated
+system, and triggers callbacks on change in state. It has built-in
+protection against infinite recursion (where the value of the data
+is changed during a callback), and detection of some hazards.
+
+The state of the bus includes an implicit "Z" (high impedence)
+state where a transition to "Z" can be followed by a valid value
+within the same TAU.
+
+This facility exists to support display and validation of the
+timing of signals. Callbacks on bus valid and bus "Z" can be used
+to record transitions into a trace, but should not be used to drive
+simulation logic.
 
 ** clock: provide an Edge that oscillates
 
