@@ -19,10 +19,21 @@ plot.
 
 [[file:img/i8080_bist_reset.png]]
 
-** TODO Execute MOV instructions
+** Execute MVI instructions
 
-Testing the MOV instructions will be much easier once we get a few other
-instructions set up.
+[[file:img/i8080_bist_mvi_abc.png]]
+
+[[file:img/i8080_bist_mvi_dehl.png]]
+
+** Execute MOV instructions
+
+[[file:img/i8080_bist_mov_bc.png]]
+
+[[file:img/i8080_bist_mov_de.png]]
+
+[[file:img/i8080_bist_mov_hl.png]]
+
+[[file:img/i8080_bist_mov_a.png]]
 
 ** Execute EI, DI, and HLT instructions
 

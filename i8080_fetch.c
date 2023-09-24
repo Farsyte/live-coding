@@ -49,7 +49,7 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_pc_out_status: end SYNC, start DBIN, check READY
+// i8080_state_pc_inc: inc PC, end SYNC, start DBIN, check READY
 
 static void i8080_state_pc_inc(i8080 cpu, int phase)
 {
@@ -71,7 +71,7 @@ static void i8080_state_pc_inc(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_pc_fetch_wait: raise WAIT, re-raise DBIN, check READY
+// i8080_state_fetch_wait: raise WAIT, re-raise DBIN, check READY
 
 static void i8080_state_fetch_wait(i8080 cpu, int phase)
 {

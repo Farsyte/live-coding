@@ -122,6 +122,10 @@ void i8080_init(i8080 cpu, Cstr name)
     edge_init(RETM1_INT, format("%s:RETM1_INT", name), 0);
     edge_init(INH_PC_INC, format("%s:INH_PC_INC", name), 0);
 
+    cpu->state_reset = i8080_state_poweron;
+    cpu->state_fetch = i8080_state_poweron;
+    cpu->state_2bops = i8080_state_poweron;
+
     cpu->state = i8080_state_poweron;
     cpu->state_next = i8080_state_poweron;
     cpu->state_m1t1 = i8080_state_poweron;
@@ -130,6 +134,8 @@ void i8080_init(i8080 cpu, Cstr name)
         cpu->m1t4[inst] = i8080_state_poweron;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
         cpu->m1t5[inst] = i8080_state_poweron;
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++)
+        cpu->m2t3[inst] = i8080_state_poweron;
 }
 
 // I8080_INIT(s): initialize the given i8080 to have this name
@@ -151,8 +157,10 @@ void i8080_linked(i8080 cpu)
 
     i8080_reset_init(cpu);
     i8080_fetch_init(cpu);
-    i8080_eidihlt_init(cpu);
+    i8080_2bops_init(cpu);
+    i8080_mvi_init(cpu);
     i8080_mov_init(cpu);
+    i8080_eidihlt_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
     EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);
@@ -304,6 +312,10 @@ static SigTrace     trace_INTA_;
 void i8080_post()
 {
     i8080_test_init();
+    i8080_reset_post(ts);
+    i8080_mvi_post(ts);
+    i8080_mov_post(ts);
+    i8080_eidihlt_post(ts);     // leaves us in HLT state.
 }
 
 // i8080_bist: Power-On Self Test for the i8080 code
@@ -354,9 +366,9 @@ void i8080_bist()
     i8080_trace_init();
 
     i8080_reset_bist(ts);
+    i8080_mvi_bist(ts);
     i8080_mov_bist(ts);
     i8080_eidihlt_bist(ts);     // leaves us in HLT state.
-
     i8080_trace_fini();
 }
 
@@ -420,8 +432,9 @@ static void i8080_test_init()
         // each mem page is 1 KiB
 
         int                 base = DEC_MEM_PAGES - (ROM_CHIPS - chip) * 2;
-        dec->mem_rd[base + 2] = rom[chip]->RD_;
+        // STUB("for chip %d, base is %d, will write %d and %d", chip, base, base + 1, base + 2);
         dec->mem_rd[base + 1] = rom[chip]->RD_;
+        dec->mem_rd[base + 0] = rom[chip]->RD_;
     }
 
     for (int board = 0; board < RAM_BOARDS; ++board) {

@@ -149,9 +149,7 @@ code and extends to the next newline.
 - '9': multibyte data, color 9
 
 * PENDING ITEMS
-** TODO test the "MOV r1, r2" instructions (i8080_mov.c)
-** TODO assert some conditions in i8080_eidihlt_bist()
-** TODO assert some conditions in i8080_reset_bist()
+** TODO create more pending items
 * Code Tour from Bottom to Top
 
 ** headers: include the Standard C headers I expect to need

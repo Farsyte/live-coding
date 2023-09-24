@@ -25,6 +25,7 @@ P		= $C printf
 
 OBJDIR		:= obj/
 DEPDIR		:= dep/
+COVDIR		:= cov/
 
 # LIBS            = util                        # add personal libraries
 # SYSLIBS         = pthread ncurses m           # add system libraries
@@ -38,6 +39,10 @@ EXEC		:= ${PROG:%=bin/%}
 
 OBJS		:= ${CSRC:%.c=${OBJDIR}%.o}
 DEPS		:= ${CSRC:%.c=${DEPDIR}%.d}
+
+GCNOS		:= ${CSRC:%.c=${OBJDIR}%.gcno}
+GCDAS		:= ${CSRC:%.c=${OBJDIR}%.gcda}
+COVS		:= ${CSRC:%.c=${COVDIR}%.gcov}
 
 PSRC		:= ${wildcard log/timing/*.txt}
 PPNG		:= ${PSRC:log/timing/%.txt=doc/img/%.png}
@@ -79,6 +84,8 @@ objs::		${OBJS}
 default::	objs
 clean::
 	${RF} ${OBJDIR}*.o ${DEPDIR}*.d
+	${RF} ${OBJDIR}*.gcno
+	${RF} ${OBJDIR}*.gcda
 
 exec::		${EXEC}
 default::	exec
@@ -112,3 +119,19 @@ doc/img/%.png:		bin/timing.py
 	$C bin/timing.py $*
 
 plots::		${PPNG}
+
+log/gcov-%.log:	log/run-%.log
+	gcov -o ${OBJDIR}. ${CSRC}
+
+${COVDIR}%.gcov:	${OBJDIR}%.gcno
+	gcov $< -t > $@
+
+covs::		${COVS}
+	$C bin/recov.py ${COVS}
+
+coverage::	${PROG:%=log/run-%.log}
+	$C ${MAKE} covs
+
+
+clean::
+	${RM} ${COVS}

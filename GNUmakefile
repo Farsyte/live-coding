@@ -10,16 +10,18 @@ PRO             :=
 
 # set COV to -fprofile-arcs -ftest-coverage
 # to enable test coverage via gcov
-# (NOT TESTED)
-COV		:=
+# NOTE: test coverage is never going to be 100%
+# even if we manage to automatically ignore the
+# benchmark code.
+# COV		:= --coverage
 
 # set DBG to -g for debugging. including this flag
 # does not seem to reduce performance significantly.
-DBG             := -g
+# DBG             := -g
 
 # set OPT to -O0, -O1, -O2, -O3, or -Ofast.
-# OPT             := -Ofast
-OPT             := -O0
+OPT             := -Ofast
+# OPT             := -O0
 
 STD		:= --std=gnu99
 WFLAGS		:= -W -Wall -Wextra -Wpedantic
@@ -36,6 +38,7 @@ TEST_EXP	:= ${PROG:%=log/run-%.log.expected}
 TEST_CMP	:= ${PROG:%=log/run-%.log.difference}
 
 log/run-%.log:	bin/%
+	${RF} ${OBJDIR}*.gcda
 	$< bist > $@ 2>log/run-$*.stderr
 
 log/run-%.log.difference:	log/run-%.log
@@ -51,6 +54,7 @@ loop::
 	$C ${MAKE} cmp
 
 bench::		log/run-${PROG}.log.difference
+	$P 'benchmarking with OPT="%s" DBG="%s" COV="%s"\n' "${OPT}" "${DBG}" "${COV}"
 	$C ${EXEC} bench
 
 # Set up a "make cmp" rule that always
@@ -107,3 +111,9 @@ cycle::
 	$C $(MAKE) plots
 	$C $(MAKE) bench
 	$C $(MAKE) format
+
+# remove the files produced by "timing.c"
+
+clean::
+	${RF} log/timing/*.txt
+	${RF} log/timing/*/*.log

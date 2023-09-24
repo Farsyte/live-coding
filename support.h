@@ -52,21 +52,30 @@ extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, .
 
 extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...);
 
-#define	ASSERT(cond, ...)	if (0 != (cond)) ; else _fail(__FILE__, __LINE__, __func__, #cond, __VA_ARGS__)
+#define	ASSERT(cond, ...)                       \
+    do {                                        \
+        if (0 != (cond))                        \
+            ;                                   \
+        else                                    \
+            _fail(__FILE__, __LINE__, __func__, \
+                  "" #cond, __VA_ARGS__);       \
+    } while (0)
 
 #define	ASSERT_OP_integer(expected, op, observed)               \
     do {                                                        \
-        if ((observed) op (expected))                           \
+        long long exp = ((long long)(expected));                \
+        long long obs = ((long long)(observed));                \
+        if ((obs) op (exp))                                     \
             ;                                                   \
         else                                                    \
             _fail(__FILE__, __LINE__, __func__,                 \
                   "" #observed " " #op " " #expected,           \
                   "Comparison Failed:\n"                        \
-                  "  Expected value: %2s %llu (%s)\n"           \
-                  "  Observed value:    %llu (%s)\n"            \
+                  "  Expected value: %2s %lld (%s)\n"           \
+                  "  Observed value:    %lld (%s)\n"            \
                   , #op                                         \
-                  , ((long long)(expected)), #expected          \
-                  , ((long long)(observed)), #observed          \
+                  , exp, #expected                              \
+                  , obs, #observed                              \
                 );                                              \
     } while (0)
 
@@ -90,7 +99,9 @@ extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, .
 
 #define	ASSERT_EQ_string(expected, observed)                    \
     do {                                                        \
-        if (!strcmp(expected, observed))                        \
+        Cstr exp = ((Cstr)(expected));                          \
+        Cstr obs = ((Cstr)(observed));                          \
+        if (!strcmp(obs, exp))                                  \
             ;                                                   \
         else                                                    \
             _fail(__FILE__, __LINE__, __func__,                 \
@@ -98,10 +109,33 @@ extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, .
                   "String Equaltiy Comparison Failed:\n"        \
                   "  Expected value: \"%s\"\n"                  \
                   "  Observed value: \"%s\"\n"                  \
-                  , ((long long)(expected))                     \
-                  , ((long long)(observed))                     \
+                  , exp, obs                                    \
                 );                                              \
     } while (0)
+
+#define	ASSERT_OP_pointer(expected, op, observed)               \
+    do {                                                        \
+        void * exp = ((void *)(expected));                      \
+        void * obs = ((void *)(observed));                      \
+        if ((obs) op (exp))                                     \
+            ;                                                   \
+        else                                                    \
+            _fail(__FILE__, __LINE__, __func__,                 \
+                  "" #observed " " #op " " #expected,           \
+                  "Pointer Comparison Failed:\n"                \
+                  "  Expected value: %2s %lld (%s)\n"           \
+                  "  Observed value:    %lld (%s)\n"            \
+                  , #op                                         \
+                  , exp, #expected                              \
+                  , obs, #observed                              \
+                );                                              \
+    } while (0)
+
+#define	ASSERT_NE_pointer(expected, observed)                   \
+    ASSERT_OP_pointer(expected, !=, observed)
+
+#define	ASSERT_NZ_pointer(observed)                             \
+    ASSERT_NE_pointer(NULL, observed)
 
 // === === === === === === === === === === === === === === === ===
 //                  SUPPORT TESTS AND TEST SUPPORT
