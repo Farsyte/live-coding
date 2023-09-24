@@ -342,3 +342,4 @@ each I/O port, separately for read and write, to avoid the
 performance issues around having every memory and device
 monitoring DBIN and/or /WR.
 
+

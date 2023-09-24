@@ -64,7 +64,7 @@ static void i8080_state_pc_inc(i8080 cpu, int phase)
           break;
       case PHI2_FALL:
           if (cpu->READY->value)
-              cpu->state_next = i8080_state_op_rd;
+              cpu->state_next = i8080_state_op_rd;      // no bist coverage
           else
               cpu->state_next = i8080_state_fetch_wait;
           break;

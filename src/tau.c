@@ -1,7 +1,8 @@
 #include "support.h"
 
-void tau_post()
-{
-    // Tau values need to be more than 4 bytes.
-    assert(sizeof(Tau) > 4);
-}
+// This is the global TAU singleton, which represents the current
+// simulated time in undefined units with undefined zero point.
+
+// TAU is set by "stepat" to the TAU for the step being run.
+
+Tau                 TAU = 0;

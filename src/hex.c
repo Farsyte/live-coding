@@ -36,7 +36,7 @@ int hex_parse(Cstr filename, HexStoreFn * store, void *ctx)
 
     fp = fopen(filename, "r");
     if (!fp)
-        return -1;
+        return -1;      // no bist coverage
 
     while (!alldone) {
         line++;
@@ -46,8 +46,8 @@ int hex_parse(Cstr filename, HexStoreFn * store, void *ctx)
 
         while (':' != (ch = fgetc(fp)))
             if (ch == EOF) {
-                ret = -2;
-                goto fail;
+                ret = -2;       // no bist coverage
+                goto fail;      // no bist coverage
             }
 #define MERGE(var)                              \
         ret = fgetb(fp);                        \
@@ -93,21 +93,23 @@ int hex_parse(Cstr filename, HexStoreFn * store, void *ctx)
               alldone = 1;
               break;
 
-          case 0x02:   // extended segment address
+              // NO BIST COVERAGE for cases 0x02, 0x03, 0x04, 0x05
+
+          case 0x02:   // extended segment address              
               GETW(base);
               base *= 16;
               break;
 
-          case 0x03:   // start segment address
+          case 0x03:   // start segment address                 
               GETW(cs_addr);
               GETW(ip_addr);
               break;
 
-          case 0x04:   // extendended linear address
+          case 0x04:   // extendended linear address            
               GETD(base);
               break;
 
-          case 0x05:   // start linear address
+          case 0x05:   // start linear address                  
               GETD(exec_addr);
               break;
         }
@@ -117,6 +119,7 @@ int hex_parse(Cstr filename, HexStoreFn * store, void *ctx)
 
         ASSERT_EQ_integer(sum_expected, sum_computed);
         if (sum_expected != sum_computed) {
+            // NO BIST COVERAGE for checksum error path
             fprintf(stderr, "%s:%d: checksum error\n", filename, line);
             fprintf(stderr, "  expected: 0x%02X\n", sum_expected);
             fprintf(stderr, "  observed: 0x%02X\n", sum_computed);
@@ -146,6 +149,7 @@ static int hex_digit_value(int ch)
         return ch - '0';
     if ('A' <= ch && ch <= 'F')
         return ch - 'A' + 10;
+    // NO BIST COVERAGE for anything but 0..9 and A..F
     if ('a' <= ch && ch <= 'f')
         return ch - 'a' + 10;
     return -3;
@@ -155,6 +159,8 @@ static int hex_digit_value(int ch)
 // returns the eight bit value represented by the digits;
 // returns -2 if an end-of-file is encountered;
 // returns -3 if an input is not a hex digit.
+//
+// NO BIST COVERAGE for error paths
 
 static int fgetb(FILE *fp)
 {

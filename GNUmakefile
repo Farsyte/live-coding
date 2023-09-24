@@ -6,22 +6,25 @@ PROG		:= live-coding
 CC		:= gcc
 
 # set PRO to -pg for profiling.
-PRO             :=
+PRO		:=
+# PRO		:= -pg
 
-# set COV to -fprofile-arcs -ftest-coverage
+# set COV to --coverage
 # to enable test coverage via gcov
 # NOTE: test coverage is never going to be 100%
 # even if we manage to automatically ignore the
 # benchmark code.
+COV		:=
 # COV		:= --coverage
 
 # set DBG to -g for debugging. including this flag
 # does not seem to reduce performance significantly.
-# DBG             := -g
+DBG		:= -g
 
 # set OPT to -O0, -O1, -O2, -O3, or -Ofast.
-OPT             := -Ofast
-# OPT             := -O0
+# OPT             := -Ofast
+OPT		:= -Ofast
+# OPT		:= -O0
 
 STD		:= --std=gnu99
 WFLAGS		:= -W -Wall -Wextra -Wpedantic

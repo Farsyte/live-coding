@@ -73,7 +73,7 @@ static void i8080_state_2bops_t2(i8080 cpu, int phase)
           break;
       case PHI2_FALL:
           if (cpu->READY->value)
-              cpu->state_next = cpu->m2t3[cpu->IR->value];
+              cpu->state_next = cpu->m2t3[cpu->IR->value];      // no bist coverage
           else
               cpu->state_next = i8080_state_2bops_tw;
           break;

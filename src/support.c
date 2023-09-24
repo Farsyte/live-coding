@@ -1,13 +1,5 @@
 #include "support.h"
 
-// The "support" facility owns the global TAU singleton, which
-// represents the current simulated time in undefined units with
-// undefined zero point.
-//
-// TAU is set by "stepat" to the TAU for the step being run.
-
-Tau                 TAU = 0;
-
 // printf but to a freshly allocated Str.
 Cstr format(Cstr fmt, ...)
 {
@@ -46,36 +38,36 @@ Cstr format(Cstr fmt, ...)
 }
 
 // generate a useful message that next-error can parse, maybe abort.
-extern int _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, ...)
+extern int _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, ...)      // no bist coverage
 {
 
-    fprintf(stderr, "%s:%d: (in %s): ", file, line, func);
+    fprintf(stderr, "%s:%d: (in %s): ", file, line, func);      // no bist coverage
 
     va_list             ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
+    va_start(ap, fmt);  // no bist coverage
+    vfprintf(stderr, fmt, ap);  // no bist coverage
+    va_end(ap);         // no bist coverage
 
-    fprintf(stderr, "\n");
-    if (fatal)
-        abort();
+    fprintf(stderr, "\n");      // no bist coverage
+    if (fatal)          // no bist coverage
+        abort();        // no bist coverage
 
-    return 0;
+    return 0;           // no bist coverage
 }
 
 // generate test failure report that next-error can parse, maybe abort.
-extern int _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...)
+extern int _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...)      // no bist coverage
 {
-    fprintf(stderr, "%s:%d: (in %s): test condition failed\n    (%s)\n", file,
+    fprintf(stderr, "%s:%d: (in %s): test condition failed\n    (%s)\n", file,  // no bist coverage
             line, func, cond);
 
     va_list             ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
+    va_start(ap, fmt);  // no bist coverage
+    vfprintf(stderr, fmt, ap);  // no bist coverage
+    va_end(ap);         // no bist coverage
 
-    fprintf(stderr, "\n");
-    abort();
+    fprintf(stderr, "\n");      // no bist coverage
+    abort();            // no bist coverage
 
     return 0;
 }
