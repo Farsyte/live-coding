@@ -1,5 +1,5 @@
-#include "hex.h"
 #include "rom8316.h"
+#include "hex.h"
 
 static void         rom8316_rd(Rom8316);
 static void         rom8316_dz(Rom8316);

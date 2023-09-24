@@ -1,6 +1,6 @@
+#include "sigtrace.h"
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "sigtrace.h"
 
 static void         sig_rise(SigTrace trc);
 static void         sig_fall(SigTrace trc);

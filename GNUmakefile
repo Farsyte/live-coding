@@ -71,7 +71,7 @@ wait::
 	$C inotifywait \
 		-q ${WAITE:%=-e %} \
 		GNUmakefile GNUmakefile.rules \
-		*.h *.c bin/*.sh
+		${HSRC} ${CSRC} ${TSRC}
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::

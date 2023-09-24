@@ -23,6 +23,9 @@ NOOP            = $C true
 E               = $C echo
 P		= $C printf
 
+INCDIR		:= inc/
+SRCDIR		:= src/
+TESTDIR		:= test/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
 COVDIR		:= cov/
@@ -33,21 +36,25 @@ SYSLIBS         = ncurses m     # add system libraries
 
 ALLLIBS         = $(LIBS) $(SYSLIBS)
 
-HSRC            := ${wildcard *.h}
-CSRC            := ${wildcard *.c}
+HSRC            := ${wildcard ${INCDIR}*.h}
+CSRC            := ${wildcard ${SRCDIR}*.c}
+TSRC            := ${wildcard ${TESTDIR}*.c}
 EXEC		:= ${PROG:%=bin/%}
 
-OBJS		:= ${CSRC:%.c=${OBJDIR}%.o}
-DEPS		:= ${CSRC:%.c=${DEPDIR}%.d}
+SRCB		:= ${CSRC:${SRCDIR}%.c=%} \
+		   ${TSRC:${TESTDIR}%.c=%}
+OBJS		:= ${SRCB:%=${OBJDIR}%.o}
+DEPS		:= ${SRCB:%=${DEPDIR}%.d}
 
-GCNOS		:= ${CSRC:%.c=${OBJDIR}%.gcno}
-GCDAS		:= ${CSRC:%.c=${OBJDIR}%.gcda}
-COVS		:= ${CSRC:%.c=${COVDIR}%.gcov}
+# coverage only notices sources in ${SRCDIR}, not ${TESTDIR}.
+GCNOS		:= ${CSRC:${SRCDIR}%.c=${OBJDIR}%.gcno}
+GCDAS		:= ${CSRC:${SRCDIR}%.c=${OBJDIR}%.gcda}
+COVS		:= ${CSRC:${SRCDIR}%.c=${COVDIR}%.gcov}
 
 PSRC		:= ${wildcard log/timing/*.txt}
 PPNG		:= ${PSRC:log/timing/%.txt=doc/img/%.png}
 
-INCDIRS		:= 
+INCDIRS		:= ${INCDIR}
 
 IFLAGS		:= ${INCDIRS:%=-I%}
 
@@ -98,7 +105,12 @@ clean::
 # - maintain a dependency file for each source file
 # 
 
-${OBJDIR}%.o:    %.c
+${OBJDIR}%.o:    ${SRCDIR}%.c
+	$E 'cc $* ...'
+	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
+	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
+
+${OBJDIR}%.o:    ${TESTDIR}%.c
 	$E 'cc $* ...'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr

@@ -1,6 +1,6 @@
+#include "i8080.h"
 #include "clock.h"
 #include "decoder.h"
-#include "i8080.h"
 #include "i8080_impl.h"
 #include "i8224.h"
 #include "i8228.h"

@@ -1,5 +1,5 @@
-#include "clock.h"
 #include "timing.h"
+#include "clock.h"
 
 // timing: check simulated signal timing
 //
