@@ -25,6 +25,8 @@ P		= $C printf
 
 INCDIR		:= inc/
 SRCDIR		:= src/
+ASMDIR		:= asm/
+LSTDIR		:= lst/
 TESTDIR		:= test/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
@@ -40,6 +42,9 @@ HSRC            := ${wildcard ${INCDIR}*.h}
 CSRC            := ${wildcard ${SRCDIR}*.c}
 TSRC            := ${wildcard ${TESTDIR}*.c}
 EXEC		:= ${PROG:%=bin/%}
+
+ASMS            := ${wildcard ${ASMDIR}*.asm}
+LSTS		:= ${ASMS:${ASMDIR}%.asm=${LSTDIR}%.lst}
 
 SRCB		:= ${CSRC:${SRCDIR}%.c=%} \
 		   ${TSRC:${TESTDIR}%.c=%}
@@ -147,3 +152,8 @@ coverage::	${PROG:%=log/run-%.log}
 
 clean::
 	${RM} ${COVS}
+
+lsts::		${LSTS}
+
+${LSTDIR}%.lst:	${ASMDIR}%.asm
+	asm8080 $< -oobj/$* -l$@

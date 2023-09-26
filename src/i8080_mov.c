@@ -67,16 +67,16 @@ static p8080State   i8080_state_movT5[8] = {
 void i8080_mov_init(i8080 cpu)
 {
     for (int sss = 0; sss < 8; ++sss) {
-        p8080State          t4 = i8080_state_movT4[sss];
-        if (!t4)
+        p8080State          m1t4 = i8080_state_movT4[sss];
+        if (!m1t4)
             continue;
         for (int ddd = 0; ddd < 8; ++ddd) {
-            p8080State          t5 = i8080_state_movT5[ddd];
-            if (!t5)
+            p8080State          m1t5 = i8080_state_movT5[ddd];
+            if (!m1t5)
                 continue;
             Byte                op = 0x40 | (ddd << 3) | sss;
-            cpu->m1t4[op] = i8080_state_movT4[sss];
-            cpu->m1t5[op] = i8080_state_movT5[ddd];
+            cpu->m1t4[op] = m1t4;
+            cpu->m1t5[op] = m1t5;
         }
     }
 }

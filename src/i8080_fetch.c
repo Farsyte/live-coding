@@ -36,7 +36,7 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          data_z(cpu->IR);
+          // data_z(cpu->IR);
           break;
       case PHI2_RISE:
           addr_to(cpu->ADDR, cpu->PC->value);
@@ -53,10 +53,16 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
 
 static void i8080_state_pc_inc(i8080 cpu, int phase)
 {
+    Byte                IR;
+    p8080State          m1t2;
     switch (phase) {
       case PHI1_RISE:
           break;
       case PHI2_RISE:
+          IR = cpu->IR->value;
+          m1t2 = cpu->m1t2[IR];
+          if (NULL != m1t2)
+              m1t2(cpu, phase);
           addr_to(cpu->PC, cpu->PC->value + 1);
           data_z(cpu->DATA);
           edge_lo(cpu->SYNC);

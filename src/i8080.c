@@ -34,6 +34,10 @@ void i8080_invar(i8080 cpu)
 
     addr_invar(cpu->PC);
     data_invar(cpu->IR);
+    data_invar(cpu->TMP);
+    data_invar(cpu->ACT);
+    data_invar(cpu->ALU);
+    data_invar(cpu->FLAGS);
 
     edge_invar(cpu->PHI1);
     edge_invar(cpu->PHI2);
@@ -84,6 +88,10 @@ void i8080_init(i8080 cpu, Cstr name)
     pData               L = cpu->L;
 
     pData               IR = cpu->IR;
+    pData               TMP = cpu->TMP;
+    pData               ACT = cpu->ACT;
+    pData               ALU = cpu->ALU;
+    pData               FLAGS = cpu->FLAGS;
 
     pEdge               RESET_INT = cpu->RESET_INT;
     pEdge               RETM1_INT = cpu->RETM1_INT;
@@ -117,6 +125,10 @@ void i8080_init(i8080 cpu, Cstr name)
     data_init(L, format("%s:L", name));
 
     data_init(IR, format("%s:IR", name));
+    data_init(TMP, format("%s:TMP", name));
+    data_init(ACT, format("%s:ACT", name));
+    data_init(ALU, format("%s:ALU", name));
+    data_init(FLAGS, format("%s:FLAGS", name));
 
     edge_init(RESET_INT, format("%s:RESET_INT", name), 1);
     edge_init(RETM1_INT, format("%s:RETM1_INT", name), 0);
@@ -130,6 +142,8 @@ void i8080_init(i8080 cpu, Cstr name)
     cpu->state_next = i8080_state_poweron;
     cpu->state_m1t1 = i8080_state_poweron;
 
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++)
+        cpu->m1t2[inst] = NULL;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
         cpu->m1t4[inst] = i8080_state_poweron;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
@@ -160,6 +174,7 @@ void i8080_linked(i8080 cpu)
     i8080_2bops_init(cpu);
     i8080_mvi_init(cpu);
     i8080_mov_init(cpu);
+    i8080_alu_init(cpu);
     i8080_eidihlt_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);

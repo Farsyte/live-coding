@@ -7,19 +7,22 @@
 // T3 samples Data to IR, releases DBIN
 // control delivered via cpu->m1t4[IR] for the T4 cycle
 
-void i8080_fetch_post() {
+void i8080_fetch_post()
+{
     PRINT_TOP();
     // not yet written or called
     PRINT_END();
 }
 
-void i8080_fetch_bist() {
+void i8080_fetch_bist()
+{
     PRINT_TOP();
     // not yet written or called
     PRINT_END();
 }
 
-void i8080_fetch_bench() {
+void i8080_fetch_bench()
+{
     PRINT_TOP();
     // not yet written or called
     PRINT_END();

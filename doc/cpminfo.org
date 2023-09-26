@@ -1,0 +1,64 @@
+* FIRST LEVEL SYSTEM REGENERATION
+
+standard distribution is configured as a 16 KiB system
+
+| mem | bias "b" to add |
+| 24K | b=02000H        |
+| 32K | b=04000H        |
+| 40K | b=06000H        |
+| 48K | b=08000H        |
+| 56K | b=0A000H        |
+| 62K | b=0B800H        |
+| 64K | b=0C000H        |
+
+GETSYS: read two tracks of diskette into memory starting at 2880H
+actual operating system starts at 2900H
+
+PUTSYS: write from 2880H to first two tracks of diskette
+
+cold start is at 3E00H
+
+CCP is at 2900H
+
+2880H - two tracks of diskette loaded starting here
+operating system starts here
+2900H - CCP
+3E00H - COLD
+
+* diskette organization
+
+track numbers are 00..76
+sector numbers are 01..26
+sectors are 128 bytes
+-> multiplies out to 256256 bytes addresssable.
+
+2900H+b to 30FFH+b -- CCP
+3100H+b to 3DFFH+b -- BDOS
+3E00H+b to 3FFFH+b -- BIOS
+
+* IOBYTE at 00003H
+
+        ;; OPTIONAL IOBYTE AT 00003H
+        ;; PROVIDES REASSIGNMENT OF PHYSICAL AND LOGICAL DEVICES.
+        ;; ONLY CP/M PIP AND STAT MAKE USE OF THIS
+        ;; OTHER CP/M CODE TOLERATES THIS BYTE EXISTING
+        ;; CONSOLE (BITS 0, 1):
+        ;; 0 - CONSOLE ON "TTY:" (TTY PRINTED OUTPUT)
+        ;; 1 - CONSOLE ON "CRT:" (DISPLAY DEVICE)
+        ;; 2 - BATCH MODE: USE READER FOR INPUT, LIST DEVICE FOR OUTPUT
+        ;; 3 - CONSOLE ON "UC1:" (USER DEFINED CONSOLE)
+        ;; READER (BITS 2, 3):
+        ;; 0 - READER ON "TTY:" (TTY PAPER TAPE READER)
+        ;; 1 - READER ON "PTR:" (HIGH SPEED READER DEVICE)
+        ;; 2 - READER ON "UR1:" (USER-DEFINED READER #1)
+        ;; 3 - READER ON "UR2:" (USER-DEFINED READER #2)
+        ;; PUNCH (BITS 4, 5):
+        ;; 0 - PUNCH ON "TTY:" (TTY PAPER TAPE PUNCH)
+        ;; 1 - PUNCH ON "PTP:" (HIGH SPEED PUNCH DEVICE)
+        ;; 2 - PUNCH ON "UR1:" (USER-DEFINED PUNCH #1)
+        ;; 3 - PUNCH ON "UR2:" (USER-DEFINED PUNCH #2)
+        ;; LIST (BITS 6, 7):
+        ;; 0 - LIST ON "TTY:" (TTY PRINTED OUTPUT)
+        ;; 1 - LIST ON "CRT:" (DISPLAY DEVICE)
+        ;; 2 - LIST ON "LPT:" (LINE PRINTER DEVICE)
+        ;; 3 - LIST ON "UL1:" (USER-DEFINED LIST DEVICE)

@@ -1,4 +1,3 @@
-#include "main.h"
 #include "addr.h"
 #include "clock.h"
 #include "data.h"
@@ -8,6 +7,7 @@
 #include "i8080.h"
 #include "i8224.h"
 #include "i8228.h"
+#include "main.h"
 #include "ram8107x8x4.h"
 #include "rom8316.h"
 #include "sched.h"

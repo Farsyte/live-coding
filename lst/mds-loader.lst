@@ -1,0 +1,62 @@
+     1 			;;; MDS LOADER MOVE PROGRAM, PLACES COLD START BOOT AT BOOTB
+     2      30 00	        ORG     3000H           ;WE ARE LOADED HERE ON COLD START
+     3      00 80	BOOTB   EQU     80H             ;START OF COLD BOOT PROGRAM
+     4      00 80	BOOTL   EQU     80H             ;LENGTH OF BOOT
+     5      D9 00	MBIAS	EQU     900H-$          ;BIAS TO ADD DURING LOAD
+     6      00 78	BASE    EQU     078H            ;'BASE' USED BY DISK CONTROLLER
+     7      00 79	RTYPE   EQU     BASE+1          ;RESULT TYPE
+     8      00 7B	RBYTE   EQU     BASE+3          ;RESULT TYPE
+     9 			;;;
+    10      00 FF	BSW     EQU     0FFH            ;BOOT SWITCH
+    11 			;;;
+    12 			;;; CLEAR DISK STATUS
+    13 3000 DB 79	        IN      RTYPE
+    14 3002 DB 7B	        IN      RBYTE
+    15 			;;;
+    16 			COLDSTART:
+    17 3004 DB FF	        IN      BSW
+    18 3006 E6 02	        ANI     2H              ;SWITCH ON?
+    19 3008 C2 04 30	        JNZ     COLDSTART
+    20 			;;;
+    21 300B 21 1E 30	        LXI     H,BOOTV         ;VIRTUAL BASE
+    22 300E 06 80	        MVI     B,BOOTL         ;LENGTH OF BOOT
+    23 3010 11 80 00	        LXI     D,BOOTB         ;DESTINATION OF BOOT
+    24 3013 7E		MOVE:   MOV     A,M
+    25 3014 12		        STAX    D               ;TRANSFERRED ONE BYTE
+    26 3015 23		        INX     H
+    27 3016 13		        INX     D
+    28 3017 05		        DCR     B
+    29 3018 C2 13 30	        JNZ     MOVE
+    30 301B C3 80 00	        JMP     BOOTB           ;TO BOOT SYSTEM
+    31 			;;;
+    32 			BOOTV:	;BOOT LOADER PLACE HERE AT SYSTEM GENERATION
+    33      08 9E	LBIAS   EQU     $-80H+MBIAS     ;COLD START BOOT BEGINS AT 80H
+    34     		        END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+BOOTB		EQU	00080h
+BOOTL		EQU	00080h
+MBIAS		EQU	FFFFD900h
+BASE		EQU	00078h
+RTYPE		EQU	00079h
+RBYTE		EQU	0007Bh
+BSW		EQU	000FFh
+LBIAS		EQU	0089Eh
+COLDSTART	Label	03004h
+MOVE		Label	03013h
+BOOTV		Label	0301Eh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 8
+"SET"	= 0
+Labels	= 3
+
+

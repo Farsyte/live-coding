@@ -7,20 +7,19 @@
 // for each source register, and one for each destination; each of the
 // instructions will mix-and-match the correct source and destination.
 
-
 // === === === === === === === === === === === === === === === ===
 //                COMMON SUPPORT FOR POST/BIST/BENCH
 // === === === === === === === === === === === === === === === ===
 
 static Byte         i8080_mov_program[] = {
     OP_NOP,             // give us a moment
-    MVI_B, 0x22, MOV_A_B,
-    MVI_C, 0x33, MOV_B_C,
-    MVI_D, 0x44, MOV_C_D,
-    MVI_E, 0x55, MOV_D_E,
-    MVI_H, 0x66, MOV_E_H,
-    MVI_L, 0x77, MOV_H_L,
-    MVI_A, 0x11, MOV_L_A,
+    OP_MVI_B, 0x22, OP_MOV_A_B,
+    OP_MVI_C, 0x33, OP_MOV_B_C,
+    OP_MVI_D, 0x44, OP_MOV_C_D,
+    OP_MVI_E, 0x55, OP_MOV_D_E,
+    OP_MVI_H, 0x66, OP_MOV_E_H,
+    OP_MVI_L, 0x77, OP_MOV_H_L,
+    OP_MVI_A, 0x11, OP_MOV_L_A,
     0xFF,               // make this look like uninitialized memory
 };
 
@@ -34,38 +33,30 @@ void i8080_mov_post(CpuTestSys ts)
 
     ASSERT_EQ_integer(sizeof(ts->rom[0]->cells[0]), sizeof(i8080_mov_program[0]));
 
-    memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
-           i8080_mov_program, sizeof(i8080_mov_program));
+    memcpy(ts->rom[0]->cells, i8080_mov_program, sizeof(i8080_mov_program));
 
-    data_to(cpu->A, 0xFF);
-    data_to(cpu->B, 0xFF);
-    data_to(cpu->C, 0xFF);
-    data_to(cpu->D, 0xFF);
-    data_to(cpu->E, 0xFF);
-    data_to(cpu->H, 0xFF);
-    data_to(cpu->L, 0xFF);
+    data_z(cpu->A);
+    data_z(cpu->B);
+    data_z(cpu->C);
+    data_z(cpu->D);
+    data_z(cpu->E);
+    data_z(cpu->H);
+    data_z(cpu->L);
 
-    // run the NOP up to but not including the last clock of the machine cycle
-    clock_run_until(TAU + 9 * 5);
+    clock_run_until(TAU + 9 * 5);       // the leading NOP
 
     clock_run_until(TAU + 9 * 15);      // MVI to B, MOV to A
     ASSERT_EQ_integer(0x22, cpu->A->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to C, MOV to B
     ASSERT_EQ_integer(0x33, cpu->B->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to D, MOV to C
     ASSERT_EQ_integer(0x44, cpu->C->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to E, MOV to D
     ASSERT_EQ_integer(0x55, cpu->D->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to H, MOV to E
     ASSERT_EQ_integer(0x66, cpu->E->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to L, MOV to H
     ASSERT_EQ_integer(0x77, cpu->H->value);
-
     clock_run_until(TAU + 9 * 15);      // MVI to A, MOV to L
     ASSERT_EQ_integer(0x11, cpu->L->value);
 }
@@ -87,16 +78,15 @@ void i8080_mov_bist(CpuTestSys ts)
     memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
            i8080_mov_program, sizeof(i8080_mov_program));
 
-    data_to(cpu->A, 0xFF);
-    data_to(cpu->B, 0xFF);
-    data_to(cpu->C, 0xFF);
-    data_to(cpu->D, 0xFF);
-    data_to(cpu->E, 0xFF);
-    data_to(cpu->H, 0xFF);
-    data_to(cpu->L, 0xFF);
+    data_z(cpu->A);
+    data_z(cpu->B);
+    data_z(cpu->C);
+    data_z(cpu->D);
+    data_z(cpu->E);
+    data_z(cpu->H);
+    data_z(cpu->L);
 
-    // run the NOP up to but not including the last clock of the machine cycle
-    clock_run_until(TAU + 9 * 5);
+    clock_run_until(TAU + 9 * 5);       // the leading NOP
 
     t0 = TAU;
     clock_run_until(TAU + 9 * 15);      // MVI to B, MOV to A

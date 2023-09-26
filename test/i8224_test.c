@@ -1,5 +1,5 @@
-#include "i8224.h"
 #include "clock.h"
+#include "i8224.h"
 #include "sigtrace.h"
 #include "support.h"
 

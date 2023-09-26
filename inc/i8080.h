@@ -57,6 +57,10 @@ typedef struct s8080 {
 
     Data                IR;                     // instruction register
     Data                TMP;                    // TEMP REG feeding ALU upper operand
+    Data                ACT;                    // Accumulator Latch for ALU operations
+    Data                ALU;                    // Result of ALU operation
+
+    Data                FLAGS;                  // flag bits placed for push/pop PSW
 
     Edge                RESET_INT;              // officially "INTERNAL RESET"
     Edge                RETM1_INT;              // officially "RETURN M1"
@@ -70,6 +74,10 @@ typedef struct s8080 {
     p8080State          state;                  // function for the current T-state
     p8080State          state_next;             // function for the next T-state
     p8080State          state_m1t1;             // function for the next T1 state
+
+    // opcode decode table giving the T-state function to use
+    // for M1 T2, last bit of work for prior instruction.
+    p8080State          m1t2[256];
 
     // opcode decode table giving the T-state function to use
     // for M1 T4 (op decode is in M1 T3).

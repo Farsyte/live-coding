@@ -38,3 +38,22 @@ plot.
 ** Execute EI, DI, and HLT instructions
 
 [[file:img/i8080_bist_eidihlt.png]]
+
+** ALU Operations
+
+*** ADD
+
+[[file:img/i8080_alu_add.png]]
+
+*** SUB
+
+[[file:img/i8080_alu_sub.png]]
+
+*** ADC
+
+[[file:img/i8080_alu_adc.png]]
+
+*** SBB
+
+[[file:img/i8080_alu_sbb.png]]
+

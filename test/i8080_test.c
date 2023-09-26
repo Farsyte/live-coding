@@ -1,6 +1,6 @@
-#include "i8080.h"
 #include "clock.h"
 #include "decoder.h"
+#include "i8080.h"
 #include "i8080_impl.h"
 #include "i8224.h"
 #include "i8228.h"
@@ -12,6 +12,8 @@
 static void         i8080_test_init();
 static void         i8080_trace_init();
 static void         i8080_trace_fini();
+
+static void         i8080_reset_for_testing();
 
 static CpuTestSys   ts;
 
@@ -38,6 +40,10 @@ static const pData  E = cpu->E;
 static const pData  H = cpu->H;
 static const pData  L = cpu->L;
 static const pData  IR = cpu->IR;
+static const pData  TMP = cpu->TMP;
+static const pData  ACT = cpu->ACT;
+static const pData  ALU = cpu->ALU;
+static const pData  FLAGS = cpu->FLAGS;
 
 static const pEdge  SYNC = cpu->SYNC;
 static const pEdge  DBIN = cpu->DBIN;
@@ -94,6 +100,10 @@ static SigTrace     trace_H;
 static SigTrace     trace_L;
 
 static SigTrace     trace_IR;
+static SigTrace     trace_TMP;
+static SigTrace     trace_ACT;
+static SigTrace     trace_ALU;
+static SigTrace     trace_FLAGS;
 
 static SigTrace     trace_MEMR_;
 static SigTrace     trace_MEMW_;
@@ -110,8 +120,17 @@ void i8080_post()
 {
     i8080_test_init();
     i8080_reset_post(ts);
+
+    i8080_reset_for_testing();
     i8080_mvi_post(ts);
+
+    i8080_reset_for_testing();
     i8080_mov_post(ts);
+
+    i8080_reset_for_testing();
+    i8080_alu_post(ts);
+
+    i8080_reset_for_testing();
     i8080_eidihlt_post(ts);     // leaves us in HLT state.
 }
 
@@ -155,6 +174,10 @@ void i8080_plot_sigs(SigPlot sp)
     sigplot_sig(sp, trace_IOW_);
     sigplot_sig(sp, trace_INTA_);
     sigplot_sig(sp, trace_IR);
+    sigplot_sig(sp, trace_TMP);
+    sigplot_sig(sp, trace_ACT);
+    sigplot_sig(sp, trace_ALU);
+    sigplot_sig(sp, trace_FLAGS);
 }
 
 void i8080_bist()
@@ -163,9 +186,19 @@ void i8080_bist()
     i8080_trace_init();
 
     i8080_reset_bist(ts);
+
+    i8080_reset_for_testing();
     i8080_mvi_bist(ts);
+
+    i8080_reset_for_testing();
     i8080_mov_bist(ts);
+
+    i8080_reset_for_testing();
+    i8080_alu_bist(ts);
+
+    i8080_reset_for_testing();
     i8080_eidihlt_bist(ts);     // leaves us in HLT state.
+
     i8080_trace_fini();
 }
 
@@ -314,6 +347,10 @@ static void i8080_trace_init()
     sigtrace_init_edge(trace_IOW_, ss, IOW_);
     sigtrace_init_edge(trace_INTA_, ss, INTA_);
     sigtrace_init_data(trace_IR, ss, IR);
+    sigtrace_init_data(trace_TMP, ss, TMP);
+    sigtrace_init_data(trace_ACT, ss, ACT);
+    sigtrace_init_data(trace_ALU, ss, ALU);
+    sigtrace_init_data(trace_FLAGS, ss, FLAGS);
 }
 
 static void i8080_trace_fini()
@@ -350,6 +387,31 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_IOW_);
     sigtrace_fini(trace_INTA_);
     sigtrace_fini(trace_IR);
+    sigtrace_fini(trace_TMP);
+    sigtrace_fini(trace_ACT);
+    sigtrace_fini(trace_ALU);
+    sigtrace_fini(trace_FLAGS);
 
     sigsess_fini(ss);
+}
+
+static void i8080_reset_for_testing()
+{
+    clock_run_one();
+    edge_lo(RESIN_);
+    edge_lo(RDYIN);
+    clock_run_until(TAU + 9 * 4);
+    while (0 == PHI2->value)
+        clock_run_one();
+    while (1 == PHI2->value)
+        clock_run_one();
+    clock_run_one();
+
+    edge_hi(RESIN_);
+    edge_hi(RDYIN);
+    while (1 == RESET->value)
+        clock_run_one();
+    while (1 == PHI2->value)
+        clock_run_one();
+    clock_run_until(TAU + 11);
 }

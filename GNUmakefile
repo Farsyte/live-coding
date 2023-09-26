@@ -95,11 +95,11 @@ gdb::		${EXEC}
 
 format::	${EXEC}
 	$E 'fix c headers ...'
-	$C bin/fix-c-includes.sh ${CSRC} ${BSRC} ${ASRC}
+	$C bin/fix-c-includes.sh ${CSRC} ${TSRC}
 	$E 'fix h headers ...'
 	$C bin/fix-h-includes.sh ${HSRC}
 	$E 'indent ...'
-	$C bin/indent.sh ${HSRC} ${CSRC} ${BSRC} ${ASRC}
+	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC}
 
 
 world::

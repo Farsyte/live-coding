@@ -1,0 +1,169 @@
+     1 			;;; 
+     2 			;;; mds cold start loader for cp/m
+     3 			;;; version 1.4 january, 1978
+     4 			;;;
+     5      01 00	BIAS    EQU     100h            ;bias for relocation
+     6      00 00	FALSE   EQU     0
+     7      00 01	TRUE    EQU     1
+     8      00 00	TESTING	EQU     0               ;IF TRUE, THEN GO TO MON80 ON ERRORS
+     9 			;;;
+    10      01 00	BDOSB   EQU     BIAS            ;BASE OF DOS LOAD
+    11      09 06	BDOS    EQU     806H+BIAS       ;ENTRY TO DOS FOR CALLS
+    12      18 00	BDOSE   EQU     1700H+BIAS      ;END OF DOS LOAD
+    13      16 00	BOOT    EQU     1500H+BIAS      ;COLD START ENTRY POINT
+    14      16 03	RBOOT   EQU     BOOT+3          ;WARM START ENTRY POINT
+    15 			;;;
+    16      00 80	        ORG     80H             ;LOADED DOWN FROM HARDWARE BOOT AT 3000H
+    17 			;;;
+    18      17 00	BDOSL   EQU     BDOSE-BDOSB
+    19      00 02	NTRKS   EQU     2               ;NUMBER OF TRACKS TO READ
+    20      00 2E	BDOSS   EQU     BDOSL/128       ;NUMBER OF SECTORS IN DOS
+    21      00 19	BDOS0   EQU     25              ;NUMBER OF BDOS SECTORS ON TRACK 0
+    22      00 15	BDOS1   EQU     BDOSS-BDOS0     ;NUMBER OF SECTORS ON TRACK 1
+    23 			;;;
+    24      F8 00	MON80   EQU     0F800H          ;INTEL MONITOR BASE
+    25      FF 0F	RMON80  EQU     0FF0FH          ;RESTART LOCATION FOR MON80
+    26      00 78	BASE    EQU     078H            ;'BASE' USED BY CONTROLLER
+    27      00 79	RTYPE   EQU     BASE+1          ;RESULT TYPE
+    28      00 7B	RBYTE   EQU     BASE+3          ;RESULT BYTE
+    29      00 7F	RESET   EQU     BASE+7          ;RESET CONTROLLER
+    30 			;;;
+    31      00 78	DSTAT   EQU     BASE            ;DISK STATUS PORT
+    32      00 79	ILOW    EQU     BASE+1          ;LOW IOPB ADDRESS
+    33      00 7A	IHIGH   EQU     BASE+2          ;HIGH IOPB ADDRESS
+    34      00 03	RECAL   EQU     3H              ;RECALIBRATE SELECTED DRIVE
+    35      00 04	READF   EQU     4H              ;DISK READ FUNCTION
+    36      01 00	STACK   EQU     100H            ;USE END OF BOOT FOR STACK
+    37 			;;;
+    38 			RSTART:
+    39 0080 31 00 01	        LXI     SP,STACK        ;IN CASE OF CALL TO MON80
+    40 			;;; CLEAR THE CONTROLLER
+    41 0083 D3 7F	        OUT     RESET           ;LOGIC CLEARED
+    42 			;;;
+    43 			;;;
+    44 0085 06 02	        MVI     B,NTRKS         ;NUMBER OF TRACKS TO READ
+    45 0087 21 B7 00	        LXI     H,IOPB0
+    46 			;;;
+    47 			START:
+    48 			;;;
+    49 			;;; READ FIRST/NEXT TRACK INTO BDOSB
+    50 008A 7D		        MOV     A,L
+    51 008B D3 79	        OUT     ILOW
+    52 008D 7C		        MOV     A,H
+    53 008E D3 7A	        OUT     IHIGH
+    54 0090 DB 78	WAIT0:  IN      DSTAT
+    55 0092 E6 04	        ANI     4
+    56 0094 CA 90 00	        JZ      WAIT0
+    57 			;;;
+    58 			;;; CHECK DISK STATUS
+    59 0097 DB 79	        IN      RTYPE
+    60 0099 E6 03	        ANI     11B
+    61 009B FE 02	        CPI     2
+    62 			;;; 
+    63     		        IF      TESTING
+    64     		        CNC     RMON80          ;GO TO MONITOR IF 11 OR 10
+    65     		        ELSE
+    66 009D D2 80 00	        JNC     RSTART          ;RETRY THE LOAD
+    67     		        ENDIF
+    68 			;;;
+    69 00A0 DB 7B	        IN      RBYTE           ;I/O COMPLETE, CHECK STATUS
+    70 			;;; IF NOT READY, THEN GO TO MON80
+    71 00A2 17		        RAL
+    72 00A3 DC 0F FF	        CC      RMON80          ;NOT READY BIT SET
+    73 00A6 1F		        RAR                     ;RESTORE
+    74 00A7 E6 1E	        ANI     11110B          ;OVERRUN/ADDR ERR/SEEK/CRC/XXXX
+    75 			;;;
+    76     		        IF      TESTING
+    77     		        CNZ     RMON80          ;GO TO MONITOR
+    78     		        ELSE
+    79 00A9 C2 80 00	        JNZ     RSTART          ;RETRY THE LOAD
+    80     		        ENDIF
+    81 			;;;
+    82 			;;;
+    83 00AC 11 07 00	        LXI     D,IOPBL         ;LENGTH OF IOPB
+    84 00AF 19		        DAD     D               ;ADDRESSING NEXT IOPB
+    85 00B0 05		        DCR     B               ;COUNT DOWN TRACKS
+    86 00B1 C2 8A 00	        JNZ     START
+    87 			;;;
+    88 			;;;
+    89 			;;; JMP TO BOOT TO PRINT INITIAL MESSAGE, AND SET UP JMPS
+    90 00B4 C3 00 16	        JMP     BOOT
+    91 			;;;
+    92 			;;; PARAMETER BLOCKS
+    93 00B7		IOPB0:  DB      80H             ;IOCW, NO UPDATE
+            80 
+    94 00B8		        DB      READF           ;READ FUNCTION
+            04 
+    95 00B9		        DB      BDOS0           ;# SECTORS TO READ ON TRACK 0
+            19 
+    96 00BA		        DB      0               ;TRACK 0
+            00 
+    97 00BB		        DB      2               ;START WITH SECTOR 2 ON TRACK 0
+            02 
+    98 00BC		        DW      BDOSB           ;START AT BASE OF BIOS
+            0001 
+    99      00 07	IOPBL   EQU     $-IOPB0
+   100 			;;; 
+   101 00BE		IOPB1:  DB      80H
+            80 
+   102 00BF		        DB      READF
+            04 
+   103 00C0		        DB      BDOS1           ;SECTORS TO READ ON TRACK 1
+            15 
+   104 00C1		        DB      1               ;TRACK 1
+            01 
+   105 00C2		        DB      1               ;SECTOR 1
+            01 
+   106 00C3		        DW      BDOSB+BDOS0*128 ;BASE OF SECOND READ
+            808C 
+   107 			;;;
+   108     		        END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+BIAS		EQU	00100h
+FALSE		EQU	00000h
+TRUE		EQU	00001h
+TESTING		EQU	00000h
+BDOSB		EQU	00100h
+BDOS		EQU	00906h
+BDOSE		EQU	01800h
+BOOT		EQU	01600h
+RBOOT		EQU	01603h
+BDOSL		EQU	01700h
+NTRKS		EQU	00002h
+BDOSS		EQU	0002Eh
+BDOS0		EQU	00019h
+BDOS1		EQU	00015h
+MON80		EQU	0F800h
+RMON80		EQU	0FF0Fh
+BASE		EQU	00078h
+RTYPE		EQU	00079h
+RBYTE		EQU	0007Bh
+RESET		EQU	0007Fh
+DSTAT		EQU	00078h
+ILOW		EQU	00079h
+IHIGH		EQU	0007Ah
+RECAL		EQU	00003h
+READF		EQU	00004h
+STACK		EQU	00100h
+IOPBL		EQU	00007h
+RSTART		Label	00080h
+START		Label	0008Ah
+WAIT0		Label	00090h
+IOPB0		Label	000B7h
+IOPB1		Label	000BEh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 27
+"SET"	= 0
+Labels	= 5
+
+

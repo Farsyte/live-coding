@@ -9,24 +9,6 @@ typedef uint8_t    *pBit, Bit;
 typedef uint8_t    *pByte, Byte;
 typedef uint16_t   *pWord, Word;
 
-// Even with --std=gnu99, asking for -Wpedantic causes any use
-// of these macros to generate
-//     warning: binary constants are a C2X feature or GCC extension
-//
-// and all discussions I can find on how to eliminate that warning
-// come down to "stop using that extension" because the answering
-// idiot thinks that, just because they don't see value in the binary
-// constant, nobody else should want to use it.
-//
-// sigh.
-//
-// To use this, I would have to bracket all USES of these macros
-// with
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored "-Wpedantic"
-// (use STATUS_whatever)
-// #pragma GCC diagnostic pop
-
 // Position of each status bit in the status byte
 #define STATUS_INTA     0x01    // Interrupt Acknowledge
 #define STATUS_WO       0x02    // Write Output (active low)
@@ -49,3 +31,11 @@ typedef uint16_t   *pWord, Word;
 #define STATUS_INTACK   0x23    // [/INTA]  (8)      M1        INTA
 #define STATUS_HALTACK  0x8A    // [     ]  (9) MEMR    HLTA
 #define STATUS_INTACKW  0x2B    // [/INTA]  (10)     M1 HLTA   INTA
+
+// Position of flag bits in PSW when pushed and popped
+
+#define FLAGS_CY	0x01
+#define FLAGS_P		0x04
+#define FLAGS_AC	0x10
+#define FLAGS_Z		0x40
+#define FLAGS_S		0x80
