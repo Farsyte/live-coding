@@ -13,13 +13,13 @@
 
 static Byte         i8080_mov_program[] = {
     OP_NOP,             // give us a moment
-    OP_MVI_B, 0x22, OP_MOV_A_B,
-    OP_MVI_C, 0x33, OP_MOV_B_C,
-    OP_MVI_D, 0x44, OP_MOV_C_D,
-    OP_MVI_E, 0x55, OP_MOV_D_E,
-    OP_MVI_H, 0x66, OP_MOV_E_H,
-    OP_MVI_L, 0x77, OP_MOV_H_L,
-    OP_MVI_A, 0x11, OP_MOV_L_A,
+    OP_MVI__B, 0x22, OP_MOV__A_B,
+    OP_MVI__C, 0x33, OP_MOV__B_C,
+    OP_MVI__D, 0x44, OP_MOV__C_D,
+    OP_MVI__E, 0x55, OP_MOV__D_E,
+    OP_MVI__H, 0x66, OP_MOV__E_H,
+    OP_MVI__L, 0x77, OP_MOV__H_L,
+    OP_MVI__A, 0x11, OP_MOV__L_A,
     0xFF,               // make this look like uninitialized memory
 };
 

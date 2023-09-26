@@ -18,9 +18,11 @@ RD              = $C /bin/rm -fr
 
 MAKEFLAGS	:= --no-print-directory
 
-# Allow me to override certain items from the command line.
-NOOP            = $C true
-E               = $C echo
+# Allow me to override certain items from the command line:
+# use ECHO=true to turn off echo. Yes, confusing. Deal with it.
+ECHO		= echo
+
+E               = $C ${ECHO}
 P		= $C printf
 
 INCDIR		:= inc/
@@ -138,10 +140,10 @@ doc/img/%.png:		bin/timing.py
 plots::		${PPNG}
 
 log/gcov-%.log:	log/run-%.log
-	gcov -o ${OBJDIR}. ${CSRC}
+	$C gcov -o ${OBJDIR}. ${CSRC}
 
 ${COVDIR}%.gcov:	${OBJDIR}%.gcno
-	gcov $< -t > $@
+	$C gcov $< -t > $@
 
 covs::		${COVS}
 	$C bin/recov.py ${COVS}
@@ -151,7 +153,7 @@ coverage::	${PROG:%=log/run-%.log}
 
 
 clean::
-	${RM} ${COVS}
+	${RF} ${COVS}
 
 lsts::		${LSTS}
 

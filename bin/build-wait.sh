@@ -9,7 +9,7 @@ cat <<EOF
 
 EOF
 
-if make -kj loop
+if make -k -j ECHO=true loop
 then bs="COMPLETED"
 else bs="FAILED"
 fi

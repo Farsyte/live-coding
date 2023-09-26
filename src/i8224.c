@@ -34,8 +34,6 @@ void i8224_invar(i8224 gen)
 
     assert(0 <= state);
     assert(state <= 9);
-
-    (void)gen;
 }
 
 // i8224_init(s): initialize the given i8224 to have this name

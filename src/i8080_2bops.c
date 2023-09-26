@@ -23,6 +23,7 @@ static f8080State   i8080_state_2bops_tw;
 void i8080_2bops_init(i8080 cpu)
 {
     cpu->state_2bops = i8080_state_2bops;
+    cpu->state_2bops_t1 = i8080_state_2bops_t1;
 }
 
 // i8080_state_2bops: M1 T4 used for 2-byte opcodes

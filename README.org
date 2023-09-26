@@ -160,7 +160,7 @@ True "Old School" code would only include, in each .c file,
 the exact headers needed by that file; failure to do so would
 have caused build times to grow large.
 
-** support: the rock below our feet (including rtc and tau)
+** support and tau: the rock below our feet
 
 This is a "catch all" for support code imported into the project
 before starting on the project itself. This includes typedefs for
@@ -342,4 +342,76 @@ each I/O port, separately for read and write, to avoid the
 performance issues around having every memory and device
 monitoring DBIN and/or /WR.
 
+*** rom8316: 2 KiB read-only memory for 8080-like microcomputer system
 
+This module is read-only memory that looks like an 8316 with a trivial
+bit of external logic, because we want to drive it with a single
+"read" signal and a single "write" signal, rather than the particular
+selection of control signals used by the real 8316.
+
+*** ram8107x8x4: 16 KiB memory for 8080-like microcomputer system
+
+This module is a read-write memory that looks like four rows of eight
+sets of 8107 memory chips and whatever external logic is needed to
+mate it with our decoder above.
+
+This not only includes assumed logic to drive that array of chips from
+inbound "read" and "write" signals, but since the 8107 is a dynamic
+memory that needs "refresh" the logic not explicitly represented
+also includes whatever is needed to do memory refresh.
+
+*** i8080: Single Chip 8-bit Central Processing Unit
+
+This module is a collection of smaller functional unit that together
+comprise a complete CPU. Implementation divides the functionality not
+along the lines between functional units, but instead along the lines
+between the different kinds of behaviors generated.
+
+**** i8080_reset:
+
+This module handles capture of control of the CPU when the RESET
+signal is asserted, and returning control to the normal execution
+logic (with PC set to 0x0000) when RESET is released.
+
+**** i8080_fetch:
+
+This module provides the normal logic that runs during "M1" cycles,
+which includes the first few T-states:
+
+- Publish the FETCH status and the PC
+- initiate a read, and increment the program counter
+- insert WAIT states until READY is set
+- transfer the received opcode into IR
+- deliver control of T4 based on the opcode (uses cpu->m1t4[IR])
+
+**** i8080_2bops:
+
+This module provides the logic for fetching additional bytes from
+the instruction stream: the "state_2bops" state function published
+in the CPU structure, when run during falling PHI2, will take the CPU
+into a new machine cycle similar to a "Fetch":
+
+- Publish the FETCH status and the PC
+- initiate a read, and increment the program counter
+- insert WAIT states until READY is set
+- next instruction is on the data bus, and is not latched into the CPU yet.
+- deliver control of T3 based on the opcode (uses cpu->m1t3[IR])
+
+**** i8080_mvi:
+
+This module provides the T-state control logic for the MVI instructions
+that copy the next byte of data from the instruction stream into one of
+the seven 8-bit registers.
+
+These instructions use 2bops (above) in their M1T4 cycle, then select one
+of seven implementations for the M2T3 cycle.
+
+This module does not (yet) allow M as the destination.
+
+**** i8080_mov:
+
+This module does not (yet) allow M as source or destination.
+
+**** i8080_alu:
+
+**** i8080_eidihlt:

@@ -69,7 +69,8 @@ typedef struct s8080 {
     // T-state management functions
     p8080State          state_reset;            // entry T-state for reset
     p8080State          state_fetch;            // entry T-state for STATUS_FETCH cycles
-    p8080State          state_2bops;            // M1 T4 handler for 2-byte ops
+    p8080State          state_2bops;            // T4 handler for 2-byte ops
+    p8080State          state_2bops_t1;         // T1 handler for 2-byte ops
 
     p8080State          state;                  // function for the current T-state
     p8080State          state_next;             // function for the next T-state

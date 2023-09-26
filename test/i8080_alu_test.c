@@ -63,13 +63,13 @@ static void i8080_alu_bist_add(CpuTestSys ts)
 
     Byte                test_prog[] = {
         OP_NOP,
-        OP_MVI_A, 0x40, OP_ADD_A,
-        OP_MVI_B, 0x01, OP_ADD_B,
-        OP_MVI_C, 0x02, OP_ADD_C,
-        OP_MVI_D, 0x04, OP_ADD_D,
-        OP_MVI_E, 0x08, OP_ADD_E,
-        OP_MVI_H, 0x10, OP_ADD_H,
-        OP_MVI_L, 0x20, OP_ADD_L,
+        OP_MVI__A, 0x40, OP_ADD__A,
+        OP_MVI__B, 0x01, OP_ADD__B,
+        OP_MVI__C, 0x02, OP_ADD__C,
+        OP_MVI__D, 0x04, OP_ADD__D,
+        OP_MVI__E, 0x08, OP_ADD__E,
+        OP_MVI__H, 0x10, OP_ADD__H,
+        OP_MVI__L, 0x20, OP_ADD__L,
         OP_NOP, OP_NOP, OP_NOP,
     };
 
@@ -184,13 +184,13 @@ static void i8080_alu_bist_sub(CpuTestSys ts)
 
     Byte                test_prog[] = {
         OP_NOP,
-        OP_MVI_A, 0x40, OP_SUB_A,
-        OP_MVI_B, 0x01, OP_SUB_B,
-        OP_MVI_C, 0x02, OP_SUB_C,
-        OP_MVI_D, 0x04, OP_SUB_D,
-        OP_MVI_E, 0x08, OP_SUB_E,
-        OP_MVI_H, 0x10, OP_SUB_H,
-        OP_MVI_L, 0x20, OP_SUB_L,
+        OP_MVI__A, 0x40, OP_SUB__A,
+        OP_MVI__B, 0x01, OP_SUB__B,
+        OP_MVI__C, 0x02, OP_SUB__C,
+        OP_MVI__D, 0x04, OP_SUB__D,
+        OP_MVI__E, 0x08, OP_SUB__E,
+        OP_MVI__H, 0x10, OP_SUB__H,
+        OP_MVI__L, 0x20, OP_SUB__L,
         OP_NOP, OP_NOP, OP_NOP,
     };
 
@@ -303,13 +303,13 @@ static void i8080_alu_bist_adc(CpuTestSys ts)
 
     Byte                test_prog[] = {
         OP_NOP,
-        OP_MVI_A, 0x40, OP_ADC_A,
-        OP_MVI_B, 0x01, OP_ADC_B,
-        OP_MVI_C, 0x02, OP_ADC_C,
-        OP_MVI_D, 0x04, OP_ADC_D,
-        OP_MVI_E, 0x08, OP_ADC_E,
-        OP_MVI_H, 0x10, OP_ADC_H,
-        OP_MVI_L, 0x20, OP_ADC_L,
+        OP_MVI__A, 0x40, OP_ADC__A,
+        OP_MVI__B, 0x01, OP_ADC__B,
+        OP_MVI__C, 0x02, OP_ADC__C,
+        OP_MVI__D, 0x04, OP_ADC__D,
+        OP_MVI__E, 0x08, OP_ADC__E,
+        OP_MVI__H, 0x10, OP_ADC__H,
+        OP_MVI__L, 0x20, OP_ADC__L,
         OP_NOP, OP_NOP, OP_NOP,
     };
 
@@ -431,13 +431,13 @@ static void i8080_alu_bist_sbb(CpuTestSys ts)
 
     Byte                test_prog[] = {
         OP_NOP,
-        OP_MVI_A, 0x40, OP_SBB_A,
-        OP_MVI_B, 0x01, OP_SBB_B,
-        OP_MVI_C, 0x02, OP_SBB_C,
-        OP_MVI_D, 0x04, OP_SBB_D,
-        OP_MVI_E, 0x08, OP_SBB_E,
-        OP_MVI_H, 0x10, OP_SBB_H,
-        OP_MVI_L, 0x20, OP_SBB_L,
+        OP_MVI__A, 0x40, OP_SBB__A,
+        OP_MVI__B, 0x01, OP_SBB__B,
+        OP_MVI__C, 0x02, OP_SBB__C,
+        OP_MVI__D, 0x04, OP_SBB__D,
+        OP_MVI__E, 0x08, OP_SBB__E,
+        OP_MVI__H, 0x10, OP_SBB__H,
+        OP_MVI__L, 0x20, OP_SBB__L,
         OP_NOP, OP_NOP, OP_NOP,
     };
 

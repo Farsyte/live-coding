@@ -9,13 +9,13 @@
 
 static Byte         i8080_mvi_program[] = {
     OP_NOP,             // give us a moment
-    OP_MVI_A, 0x11,
-    OP_MVI_B, 0x22,
-    OP_MVI_C, 0x33,
-    OP_MVI_D, 0x44,
-    OP_MVI_E, 0x55,
-    OP_MVI_H, 0x66,
-    OP_MVI_L, 0x77,
+    OP_MVI__A, 0x11,
+    OP_MVI__B, 0x22,
+    OP_MVI__C, 0x33,
+    OP_MVI__D, 0x44,
+    OP_MVI__E, 0x55,
+    OP_MVI__H, 0x66,
+    OP_MVI__L, 0x77,
     0xFF,               // make this look like uninitialized memory
 };
 
