@@ -16,9 +16,9 @@ void i8080_eidihlt_post(CpuTestSys ts)
 {
     p8080               cpu = ts->cpu;
 
-    Word                pc0 = ts->cpu->PC->value;
+    Word                pc0 = cpu->PC->value;
 
-    memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
+    memcpy(ts->rom[0]->cells + cpu->PC->value,
            i8080_eidihlt_program, sizeof(i8080_eidihlt_program));
 
     Tau                 t0 = TAU;

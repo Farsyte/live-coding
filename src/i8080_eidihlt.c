@@ -66,7 +66,7 @@ static void i8080_state_hlt(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_hlt_m2t1: start HALTACK: output PC and STATUS; raise SYNC
+// i8080_state_hlt_m2t1: start HALTACK: output PC via IDAL, and STATUS; raise SYNC
 
 static void i8080_state_hlt_m2t1(i8080 cpu, int phase)
 {
@@ -75,7 +75,8 @@ static void i8080_state_hlt_m2t1(i8080 cpu, int phase)
           // data_z(cpu->IR);
           break;
       case PHI2_RISE:
-          addr_to(cpu->ADDR, cpu->PC->value);
+          addr_to(cpu->IDAL, cpu->PC->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
           data_to(cpu->DATA, STATUS_HALTACK);
           edge_hi(cpu->SYNC);
           break;

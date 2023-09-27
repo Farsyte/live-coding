@@ -33,6 +33,8 @@ void i8080_invar(i8080 cpu)
     data_invar(cpu->DATA);
 
     addr_invar(cpu->PC);
+    addr_invar(cpu->IDAL);
+
     data_invar(cpu->IR);
     data_invar(cpu->TMP);
     data_invar(cpu->ACT);
@@ -77,6 +79,7 @@ void i8080_init(i8080 cpu, Cstr name)
     pEdge               INTE = cpu->INTE;
 
     pAddr               PC = cpu->PC;
+    pAddr               IDAL = cpu->IDAL;
 
     pData               A = cpu->A;
 
@@ -114,6 +117,7 @@ void i8080_init(i8080 cpu, Cstr name)
     edge_init(INTE, format("%s:INTE", name), 0);
 
     addr_init(PC, format("%s:PC", name));
+    addr_init(IDAL, format("%s:IDAL", name));
 
     data_init(A, format("%s:A", name));
 

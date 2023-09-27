@@ -1,8 +1,8 @@
 #include "i8080_impl.h"
 
 // i8080_fetch: manage the STATUS_FETCH machine cycle
-// T1 drives PC to address, STATUS to data, and SYNC high.
-// T2 increments PC, releases Data and Sync, drives DBIN
+// T1 drives PC via IDAL to address, STATUS to data, and SYNC high.
+// T2 increments IDAL into PC, releases Data and Sync, drives DBIN
 // TW waits for READY if needed
 // T3 samples Data to IR, releases DBIN
 // control delivered via cpu->m1t4[IR] for the T4 cycle

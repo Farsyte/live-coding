@@ -188,6 +188,9 @@ void i8080_bist()
     i8080_reset_bist(ts);
 
     i8080_reset_for_testing();
+    i8080_eidihlt_bist(ts);
+
+    i8080_reset_for_testing();
     i8080_mvi_bist(ts);
 
     i8080_reset_for_testing();
@@ -195,9 +198,6 @@ void i8080_bist()
 
     i8080_reset_for_testing();
     i8080_alu_bist(ts);
-
-    i8080_reset_for_testing();
-    i8080_eidihlt_bist(ts);     // leaves us in HLT state.
 
     i8080_trace_fini();
 }

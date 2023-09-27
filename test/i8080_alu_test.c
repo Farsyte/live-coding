@@ -80,7 +80,7 @@ static void i8080_alu_bist_add(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -201,7 +201,7 @@ static void i8080_alu_bist_sub(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -322,7 +322,7 @@ static void i8080_alu_bist_adc(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -450,7 +450,7 @@ static void i8080_alu_bist_sbb(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -578,7 +578,7 @@ static void i8080_alu_bist_ana(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -699,7 +699,7 @@ static void i8080_alu_bist_ora(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -820,7 +820,7 @@ static void i8080_alu_bist_xra(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 
@@ -941,7 +941,7 @@ static void i8080_alu_bist_cmp(CpuTestSys ts)
         OP_NOP, OP_NOP, OP_NOP,
     };
 
-    pByte               into = cells + ts->cpu->PC->value;
+    pByte               into = cells + cpu->PC->value;
 
     memcpy(into, test_prog, sizeof(test_prog));
 

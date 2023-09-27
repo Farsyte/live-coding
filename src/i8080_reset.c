@@ -42,13 +42,22 @@ static void i8080_reset_rise(i8080 cpu)
     cpu->state = i8080_state_reset;
     cpu->state_next = i8080_state_reset;
     cpu->state_m1t1 = i8080_state_reset;
+
     addr_z(cpu->PC);
+    addr_z(cpu->IDAL);
     addr_z(cpu->ADDR);
+
     data_z(cpu->DATA);
     data_z(cpu->IR);
+    data_z(cpu->ACT);
+    data_z(cpu->TMP);
+    data_z(cpu->ALU);
+    data_z(cpu->FLAGS);
+
     edge_lo(cpu->SYNC);
     edge_lo(cpu->DBIN);
     edge_lo(cpu->WAIT);
+
 }
 
 // i8080_state_reset: T-State handler for RESET states

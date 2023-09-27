@@ -1,8 +1,8 @@
 #include "i8080_impl.h"
 
 // i8080_b2: provide support for fetching 2nd byte of multibyte instructions
-// T1 drives PC to address, STATUS to data, and SYNC high.
-// T2 increments PC, releases Data and Sync, drives DBIN
+// T1 drives PC to IDAL to address, STATUS_MREAD to data, and SYNC high.
+// T2 drives IDAL+1 to PC, releases Data and Sync, drives DBIN
 // TW waits for READY if needed
 // T2 and TW deliver control to cpu->m2t3[IR] when READY
 
@@ -41,7 +41,7 @@ static void i8080_state_2bops(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_2bops_t1: publish PC, STATUS. Start SYNC.
+// i8080_state_2bops_t1: publish PC via IDAL, STATUS. Start SYNC.
 
 static void i8080_state_2bops_t1(i8080 cpu, int phase)
 {
@@ -49,7 +49,8 @@ static void i8080_state_2bops_t1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->ADDR, cpu->PC->value);
+          addr_to(cpu->IDAL, cpu->PC->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
           data_to(cpu->DATA, STATUS_MREAD);
           edge_hi(cpu->SYNC);
           break;
@@ -59,7 +60,7 @@ static void i8080_state_2bops_t1(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_2bops_t2: inc PC, end SYNC, start DBIN, check READY
+// i8080_state_2bops_t2: inc IDAL into PC, end SYNC, start DBIN, check READY
 
 static void i8080_state_2bops_t2(i8080 cpu, int phase)
 {
@@ -67,7 +68,7 @@ static void i8080_state_2bops_t2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->PC, cpu->PC->value + 1);
+          addr_to(cpu->PC, cpu->IDAL->value + 1);
           data_z(cpu->DATA);
           edge_lo(cpu->SYNC);
           edge_hi(cpu->DBIN);

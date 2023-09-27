@@ -29,8 +29,7 @@ void i8080_mvi_post(CpuTestSys ts)
 
     ASSERT_EQ_integer(sizeof(ts->rom[0]->cells[0]), sizeof(i8080_mvi_program[0]));
 
-    memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
-           i8080_mvi_program, sizeof(i8080_mvi_program));
+    memcpy(ts->rom[0]->cells + cpu->PC->value, i8080_mvi_program, sizeof(i8080_mvi_program));
 
     clock_run_until(TAU + 9 * 5);       // NOP
 
@@ -66,8 +65,7 @@ void i8080_mvi_bist(CpuTestSys ts)
 
     ASSERT_EQ_integer(sizeof(ts->rom[0]->cells[0]), sizeof(i8080_mvi_program[0]));
 
-    memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
-           i8080_mvi_program, sizeof(i8080_mvi_program));
+    memcpy(ts->rom[0]->cells + cpu->PC->value, i8080_mvi_program, sizeof(i8080_mvi_program));
 
     t0 = TAU;
     clock_run_until(TAU + 9 * 5);       // NOP

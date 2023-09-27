@@ -60,6 +60,8 @@ typedef struct s8080 {
     Data                ACT;                    // Accumulator Latch for ALU operations
     Data                ALU;                    // Result of ALU operation
 
+    Addr                IDAL;                   // Incrementer/Decrementer Address Latch
+
     Data                FLAGS;                  // flag bits placed for push/pop PSW
 
     Edge                RESET_INT;              // officially "INTERNAL RESET"

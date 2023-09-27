@@ -1,8 +1,8 @@
 #include "i8080_impl.h"
 
 // i8080_fetch: manage the STATUS_FETCH machine cycle
-// T1 drives PC to address, STATUS to data, and SYNC high.
-// T2 increments PC, releases Data and Sync, drives DBIN
+// T1 drives PC to IDAL to address, STATUS_FETCH to data, and SYNC high.
+// T2 drives IDAL+1 to PC, releases Data and Sync, drives DBIN
 // TW waits for READY if needed
 // T3 samples Data to IR, releases DBIN
 // control delivered via cpu->m1t4[IR] for the T4 cycle
@@ -30,7 +30,7 @@ void i8080_fetch_init(i8080 cpu)
         cpu->m1t4[inst] = i8080_state_x;
 }
 
-// i8080_state_pc_out_status: publish PC, STATUS. Start SYNC.
+// i8080_state_pc_out_status: publish PC via IDAL, STATUS. Start SYNC.
 
 static void i8080_state_pc_out_status(i8080 cpu, int phase)
 {
@@ -39,7 +39,8 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
           // data_z(cpu->IR);
           break;
       case PHI2_RISE:
-          addr_to(cpu->ADDR, cpu->PC->value);
+          addr_to(cpu->IDAL, cpu->PC->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
           data_to(cpu->DATA, STATUS_FETCH);
           edge_hi(cpu->SYNC);
           break;
@@ -49,7 +50,7 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_pc_inc: inc PC, end SYNC, start DBIN, check READY
+// i8080_state_pc_inc: inc IDAL into PC, end SYNC, start DBIN, check READY
 
 static void i8080_state_pc_inc(i8080 cpu, int phase)
 {
@@ -63,7 +64,7 @@ static void i8080_state_pc_inc(i8080 cpu, int phase)
           m1t2 = cpu->m1t2[IR];
           if (NULL != m1t2)
               m1t2(cpu, phase);
-          addr_to(cpu->PC, cpu->PC->value + 1);
+          addr_to(cpu->PC, cpu->IDAL->value + 1);
           data_z(cpu->DATA);
           edge_lo(cpu->SYNC);
           edge_hi(cpu->DBIN);

@@ -75,8 +75,7 @@ void i8080_mov_bist(CpuTestSys ts)
 
     ASSERT_EQ_integer(sizeof(ts->rom[0]->cells[0]), sizeof(i8080_mov_program[0]));
 
-    memcpy(ts->rom[0]->cells + ts->cpu->PC->value,
-           i8080_mov_program, sizeof(i8080_mov_program));
+    memcpy(ts->rom[0]->cells + cpu->PC->value, i8080_mov_program, sizeof(i8080_mov_program));
 
     data_z(cpu->A);
     data_z(cpu->B);
