@@ -33,6 +33,7 @@ void i8080_invar(i8080 cpu)
     data_invar(cpu->DATA);
 
     addr_invar(cpu->PC);
+    addr_invar(cpu->SP);
     addr_invar(cpu->IDAL);
 
     data_invar(cpu->IR);
@@ -79,6 +80,7 @@ void i8080_init(i8080 cpu, Cstr name)
     pEdge               INTE = cpu->INTE;
 
     pAddr               PC = cpu->PC;
+    pAddr               SP = cpu->SP;
     pAddr               IDAL = cpu->IDAL;
 
     pData               A = cpu->A;
@@ -117,6 +119,7 @@ void i8080_init(i8080 cpu, Cstr name)
     edge_init(INTE, format("%s:INTE", name), 0);
 
     addr_init(PC, format("%s:PC", name));
+    addr_init(SP, format("%s:SP", name));
     addr_init(IDAL, format("%s:IDAL", name));
 
     data_init(A, format("%s:A", name));
@@ -176,10 +179,11 @@ void i8080_linked(i8080 cpu)
     i8080_reset_init(cpu);
     i8080_fetch_init(cpu);
     i8080_2bops_init(cpu);
+    i8080_eidihlt_init(cpu);
     i8080_mvi_init(cpu);
     i8080_mov_init(cpu);
     i8080_alu_init(cpu);
-    i8080_eidihlt_init(cpu);
+    i8080_incdec_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
     EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);

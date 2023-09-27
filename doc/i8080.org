@@ -87,15 +87,47 @@ plot.
 
 [[file:img/i8080_alu_add.png]]
 
-*** SUB
-
-[[file:img/i8080_alu_sub.png]]
-
 *** ADC
 
 [[file:img/i8080_alu_adc.png]]
 
+*** SUB
+
+[[file:img/i8080_alu_sub.png]]
+
 *** SBB
 
 [[file:img/i8080_alu_sbb.png]]
+
+*** ANA
+
+[[file:img/i8080_alu_ana.png]]
+
+*** XRA
+
+[[file:img/i8080_alu_xra.png]]
+
+*** ORA
+
+[[file:img/i8080_alu_ora.png]]
+
+*** CMP
+
+[[file:img/i8080_alu_cmp.png]]
+
+*** INR
+
+[[file:img/i8080_alu_inr.png]]
+
+*** DCR
+
+[[file:img/i8080_alu_dcr.png]]
+
+*** INX
+
+[[file:img/i8080_alu_inx.png]]
+
+*** DCX
+
+[[file:img/i8080_alu_dcx.png]]
 

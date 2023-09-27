@@ -43,6 +43,7 @@ typedef struct s8080 {
 
     // programmer visible state
     Addr                PC;                     // program counter
+    Addr                SP;                     // stack pointer
 
     Data                A;
 

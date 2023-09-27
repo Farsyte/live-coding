@@ -21,7 +21,7 @@ def draw_from_json_string(json, fbase):
     """
     fname = f'doc/img/{fbase}.png'
     with schemdraw.Drawing() as d:
-        d += logic.TimingDiagram.from_json(json, risetime = 0)
+        d += logic.TimingDiagram.from_json(json, risetime = 0, grid=False)
     d.save(fname)
     # print(f'Figure plotted into {fname}')
     return fname
@@ -242,6 +242,7 @@ def draw_from_json_file(fbase):
         f"  ], config: {ob} hscale: {hscale}{cb}",
         "}"])
 
+    # print(f'plotting {fbase}: {act_len=} {hscale=}')
     # print(json_string)
     draw_from_json_string(json_string, fbase)
 

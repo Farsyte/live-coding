@@ -35,16 +35,29 @@ void i8080_alu_post(CpuTestSys ts)
 
 void i8080_alu_bist(CpuTestSys ts)
 {
+    i8080_reset_for_testing(ts);
     i8080_alu_bist_add(ts);
-    i8080_alu_bist_sub(ts);
-    i8080_alu_bist_adc(ts);
-    i8080_alu_bist_sbb(ts);
-    i8080_alu_bist_ana(ts);
-    i8080_alu_bist_xra(ts);
-    i8080_alu_bist_ora(ts);
-    i8080_alu_bist_cmp(ts);
 
-    // TODO test CMP
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_sub(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_adc(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_sbb(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_ana(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_xra(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_ora(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_alu_bist_cmp(ts);
 }
 
 static void i8080_alu_bist_add(CpuTestSys ts)
@@ -1022,9 +1035,9 @@ static void i8080_alu_bist_cmp(CpuTestSys ts)
     clock_run_until(TAU + 9 * 13);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_sub",
+    sigplot_init(sp, ss, "i8080_alu_cmp",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
-                 "SUB from each register", t0, TAU - t0);
+                 "CMP from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 }

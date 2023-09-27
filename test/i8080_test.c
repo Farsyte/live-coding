@@ -13,8 +13,6 @@ static void         i8080_test_init();
 static void         i8080_trace_init();
 static void         i8080_trace_fini();
 
-static void         i8080_reset_for_testing();
-
 static CpuTestSys   ts;
 
 static const p8080  cpu = ts->cpu;
@@ -32,6 +30,7 @@ static const pEdge  RDYIN = ts->RDYIN;
 static const pAddr  ADDR = cpu->ADDR;
 static const pData  DATA = cpu->DATA;
 static const pAddr  PC = cpu->PC;
+static const pAddr  SP = cpu->SP;
 static const pData  A = cpu->A;
 static const pData  B = cpu->B;
 static const pData  C = cpu->C;
@@ -45,6 +44,7 @@ static const pData  ACT = cpu->ACT;
 static const pData  ALU = cpu->ALU;
 static const pData  FLAGS = cpu->FLAGS;
 
+static const pEdge  RETM1_INT = cpu->RETM1_INT;
 static const pEdge  SYNC = cpu->SYNC;
 static const pEdge  DBIN = cpu->DBIN;
 static const pEdge  WR_ = cpu->WR_;
@@ -72,6 +72,7 @@ static pSigSess     ss = ts->ss;
 static SigTrace     trace_ADDR;
 static SigTrace     trace_DATA;
 
+static SigTrace     trace_RETM1_INT;
 static SigTrace     trace_SYNC;
 static SigTrace     trace_DBIN;
 static SigTrace     trace_WR_;
@@ -91,6 +92,7 @@ static SigTrace     trace_RDYIN;
 static SigTrace     trace_READY;
 
 static SigTrace     trace_PC;
+static SigTrace     trace_SP;
 static SigTrace     trace_A;
 static SigTrace     trace_B;
 static SigTrace     trace_C;
@@ -121,16 +123,19 @@ void i8080_post()
     i8080_test_init();
     i8080_reset_post(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_mvi_post(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_mov_post(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_alu_post(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
+    i8080_incdec_post(ts);
+
+    i8080_reset_for_testing(ts);
     i8080_eidihlt_post(ts);     // leaves us in HLT state.
 }
 
@@ -152,6 +157,7 @@ void i8080_plot_sigs(SigPlot sp)
     sigplot_sig(sp, trace_HOLD);
     sigplot_sig(sp, trace_HLDA);
     sigplot_sig(sp, trace_PC);
+    sigplot_sig(sp, trace_SP);
     sigplot_sig(sp, trace_A);
     sigplot_sig(sp, trace_B);
     sigplot_sig(sp, trace_C);
@@ -160,6 +166,7 @@ void i8080_plot_sigs(SigPlot sp)
     sigplot_sig(sp, trace_H);
     sigplot_sig(sp, trace_L);
     sigplot_sig(sp, trace_ADDR);
+    sigplot_sig(sp, trace_RETM1_INT);
     sigplot_sig(sp, trace_SYNC);
     sigplot_sig(sp, trace_STSTB_);
     sigplot_sig(sp, trace_DATA);
@@ -187,17 +194,20 @@ void i8080_bist()
 
     i8080_reset_bist(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_eidihlt_bist(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_mvi_bist(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_mov_bist(ts);
 
-    i8080_reset_for_testing();
+    i8080_reset_for_testing(ts);
     i8080_alu_bist(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_incdec_bist(ts);
 
     i8080_trace_fini();
 }
@@ -210,6 +220,33 @@ void i8080_bist()
 void i8080_bench()
 {
     i8080_test_init();
+}
+
+void i8080_reset_for_testing(CpuTestSys ts)
+{
+    p8224               gen = ts->gen;
+    pEdge               RESIN_ = ts->RESIN_;
+    pEdge               RDYIN = ts->RDYIN;
+    pEdge               PHI2 = gen->PHI2;
+    pEdge               RESET = gen->RESET;
+
+    clock_run_one();
+    edge_lo(RESIN_);
+    edge_lo(RDYIN);
+    clock_run_until(TAU + 9 * 4);
+    while (0 == PHI2->value)
+        clock_run_one();
+    while (1 == PHI2->value)
+        clock_run_one();
+    clock_run_one();
+
+    edge_hi(RESIN_);
+    edge_hi(RDYIN);
+    while (1 == RESET->value)
+        clock_run_one();
+    while (1 == PHI2->value)
+        clock_run_one();
+    clock_run_until(TAU + 11);
 }
 
 static void i8080_test_init()
@@ -325,6 +362,7 @@ static void i8080_trace_init()
     sigtrace_init_edge(trace_HOLD, ss, HOLD);
     sigtrace_init_edge(trace_HLDA, ss, HLDA);
     sigtrace_init_addr(trace_PC, ss, PC);
+    sigtrace_init_addr(trace_SP, ss, SP);
     sigtrace_init_data(trace_A, ss, A);
     sigtrace_init_data(trace_B, ss, B);
     sigtrace_init_data(trace_C, ss, C);
@@ -333,6 +371,7 @@ static void i8080_trace_init()
     sigtrace_init_data(trace_H, ss, H);
     sigtrace_init_data(trace_L, ss, L);
     sigtrace_init_addr(trace_ADDR, ss, ADDR);
+    sigtrace_init_edge(trace_RETM1_INT, ss, RETM1_INT);
     sigtrace_init_edge(trace_SYNC, ss, SYNC);
     sigtrace_init_edge(trace_STSTB_, ss, STSTB_);
     sigtrace_init_data(trace_DATA, ss, DATA);
@@ -365,6 +404,7 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_HOLD);
     sigtrace_fini(trace_HLDA);
     sigtrace_fini(trace_PC);
+    sigtrace_fini(trace_SP);
     sigtrace_fini(trace_A);
     sigtrace_fini(trace_B);
     sigtrace_fini(trace_C);
@@ -373,6 +413,7 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_H);
     sigtrace_fini(trace_L);
     sigtrace_fini(trace_ADDR);
+    sigtrace_fini(trace_RETM1_INT);
     sigtrace_fini(trace_SYNC);
     sigtrace_fini(trace_STSTB_);
     sigtrace_fini(trace_DATA);
@@ -393,25 +434,4 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_FLAGS);
 
     sigsess_fini(ss);
-}
-
-static void i8080_reset_for_testing()
-{
-    clock_run_one();
-    edge_lo(RESIN_);
-    edge_lo(RDYIN);
-    clock_run_until(TAU + 9 * 4);
-    while (0 == PHI2->value)
-        clock_run_one();
-    while (1 == PHI2->value)
-        clock_run_one();
-    clock_run_one();
-
-    edge_hi(RESIN_);
-    edge_hi(RDYIN);
-    while (1 == RESET->value)
-        clock_run_one();
-    while (1 == PHI2->value)
-        clock_run_one();
-    clock_run_until(TAU + 11);
 }
