@@ -36,7 +36,12 @@ typedef struct sCpuTestSys {
 
 }                  *pCpuTestSys, CpuTestSys[1];
 
+extern void         i8080_one_instruction(i8080 cpu, unsigned plus_TAU);
+
 extern void         i8080_plot_sigs();
+
+extern unsigned     i8080_unimp_ops(i8080);
+extern Cstr         i8080_instruction_name(Byte);
 
 extern void         i8080_reset_for_testing(CpuTestSys ts);
 
@@ -49,6 +54,7 @@ extern void         i8080_mvi_init(i8080 cpu);
 extern void         i8080_mov_init(i8080 cpu);
 extern void         i8080_alu_init(i8080 cpu);
 extern void         i8080_incdec_init(i8080 cpu);
+extern void         i8080_misc_init(i8080 cpu);
 
 extern void         i8080_reset_post(CpuTestSys ts);
 extern void         i8080_eidihlt_post(CpuTestSys ts);
@@ -56,6 +62,7 @@ extern void         i8080_mvi_post(CpuTestSys ts);
 extern void         i8080_mov_post(CpuTestSys ts);
 extern void         i8080_alu_post(CpuTestSys ts);
 extern void         i8080_incdec_post(CpuTestSys ts);
+extern void         i8080_misc_post(CpuTestSys ts);
 
 extern void         i8080_reset_bist(CpuTestSys ts);
 extern void         i8080_eidihlt_bist(CpuTestSys ts);
@@ -63,6 +70,7 @@ extern void         i8080_mvi_bist(CpuTestSys ts);
 extern void         i8080_mov_bist(CpuTestSys ts);
 extern void         i8080_alu_bist(CpuTestSys ts);
 extern void         i8080_incdec_bist(CpuTestSys ts);
+extern void         i8080_misc_bist(CpuTestSys ts);
 
 // Activity during a T-state is managed by a single
 // function, which is called three times.

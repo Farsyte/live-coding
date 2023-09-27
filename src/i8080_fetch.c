@@ -11,13 +11,13 @@ static f8080State   i8080_state_pc_out_status;
 static f8080State   i8080_state_pc_inc;
 static f8080State   i8080_state_fetch_wait;
 static f8080State   i8080_state_op_rd;
-static f8080State   i8080_state_x;
+static f8080State   i8080_state_nop;
 
 // Initialize the FETCH facility.
 //
 // Fill in cpu->state_fetch with the function to use to
-// manage the STATE_FETCH cycles, and initialize the opcode
-// decode table to the "do nothing" service for M1T4.
+// manage the STATE_FETCH cycles, and establish the service
+// function for the NOP instruction.
 //
 // This should be the only symbol exported by this file into the
 // global namespace.
@@ -26,8 +26,7 @@ void i8080_fetch_init(i8080 cpu)
 {
     cpu->state_fetch = i8080_state_pc_out_status;
 
-    for (unsigned inst = 0x00; inst <= 0xff; inst++)
-        cpu->m1t4[inst] = i8080_state_x;
+    cpu->m1t4[OP_NOP] = i8080_state_nop;
 }
 
 // i8080_state_pc_out_status: publish PC via IDAL, STATUS. Start SYNC.
@@ -118,9 +117,9 @@ static void i8080_state_op_rd(i8080 cpu, int phase)
     }
 }
 
-// i8080_state_x: raise RETM1_INT and do nothing else.
+// i8080_state_nop: raise RETM1_INT and do nothing else.
 
-static void i8080_state_x(i8080 cpu, int phase)
+static void i8080_state_nop(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:

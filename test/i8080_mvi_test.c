@@ -8,7 +8,7 @@
 // === === === === === === === === === === === === === === === ===
 
 static Byte         i8080_mvi_program[] = {
-    OP_NOP,             // give us a moment
+    OP_NOP,
     OP_MVI__A, 0x11,
     OP_MVI__B, 0x22,
     OP_MVI__C, 0x33,
@@ -16,7 +16,7 @@ static Byte         i8080_mvi_program[] = {
     OP_MVI__E, 0x55,
     OP_MVI__H, 0x66,
     OP_MVI__L, 0x77,
-    0xFF,               // make this look like uninitialized memory
+    OP_NOP,
 };
 
 // === === === === === === === === === === === === === === === ===
@@ -31,24 +31,25 @@ void i8080_mvi_post(CpuTestSys ts)
 
     memcpy(ts->rom[0]->cells + cpu->PC->value, i8080_mvi_program, sizeof(i8080_mvi_program));
 
-    clock_run_until(TAU + 9 * 5);       // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 
-    clock_run_until(TAU + 9 * 9);       // ..., A
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x11
     ASSERT_EQ_integer(0x11, cpu->A->value);
-    clock_run_until(TAU + 9 * 9);       // ..., B
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x22
     ASSERT_EQ_integer(0x22, cpu->B->value);
-    clock_run_until(TAU + 9 * 9);       // ..., C
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x33
     ASSERT_EQ_integer(0x33, cpu->C->value);
 
-    clock_run_until(TAU + 9 * 9);       // ..., D
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x44
     ASSERT_EQ_integer(0x44, cpu->D->value);
-    clock_run_until(TAU + 9 * 9);       // ..., E
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x55
     ASSERT_EQ_integer(0x55, cpu->E->value);
-    clock_run_until(TAU + 9 * 9);       // ..., H
+    i8080_one_instruction(cpu, 0);      // MVI H, 0x66
     ASSERT_EQ_integer(0x66, cpu->H->value);
-    clock_run_until(TAU + 9 * 9);       // ..., L
+    i8080_one_instruction(cpu, 0);      // MVI L, 0x77
     ASSERT_EQ_integer(0x77, cpu->L->value);
 
+    i8080_one_instruction(cpu, 0);      // NOP
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -68,13 +69,13 @@ void i8080_mvi_bist(CpuTestSys ts)
     memcpy(ts->rom[0]->cells + cpu->PC->value, i8080_mvi_program, sizeof(i8080_mvi_program));
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 5);       // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 
-    clock_run_until(TAU + 9 * 9);       // ..., A
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x11
     ASSERT_EQ_integer(0x11, cpu->A->value);
-    clock_run_until(TAU + 9 * 9);       // ..., B
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x22
     ASSERT_EQ_integer(0x22, cpu->B->value);
-    clock_run_until(TAU + 9 * 9);       // ..., C
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x33
     ASSERT_EQ_integer(0x33, cpu->C->value);
 
     sigplot_init(sp, ss, "i8080_bist_mvi_abc", "Intel 8080 Single Chip 8-bit Microprocessor",
@@ -83,17 +84,19 @@ void i8080_mvi_bist(CpuTestSys ts)
     sigplot_fini(sp);
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 9);       // ..., D
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x44
     ASSERT_EQ_integer(0x44, cpu->D->value);
-    clock_run_until(TAU + 9 * 9);       // ..., E
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x55
     ASSERT_EQ_integer(0x55, cpu->E->value);
-    clock_run_until(TAU + 9 * 9);       // ..., H
+    i8080_one_instruction(cpu, 0);      // MVI H, 0x66
     ASSERT_EQ_integer(0x66, cpu->H->value);
-    clock_run_until(TAU + 9 * 9);       // ..., L
+    i8080_one_instruction(cpu, 0);      // MVI L, 0x77
     ASSERT_EQ_integer(0x77, cpu->L->value);
+
     sigplot_init(sp, ss, "i8080_bist_mvi_dehl", "Intel 8080 Single Chip 8-bit Microprocessor",
                  "MVI test: MVI D, MVI E, MVI H, MVI L", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 
+    i8080_one_instruction(cpu, 0);      // NOP
 }

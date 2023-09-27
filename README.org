@@ -149,7 +149,7 @@ code and extends to the next newline.
 - '9': multibyte data, color 9
 
 * PENDING ITEMS
-** TODO create more pending items
+** TODO write up more things that need to be done
 * Code Tour from Bottom to Top
 
 ** headers: include the Standard C headers I expect to need

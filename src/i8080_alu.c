@@ -5,6 +5,20 @@
 
 static unsigned     i8080_alu_flags(unsigned alu, unsigned hc);
 
+static f8080State   i8080_state_daaT4;
+static f8080State   i8080_state_rlcT4;
+static f8080State   i8080_state_rlcT2;
+static f8080State   i8080_state_rrcT4;
+static f8080State   i8080_state_rrcT2;
+static f8080State   i8080_state_ralT4;
+static f8080State   i8080_state_ralT2;
+static f8080State   i8080_state_rarT4;
+static f8080State   i8080_state_rarT2;
+
+static f8080State   i8080_state_cmaT4;
+static f8080State   i8080_state_cmcT4;
+static f8080State   i8080_state_stcT4;
+
 // i8080_alu uses a collection of t-state functions to handle
 // the distinct M1T4 operations, which for "ALU R" operations,
 // comprises one function per (second ALU operand) register.
@@ -90,6 +104,25 @@ static p8080State   i8080_state_aluT2[8] = {
 
 void i8080_alu_init(i8080 cpu)
 {
+
+    cpu->m1t4[OP_DAA] = i8080_state_daaT4;
+
+    cpu->m1t4[OP_RLC] = i8080_state_rlcT4;
+    cpu->m1t2[OP_RLC] = i8080_state_rlcT2;
+
+    cpu->m1t4[OP_RRC] = i8080_state_rrcT4;
+    cpu->m1t2[OP_RRC] = i8080_state_rrcT2;
+
+    cpu->m1t4[OP_RAL] = i8080_state_ralT4;
+    cpu->m1t2[OP_RAL] = i8080_state_ralT2;
+
+    cpu->m1t4[OP_RAR] = i8080_state_rarT4;
+    cpu->m1t2[OP_RAR] = i8080_state_rarT2;
+
+    cpu->m1t4[OP_CMA] = i8080_state_cmaT4;
+    cpu->m1t4[OP_CMC] = i8080_state_cmcT4;
+    cpu->m1t4[OP_STC] = i8080_state_stcT4;
+
     for (int ooo = 0; ooo < 8; ++ooo) {
         for (int sss = 0; sss < 8; ++sss) {
             p8080State          m1t4 = i8080_state_aluT4[sss];
@@ -108,6 +141,268 @@ void i8080_alu_init(i8080 cpu)
     flags &= ~0x28;
 
     cpu->FLAGS->value = flags;
+}
+
+// i8080_state_daaT4: implement Decimal Adjust It is possible that the
+// block in 8080 called DAA is actually logic or a latch that
+// maintains the decimal-adjusted result of the prior ALU operation.
+// We do not, however, want to take the performance hit implied when
+// simulating this logic in every arithmetic operation, so the math
+// is actually implemented here.
+
+static void i8080_state_daaT4(i8080 cpu, int phase)
+{
+    unsigned            alu;
+    unsigned            daa;
+    unsigned            ac;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+
+          // pretend we had a DAA latch that was set with the results
+          // of this computation, in EVERY arithmetic instruction.
+
+          daa = alu = cpu->A->value;
+          if (((daa & 15) > 9) || (cpu->FLAGS->value & FLAGS_AC))
+              daa += 0x06;
+          if ((((daa >> 4) & 15) > 9) || (cpu->FLAGS->value & FLAGS_CY))
+              daa += 0x60;
+
+          ac = (daa & 15) < (alu & 15) ? FLAGS_AC : 0;;
+          data_to(cpu->A, daa);
+          data_to(cpu->FLAGS, i8080_alu_flags(daa, ac));
+
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_rlcT4(): rotate left circular
+// barrel rotate A left, retain input for T2 ops
+
+static void i8080_state_rlcT4(i8080 cpu, int phase)
+{
+    unsigned            act;
+    unsigned            alu;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          act = cpu->A->value;
+          alu = (act << 1) | (act >> 7);
+          data_to(cpu->ACT, act);
+          data_to(cpu->ALU, alu);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_rlcT2(): finish RLC
+// copy MSBit into CY, publish A and Flags results.
+
+static void i8080_state_rlcT2(i8080 cpu, int phase)
+{
+
+    (void)phase;
+
+    unsigned            act = cpu->ACT->value;
+    unsigned            alu = cpu->ALU->value;
+    unsigned            f = cpu->FLAGS->value;
+
+    if (act & 0x80)
+        f |= FLAGS_CY;
+    else
+        f &= ~FLAGS_CY;
+
+    data_to(cpu->A, alu);
+    data_to(cpu->FLAGS, f);
+}
+
+// i8080_state_rrcT4(): rotate left circular
+// barrel rotate A right, retain input for T2 ops
+
+static void i8080_state_rrcT4(i8080 cpu, int phase)
+{
+    unsigned            act;
+    unsigned            alu;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          act = cpu->A->value;
+          alu = (act >> 1) | (act << 7);
+          data_to(cpu->ACT, act);
+          data_to(cpu->ALU, alu);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_rrcT2(): finish RRC
+// copy LSBit into CY, publish A and Flags results.
+
+static void i8080_state_rrcT2(i8080 cpu, int phase)
+{
+
+    (void)phase;
+
+    unsigned            act = cpu->ACT->value;
+    unsigned            alu = cpu->ALU->value;
+    unsigned            f = cpu->FLAGS->value;
+
+    if (act & 0x01)
+        f |= FLAGS_CY;
+    else
+        f &= ~FLAGS_CY;
+
+    data_to(cpu->A, alu);
+    data_to(cpu->FLAGS, f);
+}
+
+// i8080_state_ralT4(): rotate left through carry
+// rotate left including carry: carry goes into LSBit
+
+static void i8080_state_ralT4(i8080 cpu, int phase)
+{
+    unsigned            act;
+    unsigned            alu;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          act = cpu->A->value;
+          alu = (act << 1) | (cpu->FLAGS->value & FLAGS_CY);
+          data_to(cpu->ACT, act);
+          data_to(cpu->ALU, alu);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_ralT2(): finish RAL
+// copy MSBit of input into CY, commit results to A and Flags
+
+static void i8080_state_ralT2(i8080 cpu, int phase)
+{
+
+    (void)phase;
+
+    unsigned            act = cpu->ACT->value;
+    unsigned            alu = cpu->ALU->value;
+    unsigned            f = cpu->FLAGS->value;
+
+    if (act & 0x80)
+        f |= FLAGS_CY;
+    else
+        f &= ~FLAGS_CY;
+
+    data_to(cpu->A, alu);
+    data_to(cpu->FLAGS, f);
+}
+
+// i8080_state_rarT4(): rotate right through carry
+// rotate right including carry: carry goes into MSBit
+
+static void i8080_state_rarT4(i8080 cpu, int phase)
+{
+    unsigned            act;
+    unsigned            alu;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          act = cpu->A->value;
+          alu = ((cpu->FLAGS->value & FLAGS_CY) << 7) | (act >> 1);
+          data_to(cpu->ACT, act);
+          data_to(cpu->ALU, alu);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_ralT2(): finish RAR
+// copy LSBit of input into CY, commit results to A and Flags
+
+static void i8080_state_rarT2(i8080 cpu, int phase)
+{
+
+    (void)phase;
+
+    unsigned            act = cpu->ACT->value;
+    unsigned            alu = cpu->ALU->value;
+    unsigned            f = cpu->FLAGS->value;
+
+    if (act & 0x01)
+        f |= FLAGS_CY;
+    else
+        f &= ~FLAGS_CY;
+
+    data_to(cpu->A, alu);
+    data_to(cpu->FLAGS, f);
+}
+
+// i8080_state_cmaT4: Complement Accumulator
+
+static void i8080_state_cmaT4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          data_to(cpu->A, ~cpu->A->value);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_cmaT4: Complement Carry Flag
+
+static void i8080_state_cmcT4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          data_to(cpu->FLAGS, FLAGS_CY ^ cpu->FLAGS->value);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_cmaT4: Set Carry Flag
+
+static void i8080_state_stcT4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          data_to(cpu->FLAGS, FLAGS_CY | cpu->FLAGS->value);
+          break;
+      case PHI2_FALL:
+          break;
+    }
 }
 
 // The IMPL_M1T4(R) macro is followed by a semicolon at the call-site.
@@ -298,6 +593,7 @@ static void i8080_state_aluT2CMP(i8080 cpu, int phase)
     data_to(cpu->ALU, alu);
 
     data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+
 }
 
 // i8080_alu_flags: update the flags based on the extended

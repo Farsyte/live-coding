@@ -9,9 +9,9 @@
 #include "sigtrace.h"
 #include "target.h"
 
-static void         i8080_phi1_rise(i8080 cpu);
-static void         i8080_phi2_rise(i8080 cpu);
-static void         i8080_phi2_fall(i8080 cpu);
+static void         i8080_phi1_rise(i8080);
+static void         i8080_phi2_rise(i8080);
+static void         i8080_phi2_fall(i8080);
 
 static f8080State   i8080_state_poweron;
 
@@ -184,10 +184,30 @@ void i8080_linked(i8080 cpu)
     i8080_mov_init(cpu);
     i8080_alu_init(cpu);
     i8080_incdec_init(cpu);
+    i8080_misc_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
     EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);
     EDGE_ON_FALL(cpu->PHI2, i8080_phi2_fall, cpu);
+}
+
+// i8080_unimp_ops(i8080 cpu): count opcodes missing from m1t4 table
+
+unsigned i8080_unimp_ops(i8080 cpu)
+{
+    unsigned            unset_count = 0;
+
+    FILE               *fp = fopen("log/i8080_unimp.txt", "w");
+
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++) {
+        p8080State          m1t4 = cpu->m1t4[inst];
+        if (m1t4 != i8080_state_poweron)
+            continue;
+        fprintf(fp, "%02X %s\n", inst, i8080_instruction_name(inst));
+        ++unset_count;
+    }
+    fclose(fp);
+    return unset_count;
 }
 
 // i8080_phi1_rise: actions at start of T-state
@@ -232,5 +252,6 @@ static void i8080_phi2_fall(i8080 cpu)
 static void i8080_state_poweron(i8080 cpu, int phase)
 {
     STUB("cpu '%s' in phase %d", cpu->name, phase);
+    STUB("  PC=0x%04X IR=0x%02X", cpu->PC->value, cpu->IR->value);
     abort();
 }

@@ -20,7 +20,7 @@ static Byte         i8080_mov_program[] = {
     OP_MVI__H, 0x66, OP_MOV__E_H,
     OP_MVI__L, 0x77, OP_MOV__H_L,
     OP_MVI__A, 0x11, OP_MOV__L_A,
-    0xFF,               // make this look like uninitialized memory
+    OP_NOP, OP_NOP, OP_NOP,
 };
 
 // === === === === === === === === === === === === === === === ===
@@ -43,22 +43,39 @@ void i8080_mov_post(CpuTestSys ts)
     data_z(cpu->H);
     data_z(cpu->L);
 
-    clock_run_until(TAU + 9 * 5);       // the leading NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 
-    clock_run_until(TAU + 9 * 15);      // MVI to B, MOV to A
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x22
+    i8080_one_instruction(cpu, 0);      // MOV A,B
     ASSERT_EQ_integer(0x22, cpu->A->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to C, MOV to B
+
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x33
+    i8080_one_instruction(cpu, 0);      // MOV B,C
     ASSERT_EQ_integer(0x33, cpu->B->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to D, MOV to C
+
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x44
+    i8080_one_instruction(cpu, 0);      // MOV C,D
     ASSERT_EQ_integer(0x44, cpu->C->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to E, MOV to D
+
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x55
+    i8080_one_instruction(cpu, 0);      // MOV D,E
     ASSERT_EQ_integer(0x55, cpu->D->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to H, MOV to E
+
+    i8080_one_instruction(cpu, 0);      // MVI H, 0x66
+    i8080_one_instruction(cpu, 0);      // MOV E,H
     ASSERT_EQ_integer(0x66, cpu->E->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to L, MOV to H
+
+    i8080_one_instruction(cpu, 0);      // MVI L, 0x77
+    i8080_one_instruction(cpu, 0);      // MOV H,L
     ASSERT_EQ_integer(0x77, cpu->H->value);
-    clock_run_until(TAU + 9 * 15);      // MVI to A, MOV to L
+
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x11
+    i8080_one_instruction(cpu, 0);      // MOV L,A
     ASSERT_EQ_integer(0x11, cpu->L->value);
+
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }
 
 // === === === === === === === === === === === === === === === ===
@@ -85,11 +102,13 @@ void i8080_mov_bist(CpuTestSys ts)
     data_z(cpu->H);
     data_z(cpu->L);
 
-    clock_run_until(TAU + 9 * 5);       // the leading NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 15);      // MVI to B, MOV to A
-    clock_run_until(TAU + 9 * 15);      // MVI to C, MOV to B
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x22
+    i8080_one_instruction(cpu, 0);      // MOV A,B
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x33
+    i8080_one_instruction(cpu, 0);      // MOV B,C
     sigplot_init(sp, ss, "i8080_bist_mov_bc", "Intel 8080 Single Chip 8-bit Microprocessor",
                  "MOV test for imm->B->A, imm->C->B", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -98,8 +117,10 @@ void i8080_mov_bist(CpuTestSys ts)
     ASSERT_EQ_integer(0x33, cpu->B->value);
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 15);      // MVI to D, MOV to C
-    clock_run_until(TAU + 9 * 15);      // MVI to E, MOV to D
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x44
+    i8080_one_instruction(cpu, 0);      // MOV C,D
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x55
+    i8080_one_instruction(cpu, 0);      // MOV D,E
     sigplot_init(sp, ss, "i8080_bist_mov_de", "Intel 8080 Single Ehip 8-bit Microprocessor",
                  "MOV test for imm->D->C, imm->E->D", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -108,8 +129,10 @@ void i8080_mov_bist(CpuTestSys ts)
     ASSERT_EQ_integer(0x55, cpu->D->value);
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 15);      // MVI to H, MOV to E
-    clock_run_until(TAU + 9 * 15);      // MVI to L, MOV to H
+    i8080_one_instruction(cpu, 0);      // MVI H, 0x66
+    i8080_one_instruction(cpu, 0);      // MOV E,H
+    i8080_one_instruction(cpu, 0);      // MVI L, 0x77
+    i8080_one_instruction(cpu, 0);      // MOV H,L
     sigplot_init(sp, ss, "i8080_bist_mov_hl", "Intel 8080 Single Ehip 8-bit Microprocessor",
                  "MOV test for imm->H->E, imm->L->H", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -118,10 +141,15 @@ void i8080_mov_bist(CpuTestSys ts)
     ASSERT_EQ_integer(0x77, cpu->H->value);
 
     t0 = TAU;
-    clock_run_until(TAU + 9 * 15);      // MVI to A, MOV to L
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x11
+    i8080_one_instruction(cpu, 0);      // MOV L,A
     sigplot_init(sp, ss, "i8080_bist_mov_a", "Intel 8080 Single Ehip 8-bit Microprocessor",
                  "MOV test for imm->A->L", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
     ASSERT_EQ_integer(0x11, cpu->L->value);
+
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }

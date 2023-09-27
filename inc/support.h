@@ -71,11 +71,11 @@ extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, .
             _fail(__FILE__, __LINE__, __func__,                 \
                   "" #observed " " #op " " #expected,           \
                   "Comparison Failed:\n"                        \
-                  "  Expected value: %2s %lld (%s)\n"           \
-                  "  Observed value:    %lld (%s)\n"            \
+                  "  Expected value: %2s %lld == 0x%X (%s)\n"   \
+                  "  Observed value:    %lld == 0x%X (%s)\n"    \
                   , #op                                         \
-                  , exp, #expected                              \
-                  , obs, #observed                              \
+                  , exp, exp, #expected                         \
+                  , obs, obs, #observed                         \
                 );                                              \
     } while (0)
 

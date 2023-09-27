@@ -136,6 +136,9 @@ void i8080_post()
     i8080_incdec_post(ts);
 
     i8080_reset_for_testing(ts);
+    i8080_misc_post(ts);
+
+    i8080_reset_for_testing(ts);
     i8080_eidihlt_post(ts);     // leaves us in HLT state.
 }
 
@@ -209,7 +212,14 @@ void i8080_bist()
     i8080_reset_for_testing(ts);
     i8080_incdec_bist(ts);
 
+    i8080_reset_for_testing(ts);
+    i8080_misc_bist(ts);
+
     i8080_trace_fini();
+
+    unsigned            unset_count = i8080_unimp_ops(ts->cpu);
+    fprintf(stderr, "i8080: counted %u unimplemented instruction codes.\n", unset_count);
+
 }
 
 // i8080_bench: performance verification for the i8080 code
@@ -434,4 +444,14 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_FLAGS);
 
     sigsess_fini(ss);
+}
+
+void i8080_one_instruction(i8080 cpu, unsigned plus_TAU)
+{
+    pEdge               RETM1_INT = cpu->RETM1_INT;
+    while (1 == RETM1_INT->value)
+        clock_run_one();
+    while (0 == RETM1_INT->value)
+        clock_run_one();
+    clock_run_until(TAU + 9 + plus_TAU);
 }

@@ -21,9 +21,16 @@ void i8080_eidihlt_post(CpuTestSys ts)
     memcpy(ts->rom[0]->cells + cpu->PC->value,
            i8080_eidihlt_program, sizeof(i8080_eidihlt_program));
 
-    Tau                 t0 = TAU;
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // EI
+    i8080_one_instruction(cpu, 0);      // DI
+    i8080_one_instruction(cpu, 0);      // EI
 
-    clock_run_until(t0 + 9 * 5 * 7);
+    // Can't use i8080_one_instruction() for HLT as we
+    // would never see the RETM1_INT signal rising.
+    //
+    // i8080_one_instruction(cpu, 0);      // HLT
+    clock_run_until(TAU + 9 * 5 * 2);   // HLT and hold in halt for a bit
 
     ASSERT_EQ_integer(1, cpu->READY->value);
 
@@ -43,7 +50,16 @@ void i8080_eidihlt_bist(CpuTestSys ts)
     memcpy(ts->rom[0]->cells, i8080_eidihlt_program, sizeof(i8080_eidihlt_program));
 
     Tau                 t0 = TAU;
-    clock_run_until(TAU + 9 * 5 * 8);
+
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // EI
+    i8080_one_instruction(cpu, 0);      // DI
+    i8080_one_instruction(cpu, 0);      // EI
+    // Can't use i8080_one_instruction() for HLT as we
+    // would never see the RETM1_INT signal rising.
+    //
+    // i8080_one_instruction(cpu, 0);      // HLT
+    clock_run_until(TAU + 9 * 5 * 2);   // HLT and hold in halt for a bit
 
     sigplot_init(sp, ss, "i8080_bist_eidihlt", "Intel 8080 Single Chip 8-bit Microprocessor",
                  "NOP EI HLT", t0, TAU - t0);

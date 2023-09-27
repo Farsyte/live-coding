@@ -90,49 +90,45 @@ static void i8080_incdec_bist_inr(CpuTestSys ts)
     data_z(H);
     data_z(L);
 
-    // when counting states, remember:
-    // ROM fetches add one TW state.
-
-    // MVI_A and imm8 55h, then
-    // OP_XRA__A (through next T2),
-    // then NOP.
-    clock_run_until(TAU + 9 * (9 + 5 + 5));
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x55
+    i8080_one_instruction(cpu, 0);      // XRA A
+    i8080_one_instruction(cpu, 0);      // NOP
     ASSERT_EQ_integer(0x46, FLAGS->value);      // Z,P
 
     t0 = TAU;
 
-    // MVI_A and imm8 08h, then INR A
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x08
+    i8080_one_instruction(cpu, 0);      // INR A
     ASSERT_EQ_integer(0x09, A->value);
     ASSERT_EQ_integer(0x06, FLAGS->value);      // P
 
-    // MVI_B and imm8 01h, then INR B
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x01
+    i8080_one_instruction(cpu, 0);      // INR B
     ASSERT_EQ_integer(0x02, B->value);
     ASSERT_EQ_integer(0x02, FLAGS->value);      // no flags set
 
-    // MVI_C and imm8 02h, then INR C
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x02
+    i8080_one_instruction(cpu, 0);      // INR C
     ASSERT_EQ_integer(0x03, C->value);
     ASSERT_EQ_integer(0x06, FLAGS->value);      // P
 
-    // MVI_D and imm8 08h, then INR D
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x08
+    i8080_one_instruction(cpu, 0);      // INR D
     ASSERT_EQ_integer(0x09, D->value);
     ASSERT_EQ_integer(0x06, FLAGS->value);      // P
 
-    // MVI_E and imm8 7Fh, then INR E
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x7F
+    i8080_one_instruction(cpu, 0);      // INR E
     ASSERT_EQ_integer(0x80, E->value);
     ASSERT_EQ_integer(0x92, FLAGS->value);      // S,Ac
 
-    // MVI_H and imm8 BFh, then INR H
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI H, 0xBF
+    i8080_one_instruction(cpu, 0);      // INR H,
     ASSERT_EQ_integer(0xC0, H->value);
     ASSERT_EQ_integer(0x96, FLAGS->value);      // S,Ac,P
 
-    // MVI_L and imm8 FFh, then INR L
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI L, 0xFF
+    i8080_one_instruction(cpu, 0);      // INR L
     ASSERT_EQ_integer(0x00, L->value);
     ASSERT_EQ_integer(0x16, FLAGS->value);      // Ac,P
 
@@ -143,9 +139,9 @@ static void i8080_incdec_bist_inr(CpuTestSys ts)
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 
-    // (starting with T3) NOP; NOP; NOP
-    clock_run_until(TAU + 9 * 13);
-
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }
 
 static void i8080_incdec_bist_dcr(CpuTestSys ts)
@@ -201,46 +197,45 @@ static void i8080_incdec_bist_dcr(CpuTestSys ts)
     // when counting states, remember:
     // ROM fetches add one TW state.
 
-    // MVI_A and imm8 55h, then
-    // OP_XRA__A (through next T2),
-    // then NOP.
-    clock_run_until(TAU + 9 * (9 + 5 + 5));
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x55
+    i8080_one_instruction(cpu, 0);      // XRA A
+    i8080_one_instruction(cpu, 0);      // NOP
     ASSERT_EQ_integer(0x46, FLAGS->value);      // Z,P
 
     t0 = TAU;
 
-    // MVI_A and imm8 08h, then DCR A
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI A, 0x08
+    i8080_one_instruction(cpu, 0);      // DCR A
     ASSERT_EQ_integer(0x07, A->value);
     ASSERT_EQ_integer(0x02, FLAGS->value);      // no flags set
 
-    // MVI_B and imm8 01h, then DCR B
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI B, 0x01
+    i8080_one_instruction(cpu, 0);      // DCR B
     ASSERT_EQ_integer(0x00, B->value);
     ASSERT_EQ_integer(0x46, FLAGS->value);      // Z,P
 
-    // MVI_C and imm8 02h, then DCR C
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI C, 0x02
+    i8080_one_instruction(cpu, 0);      // DCR C
     ASSERT_EQ_integer(0x01, C->value);
     ASSERT_EQ_integer(0x02, FLAGS->value);      // no flags set
 
-    // MVI_D and imm8 08h, then DCR D
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI D, 0x08
+    i8080_one_instruction(cpu, 0);      // DCR D
     ASSERT_EQ_integer(0x07, D->value);
     ASSERT_EQ_integer(0x02, FLAGS->value);      // no flags set
 
-    // MVI_E and imm8 80h, then DCR E
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI E, 0x80
+    i8080_one_instruction(cpu, 0);      // DCR E
     ASSERT_EQ_integer(0x7F, E->value);
     ASSERT_EQ_integer(0x12, FLAGS->value);      // Ac
 
-    // MVI_H and imm8 C0h, then DCR H
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI H, 0xC0
+    i8080_one_instruction(cpu, 0);      // DCR H
     ASSERT_EQ_integer(0xBF, H->value);
     ASSERT_EQ_integer(0x92, FLAGS->value);      // S,Ac
 
-    // MVI_L and imm8 00h, then DCR L
-    clock_run_until(TAU + 9 * (5 + 4 + 6));
+    i8080_one_instruction(cpu, 0);      // MVI L, 0x00
+    i8080_one_instruction(cpu, 0);      // DCR L
     ASSERT_EQ_integer(0xFF, L->value);
     ASSERT_EQ_integer(0x96, FLAGS->value);      // S,Ac,P
 
@@ -251,9 +246,9 @@ static void i8080_incdec_bist_dcr(CpuTestSys ts)
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 
-    // (starting with T3) NOP; NOP; NOP
-    clock_run_until(TAU + 9 * 13);
-
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }
 
 static void i8080_incdec_bist_inx(CpuTestSys ts)
@@ -314,41 +309,33 @@ static void i8080_incdec_bist_inx(CpuTestSys ts)
 
     t0 = TAU;
 
-    // OP_INX__SP from 0xAAFE to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX SP
     ASSERT_EQ_integer(0xAAFF, SP->value);
 
-    // OP_INX__SP from 0xAAFF to 0xAB00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX SP
     ASSERT_EQ_integer(0xAB00, SP->value);
 
-    // OP_INX__BC from 0xAAFE to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX BC
     ASSERT_EQ_integer(0xAA, B->value);
     ASSERT_EQ_integer(0xFF, C->value);
 
-    // OP_INX__BC from 0xAAFF to 0xAB00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX BC
     ASSERT_EQ_integer(0xAB, B->value);
     ASSERT_EQ_integer(0x00, C->value);
 
-    // OP_INX__DE from 0xAAFE to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX DE
     ASSERT_EQ_integer(0xAA, D->value);
     ASSERT_EQ_integer(0xFF, E->value);
 
-    // OP_INX__DE from 0xAAFF to 0xAD00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX DE
     ASSERT_EQ_integer(0xAB, D->value);
     ASSERT_EQ_integer(0x00, E->value);
 
-    // OP_INX__HL from 0xAAFE to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX HL
     ASSERT_EQ_integer(0xAA, H->value);
     ASSERT_EQ_integer(0xFF, L->value);
 
-    // OP_INX__HL from 0xAAFF to 0xAH00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // INX HL
     ASSERT_EQ_integer(0xAB, H->value);
     ASSERT_EQ_integer(0x00, L->value);
 
@@ -359,9 +346,9 @@ static void i8080_incdec_bist_inx(CpuTestSys ts)
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 
-    // (starting with T3) NOP; NOP; NOP
-    clock_run_until(TAU + 9 * 13);
-
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }
 
 static void i8080_incdec_bist_dcx(CpuTestSys ts)
@@ -422,41 +409,33 @@ static void i8080_incdec_bist_dcx(CpuTestSys ts)
 
     t0 = TAU;
 
-    // OP_DCX__SP from 0xAB01 to 0xAB00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX SP
     ASSERT_EQ_integer(0xAB00, SP->value);
 
-    // OP_DCX__SP from 0xAB00 to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX SP
     ASSERT_EQ_integer(0xAAFF, SP->value);
 
-    // OP_DCX__BC from 0xAB01 to 0xAB00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX BC
     ASSERT_EQ_integer(0xAB, B->value);
     ASSERT_EQ_integer(0x00, C->value);
 
-    // OP_DCX__BC from 0xAB00 to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX BC
     ASSERT_EQ_integer(0xAA, B->value);
     ASSERT_EQ_integer(0xFF, C->value);
 
-    // OP_DEX__DE from 0xAD01 to 0xAD00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX DE
     ASSERT_EQ_integer(0xAB, D->value);
     ASSERT_EQ_integer(0x00, E->value);
 
-    // OP_DEX__DE from 0xAD00 to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX DE
     ASSERT_EQ_integer(0xAA, D->value);
     ASSERT_EQ_integer(0xFF, E->value);
 
-    // OP_DLX__HL from 0xAH01 to 0xAH00
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX HL
     ASSERT_EQ_integer(0xAB, H->value);
     ASSERT_EQ_integer(0x00, L->value);
 
-    // OP_DLX__HL from 0xAH00 to 0xAAFF
-    clock_run_until(TAU + 9 * 6);
+    i8080_one_instruction(cpu, 0);      // DCX HL
     ASSERT_EQ_integer(0xAA, H->value);
     ASSERT_EQ_integer(0xFF, L->value);
 
@@ -467,7 +446,7 @@ static void i8080_incdec_bist_dcx(CpuTestSys ts)
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
 
-    // (starting with T3) NOP; NOP; NOP
-    clock_run_until(TAU + 9 * 13);
-
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
+    i8080_one_instruction(cpu, 0);      // NOP
 }
