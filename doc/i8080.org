@@ -131,3 +131,128 @@ plot.
 
 [[file:img/i8080_alu_dcx.png]]
 
+*** LXI
+
+[[file:img/i8080_lxi.png]]
+
+*** DAD
+
+[[file:img/i8080_dad.png]]
+
+** Not Yet Implemented
+
+*** JMP Jcc
+
+C3 jmp  ##
+
+DA jc   ##
+FA jm   ##
+D2 jnc  ##
+C2 jnz  ##
+F2 jp   ##
+EA jpe  ##
+E2 jpo  ##
+CA jz   ##
+
+*** LDA STA
+
+3A lda  ##
+32 sta  ##
+
+*** LDAX LHLD STAX SHLD
+
+0A ldax BC,##
+1A ldax DE,##
+2A lhld ##
+
+02 stax BC,##
+12 stax DE,##
+22 shld ##
+
+*** Operations on M
+
+**** MOV 
+
+46 mov  B,M
+4E mov  C,M
+56 mov  D,M
+5E mov  E,M
+66 mov  H,M
+6E mov  L,M
+7E mov  A,M
+
+70 mov  M,B
+71 mov  M,C
+72 mov  M,D
+73 mov  M,E
+74 mov  M,H
+75 mov  M,L
+77 mov  M,A
+
+**** ALUop
+
+34 inr  M
+35 dcr  M
+86 add  M
+8E adc  M
+96 sub  M
+9E sbb  M
+A6 ana  M
+AE xra  M
+B6 ora  M
+BE cmp  M
+
+**** MVI
+
+36 mvi  M,#
+
+*** PUSH rp, POP rp
+
+C5 push BC
+D5 push DE
+E5 push HL
+F5 push PSW
+
+C1 pop  BC
+D1 pop  DE
+E1 pop  HL
+F1 pop  PSW
+
+E3 xthl
+
+*** CALL Cc
+
+CD call ##
+
+DC cc   ##
+FC cm   ##
+D4 cnc  ##
+C4 cnz  ##
+F4 cp   ##
+EC cpe  ##
+E4 cpo  ##
+CC cz   ##
+
+*** RET, Rc
+
+C9 ret
+
+C0 rnz
+C8 rz
+D0 rnc
+D8 rc
+E0 rpo
+E8 rpe
+F0 rp
+F8 rm
+
+*** RST n
+
+C7 rst  0
+CF rst  1
+D7 rst  2
+DF rst  3
+E7 rst  4
+EF rst  5
+F7 rst  6
+FF rst  7

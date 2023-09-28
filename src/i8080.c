@@ -144,6 +144,8 @@ void i8080_init(i8080 cpu, Cstr name)
     cpu->state_reset = i8080_state_poweron;
     cpu->state_fetch = i8080_state_poweron;
     cpu->state_2bops = i8080_state_poweron;
+    cpu->state_2bops_t1 = i8080_state_poweron;
+    cpu->state_3bops_t1 = i8080_state_poweron;
 
     cpu->state = i8080_state_poweron;
     cpu->state_next = i8080_state_poweron;
@@ -157,6 +159,8 @@ void i8080_init(i8080 cpu, Cstr name)
         cpu->m1t5[inst] = i8080_state_poweron;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
         cpu->m2t3[inst] = i8080_state_poweron;
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++)
+        cpu->m3t3[inst] = i8080_state_poweron;
 }
 
 // I8080_INIT(s): initialize the given i8080 to have this name
@@ -179,12 +183,15 @@ void i8080_linked(i8080 cpu)
     i8080_reset_init(cpu);
     i8080_fetch_init(cpu);
     i8080_2bops_init(cpu);
+    i8080_3bops_init(cpu);
     i8080_eidihlt_init(cpu);
     i8080_mvi_init(cpu);
     i8080_mov_init(cpu);
     i8080_alu_init(cpu);
     i8080_incdec_init(cpu);
     i8080_misc_init(cpu);
+    i8080_lxi_init(cpu);
+    i8080_dad_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
     EDGE_ON_RISE(cpu->PHI2, i8080_phi2_rise, cpu);

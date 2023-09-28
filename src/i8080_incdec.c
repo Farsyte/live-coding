@@ -1,6 +1,6 @@
 #include "i8080_impl.h"
 
-// i8080_incdec: ...
+// i8080_incdec: TODO write good comments
 
 static unsigned     i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old);
 

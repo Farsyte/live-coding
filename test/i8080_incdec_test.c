@@ -1,7 +1,7 @@
 #include "clock.h"
 #include "i8080_impl.h"
 
-// i8080_incdec: ...
+// i8080_incdec: TODO write good comments
 
 // === === === === === === === === === === === === === === === ===
 //                COMMON SUPPORT FOR POST/BIST/BENCH

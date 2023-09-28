@@ -72,8 +72,9 @@ typedef struct s8080 {
     // T-state management functions
     p8080State          state_reset;            // entry T-state for reset
     p8080State          state_fetch;            // entry T-state for STATUS_FETCH cycles
-    p8080State          state_2bops;            // T4 handler for 2-byte ops
-    p8080State          state_2bops_t1;         // T1 handler for 2-byte ops
+    p8080State          state_2bops;            // M1T4 handler for 2-byte ops
+    p8080State          state_2bops_t1;         // M2T1 handler for 2-byte ops
+    p8080State          state_3bops_t1;         // M3T1 handler for 3-byte ops
 
     p8080State          state;                  // function for the current T-state
     p8080State          state_next;             // function for the next T-state
@@ -92,8 +93,12 @@ typedef struct s8080 {
     p8080State          m1t5[256];
 
     // opcode decode table giving the T-state function to use
-    // for M2 T3 (picked during M2 T1)
+    // for M2 T3 (picked from, using IR, during M2 T2)
     p8080State          m2t3[256];
+
+    // opcode decode table giving the T-state function to use
+    // for M3 T3 (picked from, using IR, during M3 T2)
+    p8080State          m3t3[256];
 
 }                  *p8080, i8080[1];
 

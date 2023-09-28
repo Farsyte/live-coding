@@ -414,4 +414,8 @@ This module does not (yet) allow M as source or destination.
 
 **** i8080_alu:
 
+**** i8080_incdec:
+
+**** i8080_misc:
+
 **** i8080_eidihlt:
