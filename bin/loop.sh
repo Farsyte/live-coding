@@ -2,5 +2,5 @@
 
 while true
 do
-    bin/build-wait.sh "$@"
+    bin/build.sh "$@"
 done
