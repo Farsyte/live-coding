@@ -1,4 +1,3 @@
-#include "clock.h"
 #include "i8080_impl.h"
 
 // i8080_lxi: manage LXI instructions

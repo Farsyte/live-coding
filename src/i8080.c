@@ -13,7 +13,7 @@ static void         i8080_phi1_rise(i8080);
 static void         i8080_phi2_rise(i8080);
 static void         i8080_phi2_fall(i8080);
 
-static f8080State   i8080_state_poweron;
+static f8080State   i8080_state_unimp;
 
 // i8080: Single Chip 8-bit Microprocessor
 //
@@ -40,6 +40,8 @@ void i8080_invar(i8080 cpu)
     data_invar(cpu->TMP);
     data_invar(cpu->ACT);
     data_invar(cpu->ALU);
+    data_invar(cpu->W);
+    data_invar(cpu->Z);
     data_invar(cpu->FLAGS);
 
     edge_invar(cpu->PHI1);
@@ -98,6 +100,9 @@ void i8080_init(i8080 cpu, Cstr name)
     pData               ALU = cpu->ALU;
     pData               FLAGS = cpu->FLAGS;
 
+    pData               W = cpu->W;
+    pData               Z = cpu->Z;
+
     pEdge               RESET_INT = cpu->RESET_INT;
     pEdge               RETM1_INT = cpu->RETM1_INT;
     pEdge               INH_PC_INC = cpu->INH_PC_INC;
@@ -135,32 +140,34 @@ void i8080_init(i8080 cpu, Cstr name)
     data_init(TMP, format("%s:TMP", name));
     data_init(ACT, format("%s:ACT", name));
     data_init(ALU, format("%s:ALU", name));
+    data_init(W, format("%s:W", name));
+    data_init(Z, format("%s:Z", name));
     data_init(FLAGS, format("%s:FLAGS", name));
 
     edge_init(RESET_INT, format("%s:RESET_INT", name), 1);
     edge_init(RETM1_INT, format("%s:RETM1_INT", name), 0);
     edge_init(INH_PC_INC, format("%s:INH_PC_INC", name), 0);
 
-    cpu->state_reset = i8080_state_poweron;
-    cpu->state_fetch = i8080_state_poweron;
-    cpu->state_2bops = i8080_state_poweron;
-    cpu->state_2bops_t1 = i8080_state_poweron;
-    cpu->state_3bops_t1 = i8080_state_poweron;
+    cpu->state_reset = i8080_state_unimp;
+    cpu->state_fetch = i8080_state_unimp;
+    cpu->state_2bops = i8080_state_unimp;
+    cpu->state_2bops_t1 = i8080_state_unimp;
+    cpu->state_3bops_t1 = i8080_state_unimp;
 
-    cpu->state = i8080_state_poweron;
-    cpu->state_next = i8080_state_poweron;
-    cpu->state_m1t1 = i8080_state_poweron;
+    cpu->state = i8080_state_unimp;
+    cpu->state_next = i8080_state_unimp;
+    cpu->state_m1t1 = i8080_state_unimp;
 
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
         cpu->m1t2[inst] = NULL;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
-        cpu->m1t4[inst] = i8080_state_poweron;
+        cpu->m1t4[inst] = i8080_state_unimp;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
-        cpu->m1t5[inst] = i8080_state_poweron;
+        cpu->m1t5[inst] = i8080_state_unimp;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
-        cpu->m2t3[inst] = i8080_state_poweron;
+        cpu->m2t3[inst] = i8080_state_unimp;
     for (unsigned inst = 0x00; inst <= 0xFF; inst++)
-        cpu->m3t3[inst] = i8080_state_poweron;
+        cpu->m3t3[inst] = i8080_state_unimp;
 }
 
 // I8080_INIT(s): initialize the given i8080 to have this name
@@ -191,6 +198,7 @@ void i8080_linked(i8080 cpu)
     i8080_incdec_init(cpu);
     i8080_misc_init(cpu);
     i8080_lxi_init(cpu);
+    i8080_jmp_init(cpu);
     i8080_dad_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);
@@ -208,7 +216,7 @@ unsigned i8080_unimp_ops(i8080 cpu)
 
     for (unsigned inst = 0x00; inst <= 0xFF; inst++) {
         p8080State          m1t4 = cpu->m1t4[inst];
-        if (m1t4 != i8080_state_poweron)
+        if (m1t4 != i8080_state_unimp)
             continue;
         fprintf(fp, "%02X %s\n", inst, i8080_instruction_name(inst));
         ++unset_count;
@@ -246,7 +254,7 @@ static void i8080_phi2_fall(i8080 cpu)
     // then set state_next to state_m1t1.
 }
 
-// i8080_state_poweron: T-state control default
+// i8080_state_unimp: T-state control default
 //
 // Pointers to this method are used to indicate that
 // the processor is in a state not yet simulated.
@@ -256,7 +264,7 @@ static void i8080_phi2_fall(i8080 cpu)
 //
 // NO BIST COVERAGE for ending up in this fatal state
 
-static void i8080_state_poweron(i8080 cpu, int phase)
+static void i8080_state_unimp(i8080 cpu, int phase)
 {
     STUB("cpu '%s' in phase %d", cpu->name, phase);
     STUB("  PC=0x%04X IR=0x%02X", cpu->PC->value, cpu->IR->value);

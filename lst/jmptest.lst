@@ -1,0 +1,146 @@
+     1     			TITLE	'test for JMP instructions'
+     2
+     3      00 00		ORG	00000H		;BASE OF MEMORY
+     4
+     5 0000 0E 01		MVI	C,1
+     6
+     7 0002 C3 06 00		JMP	JMPP
+     8 0005 C7		JMPF:	RST	0		;fail
+     9 0006 00		JMPP:	NOP
+    10
+    11 0007 D7			RST	2		;next subtest
+    12
+    13 0008 3E 01		MVI	A,1
+    14 000A 91			SUB	C
+    15 000B C2 13 00		JNZ	JNZF1
+    16 000E 91			SUB	C
+    17 000F C2 14 00		JNZ	JNZP
+    18 0012 C7		JNZF2:	RST	0
+    19 0013 C7		JNZF1:	RST	0
+    20 0014 00		JNZP:	NOP
+    21
+    22 0015 D7			RST	2		;next subtest
+    23
+    24 0016 3E 02		MVI	A,2
+    25 0018 91			SUB	C
+    26 0019 CA 21 00		JZ	JZF1
+    27 001C 91			SUB	C
+    28 001D CA 22 00		JZ	JZP
+    29 0020 C7		JZF2:	RST	0
+    30 0021 C7		JZF1:	RST	0
+    31 0022 00		JZP:	NOP
+    32
+    33 0023 D7			RST	2		;next subtest
+    34
+    35 0024 3E 00		MVI	A,0
+    36 0026 91			SUB	C
+    37 0027 D2 2F 00		JNC	JNCF1
+    38 002A 91			SUB	C
+    39 002B D2 30 00		JNC	JNCP
+    40 002E C7		JNCF2:	RST	0
+    41 002F C7		JNCF1:	RST	0
+    42 0030 00		JNCP:	NOP
+    43
+    44 0031 D7			RST	2		;next subtest
+    45
+    46 0032 3E 01		MVI	A,1
+    47 0034 91			SUB	C
+    48 0035 DA 3D 00		JC	JCF1
+    49 0038 91			SUB	C
+    50 0039 DA 3E 00		JC	JCP
+    51 003C C7		JCF2:	RST	0
+    52 003D C7		JCF1:	RST	0
+    53 003E 00		JCP:	NOP
+    54
+    55 003F D7			RST	2		;next subtest
+    56
+    57 0040 3E 06		MVI	A,6
+    58 0042 91			SUB	C
+    59 0043 E2 4B 00		JPO	JPOF1
+    60 0046 91			SUB	C
+    61 0047 E2 4C 00		JPO	JPOP
+    62 004A C7		JPOF2:	RST	0
+    63 004B C7		JPOF1:	RST	0
+    64 004C 00		JPOP:	NOP
+    65
+    66 004D D7			RST	2		;next subtest
+    67
+    68 004E 3E 08		MVI	A,8
+    69 0050 91			SUB	C
+    70 0051 EA 59 00		JPE	JPEF1
+    71 0054 91			SUB	C
+    72 0055 EA 5A 00		JPE	JPEP
+    73 0058 C7		JPEF2:	RST	0
+    74 0059 C7		JPEF1:	RST	0
+    75 005A 00		JPEP:	NOP
+    76
+    77 005B D7			RST	2		;next subtest
+    78
+    79 005C 3E 81		MVI	A,81H
+    80 005E 91			SUB	C
+    81 005F F2 67 00		JP	JPF1
+    82 0062 91			SUB	C
+    83 0063 F2 68 00		JP	JPP
+    84 0066 C7		JPF2:	RST	0
+    85 0067 C7		JPF1:	RST	0
+    86 0068 00		JPP:	NOP
+    87
+    88 0069 D7			RST	2		;next subtest
+    89
+    90 006A 3E 01		MVI	A,01H
+    91 006C 91			SUB	C
+    92 006D FA 75 00		JM	JMF1
+    93 0070 91			SUB	C
+    94 0071 FA 76 00		JM	JMP
+    95 0074 C7		JMF2:	RST	0
+    96 0075 C7		JMF1:	RST	0
+    97 0076 00		JMP:	NOP
+    98
+    99 0077 CF			RST	1
+   100 0078 00			NOP
+   101 0079 00			NOP
+   102
+   103     			END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+JMPF		Label	00005h
+JMPP		Label	00006h
+JNZF2		Label	00012h
+JNZF1		Label	00013h
+JNZP		Label	00014h
+JZF2		Label	00020h
+JZF1		Label	00021h
+JZP		Label	00022h
+JNCF2		Label	0002Eh
+JNCF1		Label	0002Fh
+JNCP		Label	00030h
+JCF2		Label	0003Ch
+JCF1		Label	0003Dh
+JCP		Label	0003Eh
+JPOF2		Label	0004Ah
+JPOF1		Label	0004Bh
+JPOP		Label	0004Ch
+JPEF2		Label	00058h
+JPEF1		Label	00059h
+JPEP		Label	0005Ah
+JPF2		Label	00066h
+JPF1		Label	00067h
+JPP		Label	00068h
+JMF2		Label	00074h
+JMF1		Label	00075h
+JMP		Label	00076h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 26
+
+

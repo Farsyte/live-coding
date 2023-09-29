@@ -54,6 +54,7 @@ clean::
 # usually with a "make await" between iteraions.
 
 loop::
+	$C ${MAKE} lsts
 	$C ${MAKE} cmp
 
 bench::		log/run-${PROG}.log.difference
@@ -74,7 +75,7 @@ wait::
 	$C inotifywait \
 		-q ${WAITE:%=-e %} \
 		GNUmakefile GNUmakefile.rules \
-		${HSRC} ${CSRC} ${TSRC}
+		${HSRC} ${CSRC} ${TSRC} ${ASMS}
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::

@@ -42,6 +42,8 @@ static const pData  IR = cpu->IR;
 static const pData  TMP = cpu->TMP;
 static const pData  ACT = cpu->ACT;
 static const pData  ALU = cpu->ALU;
+static const pData  W = cpu->W;
+static const pData  Z = cpu->Z;
 static const pData  FLAGS = cpu->FLAGS;
 
 static const pEdge  RETM1_INT = cpu->RETM1_INT;
@@ -105,6 +107,8 @@ static SigTrace     trace_IR;
 static SigTrace     trace_TMP;
 static SigTrace     trace_ACT;
 static SigTrace     trace_ALU;
+static SigTrace     trace_W;
+static SigTrace     trace_Z;
 static SigTrace     trace_FLAGS;
 
 static SigTrace     trace_MEMR_;
@@ -140,6 +144,9 @@ void i8080_post()
 
     i8080_reset_for_testing(ts);
     i8080_lxi_post(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_jmp_post(ts);
 
     i8080_reset_for_testing(ts);
     i8080_dad_post(ts);
@@ -193,6 +200,8 @@ void i8080_plot_sigs(SigPlot sp)
     sigplot_sig(sp, trace_TMP);
     sigplot_sig(sp, trace_ACT);
     sigplot_sig(sp, trace_ALU);
+    sigplot_sig(sp, trace_W);
+    sigplot_sig(sp, trace_Z);
     sigplot_sig(sp, trace_FLAGS);
 }
 
@@ -223,6 +232,9 @@ void i8080_bist()
 
     i8080_reset_for_testing(ts);
     i8080_lxi_bist(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_jmp_bist(ts);
 
     i8080_reset_for_testing(ts);
     i8080_dad_bist(ts);
@@ -411,6 +423,8 @@ static void i8080_trace_init()
     sigtrace_init_data(trace_TMP, ss, TMP);
     sigtrace_init_data(trace_ACT, ss, ACT);
     sigtrace_init_data(trace_ALU, ss, ALU);
+    sigtrace_init_data(trace_W, ss, W);
+    sigtrace_init_data(trace_Z, ss, Z);
     sigtrace_init_data(trace_FLAGS, ss, FLAGS);
 }
 
@@ -453,6 +467,8 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_TMP);
     sigtrace_fini(trace_ACT);
     sigtrace_fini(trace_ALU);
+    sigtrace_fini(trace_W);
+    sigtrace_fini(trace_Z);
     sigtrace_fini(trace_FLAGS);
 
     sigsess_fini(ss);

@@ -1,0 +1,103 @@
+	TITLE	'test for JMP instructions'
+
+	ORG	00000H		;BASE OF MEMORY
+
+	MVI	C,1
+
+	JMP	JMPP
+JMPF:	RST	0		;fail
+JMPP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,1
+	SUB	C
+	JNZ	JNZF1
+	SUB	C
+	JNZ	JNZP
+JNZF2:	RST	0
+JNZF1:	RST	0
+JNZP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,2
+	SUB	C
+	JZ	JZF1
+	SUB	C
+	JZ	JZP
+JZF2:	RST	0
+JZF1:	RST	0
+JZP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,0
+	SUB	C
+	JNC	JNCF1
+	SUB	C
+	JNC	JNCP
+JNCF2:	RST	0
+JNCF1:	RST	0
+JNCP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,1
+	SUB	C
+	JC	JCF1
+	SUB	C
+	JC	JCP
+JCF2:	RST	0
+JCF1:	RST	0
+JCP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,6
+	SUB	C
+	JPO	JPOF1
+	SUB	C
+	JPO	JPOP
+JPOF2:	RST	0
+JPOF1:	RST	0
+JPOP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,8
+	SUB	C
+	JPE	JPEF1
+	SUB	C
+	JPE	JPEP
+JPEF2:	RST	0
+JPEF1:	RST	0
+JPEP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,81H
+	SUB	C
+	JP	JPF1
+	SUB	C
+	JP	JPP
+JPF2:	RST	0
+JPF1:	RST	0
+JPP:	NOP
+
+	RST	2		;next subtest
+
+	MVI	A,01H
+	SUB	C
+	JM	JMF1
+	SUB	C
+	JM	JMP
+JMF2:	RST	0
+JMF1:	RST	0
+JMP:	NOP
+
+	RST	1
+	NOP
+	NOP
+
+	END

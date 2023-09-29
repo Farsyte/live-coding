@@ -29,6 +29,7 @@ INCDIR		:= inc/
 SRCDIR		:= src/
 ASMDIR		:= asm/
 LSTDIR		:= lst/
+HEXDIR		:= hex/
 TESTDIR		:= test/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
@@ -47,6 +48,8 @@ EXEC		:= ${PROG:%=bin/%}
 
 ASMS            := ${wildcard ${ASMDIR}*.asm}
 LSTS		:= ${ASMS:${ASMDIR}%.asm=${LSTDIR}%.lst}
+BINS		:= ${ASMS:${ASMDIR}%.asm=${HEXDIR}%.bin}
+HEXS		:= ${ASMS:${ASMDIR}%.asm=${HEXDIR}%.hex}
 
 SRCB		:= ${CSRC:${SRCDIR}%.c=%} \
 		   ${TSRC:${TESTDIR}%.c=%}
@@ -158,4 +161,8 @@ clean::
 lsts::		${LSTS}
 
 ${LSTDIR}%.lst:	${ASMDIR}%.asm
-	asm8080 $< -oobj/$* -l$@
+	asm8080 $< -o${HEXDIR}$* -l$@
+
+clean::
+	${RF} ${BINS}
+

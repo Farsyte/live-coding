@@ -61,6 +61,9 @@ typedef struct s8080 {
     Data                ACT;                    // Accumulator Latch for ALU operations
     Data                ALU;                    // Result of ALU operation
 
+    Data                W;                      // temp for LS Byte of some ops
+    Data                Z;                      // temp for MS Byte of some ops
+
     Addr                IDAL;                   // Incrementer/Decrementer Address Latch
 
     Data                FLAGS;                  // flag bits placed for push/pop PSW

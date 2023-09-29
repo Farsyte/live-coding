@@ -35,6 +35,7 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
+          // Messing with IR here breaks ALU writeback in M1T2.
           // data_z(cpu->IR);
           break;
       case PHI2_RISE:

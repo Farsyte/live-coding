@@ -185,13 +185,20 @@ def draw_from_json_file(fbase):
 
     nom_width = 18;
 
-    with open(f'log/timing/{fbase}.txt', "r") as pf:
+    fname = f'log/timing/{fbase}.txt'
+
+    with open(fname, "r") as pf:
+
         ob, cb = '{', '}'
 
         title = pf.readline().strip()
         caption = pf.readline().strip()
         session = pf.readline().strip()
         tau_range =  pf.readline().strip()
+        if (tau_range == ''):
+            print(f'{fname} has {tau_range=!r}, skipping.')
+            return
+
         tau_min, tau_len = [int(x) for x in tau_range.split(' ')]
 
         act_len = max(tau_len, nom_width)
