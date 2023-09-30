@@ -1,0 +1,759 @@
+     1 			        ;; 2023-09-30 librarian note:
+     2 			        ;;   retrieved from http://www.gaby.de/cpm/manuals/archive/cpm22htm/axa.asm
+     3 			        ;;   adjusted for assembly with "asm8080"
+     4 			        ;;   - "IF" is less flexible
+     5 			        ;;   - "MACLIB" is not supported
+     6 			        ;;   - stock asm seems to provide opcode names as EQUs?
+     7      00 C3	jmp     equ     0C3h
+     8
+     9 			;	MDS-800 I/O Drivers for CP/M 2.2
+    10 			;	(four drive single density version)
+    11 			;
+    12 			;	Version 2.2 February, 1980
+    13 			;
+    14      00 16	vers	equ	22	;version 2.2
+    15 			;
+    16 			;	Copyright (c) 1980
+    17 			;	Digital Research
+    18 			;	Box 579, Pacific Grove
+    19 			;	California, 93950
+    20 			;
+    21 			;
+    22      00 00	test	equ	0	;1=test bios 0=normal bios
+    23 			;
+    24     			if	test
+    25     		bias	equ	03400h	;base of CCP in test system
+    26     		        else
+    27      00 00	bias	equ	0000h	;generate relocatable cp/m system
+    28     			endif
+    29 			;
+    30      16 00	patch	equ	1600h
+    31 			;
+    32      16 00		org	patch
+    33      00 00	cpmb	equ	$-patch	;base of cpm console processor
+    34      08 06	bdos	equ	806h+cpmb	;basic dos (resident portion)
+    35      16 00	cpml	equ	$-cpmb	;length (in bytes) of cpm system
+    36      00 2C	nsects	equ	cpml/128	;number of sectors to load
+    37      00 02	offset	equ	2	;number of disk tracks used by cp/m
+    38      00 04	cdisk	equ	0004h	;address of last logged disk on warm start
+    39      00 80	buff	equ	0080h	;default buffer address
+    40      00 0A	retry	equ	10	;max retries on disk i/o before error
+    41 			;
+    42 			;	perform following functions
+    43 			;	boot	cold start
+    44 			;	wboot	warm start (save i/o byte)
+    45 			;	(boot and wboot are the same for mds)
+    46 			;	const	console status
+    47 			;		reg-a = 00 if no character ready
+    48 			;		reg-a = ff if character ready
+    49 			;	conin	console character in (result in reg-a)
+    50 			;	conout	console character out (char in reg-c)
+    51 			;	list	list out (char in reg-c)
+    52 			;	punch	punch out (char in reg-c)
+    53 			;	reader	paper tape reader in (result to reg-a)
+    54 			;	home	move to track 00
+    55 			;
+    56 			;	(the following calls set-up the io parameter block for the
+    57 			;	mds, which is used to perform subsequent reads and writes)
+    58 			;	seldsk	select disk given by reg-c (0,1,2...)
+    59 			;	settrk	set track address (0,...76) for subsequent read/write
+    60 			;	setsec	set sector address (1,...,26) for subsequent read/write
+    61 			;	setdma	set subsequent dma address (initially 80h)
+    62 			;
+    63 			;	(read and write assume previous calls to set up the io parameters)
+    64 			;	read	read track/sector to preset dma address
+    65 			;	write	write track/sector from preset dma address
+    66 			;
+    67 			;	jump vector for indiviual routines
+    68 1600 C3 B3 16		jmp	boot
+    69 1603 C3 C3 16	wboote:	jmp	wboot
+    70 1606 C3 61 17		jmp	const
+    71 1609 C3 64 17		jmp	conin
+    72 160C C3 6A 17		jmp	conout
+    73 160F C3 6D 17		jmp	list
+    74 1612 C3 72 17		jmp	punch
+    75 1615 C3 75 17		jmp	reader
+    76 1618 C3 78 17		jmp	home
+    77 161B C3 7D 17		jmp	seldsk
+    78 161E C3 A7 17		jmp	settrk
+    79 1621 C3 AC 17		jmp	setsec
+    80 1624 C3 BB 17		jmp	setdma
+    81 1627 C3 C1 17		jmp	read
+    82 162A C3 CA 17		jmp	write
+    83 162D C3 70 17		jmp	listst	;list status
+    84 1630 C3 B1 17		jmp	sectran
+    85 			                                ;
+    86
+    87 			        ;;
+    88 			        
+    89 				;; maclib	diskdef	;load the disk definition library
+    90 				;; disks	4	;four disks
+    91
+    92      00 04	ndisks  equ     04h             ;
+    93
+    94      16 33	dpbase	equ	$	;base of disk parameter blocks
+    95 1633		dpe0:	dw	xlt0,0000h	;translate table
+            8216 0000 
+    96 1637			dw	0000h,0000h	;scratch area
+            0000 0000 
+    97 163B			dw	dirbuf,dpb0	;dir buff,parm block
+            6E18 7316 
+    98 163F			dw	csv0,alv0	;check, alloc vectors
+            0D19 EE18 
+    99 1643		dpe1:	dw	xlt1,0000h	;translate table
+            8216 0000 
+   100 1647			dw	0000h,0000h	;scratch area
+            0000 0000 
+   101 164B			dw	dirbuf,dpb1	;dir buff,parm block
+            6E18 7316 
+   102 164F			dw	csv1,alv1	;check, alloc vectors
+            3C19 1D19 
+   103 1653		dpe2:	dw	xlt2,0000h	;translate table
+            8216 0000 
+   104 1657			dw	0000h,0000h	;scratch area
+            0000 0000 
+   105 165B			dw	dirbuf,dpb2	;dir buff,parm block
+            6E18 7316 
+   106 165F			dw	csv2,alv2	;check, alloc vectors
+            6B19 4C19 
+   107 1663		dpe3:	dw	xlt3,0000h	;translate table
+            8216 0000 
+   108 1667			dw	0000h,0000h	;scratch area
+            0000 0000 
+   109 166B			dw	dirbuf,dpb3	;dir buff,parm block
+            6E18 7316 
+   110 166F			dw	csv3,alv3	;check, alloc vectors
+            9A19 7B19 
+   111
+   112 				;; diskdef	0,1,26,6,1024,243,64,64,offset
+   113      16 73	dpb0	equ	$		;disk parm block
+   114 1673			dw	26		;sec per track
+            1A00 
+   115 1675			db	3		;block shift
+            03 
+   116 1676			db	7		;block mask
+            07 
+   117 1677			db	0		;extnt mask
+            00 
+   118 1678			dw	242		;disk size-1
+            F200 
+   119 167A			dw	63		;directory max
+            3F00 
+   120 167C			db	192		;alloc0
+            C0 
+   121 167D			db	0		;alloc1
+            00 
+   122 167E			dw	16		;check size
+            1000 
+   123 1680			dw	2		;offset
+            0200 
+   124
+   125      16 82	xlt0	equ	$		;translate table
+   126 1682			db	1, 7, 13, 19, 25, 5, 11, 17, 23, 3, 9, 15, 21
+            01 07 0D 13 
+            19 05 0B 11 
+            17 03 09 0F 
+            15 
+   127 168F		        db      2, 8, 14, 20, 26, 6, 12, 18, 24, 4, 10, 16, 22		
+            02 08 0E 14 
+            1A 06 0C 12 
+            18 04 0A 10 
+            16 
+   128
+   129 				;; diskdef	1,0
+   130      16 73	dpb1	equ	dpb0	;equivalent parameters
+   131 			        ;; als1	equ	als0	;same allocation vector size
+   132 			        ;; css1	equ	css0	;same checksum vector size
+   133      16 82	xlt1	equ	xlt0	;same translate table
+   134
+   135 				;; diskdef	2,0
+   136      16 73	dpb2	equ	dpb0	;equivalent parameters
+   137 			        ;; als2	equ	als0	;same allocation vector size
+   138 			        ;; css2	equ	css0	;same checksum vector size
+   139      16 82	xlt2	equ	xlt0	;same translate table
+   140
+   141 				;; diskdef	3,0
+   142      16 73	dpb3	equ	dpb0	;equivalent parameters
+   143 			        ;; als3	equ	als0	;same allocation vector size
+   144 			        ;; css3	equ	css0	;same checksum vector size
+   145      16 82	xlt3	equ	xlt0	;same translate table
+   146
+   147 			        
+   148
+   149 			;	endef occurs at end of assembly
+   150 			;
+   151 			;	end of controller - independent code, the remaining subroutines
+   152 			;	are tailored to the particular operating environment, and must
+   153 			;	be altered for any system which differs from the intel mds.
+   154 			;
+   155 			;	the following code assumes the mds monitor exists at 0f800h
+   156 			;	and uses the i/o subroutines within the monitor
+   157 			;
+   158 			;	we also assume the mds system has four disk drives
+   159      00 FD	revrt	equ	0fdh	;interrupt revert port
+   160      00 FC	intc	equ	0fch	;interrupt mask port
+   161      00 F3	icon	equ	0f3h	;interrupt control port
+   162      00 F3	inte	equ	0111$1110b	;enable rst 0(warm boot), rst 7 (monitor)
+   163 			;
+   164 			;	mds monitor equates
+   165      F8 00	mon80	equ	0f800h	;mds monitor
+   166      FF 0F	rmon80	equ	0ff0fh	;restart mon80 (boot error)
+   167      F8 03	ci	equ	0f803h	;console character to reg-a
+   168      F8 06	ri	equ	0f806h	;reader in to reg-a
+   169      F8 09	co	equ	0f809h	;console char from c to console out
+   170      F8 0C	po	equ	0f80ch	;punch char from c to punch device
+   171      F8 0F	lo	equ	0f80fh	;list from c to list device
+   172      F8 12	csts	equ	0f812h	;console status 00/ff to register a
+   173 			;
+   174 			;	disk ports and commands
+   175      00 78	base	equ	78h	;base of disk command io ports
+   176      00 78	dstat	equ	base	;disk status (input)
+   177      00 79	rtype	equ	base+1	;result type (input)
+   178      00 7B	rbyte	equ	base+3	;result byte (input)
+   179 			;
+   180      00 79	ilow	equ	base+1	;iopb low address (output)
+   181      00 7A	ihigh	equ	base+2	;iopb high address (output)
+   182 			;
+   183      00 04	readf	equ	4h	;read function
+   184      00 06	writf	equ	6h	;write function
+   185      00 03	recal	equ	3h	;recalibrate drive
+   186      00 04	iordy	equ	4h	;i/o finished mask
+   187      00 0D	cr	equ	0dh	;carriage return
+   188      00 0A	lf	equ	0ah	;line feed
+   189 			;
+   190 			signon:	;signon message: xxk cp/m vers y.y
+   191 169C			db	cr,lf,lf
+            0D 0A 0A 
+   192     			if	test
+   193     			db	'32'	;32k example bios
+   194     			else
+   195 169F			db	'00'	;memory size filled by relocator
+            30 30 
+   196     			endif
+   197 16A1			db	'k CP/M vers '
+            6B 20 43 50 
+            2F 4D 20 76 
+            65 72 73 20 
+            
+   198 16AD			db	vers/10+'0','.',vers mod 10+'0'
+            32 2E 32 
+   199 16B0			db	cr,lf,0
+            0D 0A 00 
+   200 			;
+   201 			boot:	;print signon message and go to ccp
+   202 			;	(note: mds boot initialized iobyte at 0003h)
+   203 16B3 31 00 01		lxi	sp,buff+80h
+   204 16B6 21 9C 16		lxi	h,signon
+   205 16B9 CD D3 17		call	prmsg	;print message
+   206 16BC AF			xra	a	;clear accumulator
+   207 16BD 32 04 00		sta	cdisk	;set initially to disk a
+   208 16C0 C3 0F 17		jmp	gocpm	;go to cp/m
+   209 			;
+   210 			;
+   211 			wboot:;	loader on track 0, sector 1, which will be skipped for warm 
+   212 			;	read cp/m from disk - assuming there is a 128 byte cold start
+   213 			;	start.
+   214 			;
+   215 16C3 31 80 00		lxi	sp,buff	;using dma - thus 80 thru ff available for stack
+   216 			;
+   217 16C6 0E 0A		mvi	c,retry	;max retries
+   218 16C8 C5			push	b
+   219 			wboot0:	;enter here on error retries
+   220 16C9 01 00 00		lxi	b,cpmb	;set dma address to start of disk system
+   221 16CC CD BB 17		call	setdma
+   222 16CF 0E 00		mvi	c,0	;boot from drive 0
+   223 16D1 CD 7D 17		call	seldsk
+   224 16D4 0E 00		mvi	c,0
+   225 16D6 CD A7 17		call	settrk	;start with track 0
+   226 16D9 0E 02		mvi	c,2	;start reading sector 2
+   227 16DB CD AC 17		call	setsec
+   228 			;
+   229 			;	read sectors, count nsects to zero
+   230 16DE C1			pop	b	;10-error count
+   231 16DF 06 2C		mvi	b,nsects
+   232 			rdsec:	;read next sector
+   233 16E1 C5			push	b	;save sector count
+   234 16E2 CD C1 17		call	read
+   235 16E5 C2 49 17		jnz	booterr	;retry if errors occur
+   236 16E8 2A 6C 18		lhld	iod	;increment dma address
+   237 16EB 11 80 00		lxi	d,128	;sector size
+   238 16EE 19			dad	d	;incremented dma address in hl
+   239 16EF 44			mov	b,h
+   240 16F0 4D			mov	c,l	;ready for call to set dma
+   241 16F1 CD BB 17		call	setdma
+   242 16F4 3A 6B 18		lda	ios	;sector number just read
+   243 16F7 FE 1A		cpi	26	;read last sector?
+   244 16F9 DA 05 17		jc	rd1
+   245 			;	must be sector 26, zero and go to next track
+   246 16FC 3A 6A 18		lda	iot	;get track to register a
+   247 16FF 3C			inr	a
+   248 1700 4F			mov	c,a	;ready for call
+   249 1701 CD A7 17		call	settrk
+   250 1704 AF			xra	a	;clear sector number
+   251 1705 3C		rd1:	inr	a	;to next sector
+   252 1706 4F			mov	c,a	;ready for call
+   253 1707 CD AC 17		call	setsec
+   254 170A C1			pop	b	;recall sector count
+   255 170B 05			dcr	b	;done?
+   256 170C C2 E1 16		jnz	rdsec
+   257 			;
+   258 			;	done with the load, reset default buffer address
+   259 			gocpm:	;(enter here from cold start boot)
+   260 			;	enable rst0 and rst7
+   261 170F F3			di
+   262 1710 3E 12		mvi	a,12h	;initialize command
+   263 1712 D3 FD		out	revrt
+   264 1714 AF			xra	a
+   265 1715 D3 FC		out	intc	;cleared
+   266 1717 3E F3		mvi	a,inte	;rst0 and rst7 bits on
+   267 1719 D3 FC		out	intc
+   268 171B AF			xra	a
+   269 171C D3 F3		out	icon	;interrupt control
+   270 			;
+   271 			;	set default buffer address to 80h
+   272 171E 01 80 00		lxi	b,buff
+   273 1721 CD BB 17		call	setdma
+   274 			;
+   275 			;	reset monitor entry points
+   276 1724 3E C3		mvi	a,jmp
+   277 1726 32 00 00		sta	0
+   278 1729 21 03 16		lxi	h,wboote
+   279 172C 22 01 00		shld	1	;jmp wboot at location 00
+   280 172F 32 05 00		sta	5
+   281 1732 21 06 08		lxi	h,bdos
+   282 1735 22 06 00		shld	6	;jmp bdos at location 5
+   283     		        if      test
+   284     		        else
+   285 1738 32 38 00		sta	7*8	;jmp to mon80 (may have been changed by ddt)
+   286 173B 21 00 F8		lxi	h,mon80
+   287 173E 22 39 00		shld	7*8+1
+   288     			endif
+   289 			;	leave iobyte set
+   290 			;	previously selected disk was b, send parameter to cpm
+   291 1741 3A 04 00		lda	cdisk	;last logged disk number
+   292 1744 4F			mov	c,a	;send to ccp to log it in
+   293 1745 FB			ei
+   294 1746 C3 00 00		jmp	cpmb
+   295 			;
+   296 			;	error condition occurred, print message and retry
+   297 			booterr:
+   298 1749 C1			pop	b	;recall counts
+   299 174A 0D			dcr	c
+   300 174B CA 52 17		jz	booter0
+   301 			;	try again
+   302 174E C5			push	b
+   303 174F C3 C9 16		jmp	wboot0
+   304 			;
+   305 			booter0:
+   306 			;	otherwise too many retries
+   307 1752 21 5B 17		lxi	h,bootmsg
+   308 1755 CD D3 17		call	prmsg
+   309 1758 C3 0F FF		jmp	rmon80	;mds hardware monitor
+   310 			;
+   311 			bootmsg:
+   312 175B			db	'?boot',0
+            3F 62 6F 6F 
+            74 00 
+   313 			;
+   314 			;
+   315 			const:	;console status to reg-a
+   316 			;	(exactly the same as mds call)
+   317 1761 C3 12 F8		jmp	csts
+   318 			;
+   319 			conin:	;console character to reg-a
+   320 1764 CD 03 F8		call	ci
+   321 1767 E6 7F		ani	7fh	;remove parity bit
+   322 1769 C9			ret
+   323 			;
+   324 			conout:	;console character from c to console out
+   325 176A C3 09 F8		jmp	co
+   326 			;
+   327 			list:	;list device out
+   328 			;	(exactly the same as mds call)
+   329 176D C3 0F F8		jmp	lo
+   330 			;
+   331 			listst:
+   332 				;return list status
+   333 1770 AF			xra	a
+   334 1771 C9			ret		;always not ready
+   335 			;
+   336 			punch:	;punch device out
+   337 			;	(exactly the same as mds call)
+   338 1772 C3 0C F8		jmp	po
+   339 			;
+   340 			reader:	;reader character in to reg-a
+   341 			;	(exactly the same as mds call)
+   342 1775 C3 06 F8		jmp	ri
+   343 			;
+   344 			home:	;move to home position
+   345 			;	treat as track 00 seek
+   346 1778 0E 00		mvi	c,0
+   347 177A C3 A7 17		jmp	settrk
+   348 			;
+   349 			seldsk:	;select disk given by register c
+   350 177D 21 00 00		lxi	h,0000h	;return 0000 if error
+   351 1780 79			mov	a,c
+   352 1781 FE 04		cpi	ndisks	;too large?
+   353 1783 D0			rnc		;leave HL = 0000
+   354 			;
+   355 1784 E6 02		ani	10b	;00 00 for drive 0,1 and 10 10 for drive 2,3
+   356 1786 32 66 18		sta	dbank	;to select drive bank
+   357 1789 79			mov	a,c	;00, 01, 10, 11
+   358 178A E6 01		ani	1b	;mds has 0,1 at 78, 2,3 at 88
+   359 178C B7			ora	a	;result 00?
+   360 178D CA 92 17		jz	setdrive
+   361 1790 3E 30		mvi	a,00110000b	;selects drive 1 in bank
+   362 			setdrive:
+   363 1792 47			mov	b,a	;save the function
+   364 1793 21 68 18		lxi	h,iof	;io function
+   365 1796 7E			mov	a,m
+   366 1797 E6 CF		ani	11001111b	;mask out disk number
+   367 1799 B0			ora	b	;mask in new disk number
+   368 179A 77			mov	m,a	;save it in iopb
+   369 179B 69			mov	l,c
+   370 179C 26 00		mvi	h,0	;HL=disk number
+   371 179E 29			dad	h	;*2
+   372 179F 29			dad	h	;*4
+   373 17A0 29			dad	h	;*8
+   374 17A1 29			dad	h	;*16
+   375 17A2 11 33 16		lxi	d,dpbase
+   376 17A5 19			dad	d	;HL=disk header table address
+   377 17A6 C9			ret
+   378 			;
+   379 			;
+   380 			settrk:	;set track address given by c
+   381 17A7 21 6A 18		lxi	h,iot
+   382 17AA 71			mov	m,c
+   383 17AB C9			ret
+   384 			;
+   385 			setsec:	;set sector number given by c
+   386 17AC 21 6B 18		lxi	h,ios
+   387 17AF 71			mov	m,c
+   388 17B0 C9			ret
+   389 			sectran:
+   390 					;translate sector bc using table at de
+   391 17B1 06 00		mvi	b,0	;double precision sector number in BC
+   392 17B3 EB			xchg		;translate table address to HL
+   393 17B4 09			dad	b	;translate(sector) address
+   394 17B5 7E			mov	a,m	;translated sector number to A
+   395 17B6 32 6B 18		sta	ios
+   396 17B9 6F			mov	l,a	;return sector number in L
+   397 17BA C9			ret
+   398 			;
+   399 			setdma:	;set dma address given by regs b,c
+   400 17BB 69			mov	l,c
+   401 17BC 60			mov	h,b
+   402 17BD 22 6C 18		shld	iod
+   403 17C0 C9			ret
+   404 			;
+   405 			read:	;read next disk record (assuming disk/trk/sec/dma set)
+   406 17C1 0E 04		mvi	c,readf	;set to read function
+   407 17C3 CD E0 17		call	setfunc
+   408 17C6 CD F0 17		call	waitio	;perform read function
+   409 17C9 C9			ret		;may have error set in reg-a
+   410 			;
+   411 			;
+   412 			write:	;disk write function
+   413 17CA 0E 06		mvi	c,writf
+   414 17CC CD E0 17		call	setfunc	;set to write function
+   415 17CF CD F0 17		call	waitio
+   416 17D2 C9			ret		;may have error set
+   417 			;
+   418 			;
+   419 			;	utility subroutines
+   420 			prmsg:	;print message at h,l to 0
+   421 17D3 7E			mov	a,m
+   422 17D4 B7			ora	a	;zero?
+   423 17D5 C8			rz
+   424 			;	more to print
+   425 17D6 E5			push	h
+   426 17D7 4F			mov	c,a
+   427 17D8 CD 6A 17		call	conout
+   428 17DB E1			pop	h
+   429 17DC 23			inx	h
+   430 17DD C3 D3 17		jmp	prmsg
+   431 			;
+   432 			setfunc:
+   433 			;	set function for next i/o (command in reg-c)
+   434 17E0 21 68 18		lxi	h,iof	;io function address
+   435 17E3 7E			mov	a,m	;get it to accumulator for masking
+   436 17E4 E6 F8		ani	11111000b	;remove previous command
+   437 17E6 B1			ora	c	;set to new command
+   438 17E7 77			mov	m,a	;replaced in iopb
+   439 			;	the mds-800 controller requires disk bank bit in sector byte
+   440 			;	mask the bit from the current i/o function
+   441 17E8 E6 20		ani	00100000b	;mask the disk select bit
+   442 17EA 21 6B 18		lxi	h,ios		;address the sector select byte
+   443 17ED B6			ora	m		;select proper disk bank
+   444 17EE 77			mov	m,a		;set disk select bit on/off
+   445 17EF C9			ret
+   446 			;
+   447 			waitio:
+   448 17F0 0E 0A		mvi	c,retry	;max retries before perm error
+   449 			rewait:
+   450 			;	start the i/o function and wait for completion
+   451 17F2 CD 3F 18		call	intype	;in rtype
+   452 17F5 CD 4C 18		call	inbyte	;clears the controller
+   453 			;
+   454 17F8 3A 66 18		lda	dbank		;set bank flags
+   455 17FB B7			ora	a		;zero if drive 0,1 and nz if 2,3
+   456 17FC 3E 67		mvi	a,iopb and 0ffh	;low address for iopb
+   457 17FE 06 18		mvi	b,iopb shr 8	;high address for iopb
+   458 1800 C2 0B 18		jnz	iodr1	;drive bank 1?
+   459 1803 D3 79		out	ilow		;low address to controller
+   460 1805 78			mov	a,b
+   461 1806 D3 7A		out	ihigh	;high address
+   462 1808 C3 10 18		jmp	wait0		;to wait for complete
+   463 			;
+   464 			iodr1:	;drive bank 1
+   465 180B D3 89		out	ilow+10h	;88 for drive bank 10
+   466 180D 78			mov	a,b
+   467 180E D3 8A		out	ihigh+10h
+   468 			;
+   469 1810 CD 59 18	wait0:	call	instat		;wait for completion
+   470 1813 E6 04		ani	iordy		;ready?
+   471 1815 CA 10 18		jz	wait0
+   472 			;
+   473 			;	check io completion ok
+   474 1818 CD 3F 18		call	intype		;must be io complete (00) unlinked
+   475 			;	00 unlinked i/o complete,    01 linked i/o complete (not used)
+   476 			;	10 disk status changed       11 (not used)
+   477 181B FE 02		cpi	10b		;ready status change?
+   478 181D CA 32 18		jz	wready
+   479 			;
+   480 			;	must be 00 in the accumulator
+   481 1820 B7			ora	a
+   482 1821 C2 38 18		jnz	werror		;some other condition, retry
+   483 			;
+   484 			;	check i/o error bits
+   485 1824 CD 4C 18		call	inbyte
+   486 1827 17			ral
+   487 1828 DA 32 18		jc	wready		;unit not ready
+   488 182B 1F			rar
+   489 182C E6 FE		ani	11111110b	;any other errors?  (deleted data ok)
+   490 182E C2 38 18		jnz	werror
+   491 			;
+   492 			;	read or write is ok, accumulator contains zero
+   493 1831 C9			ret
+   494 			;
+   495 			wready:	;not ready, treat as error for now
+   496 1832 CD 4C 18		call	inbyte		;clear result byte
+   497 1835 C3 38 18		jmp	trycount
+   498 			;
+   499 			werror:	;return hardware malfunction (crc, track, seek, etc.)
+   500 			;	the mds controller has returned a bit in each position
+   501 			;	of the accumulator, corresponding to the conditions:
+   502 			;	0	- deleted data (accepted as ok above)
+   503 			;	1	- crc error
+   504 			;	2	- seek error
+   505 			;	3	- address error (hardware malfunction)
+   506 			;	4	- data over/under flow (hardware malfunction)
+   507 			;	5	- write protect (treated as not ready)
+   508 			;	6	- write error (hardware malfunction)
+   509 			;	7	- not ready
+   510 			;	(accumulator bits are numbered 7 6 5 4 3 2 1 0)
+   511 			;
+   512 			;	it may be useful to filter out the various conditions,
+   513 			;	but we will get a permanent error message if it is not
+   514 			;	recoverable.  in any case, the not ready condition is
+   515 			;	treated as a separate condition for later improvement
+   516 			trycount:
+   517 			;	register c contains retry count, decrement 'til zero
+   518 1838 0D			dcr	c
+   519 1839 C2 F2 17		jnz	rewait	;for another try
+   520 			;
+   521 			;	cannot recover from error
+   522 183C 3E 01		mvi	a,1	;error code
+   523 183E C9			ret
+   524 			;
+   525 			;	intype, inbyte, instat read drive bank 00 or 10
+   526 183F 3A 66 18	intype:	lda	dbank
+   527 1842 B7			ora	a
+   528 1843 C2 49 18		jnz	intyp1	;skip to bank 10
+   529 1846 DB 79		in	rtype
+   530 1848 C9			ret
+   531 1849 DB 89	intyp1:	in	rtype+10h	;78 for 0,1  88 for 2,3
+   532 184B C9			ret
+   533 			;
+   534 184C 3A 66 18	inbyte:	lda	dbank
+   535 184F B7			ora	a
+   536 1850 C2 56 18		jnz	inbyt1
+   537 1853 DB 7B		in	rbyte
+   538 1855 C9			ret
+   539 1856 DB 8B	inbyt1:	in	rbyte+10h
+   540 1858 C9			ret
+   541 			;
+   542 1859 3A 66 18	instat:	lda	dbank
+   543 185C B7			ora	a
+   544 185D C2 63 18		jnz	insta1
+   545 1860 DB 78		in	dstat
+   546 1862 C9			ret
+   547 1863 DB 88	insta1:	in	dstat+10h
+   548 1865 C9			ret
+   549 			;
+   550 			;
+   551 			;
+   552 			;	data areas (must be in ram)
+   553 1866		dbank:	db	0	;disk bank 00 if drive 0,1
+            00 
+   554 						;	   10 if drive 2,3
+   555 			iopb:	;io parameter block
+   556 1867			db	80h	;normal i/o operation
+            80 
+   557 1868		iof:	db	readf	;io function, initial read
+            04 
+   558 1869		ion:	db	1	;number of sectors to read
+            01 
+   559 186A		iot:	db	offset	;track number
+            02 
+   560 186B		ios:	db	1	;sector number
+            01 
+   561 186C		iod:	dw	buff	;io address
+            8000 
+   562 			;
+   563 			;
+   564 			;	define ram areas for bdos operation
+   565 				;; endef
+   566      18 6E	begdat	equ	$
+   567 186E		dirbuf:	ds	128	;directory access buffer
+   568 18EE		alv0:	ds	31
+   569 190D		csv0:	ds	16
+   570 191D		alv1:	ds	31
+   571 193C		csv1:	ds	16
+   572 194C		alv2:	ds	31
+   573 196B		csv2:	ds	16
+   574 197B		alv3:	ds	31
+   575 199A		csv3:	ds	16
+   576      19 AA	enddat	equ	$
+   577      01 3C	datsiz	equ	$-begdat
+   578 			        
+   579     			end
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names			Types	Values
+-----			-----	------
+jmp			EQU	000C3h
+vers			EQU	00016h
+test			EQU	00000h
+bias			EQU	00000h
+patch			EQU	01600h
+cpmb			EQU	00000h
+bdos			EQU	00806h
+cpml			EQU	01600h
+nsects			EQU	0002Ch
+offset			EQU	00002h
+cdisk			EQU	00004h
+buff			EQU	00080h
+retry			EQU	0000Ah
+ndisks			EQU	00004h
+dpbase			EQU	01633h
+dpb0			EQU	01673h
+xlt0			EQU	01682h
+dpb1			EQU	01673h
+xlt1			EQU	01682h
+dpb2			EQU	01673h
+xlt2			EQU	01682h
+dpb3			EQU	01673h
+xlt3			EQU	01682h
+revrt			EQU	000FDh
+intc			EQU	000FCh
+icon			EQU	000F3h
+inte			EQU	000F3h
+mon80			EQU	0F800h
+rmon80			EQU	0FF0Fh
+ci			EQU	0F803h
+ri			EQU	0F806h
+co			EQU	0F809h
+po			EQU	0F80Ch
+lo			EQU	0F80Fh
+csts			EQU	0F812h
+base			EQU	00078h
+dstat			EQU	00078h
+rtype			EQU	00079h
+rbyte			EQU	0007Bh
+ilow			EQU	00079h
+ihigh			EQU	0007Ah
+readf			EQU	00004h
+writf			EQU	00006h
+recal			EQU	00003h
+iordy			EQU	00004h
+cr			EQU	0000Dh
+lf			EQU	0000Ah
+begdat			EQU	0186Eh
+enddat			EQU	019AAh
+datsiz			EQU	0013Ch
+wboote			Label	01603h
+dpe0			Label	01633h
+dpe1			Label	01643h
+dpe2			Label	01653h
+dpe3			Label	01663h
+signon			Label	0169Ch
+boot			Label	016B3h
+wboot			Label	016C3h
+wboot0			Label	016C9h
+rdsec			Label	016E1h
+rd1			Label	01705h
+gocpm			Label	0170Fh
+booterr			Label	01749h
+booter0			Label	01752h
+bootmsg			Label	0175Bh
+const			Label	01761h
+conin			Label	01764h
+conout			Label	0176Ah
+list			Label	0176Dh
+listst			Label	01770h
+punch			Label	01772h
+reader			Label	01775h
+home			Label	01778h
+seldsk			Label	0177Dh
+setdrive		Label	01792h
+settrk			Label	017A7h
+setsec			Label	017ACh
+sectran			Label	017B1h
+setdma			Label	017BBh
+read			Label	017C1h
+write			Label	017CAh
+prmsg			Label	017D3h
+setfunc			Label	017E0h
+waitio			Label	017F0h
+rewait			Label	017F2h
+iodr1			Label	0180Bh
+wait0			Label	01810h
+wready			Label	01832h
+werror			Label	01838h
+trycount		Label	01838h
+intype			Label	0183Fh
+intyp1			Label	01849h
+inbyte			Label	0184Ch
+inbyt1			Label	01856h
+instat			Label	01859h
+insta1			Label	01863h
+dbank			Label	01866h
+iopb			Label	01867h
+iof			Label	01868h
+ion			Label	01869h
+iot			Label	0186Ah
+ios			Label	0186Bh
+iod			Label	0186Ch
+dirbuf			Label	0186Eh
+alv0			Label	018EEh
+csv0			Label	0190Dh
+alv1			Label	0191Dh
+csv1			Label	0193Ch
+alv2			Label	0194Ch
+csv2			Label	0196Bh
+alv3			Label	0197Bh
+csv3			Label	0199Ah
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 50
+"SET"	= 0
+Labels	= 62
+
+

@@ -139,8 +139,6 @@ plot.
 
 [[file:img/i8080_dad.png]]
 
-** Not Yet Implemented
-
 *** JMP Jcc
 
 C3 jmp  ##
@@ -154,6 +152,24 @@ EA jpe  ##
 E2 jpo  ##
 CA jz   ##
 
+** Not Yet Implemented
+
+*** IN and OUT
+
+DB in   # 
+D3 out  # 
+
+*** ALU Immediates
+
+C6 adi  # 
+CE aci  # 
+D6 sui  # 
+DE sbi  # 
+E6 ani  # 
+EE xri  # 
+F6 ori  # 
+FE cpi  #
+ 
 *** LDA STA
 
 3A lda  ##
@@ -202,7 +218,7 @@ AE xra  M
 B6 ora  M
 BE cmp  M
 
-**** MVI
+**** MVI  
 
 36 mvi  M,#
 

@@ -1,0 +1,29 @@
+     1 			;;; boot rom lives in the top 2k of memory; during SHADOW,
+     2 			;;; also serves memory reads at bottom 2K.
+     3
+     4 			;;; === === === === === === === === === === === === === === === ===
+     5
+     6      F8 00	        ORG     0F800h
+     7
+*** Error 8 in "asm/i8080_bootrom.asm": Missing field!
+     8 F800 C3 00 00	rom:    JMP     .+3
+     9 F803 F3		        DI
+    10 F804 31 80 00	        LXI     SP,0080h
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+rom		Label	0F800h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 1
+
+

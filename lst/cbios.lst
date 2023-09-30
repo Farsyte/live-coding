@@ -1,48 +1,48 @@
      1     			TITLE   'SKELETAL CBIOS FOR FIRST LEVEL OF CP/M ALTERATION'
      2 			;
      3 			;	NOTE: MSIZE DETERMINES WHERE THIS BIOS IS LOCATED.
-     4      00 10	MSIZE	EQU	16		;CP/M VERSION MEMORY SIZE IN KILOBYTES
-     5      3E 00	PATCH	EQU	(MSIZE*1024)-(2*256)  ;START OF THE CBIOS PATCH
+     4      00 3E	MSIZE	EQU	62		;CP/M VERSION MEMORY SIZE IN KILOBYTES
+     5      F6 00	PATCH	EQU	(MSIZE*1024)-(2*256)  ;START OF THE CBIOS PATCH
      6 			;
-     7      00 00	CBASE	EQU	(MSIZE-16)*1024 ;BIAS FOR SYSTEMS LARGER THAN 16K
-     8      29 00	CPMB	EQU	CBASE+2900H	;BASE OF CP/M (= BASE OF CCP)
-     9      31 06	BDOS	EQU	CBASE+3106H	;BASE OF RESIDENT PORTION OF CP/M
-    10      D7 00	CPML	EQU	$-CPMB		;LENGTH OF THE CP/M SYSTEM IN BYTES
-    11      FF AE	NSECTS	EQU	CPML/128	;NUMBER OF SECTORS TO LOAD ON WARM START
-    12 			;
-    13 			;	PAGE ZERO STUFF:
+     7      F6 00		ORG	PATCH		;ORIGIN OF THIS PROGRAM
+     8 			;
+     9      B8 00	CBASE	EQU	(MSIZE-16)*1024 ;BIAS FOR SYSTEMS LARGER THAN 16K
+    10      E1 00	CPMB	EQU	CBASE+2900H	;BASE OF CP/M (= BASE OF CCP)
+    11      E9 06	BDOS	EQU	CBASE+3106H	;BASE OF RESIDENT PORTION OF CP/M
+    12      15 00	CPML	EQU	$-CPMB		;LENGTH OF THE CP/M SYSTEM IN BYTES
+    13      00 2A	NSECTS	EQU	CPML/128	;NUMBER OF SECTORS TO LOAD ON WARM START
     14 			;
-    15      00 03	IOBYTE	EQU	0003H
-    16      00 04	CDISK	EQU	0004H
-    17 			;
-    18      00 40	SCRAT	EQU	40H	;USE THE AREA RESERVED FOR US AT 40H TO HOLD:
-    19      00 40	TRACK	EQU	SCRAT+0		;LAST SELECTED TRACK
-    20      00 41	SECTOR	EQU	SCRAT+1		;LAST SELECTED SECTOR
-    21      00 42	DMAAD	EQU	SCRAT+2		;LAST SELECTED DMA ADDRESS
-    22      00 44	DISKNO	EQU	SCRAT+4		;LAST SELECTED DISK NUMBER
-    23 			;
-    24      3E 00		ORG	PATCH	;ORIGIN OF THIS PROGRAM
+    15 			;	PAGE ZERO STUFF:
+    16 			;
+    17      00 03	IOBYTE	EQU	0003H
+    18      00 04	CDISK	EQU	0004H
+    19 			;
+    20      00 40	SCRAT	EQU	40H	;USE THE AREA RESERVED FOR US AT 40H TO HOLD:
+    21      00 40	TRACK	EQU	SCRAT+0		;LAST SELECTED TRACK
+    22      00 41	SECTOR	EQU	SCRAT+1		;LAST SELECTED SECTOR
+    23      00 42	DMAAD	EQU	SCRAT+2		;LAST SELECTED DMA ADDRESS
+    24      00 44	DISKNO	EQU	SCRAT+4		;LAST SELECTED DISK NUMBER
     25 			;
     26 			;	JUMP VECTOR FOR INDIVIDUAL SUBROUTINES
     27 			;
-    28 3E00 C3 2D 3E		JMP	BOOT	;COLD START
+    28 F600 C3 2D F6		JMP	BOOT	;COLD START
     29 			WBOOTE:
-    30 3E03 C3 30 3E		JMP	WBOOT	;WARM START
+    30 F603 C3 30 F6		JMP	WBOOT	;WARM START
     31
-    32 3E06 C3 9B 3E		JMP	CONST	;CONSOLE STATUS
-    33 3E09 C3 9F 3E		JMP	CONIN	;CONSOLE CHARACTER IN
-    34 3E0C C3 A2 3E		JMP	CONOUT	;CONSOLE CHARACTER OUT
-    35 3E0F C3 A4 3E		JMP	LIST	;LIST CHARACTER OUT
-    36 3E12 C3 A6 3E		JMP	PUNCH	;PUNCH CHARACTER OUT
-    37 3E15 C3 A8 3E		JMP	READER	;READER CHARACTER OUT
+    32 F606 C3 9B F6		JMP	CONST	;CONSOLE STATUS
+    33 F609 C3 9F F6		JMP	CONIN	;CONSOLE CHARACTER IN
+    34 F60C C3 A2 F6		JMP	CONOUT	;CONSOLE CHARACTER OUT
+    35 F60F C3 A4 F6		JMP	LIST	;LIST CHARACTER OUT
+    36 F612 C3 A6 F6		JMP	PUNCH	;PUNCH CHARACTER OUT
+    37 F615 C3 A8 F6		JMP	READER	;READER CHARACTER OUT
     38
-    39 3E18 C3 AA 3E		JMP	HOME	;MOVE HEAD TO HOME POSITION
-    40 3E1B C3 B0 3E		JMP	SELDSK	;SELECT DISK
-    41 3E1E C3 B5 3E		JMP	SETTRK	;SET TRACK NUMBER
-    42 3E21 C3 BA 3E		JMP	SETSEC	;SET SECTOR NUMBER
-    43 3E24 C3 BF 3E		JMP	SETDMA	;SET DMA ADDRESS
-    44 3E27 C3 C5 3E		JMP	READ	;READ DISK
-    45 3E2A C3 C7 3E		JMP	WRITE	;WRITE DISK
+    39 F618 C3 AA F6		JMP	HOME	;MOVE HEAD TO HOME POSITION
+    40 F61B C3 B0 F6		JMP	SELDSK	;SELECT DISK
+    41 F61E C3 B5 F6		JMP	SETTRK	;SET TRACK NUMBER
+    42 F621 C3 BA F6		JMP	SETSEC	;SET SECTOR NUMBER
+    43 F624 C3 BF F6		JMP	SETDMA	;SET DMA ADDRESS
+    44 F627 C3 C5 F6		JMP	READ	;READ DISK
+    45 F62A C3 C7 F6		JMP	WRITE	;WRITE DISK
     46
     47 			;; added in cp/m 2.0:
     48 			;;	JMP	LISTST	;RETURN LIST STATUS
@@ -64,7 +64,7 @@
     64 			;;; drive A.
     65
     66 			BOOT:
-    67 3E2D C3 79 3E	        JMP     GOCPM           ;INITIALIZE AND GO TO CP/M
+    67 F62D C3 79 F6	        JMP     GOCPM           ;INITIALIZE AND GO TO CP/M
     68
     69 			;;; The WBOOT entry point gets control when a warm start occurs.
     70 			;;; A warm start is performed whenever a user program branches to
@@ -89,97 +89,97 @@
     89 			;;; select after system initialization.
     90
     91 			WBOOT:  ;SIMPLEST CASE IS TO READ THEDISK UNTIL ALL SECTORS LOADED
-    92 3E30 31 80 00		LXI	SP, 80H		;USE SPACE BELOW BUFFER FOR STACK
-    93 3E33 0E 00		MVI	C, 0		;SELECT DISK 0
-    94 3E35 CD B0 3E		CALL	SELDSK
-    95 3E38 CD AA 3E		CALL	HOME		;GO TO TRACK 00
+    92 F630 31 80 00		LXI	SP, 80H		;USE SPACE BELOW BUFFER FOR STACK
+    93 F633 0E 00		MVI	C, 0		;SELECT DISK 0
+    94 F635 CD B0 F6		CALL	SELDSK
+    95 F638 CD AA F6		CALL	HOME		;GO TO TRACK 00
     96 			;
-    97 3E3B 06 AE		MVI	B, NSECTS	;B COUNTS * OF SECTORS TO LOAD
-    98 3E3D 0E 00		MVI	C, 0		;C HAS THE CURRENT TRACK NUMBER
-    99 3E3F 16 02		MVI	D, 2		;D HAS THE NEXT SECTOR TO READ
+    97 F63B 06 2A		MVI	B, NSECTS	;B COUNTS * OF SECTORS TO LOAD
+    98 F63D 0E 00		MVI	C, 0		;C HAS THE CURRENT TRACK NUMBER
+    99 F63F 16 02		MVI	D, 2		;D HAS THE NEXT SECTOR TO READ
    100 			;	NOTE THAT WE BEGIN BY READING TRACK 0, SECTOR 2 SINCE SECTOR 1
    101 			;	CONTAINS THE COLD START LOADER, WHICH IS SKIPPED IN A WARM START
-   102 3E41 21 00 29		LXI	H, CPMB		;BASE OF CP/M (INITIAL LOAD POINT)
+   102 F641 21 00 E1		LXI	H, CPMB		;BASE OF CP/M (INITIAL LOAD POINT)
    103 			LOAD1:	;LOAD	ONE MORE SECTOR
-   104 3E44 C5			PUSH	B		;SAVE SECTOR COUNT, CURRENT TRACK
-   105 3E45 D5			PUSH	D		;SAVE NEXT SECTOR TO READ
-   106 3E46 E5			PUSH	H		;SAVE DMA ADDRESS
-   107 3E47 4A			MOV	C, D		;GET SECTOR ADDRESS TO REGISTER C
-   108 3E48 CD BA 3E		CALL	SETSEC		;SET SECTOR ADDRESS FROM REGISTER C
-   109 3E4B C1			POP	B		;RECALL DMA ADDRESS TO B, C
-   110 3E4C C5			PUSH	B		;REPLACE ON STACK FOR LATER RECALL
-   111 3E4D CD BF 3E		CALL	SETDMA		;SET DMA ADDRESS FROM B, C
+   104 F644 C5			PUSH	B		;SAVE SECTOR COUNT, CURRENT TRACK
+   105 F645 D5			PUSH	D		;SAVE NEXT SECTOR TO READ
+   106 F646 E5			PUSH	H		;SAVE DMA ADDRESS
+   107 F647 4A			MOV	C, D		;GET SECTOR ADDRESS TO REGISTER C
+   108 F648 CD BA F6		CALL	SETSEC		;SET SECTOR ADDRESS FROM REGISTER C
+   109 F64B C1			POP	B		;RECALL DMA ADDRESS TO B, C
+   110 F64C C5			PUSH	B		;REPLACE ON STACK FOR LATER RECALL
+   111 F64D CD BF F6		CALL	SETDMA		;SET DMA ADDRESS FROM B, C
    112 			;
    113 			;	DRIVE SET TO 0, TRACK SET, SECTOR SET, DMA ADDRESS SET
-   114 3E50 CD C5 3E		CALL	READ
-   115 3E53 FE 00		CPI	00H		;ANY ERRORS?
-   116 3E55 C2 30 3E		JNZ	WBOOT		;RETRY THE ENTIRE BOOT IF AN ERROR OCCURS
+   114 F650 CD C5 F6		CALL	READ
+   115 F653 FE 00		CPI	00H		;ANY ERRORS?
+   116 F655 C2 30 F6		JNZ	WBOOT		;RETRY THE ENTIRE BOOT IF AN ERROR OCCURS
    117 			;
    118 			;	NO ERROR, MOVE TO NEXT SECTOR
-   119 3E58 E1			POP	H		;RECALL DMA ADDRESS
-   120 3E59 11 80 00		LXI	D, 128		;DMA=DMA+128
-   121 3E5C 19			DAD	D		;NEW DMA ADDRESS IS IN H, L
-   122 3E5D D1			POP	D		;RECALL SECTOR ADDRESS
-   123 3E5E C1			POP	B	        ;RECALL NUMBER OF SECTORS REMAINING, AND CURRENT TRK
-   124 3E5F 05			DCR	B		;SECTORS=SECTORS-1
-   125 3E60 CA 79 3E		JZ	GOCPM		;TRANSFER TO CP/M IF ALL HAVE BEEN LOADED
+   119 F658 E1			POP	H		;RECALL DMA ADDRESS
+   120 F659 11 80 00		LXI	D, 128		;DMA=DMA+128
+   121 F65C 19			DAD	D		;NEW DMA ADDRESS IS IN H, L
+   122 F65D D1			POP	D		;RECALL SECTOR ADDRESS
+   123 F65E C1			POP	B	        ;RECALL NUMBER OF SECTORS REMAINING, AND CURRENT TRK
+   124 F65F 05			DCR	B		;SECTORS=SECTORS-1
+   125 F660 CA 79 F6		JZ	GOCPM		;TRANSFER TO CP/M IF ALL HAVE BEEN LOADED
    126 			;
    127 			;	MORE SECTORS REMAIN TO LOAD, CHECK FOR TRACK CHANGE
-   128 3E63 14			INR	D
-   129 3E64 7A			MOV	A,D		;SECTOR=27?, IF SO, CHANGE TRACKS
-   130 3E65 FE 1B		CPI	27
-   131 3E67 DA 44 3E		JC	LOAD1		;CARRY GENERATED IF SECTOR<27
+   128 F663 14			INR	D
+   129 F664 7A			MOV	A,D		;SECTOR=27?, IF SO, CHANGE TRACKS
+   130 F665 FE 1B		CPI	27
+   131 F667 DA 44 F6		JC	LOAD1		;CARRY GENERATED IF SECTOR<27
    132 			;
    133 			;	END OF CURRENT TRACK, GO TO NEXT TRACK
-   134 3E6A 16 01		MVI	D, 1		;BEGIN WITH FIRST SECTOR OF NEXT TRACK
-   135 3E6C 0C			INR	C		;TRACK=TRACK+1
+   134 F66A 16 01		MVI	D, 1		;BEGIN WITH FIRST SECTOR OF NEXT TRACK
+   135 F66C 0C			INR	C		;TRACK=TRACK+1
    136 			;
    137 			;	SAVE REGISTER STATE, AND CHANGE TRACKS
-   138 3E6D C5			PUSH	B
-   139 3E6E D5			PUSH	D
-   140 3E6F E5			PUSH	H
-   141 3E70 CD B5 3E		CALL	SETTRK		;TRACK ADDRESS SET FROM REGISTER C
-   142 3E73 E1			POP	H
-   143 3E74 D1			POP	D
-   144 3E75 C1			POP	B
-   145 3E76 C3 44 3E		JMP	LOAD1		;FOR ANOTHER SECTOR
+   138 F66D C5			PUSH	B
+   139 F66E D5			PUSH	D
+   140 F66F E5			PUSH	H
+   141 F670 CD B5 F6		CALL	SETTRK		;TRACK ADDRESS SET FROM REGISTER C
+   142 F673 E1			POP	H
+   143 F674 D1			POP	D
+   144 F675 C1			POP	B
+   145 F676 C3 44 F6		JMP	LOAD1		;FOR ANOTHER SECTOR
    146 			;
    147 			;	END OF	LOAD OPERATION, SET PARAMETERS AND GO TO CP/M
    148 			GOCPM:
-   149 3E79 3E C3		MVI	A, 0C3H		;C3 IS A JMP INSTRUCTION
-   150 3E7B 32 00 00		STA	0		;FOR JMP TO WBOOT
-   151 3E7E 21 03 3E		LXI	H, WBOOTE	;WBOOT ENTRY POINT
-   152 3E81 22 01 00		SHLD	1		;SET ADDRESS FIELD FOR JMP AT 0
+   149 F679 3E C3		MVI	A, 0C3H		;C3 IS A JMP INSTRUCTION
+   150 F67B 32 00 00		STA	0		;FOR JMP TO WBOOT
+   151 F67E 21 03 F6		LXI	H, WBOOTE	;WBOOT ENTRY POINT
+   152 F681 22 01 00		SHLD	1		;SET ADDRESS FIELD FOR JMP AT 0
    153 			;
-   154 3E84 32 05 00		STA	5		;FOR JMP TO BDOS
-   155 3E87 21 06 31		LXI	H, BDOS		;BDOS ENTRY POINT
-   156 3E8A 22 06 00		SHLD	6		;ADDRESS FIELD OF JUMP AT 5 TO BDOS
+   154 F684 32 05 00		STA	5		;FOR JMP TO BDOS
+   155 F687 21 06 E9		LXI	H, BDOS		;BDOS ENTRY POINT
+   156 F68A 22 06 00		SHLD	6		;ADDRESS FIELD OF JUMP AT 5 TO BDOS
    157 			;
-   158 3E8D 01 80 00		LXI	B, 80H		;DEFAULT DMA ADDRESS IS 80H
-   159 3E90 CD BF 3E		CALL	SETDMA
+   158 F68D 01 80 00		LXI	B, 80H		;DEFAULT DMA ADDRESS IS 80H
+   159 F690 CD BF F6		CALL	SETDMA
    160 			;
-   161 3E93 FB			EI			;ENABLE THE INTERRUPT SYSTEM
-   162 3E94 3A 04 00		LDA	CDISK		;GET CURRENT DISK NUMBER
-   163 3E97 4F			MOV	C, A		;SEND TO THE CCP
-   164 3E98 C3 00 29		JMP	CPMB		;GO TO CP/M FOR FURTHER PROCESSING
+   161 F693 FB			EI			;ENABLE THE INTERRUPT SYSTEM
+   162 F694 3A 04 00		LDA	CDISK		;GET CURRENT DISK NUMBER
+   163 F697 4F			MOV	C, A		;SEND TO THE CCP
+   164 F698 C3 00 E1		JMP	CPMB		;GO TO CP/M FOR FURTHER PROCESSING
    165
    166 			;;; Sample the status of the currently assigned console device;
    167 			;;; return 0FFH in register A if a character is ready to read
    168 			;;; and 00H in register A if no console characters are ready.
    169
    170 			CONST:
-   171 3E9B 76			HLT                     ;content tbd
-   172 3E9C 3E 00	        MVI     A,00H
-   173 3E9E C9		        RET
+   171 F69B 76			HLT                     ;content tbd
+   172 F69C 3E 00	        MVI     A,00H
+   173 F69E C9		        RET
    174
    175 			;;; Read the next console character into register A, and set the
    176 			;;; high-order (parity bit). If no console character is ready,
    177 			;;; wait until a character is typed before returning.
    178
    179 			CONIN:
-   180 3E9F 79		        MOV     A,C
-   181 3EA0 76			HLT                     ;content tbd
-   182 3EA1 C9		        RET
+   180 F69F 79		        MOV     A,C
+   181 F6A0 76			HLT                     ;content tbd
+   182 F6A1 C9		        RET
    183
    184 			;;; Send the character from register C to the console output de-
    185 			;;; veice. The character is in ASCII, with high-order (parity) bit
@@ -191,22 +191,22 @@
    191 			;;; way (a control-z causes the Lear Siegler terminal to clear
    192 			;;; the screen, for example).
    193
-   194 3EA2 76		CONOUT: HLT                     ;content tbd
-   195 3EA3 C9		        RET
+   194 F6A2 76		CONOUT: HLT                     ;content tbd
+   195 F6A3 C9		        RET
    196
    197 			;;; Send the character from register C to the currently assigned
    198 			;;; listing device. The character is in ASCII with zero parity.
    199
    200 			LIST:
-   201 3EA4 76			HLT                     ;content tbd
-   202 3EA5 C9		        RET
+   201 F6A4 76			HLT                     ;content tbd
+   202 F6A5 C9		        RET
    203
    204 			;;; Send the character from register C to the currently assigned
    205 			;;; punch device. The character is in ASCII with zero parity.
    206
    207 			PUNCH:
-   208 3EA6 76			HLT                     ;content tbd
-   209 3EA7 C9		        RET
+   208 F6A6 76			HLT                     ;content tbd
+   209 F6A7 C9		        RET
    210
    211 			;;; Read the next character from the currently assigned reader de-
    212 			;;; vice into register A with zero parity (high-order bit must be
@@ -214,8 +214,8 @@
    214 			;;; ASCII control-z (1AH).
    215
    216 			READER:
-   217 3EA8 76			HLT                     ;content tbd
-   218 3EA9 C9		        RET
+   217 F6A8 76			HLT                     ;content tbd
+   218 F6A9 C9		        RET
    219
    220     		        PAGE
    221
@@ -227,9 +227,9 @@
    227 			;;; call on SETTRK with a parameter of 0.
    228
    229 			HOME:
-   230 3EAA 0E 00	        MVI     C,0
-   231 3EAC CD B5 3E	        CALL    SETTRK
-   232 3EAF C9		        RET
+   230 F6AA 0E 00	        MVI     C,0
+   231 F6AC CD B5 F6	        CALL    SETTRK
+   232 F6AF C9		        RET
    233
    234 			;;; Select the disk drive given by register C for further opera-
    235 			;;; tions, where register C contains 0 for drive A, 1 for drive B,
@@ -245,9 +245,9 @@
    245 			;;; cause an excessive amount of noise and disk wear.
    246
    247 			SELDSK:
-   248 3EB0 79		        MOV     A,C
-   249 3EB1 32 44 00	        STA     DISKNO
-   250 3EB4 C9		        RET
+   248 F6B0 79		        MOV     A,C
+   249 F6B1 32 44 00	        STA     DISKNO
+   250 F6B4 C9		        RET
    251
    252 			;;; Register C contains the track number for subsequent disk
    253 			;;; accesses on the currently selected drive. You can choose to
@@ -257,9 +257,9 @@
    257 			;;; numbers.
    258
    259 			SETTRK:
-   260 3EB5 79		        MOV     A,C
-   261 3EB6 32 40 00	        STA     TRACK
-   262 3EB9 C9		        RET
+   260 F6B5 79		        MOV     A,C
+   261 F6B6 32 40 00	        STA     TRACK
+   262 F6B9 C9		        RET
    263
    264 			;;; Register C contains the sector number (1 through 26) for sub-
    265 			;;; sequent disk accesses on the currently selected drive. You
@@ -268,9 +268,9 @@
    268 			;;; or write opration occurs.
    269
    270 			SETSEC:
-   271 3EBA 79		        MOV     A,C
-   272 3EBB 32 41 00	        STA     SECTOR
-   273 3EBE C9		        RET
+   271 F6BA 79		        MOV     A,C
+   272 F6BB 32 41 00	        STA     SECTOR
+   273 F6BE C9		        RET
    274
    275 			;;; Registers B and C (high-order 8 bits in B, low-order 8 bits
    276 			;;; in C) contain the DMA (Direct Memory Access) address for sub-
@@ -287,10 +287,10 @@
    287 			;;; following read or write operations.
    288
    289 			SETDMA:
-   290 3EBF 69		        MOV     L,C
-   291 3EC0 60		        MOV     H,B
-   292 3EC1 22 42 00	        SHLD    DMAAD
-   293 3EC4 C9		        RET
+   290 F6BF 69		        MOV     L,C
+   291 F6C0 60		        MOV     H,B
+   292 F6C1 22 42 00	        SHLD    DMAAD
+   293 F6C4 C9		        RET
    294
    295 			;;; Assuming the drive has been selected, the track has been set,
    296 			;;; the sector has been set, and the DMA address has been speci-
@@ -311,8 +311,8 @@
    311 			;;; typing <cr> to ignore the error, or control-C to abort.
    312
    313 			READ:
-   314 3EC5 76			HLT                     ;content tbd
-   315 3EC6 C9		        RET
+   314 F6C5 76			HLT                     ;content tbd
+   315 F6C6 C9		        RET
    316
    317 			;;; Write the data from the currently selected DMA address to the
    318 			;;; currently selected drive, track, and sector. The data should
@@ -322,8 +322,8 @@
    322 			;;; tempts as described above.
    323
    324 			WRITE:
-   325 3EC7 76			HLT                     ;content tbd
-   326 3EC8 C9		        RET
+   325 F6C7 76			HLT                     ;content tbd
+   326 F6C8 C9		        RET
    327
    328      01 37	LEFT    EQU     (MSIZE*1024)-$
 
@@ -334,13 +334,13 @@
 
 Names		Types	Values
 -----		-----	------
-MSIZE		EQU	00010h
-PATCH		EQU	03E00h
-CBASE		EQU	00000h
-CPMB		EQU	02900h
-BDOS		EQU	03106h
-CPML		EQU	FFFFD700h
-NSECTS		EQU	FFFFFFAEh
+MSIZE		EQU	0003Eh
+PATCH		EQU	0F600h
+CBASE		EQU	0B800h
+CPMB		EQU	0E100h
+BDOS		EQU	0E906h
+CPML		EQU	01500h
+NSECTS		EQU	0002Ah
 IOBYTE		EQU	00003h
 CDISK		EQU	00004h
 SCRAT		EQU	00040h
@@ -349,24 +349,24 @@ SECTOR		EQU	00041h
 DMAAD		EQU	00042h
 DISKNO		EQU	00044h
 LEFT		EQU	00137h
-WBOOTE		Label	03E03h
-BOOT		Label	03E2Dh
-WBOOT		Label	03E30h
-LOAD1		Label	03E44h
-GOCPM		Label	03E79h
-CONST		Label	03E9Bh
-CONIN		Label	03E9Fh
-CONOUT		Label	03EA2h
-LIST		Label	03EA4h
-PUNCH		Label	03EA6h
-READER		Label	03EA8h
-HOME		Label	03EAAh
-SELDSK		Label	03EB0h
-SETTRK		Label	03EB5h
-SETSEC		Label	03EBAh
-SETDMA		Label	03EBFh
-READ		Label	03EC5h
-WRITE		Label	03EC7h
+WBOOTE		Label	0F603h
+BOOT		Label	0F62Dh
+WBOOT		Label	0F630h
+LOAD1		Label	0F644h
+GOCPM		Label	0F679h
+CONST		Label	0F69Bh
+CONIN		Label	0F69Fh
+CONOUT		Label	0F6A2h
+LIST		Label	0F6A4h
+PUNCH		Label	0F6A6h
+READER		Label	0F6A8h
+HOME		Label	0F6AAh
+SELDSK		Label	0F6B0h
+SETTRK		Label	0F6B5h
+SETSEC		Label	0F6BAh
+SETDMA		Label	0F6BFh
+READ		Label	0F6C5h
+WRITE		Label	0F6C7h
 
 Statistics
 ----------

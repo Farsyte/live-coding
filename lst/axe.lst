@@ -1,0 +1,128 @@
+     1 			        ;; 2023-09-30 librarian note:
+     2 			        ;;   retrieved from http://www.gaby.de/cpm/manuals/archive/cpm22htm/axa.asm
+     3 			        ;;   adjusted for assembly with "asm8080"
+     4 			        ;;   - does not allow "$" in labels
+     5
+     6 			;this is a sample cold start loader, which, when 
+     7 			;modified
+     8 			;resides on track 00, sector 01 (the first sector on the 
+     9 			;diskette), we assume that the controller has loaded 
+    10 			;this sector into memory upon system start-up (this 
+    11 			;program can be keyed-in, or can exist in read-only 
+    12 			;memory
+    13 			;beyond the address space of the cp/m version you are 
+    14 			;running). the cold start loader brings the cp/m system 
+    15 			;into memory at"loadp" (3400h +"bias"). in a 20k 
+    16 			;memory system, the value of"bias" is 000h, with 
+    17 			;large
+    18 			;values for increased memory sizes (see section 2). 
+    19 			;after
+    20 			;loading the cp/m system, the cold start loader 
+    21 			;branches
+    22 			;to the "boot" entry point of the bios, which begins at
+    23 			; "bios" +"bias". the cold start loader is not used un-
+    24 			;til the system is powered up again, as long as the bios 
+    25 			;is not overwritten. the origin is assumed at 0000h, and 
+    26 			;must be changed if the controller brings the cold start 
+    27 			;loader into another area, or if a read-only memory 
+    28 			;area
+    29 			;is used.
+    30      00 00		org	0		;base of ram in
+    31 							;cp/m
+    32      00 14	msize	equ	20		;min mem size in
+    33 							;kbytes
+    34      00 00	bias	equ	(msize-20)*1024	;offset from 20k
+    35 							;system
+    36      34 00	ccp	equ	3400h+bias	;base of the ccp
+    37      4A 00	bios	equ	ccp+1600h	;base of the bios
+    38      03 00	biosl	equ	0300h		;length of the bios
+    39      4A 00	boot	equ	bios
+    40      19 00	size	equ	bios+biosl-ccp	;size of cp/m
+    41 							;system
+    42      00 32	sects	equ	size/128	;# of sectors to load
+    43 			;
+    44 			;	begin the load operation 
+    45
+    46 			cold:
+    47 0000 01 02 00		lxi	b,2		;b=0, c=sector 2
+    48 0003 16 32		mvi	d,sects		;d=# sectors to
+    49 							;load
+    50 0005 21 00 34		lxi	h,ccp		;base transfer
+    51 							;address
+    52 			lsect:	;load the next sector
+    53
+    54 			;	insert inline code at this point to
+    55 			;	read one 128 byte sector from the
+    56 			;	track given in register b, sector
+    57 			;	given in register c,
+    58 			;	into the address given by <hl>
+    59 			;branch	to location "cold" if a read error occurs
+    60 			;
+    61 			;
+    62 			;
+    63 			;
+    64 			;	user supplied read operation goes
+    65 			;	here...
+    66 			;
+    67 			;
+    68 			;
+    69 			;
+    70 0008 C3 6B 00		jmp	past_patch	;remove this
+    71 							;when patched
+    72 000B			ds	60h
+    73
+    74 			past_patch:
+    75 			;go to next sector if load is incomplete
+    76 006B 15			dcr	d		;sects=sects-1
+    77 006C CA 00 4A		jz	boot		;head. for the bios
+    78
+    79 			;	more sectors to load
+    80 			;
+    81
+    82 			;we aren't using a stack, so use <sp> as scratch
+    83 			;register
+    84 			;	to hold the load address increment
+    85 006F 31 80 00		lxi	sp,128		;128 bytes per
+    86 							;sector
+    87 0072 39			dad	sp		;<hl> = <hl> + 128
+    88 0073 0C			inr	c		;sector=sector + 1
+    89 0074 79			mov	a,c
+    90 0075 FE 1B		cpi	27		;last sector of
+    91 							;track?
+    92 0077 DA 08 00		jc	lsect		;no, go read
+    93 							;another
+    94
+    95 			;end of track, increment to next track
+    96
+    97 007A 0E 01		mvi	c,1		;sector = 1
+    98 007C 04			inr	b		;track = track + 1
+    99 007D C3 08 00		jmp	lsect		;for another group
+   100     			end			;of boot loader
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+msize		EQU	00014h
+bias		EQU	00000h
+ccp		EQU	03400h
+bios		EQU	04A00h
+biosl		EQU	00300h
+boot		EQU	04A00h
+size		EQU	01900h
+sects		EQU	00032h
+cold		Label	00000h
+lsect		Label	00008h
+past_patch	Label	0006Bh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 8
+"SET"	= 0
+Labels	= 3
+
+

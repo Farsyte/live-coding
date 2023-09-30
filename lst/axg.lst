@@ -1,0 +1,488 @@
+*** Error 1 in "asm/axg.asm" @75: Duplicate Label (home)!
+     1 			        ;; 2023-09-30 librarian note:
+     2 			        ;;   retrieved from http://www.gaby.de/cpm/manuals/archive/cpm22htm/axg.asm
+     3 			        ;;   adjusted for assembly with "asm8080"
+     4 			        ;;   - manually expand the macros "asm8080" does not have or can not define
+     5
+     6 			;*****************************************************
+     7 			;*                                                   *
+     8 			;*      Sector Deblocking Algorithms for CP/M 2.0    *
+     9 			;*                                                   *
+    10 			;*****************************************************
+    11 			;
+    12 			        ;; ;	utility macro to compute sector mask
+    13 			        ;; smask	macro	hblk
+    14 			        ;; ;;	compute log2(hblk), return @x as result
+    15 			        ;; ;;	(2 ** @x = hblk on return)
+    16 			        ;; @y	set	hblk
+    17 			        ;; @x	set	0
+    18 			        ;; ;;	count right shifts of @y until = 1
+    19 			        ;; 	rept	8
+    20 			        ;; 	if	@y = 1
+    21 			        ;; 	exitm
+    22 			        ;; 	endif
+    23 			        ;; ;;	@y is not 1, shift right one position
+    24 			        ;; @y	set	@y shr 1
+    25 			        ;; @x	set	@x + 1
+    26 			        ;; 	endm
+    27 			        ;; 	endm
+    28 			;
+    29 			;*****************************************************
+    30 			;*                                                   *
+    31 			;*         CP/M to host disk constants               *
+    32 			;*                                                   *
+    33 			;*****************************************************
+    34      08 00	blksiz	equ	2048		;CP/M allocation size
+    35      02 00	hstsiz	equ	512		;host disk sector size
+    36      00 14	hstspt	equ	20		;host disk sectors/trk
+    37      00 04	hstblk	equ	hstsiz/128	;CP/M sects/host buff
+    38      00 50	cpmspt	equ	hstblk * hstspt	;CP/M sectors/track
+    39      00 03	secmsk	equ	hstblk-1	;sector mask
+    40
+    41 			        ;; 	smask	hstblk		;compute sector mask
+    42 			        ;; secshf	equ	@x		;log2(hstblk)
+    43      00 02	secshf	equ	2		;log2(hstblk)
+    44
+    45 			;
+    46 			;*****************************************************
+    47 			;*                                                   *
+    48 			;*        BDOS constants on entry to write           *
+    49 			;*                                                   *
+    50 			;*****************************************************
+    51      00 00	wrall	equ	0		;write to allocated
+    52      00 01	wrdir	equ	1		;write to directory
+    53      00 02	wrual	equ	2		;write to unallocated
+    54 			;
+    55 			;*****************************************************
+    56 			;*                                                   *
+    57 			;*	The BDOS entry points given below show the   *
+    58 			;*      code which is relevant to deblocking only.   *
+    59 			;*                                                   *
+    60 			;*****************************************************
+    61 			;
+    62 			;	DISKDEF macro, or hand coded tables go here
+    63      00 00	dpbase	equ	$		;disk param block base
+    64 			;
+    65 			boot:
+    66 			wboot:
+    67 				;enter here on system boot to initialize
+    68 0000 AF			xra	a		;0 to accumulator
+    69 0001 32 6A 01		sta	hstact		;host buffer inactive
+    70 0004 32 6C 01		sta	unacnt		;clear unalloc count
+    71 0007 C9			ret
+    72 			;
+    73 			home:
+    74 				;home the selected disk
+    75 			home:
+    76 0008 3A 6B 01		lda	hstwrt	;check for pending write
+    77 000B B7			ora	a
+    78 000C C2 12 00		jnz	homed
+    79 000F 32 6A 01		sta	hstact	;clear host active flag
+    80 			homed:
+    81 0012 C9			ret
+    82 			;
+    83 			seldsk:
+    84 				;select disk
+    85 0013 79			mov	a,c		;selected disk number
+    86 0014 32 61 01		sta	sekdsk		;seek disk number
+    87 0017 6F			mov	l,a		;disk number to HL
+    88 0018 26 00		mvi	h,0
+    89
+    90 			        ;; 	rept	4		;multiply by 16
+    91 			        ;; 	dad	h
+    92 			        ;; 	endm
+    93 001A 29			dad	h
+    94 001B 29			dad	h
+    95 001C 29			dad	h
+    96 001D 29			dad	h
+    97
+    98 001E 11 00 00		lxi	d,dpbase	;base of parm block
+    99 0021 19			dad	d		;hl=.dpb(curdsk)
+   100 0022 C9			ret
+   101 			;
+   102 			settrk:
+   103 				;set track given by registers BC
+   104 0023 60			mov	h,b
+   105 0024 69			mov	l,c
+   106 0025 22 62 01		shld	sektrk		;track to seek
+   107 0028 C9			ret
+   108 			;
+   109 			setsec:
+   110 				;set sector given by register c 
+   111 0029 79			mov	a,c
+   112 002A 32 64 01		sta	seksec		;sector to seek
+   113 002D C9			ret
+   114 			;
+   115 			setdma:
+   116 				;set dma address given by BC
+   117 002E 60			mov	h,b
+   118 002F 69			mov	l,c
+   119 0030 22 75 01		shld	dmaadr
+   120 0033 C9			ret
+   121 			;
+   122 			sectran:
+   123 				;translate sector number BC
+   124 0034 60			mov	h,b
+   125 0035 69			mov	l,c
+   126 0036 C9			ret
+   127 			;
+   128 			;*****************************************************
+   129 			;*                                                   *
+   130 			;*	The READ entry point takes the place of      *
+   131 			;*	the previous BIOS defintion for READ.        *
+   132 			;*                                                   *
+   133 			;*****************************************************
+   134 			read:
+   135 				;read the selected CP/M sector
+   136 0037 AF			xra	a
+   137 0038 32 6C 01		sta	unacnt
+   138 003B 3E 01		mvi	a,1
+   139 003D 32 73 01		sta	readop		;read operation
+   140 0040 32 72 01		sta	rsflag		;must read data
+   141 0043 3E 02		mvi	a,wrual
+   142 0045 32 74 01		sta	wrtype		;treat as unalloc
+   143 0048 C3 B6 00		jmp	rwoper		;to perform the read
+   144 			;
+   145 			;*****************************************************
+   146 			;*                                                   *
+   147 			;*	The WRITE entry point takes the place of     *
+   148 			;*	the previous BIOS defintion for WRITE.       *
+   149 			;*                                                   *
+   150 			;*****************************************************
+   151 			write:
+   152 				;write the selected CP/M sector
+   153 004B AF			xra	a		;0 to accumulator
+   154 004C 32 73 01		sta	readop		;not a read operation
+   155 004F 79			mov	a,c		;write type in c
+   156 0050 32 74 01		sta	wrtype
+   157 0053 FE 02		cpi	wrual		;write unallocated?
+   158 0055 C2 6F 00		jnz	chkuna		;check for unalloc
+   159 			;
+   160 			;	write to unallocated, set parameters
+   161 0058 3E 10		mvi	a,blksiz/128	;next unalloc recs
+   162 005A 32 6C 01		sta	unacnt
+   163 005D 3A 61 01		lda	sekdsk		;disk to seek
+   164 0060 32 6D 01		sta	unadsk		;unadsk = sekdsk
+   165 0063 2A 62 01		lhld	sektrk
+   166 0066 22 6E 01		shld	unatrk		;unatrk = sectrk
+   167 0069 3A 64 01		lda	seksec
+   168 006C 32 70 01		sta	unasec		;unasec = seksec
+   169 			;
+   170 			chkuna:
+   171 				;check for write to unallocated sector
+   172 006F 3A 6C 01		lda	unacnt		;any unalloc remain?
+   173 0072 B7			ora	a
+   174 0073 CA AE 00		jz	alloc		;skip if not
+   175 			;
+   176 			;	more unallocated records remain
+   177 0076 3D			dcr	a		;unacnt = unacnt-1
+   178 0077 32 6C 01		sta	unacnt
+   179 007A 3A 61 01		lda	sekdsk		;same disk?
+   180 007D 21 6D 01		lxi	h,unadsk
+   181 0080 BE			cmp	m		;sekdsk = unadsk?
+   182 0081 C2 AE 00		jnz	alloc		;skip if not
+   183 			;
+   184 			;	disks are the same
+   185 0084 21 6E 01		lxi	h,unatrk
+   186 0087 CD 53 01		call	sektrkcmp	;sektrk = unatrk?
+   187 008A C2 AE 00		jnz	alloc		;skip if not
+   188 			;
+   189 			;	tracks are the same
+   190 008D 3A 64 01		lda	seksec		;same sector?
+   191 0090 21 70 01		lxi	h,unasec
+   192 0093 BE			cmp	m		;seksec = unasec?
+   193 0094 C2 AE 00		jnz	alloc		;skip if not
+   194 			;
+   195 			;	match, move to next sector for future ref
+   196 0097 34			inr	m		;unasec = unasec+1
+   197 0098 7E			mov	a,m		;end of track?
+   198 0099 FE 50		cpi	cpmspt		;count CP/M sectors
+   199 009B DA A7 00		jc	noovf		;skip if no overflow
+   200 			;
+   201 			;	overflow to next track
+   202 009E 36 00		mvi	m,0		;unasec = 0
+   203 00A0 2A 6E 01		lhld	unatrk
+   204 00A3 23			inx	h
+   205 00A4 22 6E 01		shld	unatrk		;unatrk = unatrk+1
+   206 			;
+   207 			noovf:
+   208 				;match found, mark as unnecessary read
+   209 00A7 AF			xra	a		;0 to accumulator
+   210 00A8 32 72 01		sta	rsflag		;rsflag = 0
+   211 00AB C3 B6 00		jmp	rwoper		;to perform the write
+   212 			;
+   213 			alloc:
+   214 				;not an unallocated record, requires pre-read
+   215 00AE AF			xra	a		;0 to accum
+   216 00AF 32 6C 01		sta	unacnt		;unacnt = 0
+   217 00B2 3C			inr	a		;1 to accum
+   218 00B3 32 72 01		sta	rsflag		;rsflag = 1
+   219 			;
+   220 			;*****************************************************
+   221 			;*                                                   *
+   222 			;*	Common code for READ and WRITE follows       *
+   223 			;*                                                   *
+   224 			;*****************************************************
+   225 			rwoper:
+   226 				;enter here to perform the read/write
+   227 00B6 AF			xra	a		;zero to accum
+   228 00B7 32 71 01		sta	erflag		;no errors (yet)
+   229 00BA 3A 64 01		lda	seksec		;compute host sector
+   230
+   231 			        ;; 	rept	secshf
+   232 			        ;; 	ora	a		;carry = 0
+   233 			        ;; 	rar			;shift right
+   234 			        ;; 	endm
+   235
+   236 00BD B7			ora	a		;carry = 0
+   237 00BE 1F			rar			;shift right
+   238 00BF B7			ora	a		;carry = 0
+   239 00C0 1F			rar			;shift right
+   240
+   241 00C1 32 69 01		sta	sekhst		;host sector to seek
+   242 			;
+   243 			;	active host sector?
+   244 00C4 21 6A 01		lxi	h,hstact	;host active flag
+   245 00C7 7E			mov	a,m
+   246 00C8 36 01		mvi	m,1		;always becomes 1
+   247 00CA B7			ora	a		;was it already?
+   248 00CB CA F2 00		jz	filhst		;fill host if not
+   249 			;
+   250 			;	host buffer active, same as seek buffer?
+   251 00CE 3A 61 01		lda	sekdsk
+   252 00D1 21 65 01		lxi	h,hstdsk	;same disk?
+   253 00D4 BE			cmp	m		;sekdsk = hstdsk?
+   254 00D5 C2 EB 00		jnz	nomatch
+   255 			;
+   256 			;	same disk, same track?
+   257 00D8 21 66 01		lxi	h,hsttrk
+   258 00DB CD 53 01		call	sektrkcmp	;sektrk = hsttrk?
+   259 00DE C2 EB 00		jnz	nomatch
+   260 			;
+   261 			;	same disk, same track, same buffer?
+   262 00E1 3A 69 01		lda	sekhst
+   263 00E4 21 68 01		lxi	h,hstsec	;sekhst = hstsec?
+   264 00E7 BE			cmp	m
+   265 00E8 CA 0F 01		jz	match		;skip if match
+   266 			;
+   267 			nomatch:
+   268 				;proper disk, but not correct sector
+   269 00EB 3A 6B 01		lda	hstwrt		;host written?
+   270 00EE B7			ora	a
+   271 00EF C4 5F 01		cnz	writehst	;clear host buff
+   272 			;
+   273 			filhst:
+   274 				;may have to fill the host buffer
+   275 00F2 3A 61 01		lda	sekdsk
+   276 00F5 32 65 01		sta	hstdsk
+   277 00F8 2A 62 01		lhld	sektrk
+   278 00FB 22 66 01		shld	hsttrk
+   279 00FE 3A 69 01		lda	sekhst
+   280 0101 32 68 01		sta	hstsec
+   281 0104 3A 72 01		lda	rsflag		;need to read?
+   282 0107 B7			ora	a
+   283 0108 C4 60 01		cnz	readhst		;yes, if 1
+   284 010B AF			xra	a		;0 to accum
+   285 010C 32 6B 01		sta	hstwrt		;no pending write
+   286 			;
+   287 			match:
+   288 				;copy data to or from buffer
+   289 010F 3A 64 01		lda	seksec		;mask buffer number
+   290 0112 E6 03		ani	secmsk		;least signif bits
+   291 0114 6F			mov	l,a		;ready to shift
+   292 0115 26 00		mvi	h,0		;double count
+   293
+   294 			        ;; 	rept	7		;shift left 7
+   295 			        ;; 	dad	h
+   296 			        ;; 	endm
+   297 0117 29			dad	h
+   298 0118 29			dad	h
+   299 0119 29			dad	h
+   300 011A 29			dad	h
+   301 011B 29			dad	h
+   302 011C 29			dad	h
+   303 011D 29			dad	h
+   304
+   305 			;	hl has relative host buffer address
+   306 011E 11 77 01		lxi	d,hstbuf
+   307 0121 19			dad	d		;hl = host address
+   308 0122 EB			xchg			;now in DE
+   309 0123 2A 75 01		lhld	dmaadr		;get/put CP/M data
+   310 0126 0E 80		mvi	c,128		;length of move
+   311 0128 3A 73 01		lda	readop		;which way?
+   312 012B B7			ora	a
+   313 012C C2 35 01		jnz	rwmove		;skip if read
+   314 			;
+   315 			;	write operation, mark and switch direction
+   316 012F 3E 01		mvi	a,1
+   317 0131 32 6B 01		sta	hstwrt		;hstwrt = 1
+   318 0134 EB			xchg			;source/dest swap
+   319 			;
+   320 			rwmove:
+   321 				;C initially 128, DE is source, HL is dest
+   322 0135 1A			ldax	d		;source character
+   323 0136 13			inx	d
+   324 0137 77			mov	m,a		;to dest
+   325 0138 23			inx	h
+   326 0139 0D			dcr	c		;loop 128 times
+   327 013A C2 35 01		jnz	rwmove
+   328 			;
+   329 			;	data has been moved to/from host buffer
+   330 013D 3A 74 01		lda	wrtype		;write type
+   331 0140 FE 01		cpi	wrdir		;to directory?
+   332 0142 3A 71 01		lda	erflag		;in case of errors
+   333 0145 C0			rnz			;no further processing
+   334 			;
+   335 			;	clear host buffer for directory write
+   336 0146 B7			ora	a		;errors?
+   337 0147 C0			rnz			;skip if so
+   338 0148 AF			xra	a		;0 to accum
+   339 0149 32 6B 01		sta	hstwrt		;buffer written
+   340 014C CD 5F 01		call	writehst
+   341 014F 3A 71 01		lda	erflag
+   342 0152 C9			ret
+   343 			;
+   344 			;*****************************************************
+   345 			;*                                                   *
+   346 			;*	Utility subroutine for 16-bit compare        *
+   347 			;*                                                   *
+   348 			;*****************************************************
+   349 			sektrkcmp:
+   350 				;HL = .unatrk or .hsttrk, compare with sektrk
+   351 0153 EB			xchg
+   352 0154 21 62 01		lxi	h,sektrk
+   353 0157 1A			ldax	d		;low byte compare
+   354 0158 BE			cmp	m		;same?
+   355 0159 C0			rnz			;return if not
+   356 			;	low bytes equal, test high 1s
+   357 015A 13			inx	d
+   358 015B 23			inx	h
+   359 015C 1A			ldax	d
+   360 015D BE			cmp	m	;sets flags
+   361 015E C9			ret
+   362 			;
+   363 			;*****************************************************
+   364 			;*                                                   *
+   365 			;*	WRITEHST performs the physical write to      *
+   366 			;*	the host disk, READHST reads the physical    *
+   367 			;*	disk.					     *
+   368 			;*                                                   *
+   369 			;*****************************************************
+   370 			writehst:
+   371 				;hstdsk = host disk #, hsttrk = host track #,
+   372 				;hstsec = host sect #. write "hstsiz" bytes
+   373 				;from hstbuf and return error flag in erflag.
+   374 				;return erflag non-zero if error
+   375 015F C9			ret
+   376 			;
+   377 			readhst:
+   378 				;hstdsk = host disk #, hsttrk = host track #,
+   379 				;hstsec = host sect #. read "hstsiz" bytes
+   380 				;into hstbuf and return error flag in erflag.
+   381 0160 C9			ret
+   382 			;
+   383 			;*****************************************************
+   384 			;*                                                   *
+   385 			;*	Unitialized RAM data areas		     *
+   386 			;*                                                   *
+   387 			;*****************************************************
+   388 			;
+   389 0161		sekdsk:	ds	1		;seek disk number
+   390 0162		sektrk:	ds	2		;seek track number
+   391 0164		seksec:	ds	1		;seek sector number
+   392 			;
+   393 0165		hstdsk:	ds	1		;host disk number
+   394 0166		hsttrk:	ds	2		;host track number
+   395 0168		hstsec:	ds	1		;host sector number
+   396 			;
+   397 0169		sekhst:	ds	1		;seek shr secshf
+   398 016A		hstact:	ds	1		;host active flag
+   399 016B		hstwrt:	ds	1		;host written flag
+   400 			;
+   401 016C		unacnt:	ds	1		;unalloc rec cnt
+   402 016D		unadsk:	ds	1		;last unalloc disk
+   403 016E		unatrk:	ds	2		;last unalloc track
+   404 0170		unasec:	ds	1		;last unalloc sector
+   405 			;
+   406 0171		erflag:	ds	1		;error reporting
+   407 0172		rsflag:	ds	1		;read sector flag
+   408 0173		readop:	ds	1		;1 if read operation
+   409 0174		wrtype:	ds	1		;write operation type
+   410 0175		dmaadr:	ds	2		;last dma address
+   411 0177		hstbuf:	ds	hstsiz		;host buffer
+   412 			;
+   413 			;*****************************************************
+   414 			;*                                                   *
+   415 			;*	The ENDEF macro invocation goes here	     *
+   416 			;*                                                   *
+   417 			;*****************************************************
+   418     			end
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+blksiz		EQU	00800h
+hstsiz		EQU	00200h
+hstspt		EQU	00014h
+hstblk		EQU	00004h
+cpmspt		EQU	00050h
+secmsk		EQU	00003h
+secshf		EQU	00002h
+wrall		EQU	00000h
+wrdir		EQU	00001h
+wrual		EQU	00002h
+dpbase		EQU	00000h
+boot		Label	00000h
+wboot		Label	00000h
+home		Label	00008h
+homed		Label	00012h
+seldsk		Label	00013h
+settrk		Label	00023h
+setsec		Label	00029h
+setdma		Label	0002Eh
+sectran		Label	00034h
+read		Label	00037h
+write		Label	0004Bh
+chkuna		Label	0006Fh
+noovf		Label	000A7h
+alloc		Label	000AEh
+rwoper		Label	000B6h
+nomatch		Label	000EBh
+filhst		Label	000F2h
+match		Label	0010Fh
+rwmove		Label	00135h
+sektrkcmp	Label	00153h
+writehst	Label	0015Fh
+readhst		Label	00160h
+sekdsk		Label	00161h
+sektrk		Label	00162h
+seksec		Label	00164h
+hstdsk		Label	00165h
+hsttrk		Label	00166h
+hstsec		Label	00168h
+sekhst		Label	00169h
+hstact		Label	0016Ah
+hstwrt		Label	0016Bh
+unacnt		Label	0016Ch
+unadsk		Label	0016Dh
+unatrk		Label	0016Eh
+unasec		Label	00170h
+erflag		Label	00171h
+rsflag		Label	00172h
+readop		Label	00173h
+wrtype		Label	00174h
+dmaadr		Label	00175h
+hstbuf		Label	00177h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 11
+"SET"	= 0
+Labels	= 41
+
+
