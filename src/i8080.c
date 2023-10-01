@@ -199,6 +199,7 @@ void i8080_linked(i8080 cpu)
     i8080_misc_init(cpu);
     i8080_lxi_init(cpu);
     i8080_jmp_init(cpu);
+    i8080_io_init(cpu);
     i8080_dad_init(cpu);
 
     EDGE_ON_RISE(cpu->PHI1, i8080_phi1_rise, cpu);

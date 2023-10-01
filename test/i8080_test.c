@@ -149,6 +149,9 @@ void i8080_post()
     i8080_jmp_post(ts);
 
     i8080_reset_for_testing(ts);
+    i8080_io_post(ts);
+
+    i8080_reset_for_testing(ts);
     i8080_dad_post(ts);
 
     i8080_reset_for_testing(ts);
@@ -235,6 +238,9 @@ void i8080_bist()
 
     i8080_reset_for_testing(ts);
     i8080_jmp_bist(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_io_bist(ts);
 
     i8080_reset_for_testing(ts);
     i8080_dad_bist(ts);

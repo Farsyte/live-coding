@@ -58,6 +58,7 @@ extern void         i8080_incdec_init(i8080 cpu);
 extern void         i8080_misc_init(i8080 cpu);
 extern void         i8080_lxi_init(i8080 cpu);
 extern void         i8080_jmp_init(i8080 cpu);
+extern void         i8080_io_init(i8080 cpu);
 extern void         i8080_dad_init(i8080 cpu);
 
 extern void         i8080_reset_post(CpuTestSys ts);
@@ -69,6 +70,7 @@ extern void         i8080_incdec_post(CpuTestSys ts);
 extern void         i8080_misc_post(CpuTestSys ts);
 extern void         i8080_lxi_post(CpuTestSys ts);
 extern void         i8080_jmp_post(CpuTestSys ts);
+extern void         i8080_io_post(CpuTestSys ts);
 extern void         i8080_dad_post(CpuTestSys ts);
 
 extern void         i8080_reset_bist(CpuTestSys ts);
@@ -80,6 +82,7 @@ extern void         i8080_incdec_bist(CpuTestSys ts);
 extern void         i8080_misc_bist(CpuTestSys ts);
 extern void         i8080_lxi_bist(CpuTestSys ts);
 extern void         i8080_jmp_bist(CpuTestSys ts);
+extern void         i8080_io_bist(CpuTestSys ts);
 extern void         i8080_dad_bist(CpuTestSys ts);
 
 // Activity during a T-state is managed by a single

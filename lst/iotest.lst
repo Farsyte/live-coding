@@ -1,0 +1,52 @@
+     1     			TITLE	'test for IN and OUT instructions'
+     2
+     3      00 37	TDWP	EQU     55
+     4      00 CD	TDRP	EQU	205
+     5
+     6      00 00		ORG	00000H		;BASE OF MEMORY
+     7
+     8 0000 3E 01		MVI     A,1
+     9 0002 D3 37	        OUT     TDWP
+    10 0004 3E 80	        MVI     A,128
+    11 0006 DB CD	        IN      TDRP
+    12 0008 3D		        DCR     A
+    13 0009 CA 0D 00	        JZ      PASS1
+    14 000C C7		        RST     0               ;fail
+    15 000D 00		PASS1:  NOP
+    16 000E D7		        RST     2               ;next subtest
+    17
+    18 000F 3E 80		MVI     A,80h
+    19 0011 D3 37	        OUT     TDWP
+    20 0013 3E 2A	        MVI     A,42
+    21 0015 DB CD	        IN      TDRP
+    22 0017 3D		        DCR     A
+    23 0018 F2 1C 00	        JP      PASS2
+    24 001B C7		        RST     0               ;fail
+    25 001C 00		PASS2:  NOP
+    26
+    27 001D CF			RST	1               ;test complete
+    28 001E 00			NOP
+    29 001F 00			NOP
+    30
+    31     			END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+TDWP		EQU	00037h
+TDRP		EQU	000CDh
+PASS1		Label	0000Dh
+PASS2		Label	0001Ch
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 2
+"SET"	= 0
+Labels	= 2
+
+
