@@ -3,12 +3,54 @@
      3
      4 			;;; === === === === === === === === === === === === === === === ===
      5
-     6      F8 00	        ORG     0F800h
-     7
-*** Error 8 in "asm/i8080_bootrom.asm": Missing field!
-     8 F800 C3 00 00	rom:    JMP     .+3
-     9 F803 F3		        DI
-    10 F804 31 80 00	        LXI     SP,0080h
+     6 			;;; Simulation Control Output Port
+     7 			;;; - write zero to this port to turn off SHADOW.
+     8 			;;; - anything else halts the simulation.
+     9      00 FF	COPORT	EQU     255             ;simulation control port
+    10
+    11 			;;; Simulation Status Input Port
+    12 			;;; - returns status code TBD.
+    13      00 FF	CIPORT	EQU     255             ;simulation control port
+    14
+    15      00 30	MEMKB	EQU     48
+    16      BB 80	MEMTOP  EQU     (MEMKB*1000)
+    17
+    18      F8 00	        ORG     0F800h
+    19
+    20 			;;; ZERO: entry point used at RESET, when SHADOW maps this rom
+    21 			;;; to memory reads at 0x0000
+    22
+    23 			ZERO:
+    24 F800 F3		        DI
+    25 F801 C3 04 F8	        JMP     HIGH
+    26
+    27 			;;; HIGH: arrival location in high memory. shut off SHADOW
+    28 			;;;  and enter the SYSTEM IDLE loop.
+    29
+    30 			HIGH:
+    31 F804 AF		        XRA     A
+    32 F805 D3 FF	        OUT     COPORT
+    33
+    34 F807 31 80 BB	        LXI     SP,MEMTOP
+    35
+    36 			;;; TODO: read boot record from mass storage into memory at known
+    37 			;;; address, then start the boot sector running; it will load and run
+    38 			;;; more data from mass storage.
+    39
+    40 			;;; IDLE: Enable interrupts and halt the CPU.
+    41 			;;; 
+    42 			;;; RESET will restart us at ZERO.
+    43 			;;; 
+    44 			;;; INTERRUPT requests will service the request then resume execution
+    45 			;;; after the HLT, which will just branch back to IDLE.
+    46 			;;;
+    47 			;;; The intent is that an operator will have the ability to assert
+    48 			;;; RESET, or to issue INT with a "JMP" to code to be executed.
+    49
+    50 			IDLE:
+    51 F80A FB		        EI
+    52 F80B 76		        HLT
+    53 F80C C3 0A F8	        JMP     IDLE
 
 
 *******************************************************************************
@@ -17,13 +59,19 @@
 
 Names		Types	Values
 -----		-----	------
-rom		Label	0F800h
+COPORT		EQU	000FFh
+CIPORT		EQU	000FFh
+MEMKB		EQU	00030h
+MEMTOP		EQU	0BB80h
+ZERO		Label	0F800h
+HIGH		Label	0F804h
+IDLE		Label	0F80Ah
 
 Statistics
 ----------
 "Name"	= 0
-"EQU"	= 0
+"EQU"	= 4
 "SET"	= 0
-Labels	= 1
+Labels	= 3
 
 
