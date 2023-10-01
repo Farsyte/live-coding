@@ -71,10 +71,6 @@ void edge_post()
     ASSERT_EQ_integer(2, e->fall->len);
     edge_invar(e);
 
-    // TODO: verify that the "1st" variants are in fact
-    // being activated first. subs stuff is tested but
-    // edge may be calling the wrong entry point.
-
     edge_lo(e);
     ASSERT_EQ_integer(0, e->value);
     ASSERT_EQ_integer(TAU, e->when);

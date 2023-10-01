@@ -1,8 +1,6 @@
 #include "i8080_impl.h"
 
-// i8080_incdec: TODO write good comments
-
-static unsigned     i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old);
+// i8080_incdec: provide INR, DCR, INX, DCX
 
 #define NAME_INR_M1T4(R)	i8080_state_inrT4 ## R
 #define DEFN_INR_M1T4(R)	static f8080State NAME_INR_M1T4(R)
@@ -103,6 +101,11 @@ static p8080State   i8080_state_dcx_t5[4] = {
     NAME_DCX_T5(HL),
     NAME_DCX_T5(SP),
 };
+
+static unsigned     i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old);
+
+// i8080_incdec_init(i8080): set up the opcode decode entries
+// for the many increment and decrement instructions.
 
 void i8080_incdec_init(i8080 cpu)
 {
@@ -280,8 +283,7 @@ static unsigned i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old)
 
 }
 
-//#define NAME_RP_IDAL_T4(RP)   i8080_state_rp_idal_T4 ## RP
-//#define DEFN_RP_IDAL_T4(RP)   static f8080State NAME_RP_IDAL_T4(RP)
+// i8080_state_rp_idal_T4RP: latch a register pair into IDAL
 
 #define IMPL_RP_IDAL_T4(RH,RL)                                          \
     static void NAME_RP_IDAL_T4(RH##RL) (i8080 cpu, int phase) {        \
@@ -306,6 +308,8 @@ IMPL_RP_IDAL_T4(B, C);
 IMPL_RP_IDAL_T4(D, E);
 IMPL_RP_IDAL_T4(H, L);
 
+// i8080_state_rp_idal_T4SP: latch SP into IDAL
+
 static void i8080_state_rp_idal_T4SP(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -319,6 +323,8 @@ static void i8080_state_rp_idal_T4SP(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_state_inx_t5RP: increment IDAL into RH,RL
 
 #define IMPL_INX_T5(RH,RL)                                          \
     static void NAME_INX_T5(RH##RL) (i8080 cpu, int phase)          \
@@ -343,6 +349,8 @@ IMPL_INX_T5(B, C);
 IMPL_INX_T5(D, E);
 IMPL_INX_T5(H, L);
 
+// i8080_state_inx_t5SP: increment IDAL into SP
+
 static void i8080_state_inx_t5SP(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -356,6 +364,8 @@ static void i8080_state_inx_t5SP(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_state_dcx_t5RP: decrement IDAL into RP
 
 #define IMPL_DCX_T5(RH,RL)                                          \
     static void NAME_DCX_T5(RH##RL) (i8080 cpu, int phase)          \
@@ -379,6 +389,8 @@ static void i8080_state_inx_t5SP(i8080 cpu, int phase)
 IMPL_DCX_T5(B, C);
 IMPL_DCX_T5(D, E);
 IMPL_DCX_T5(H, L);
+
+// i8080_state_dcx_t5SP: decrement IDAL into SP
 
 static void i8080_state_dcx_t5SP(i8080 cpu, int phase)
 {

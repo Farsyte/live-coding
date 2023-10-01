@@ -204,7 +204,7 @@ def draw_from_json_file(fbase):
         act_len = max(tau_len, nom_width)
 
         # TITLE line: an unnamed signal with the name as its value.
-        # TODO is there a better way to do a title?
+
         wa = ['.' for tau in range(act_len)]
         wa[0] = '6'
         wave = "".join(wa)
@@ -230,7 +230,7 @@ def draw_from_json_file(fbase):
             json_sigs.append("".join(json_bits))
 
         # CAPTION line: an unnamed signal with the name as its value.
-        # TODO is there a better way to do a caption?
+
         wa = ['.' for tau in range(act_len)]
         wa[0] = '6'
         wave = "".join(wa)

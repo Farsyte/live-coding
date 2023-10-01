@@ -1,24 +1,10 @@
 #include "clock.h"
 #include "i8080_impl.h"
 
-// i8080_jmp_test: TODO write good comments
+// i8080_jmp_test: test the JMP instruction
 
 // === === === === === === === === === === === === === === === ===
 //                COMMON SUPPORT FOR POST/BIST/BENCH
-// === === === === === === === === === === === === === === === ===
-
-// === === === === === === === === === === === === === === === ===
-//                    POWER-ON SELF TEST SUPPORT
-// === === === === === === === === === === === === === === === ===
-
-void i8080_jmp_post(CpuTestSys ts)
-{
-    (void)ts;
-    // TODO refine BIST into POST
-}
-
-// === === === === === === === === === === === === === === === ===
-//                        BUILT-IN SELF TEST
 // === === === === === === === === === === === === === === === ===
 
 static f8080State   i8080_state_jmp_test_fail;
@@ -28,16 +14,57 @@ static f8080State   i8080_state_jmp_test_page;
 static int          i8080_jmp_test_done;
 static int          i8080_jmp_test_page;
 
-static void i8080_jmp_read(i8080 cpu)
-{
-    if (data_is_z(cpu->DATA))
-        return;
-    // STUB("%9lld: Addr=%04Xh Data=%02Xh", (long long)TAU, cpu->ADDR->value, cpu->DATA->value);
-}
-
 static p8080State   saved_rst0;
 static p8080State   saved_rst1;
 static p8080State   saved_rst2;
+
+// === === === === === === === === === === === === === === === ===
+//                    POWER-ON SELF TEST SUPPORT
+// === === === === === === === === === === === === === === === ===
+
+void i8080_jmp_post(CpuTestSys ts)
+{
+    const p8080         cpu = ts->cpu;
+
+    Rom8316            *rom = ts->rom;
+
+    pAddr               PC = cpu->PC;
+
+    data_z(cpu->A);
+
+    ASSERT_EQ_integer(0x0000, PC->value);
+
+    // override the RST 0 and RST 1 instruction decodes
+    // so we can safely use them as fenceposts.
+
+    saved_rst0 = cpu->m1t4[OP_RST__0];
+    saved_rst1 = cpu->m1t4[OP_RST__1];
+    saved_rst2 = cpu->m1t4[OP_RST__2];
+
+    cpu->m1t4[OP_RST__0] = i8080_state_jmp_test_fail;
+    cpu->m1t4[OP_RST__1] = i8080_state_jmp_test_pass;
+    cpu->m1t4[OP_RST__2] = i8080_state_jmp_test_page;
+
+    i8080_jmp_test_done = 0;
+    i8080_jmp_test_page = 0;
+
+    rom8316_load(rom[0], 0x0000, "hex/jmptest.hex");
+
+    while (i8080_jmp_test_done == 0) {
+        clock_run_one();
+        // ignore i8080_jmp_test_page during POST
+    }
+
+    assert(i8080_jmp_test_done > 0);
+
+    cpu->m1t4[OP_RST__0] = saved_rst0;
+    cpu->m1t4[OP_RST__1] = saved_rst1;
+    cpu->m1t4[OP_RST__2] = saved_rst2;
+}
+
+// === === === === === === === === === === === === === === === ===
+//                        BUILT-IN SELF TEST
+// === === === === === === === === === === === === === === === ===
 
 void i8080_jmp_bist(CpuTestSys ts)
 {
@@ -76,8 +103,6 @@ void i8080_jmp_bist(CpuTestSys ts)
 
     t0 = TAU;
 
-    EDGE_ON_RISE(cpu->DBIN, i8080_jmp_read, cpu);
-
     Cstr                fn;
 
     while (i8080_jmp_test_done == 0) {
@@ -111,7 +136,13 @@ void i8080_jmp_bist(CpuTestSys ts)
     cpu->m1t4[OP_RST__0] = saved_rst0;
     cpu->m1t4[OP_RST__1] = saved_rst1;
     cpu->m1t4[OP_RST__2] = saved_rst2;
+
+    assert(i8080_jmp_test_done > 0);
 }
+
+// === === === === === === === === === === === === === === === ===
+//                COMMON SUPPORT FOR POST/BIST/BENCH
+// === === === === === === === === === === === === === === === ===
 
 static void i8080_state_jmp_test_fail(i8080 cpu, int phase)
 {

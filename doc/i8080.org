@@ -83,109 +83,104 @@ plot.
 
 ** ALU Operations
 
-*** ADD
+*** ADD r, ADI imm8
 
 [[file:img/i8080_alu_add.png]]
 
-*** ADC
+*** ADC r, ACI imm8
 
 [[file:img/i8080_alu_adc.png]]
 
-*** SUB
+*** SUB r, SUI imm8
 
 [[file:img/i8080_alu_sub.png]]
 
-*** SBB
+*** SBB r, SBI imm8
 
 [[file:img/i8080_alu_sbb.png]]
 
-*** ANA
+*** ANA r, ANI imm8
 
 [[file:img/i8080_alu_ana.png]]
 
-*** XRA
+*** XRA r, XRI imm8
 
 [[file:img/i8080_alu_xra.png]]
 
-*** ORA
+*** ORA r, ORI imm8
 
 [[file:img/i8080_alu_ora.png]]
 
-*** CMP
+*** CMP r, CPI imm8
 
 [[file:img/i8080_alu_cmp.png]]
 
-*** INR
+*** INR r
 
 [[file:img/i8080_alu_inr.png]]
 
-*** DCR
+*** DCR r
 
 [[file:img/i8080_alu_dcr.png]]
 
-*** INX
+*** INX rp
 
 [[file:img/i8080_alu_inx.png]]
 
-*** DCX
+*** DCX rp
 
 [[file:img/i8080_alu_dcx.png]]
 
-*** LXI
+*** LXI rp,imm16
 
 [[file:img/i8080_lxi.png]]
 
-*** DAD
+*** DAD rp
 
 [[file:img/i8080_dad.png]]
 
-*** JMP Jcc
+*** JMP imm16, Jcc imm16
 
-C3 jmp  ##
+[[file:img/i8080_jmp_1.png]]
 
-DA jc   ##
-FA jm   ##
-D2 jnc  ##
-C2 jnz  ##
-F2 jp   ##
-EA jpe  ##
-E2 jpo  ##
-CA jz   ##
+[[file:img/i8080_jmp_2.png]]
 
-** Not Yet Implemented
+[[file:img/i8080_jmp_3.png]]
+
+[[file:img/i8080_jmp_4.png]]
+
+[[file:img/i8080_jmp_5.png]]
+
+[[file:img/i8080_jmp_6.png]]
+
+[[file:img/i8080_jmp_7.png]]
+
+[[file:img/i8080_jmp_8.png]]
+
+[[file:img/i8080_jmp_9.png]]
 
 *** IN and OUT
 
-DB in   # 
-D3 out  # 
+[[file:img/i8080_io_1.png]]
 
-*** ALU Immediates
-
-C6 adi  # 
-CE aci  # 
-D6 sui  # 
-DE sbi  # 
-E6 ani  # 
-EE xri  # 
-F6 ori  # 
-FE cpi  #
+[[file:img/i8080_io_2.png]]
  
-*** LDA STA
-
-3A lda  ##
-32 sta  ##
-
-*** LDAX LHLD STAX SHLD
-
-0A ldax BC,##
-1A ldax DE,##
-2A lhld ##
-
-02 stax BC,##
-12 stax DE,##
-22 shld ##
+** Not Yet Implemented
 
 *** Operations on M
+
+**** ALUop
+
+34 inr  M
+35 dcr  M
+86 add  M
+8E adc  M
+96 sub  M
+9E sbb  M
+A6 ana  M
+AE xra  M
+B6 ora  M
+BE cmp  M
 
 **** MOV 
 
@@ -205,22 +200,24 @@ FE cpi  #
 75 mov  M,L
 77 mov  M,A
 
-**** ALUop
-
-34 inr  M
-35 dcr  M
-86 add  M
-8E adc  M
-96 sub  M
-9E sbb  M
-A6 ana  M
-AE xra  M
-B6 ora  M
-BE cmp  M
-
 **** MVI  
 
 36 mvi  M,#
+
+*** LDA STA
+
+3A lda  ##
+32 sta  ##
+
+*** LDAX LHLD STAX SHLD
+
+0A ldax BC,##
+1A ldax DE,##
+2A lhld ##
+
+02 stax BC,##
+12 stax DE,##
+22 shld ##
 
 *** PUSH rp, POP rp
 

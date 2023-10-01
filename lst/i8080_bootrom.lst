@@ -33,7 +33,7 @@
     33
     34 F807 31 80 BB	        LXI     SP,MEMTOP
     35
-    36 			;;; TODO: read boot record from mass storage into memory at known
+    36 			;;; FUTURE: read boot record from mass storage into memory at known
     37 			;;; address, then start the boot sector running; it will load and run
     38 			;;; more data from mass storage.
     39

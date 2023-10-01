@@ -1,6 +1,6 @@
 #include "i8080_impl.h"
 
-// i8080_io: TODO write good comments
+// i8080_io: provide IN and OUT instructions
 
 static f8080State   i8080_io_in_M2T3;
 static f8080State   i8080_io_in_M3T1;
@@ -13,6 +13,8 @@ static f8080State   i8080_io_out_M3T1;
 static f8080State   i8080_io_out_M3T2;
 static f8080State   i8080_io_out_M3T3;
 
+// i8080_io_init: set opcode decode entries for IN and OUT
+
 void i8080_io_init(i8080 cpu)
 {
     cpu->m1t4[OP_IN] = cpu->state_2bops;
@@ -21,6 +23,8 @@ void i8080_io_init(i8080 cpu)
     cpu->m1t4[OP_OUT] = cpu->state_2bops;
     cpu->m2t3[OP_OUT] = i8080_io_out_M2T3;
 }
+
+// i8080_io_in_M2T3: accept port number for IN instruction
 
 static void i8080_io_in_M2T3(i8080 cpu, int phase)
 {
@@ -40,6 +44,8 @@ static void i8080_io_in_M2T3(i8080 cpu, int phase)
     }
 }
 
+// i8080_io_in_M3T1: initiate machine cycle for IN execution
+
 static void i8080_io_in_M3T1(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -56,6 +62,8 @@ static void i8080_io_in_M3T1(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_io_in_M3T2: start data transfer for IN instruction
 
 static void i8080_io_in_M3T2(i8080 cpu, int phase)
 {
@@ -75,6 +83,8 @@ static void i8080_io_in_M3T2(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_io_in_M3TW: handle WAIT states for IN instruction
 
 static void i8080_io_in_M3TW(i8080 cpu, int phase)
 {
@@ -97,6 +107,8 @@ static void i8080_io_in_M3TW(i8080 cpu, int phase)
     }
 }
 
+// i8080_io_in_M3T3: finish data transfer for IN instruction
+
 static void i8080_io_in_M3T3(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -113,6 +125,8 @@ static void i8080_io_in_M3T3(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_io_out_M2T3: accept port number for OUT instruction
 
 static void i8080_io_out_M2T3(i8080 cpu, int phase)
 {
@@ -132,6 +146,8 @@ static void i8080_io_out_M2T3(i8080 cpu, int phase)
     }
 }
 
+// i8080_io_out_M3T1: initiate machine cycle for OUT execution
+
 static void i8080_io_out_M3T1(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -149,6 +165,8 @@ static void i8080_io_out_M3T1(i8080 cpu, int phase)
     }
 }
 
+// i8080_io_out_M3T2: start data transfer for OUT instruction
+
 static void i8080_io_out_M3T2(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -163,6 +181,8 @@ static void i8080_io_out_M3T2(i8080 cpu, int phase)
           break;
     }
 }
+
+// i8080_io_out_M3T3: finish data transfer for OUT instruction
 
 static void i8080_io_out_M3T3(i8080 cpu, int phase)
 {

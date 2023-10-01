@@ -33,7 +33,7 @@ HIGH:
 
         LXI     SP,MEMTOP
 
-;;; TODO: read boot record from mass storage into memory at known
+;;; FUTURE: read boot record from mass storage into memory at known
 ;;; address, then start the boot sector running; it will load and run
 ;;; more data from mass storage.
 

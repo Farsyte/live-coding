@@ -43,6 +43,9 @@ DEFN_M1T4(H);
 DEFN_M1T4(L);
 DEFN_M1T4(A);
 
+static f8080State   i8080_state_aluimmM1T4;
+static f8080State   i8080_state_aluimmM2T3;
+
 // Table of functions: indexed by the "sss" bits of the
 // opcode, giving the proper function.
 
@@ -98,7 +101,6 @@ static p8080State   i8080_state_aluT2[8] = {
     NAME_M1T2(ORA),
     NAME_M1T2(CMP),
 };
-
 // i8080_alu_init: set up decoding for ALU instructions
 // operating purely on our eight-bit registers.
 
@@ -126,14 +128,23 @@ void i8080_alu_init(i8080 cpu)
     for (int ooo = 0; ooo < 8; ++ooo) {
         for (int sss = 0; sss < 8; ++sss) {
             p8080State          m1t4 = i8080_state_aluT4[sss];
-            if (NULL == m1t4)
-                continue;
             Byte                op = 0x80 | (ooo << 3) | sss;
-            cpu->m1t4[op] = m1t4;
+            if (NULL == m1t4) {
+                // cpu->m1t4[op] = ... use 2bops to read TMP from (HL)
+            } else {
+                cpu->m1t4[op] = m1t4;
+            }
             cpu->m1t2[op] = i8080_state_aluT2[ooo];
             // yes, we are getting here.
             // STUB("i8080_alu_init: op %02X m1t2 %p", op, (void *)(cpu->m1t2[op]));
         }
+    }
+
+    for (int ooo = 0; ooo < 8; ++ooo) {
+        Byte                op = 0xC0 | (ooo << 3) | 6;
+        cpu->m1t4[op] = i8080_state_aluimmM1T4;
+        cpu->m2t3[op] = i8080_state_aluimmM2T3;
+        cpu->m1t2[op] = i8080_state_aluT2[ooo];
     }
 
     unsigned            flags = cpu->FLAGS->value;
@@ -432,6 +443,41 @@ IMPL_M1T4(D);
 IMPL_M1T4(E);
 IMPL_M1T4(H);
 IMPL_M1T4(L);
+
+// This is the M1T4 cycle shared by the eight ALU ops
+// when the 2nd operand is the 2nd byte of the opcode.
+static void i8080_state_aluimmM1T4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          data_to(cpu->ACT, cpu->A->value);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = cpu->state_2bops_t1;
+          break;
+    }
+}
+
+// This is the M2T3 cycle shared by the eight ALU ops
+// when the 2nd operand is the 2nd byte of the opcode.
+static void i8080_state_aluimmM2T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_lo(cpu->WAIT);
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          data_to(cpu->TMP, cpu->DATA->value);
+          edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
 
 // There is no good IMPL_M1T2 macro: too much varies between
 // the functions for it to be a win.

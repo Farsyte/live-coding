@@ -269,5 +269,6 @@ static void i8080_state_unimp(i8080 cpu, int phase)
 {
     STUB("cpu '%s' in phase %d", cpu->name, phase);
     STUB("  PC=0x%04X IR=0x%02X", cpu->PC->value, cpu->IR->value);
-    abort();
+    // abort();
+    edge_hi(cpu->RETM1_INT);
 }
