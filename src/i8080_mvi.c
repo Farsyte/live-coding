@@ -11,6 +11,10 @@
 #define NAME_M2T3(R)	i8080_state_mviM2T3 ## R
 #define DEFN_M2T3(R)	static f8080State NAME_M2T3(R)
 
+static f8080State   i8080_state_mviM3T1M;
+static f8080State   i8080_state_mviM3T2M;
+static f8080State   i8080_state_mviM3T3M;
+
 DEFN_M2T3(A);
 DEFN_M2T3(B);
 DEFN_M2T3(C);
@@ -18,6 +22,7 @@ DEFN_M2T3(D);
 DEFN_M2T3(E);
 DEFN_M2T3(H);
 DEFN_M2T3(L);
+DEFN_M2T3(M);
 
 static p8080State   i8080_state_mviM2T3[8] = {
     NAME_M2T3(B),
@@ -26,7 +31,7 @@ static p8080State   i8080_state_mviM2T3[8] = {
     NAME_M2T3(E),
     NAME_M2T3(H),
     NAME_M2T3(L),
-    0,
+    NAME_M2T3(M),
     NAME_M2T3(A),
 };
 
@@ -48,8 +53,9 @@ void i8080_mvi_init(i8080 cpu)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
+#define DECL_M2T3(R)	NAME_M2T3(R) (i8080 cpu, int phase)
 #define IMPL_M2T3(R)                                            \
-    static void NAME_M2T3(R) (i8080 cpu, int phase) {           \
+    static void DECL_M2T3(R) {                                  \
         switch (phase) {                                        \
         case PHI1_RISE:                                         \
             edge_lo(cpu->WAIT);                                 \
@@ -73,3 +79,74 @@ IMPL_M2T3(D);
 IMPL_M2T3(E);
 IMPL_M2T3(H);
 IMPL_M2T3(L);
+
+static void i8080_state_mviM2T3M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_lo(cpu->WAIT);
+          // edge_hi(cpu->RETM1_INT);                            
+          break;
+      case PHI2_RISE:
+          data_to(cpu->TMP, cpu->DATA->value);
+          edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_mviM3T1M;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_mviM3T1M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
+          data_to(cpu->DATA, STATUS_MWRITE);
+          edge_hi(cpu->SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_mviM3T2M;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_mviM3T2M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          edge_lo(cpu->SYNC);
+          data_to(cpu->DATA, cpu->TMP->value);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_mviM3T3M;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_mviM3T3M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          edge_lo(cpu->WR_);
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          edge_hi(cpu->WR_);
+          addr_z(cpu->ADDR);
+          break;
+    }
+}

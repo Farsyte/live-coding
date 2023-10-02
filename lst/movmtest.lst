@@ -1,0 +1,76 @@
+     1     		        TITLE   'test for MOV M,Rs and MOV Rd,M instructions'
+     2
+     3 			        ;; This test is being used before we deal with SHADOW,
+     4 			        ;; so it can only read the SHADOW ROM and writes will go
+     5 			        ;; to the shadowed ram area.
+     6
+     7      00 00	        ORG     00000h
+     8
+     9 			START:  
+    10 0000 21 00 00	        LXI     HL,START
+    11
+    12 0003 3E 55	        MVI     A,55H
+    13 0005 7E		        MOV     A,M
+    14 0006 77		        MOV     M,A
+    15 0007 23		        INX     HL
+    16 0008 D7		        RST     2
+    17
+    18 0009 06 55	        MVI     B,55H
+    19 000B 46		        MOV     B,M
+    20 000C 70		        MOV     M,B
+    21 000D 23		        INX     HL
+    22 000E D7		        RST     2
+    23
+    24 000F 0E 55	        MVI     C,55H
+    25 0011 4E		        MOV     C,M
+    26 0012 71		        MOV     M,C
+    27 0013 23		        INX     HL
+    28 0014 D7		        RST     2
+    29
+    30 0015 16 55	        MVI     D,55H
+    31 0017 56		        MOV     D,M
+    32 0018 72		        MOV     M,D
+    33 0019 23		        INX     HL
+    34 001A D7		        RST     2
+    35
+    36 001B 1E 55	        MVI     E,55H
+    37 001D 5E		        MOV     E,M
+    38 001E 73		        MOV     M,E
+    39 001F 23		        INX     HL
+    40 0020 D7		        RST     2
+    41
+    42 0021 36 55	        MVI     M,055H
+    43 0023 23		        INX     HL
+    44 0024 36 AA	        MVI     M,0AAH
+    45 0026 23		        INX     HL
+    46 0027 D7		        RST     2
+    47
+    48 0028 34		        INR	M
+    49 0029 23		        INX     HL
+    50 002A 35		        DCR	M
+    51 002B 23		        INX     HL
+    52
+    53 002C CF		        RST     1
+    54 002D 00		        NOP
+    55 002E 00		        NOP
+    56 002F 00		        NOP
+    57 0030 76		        HLT
+    58
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+START		Label	00000h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 1
+
+

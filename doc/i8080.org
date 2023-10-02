@@ -165,14 +165,33 @@ plot.
 
 [[file:img/i8080_io_2.png]]
  
+*** Operations on M
+
+**** MOV 
+[[file:img/i8080_movm_1.png]]
+
+[[file:img/i8080_movm_2.png]]
+
+[[file:img/i8080_movm_3.png]]
+
+[[file:img/i8080_movm_4.png]]
+
+[[file:img/i8080_movm_5.png]]
+
+**** MVI  
+
+[[file:img/i8080_movm_6.png]]
+
+**** INR M, DCR M
+
+[[file:img/i8080_movm_7.png]]
+
 ** Not Yet Implemented
 
 *** Operations on M
 
 **** ALUop
 
-34 inr  M
-35 dcr  M
 86 add  M
 8E adc  M
 96 sub  M
@@ -181,28 +200,6 @@ A6 ana  M
 AE xra  M
 B6 ora  M
 BE cmp  M
-
-**** MOV 
-
-46 mov  B,M
-4E mov  C,M
-56 mov  D,M
-5E mov  E,M
-66 mov  H,M
-6E mov  L,M
-7E mov  A,M
-
-70 mov  M,B
-71 mov  M,C
-72 mov  M,D
-73 mov  M,E
-74 mov  M,H
-75 mov  M,L
-77 mov  M,A
-
-**** MVI  
-
-36 mvi  M,#
 
 *** LDA STA
 

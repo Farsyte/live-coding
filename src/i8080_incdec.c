@@ -11,6 +11,7 @@ DEFN_INR_M1T4(D);
 DEFN_INR_M1T4(E);
 DEFN_INR_M1T4(H);
 DEFN_INR_M1T4(L);
+DEFN_INR_M1T4(M);
 DEFN_INR_M1T4(A);
 
 static p8080State   i8080_state_inrT4[8] = {
@@ -20,7 +21,7 @@ static p8080State   i8080_state_inrT4[8] = {
     NAME_INR_M1T4(E),
     NAME_INR_M1T4(H),
     NAME_INR_M1T4(L),
-    0,
+    NAME_INR_M1T4(M),
     NAME_INR_M1T4(A),
 };
 
@@ -33,6 +34,7 @@ DEFN_DCR_M1T4(D);
 DEFN_DCR_M1T4(E);
 DEFN_DCR_M1T4(H);
 DEFN_DCR_M1T4(L);
+DEFN_DCR_M1T4(M);
 DEFN_DCR_M1T4(A);
 
 static p8080State   i8080_state_dcrT4[8] = {
@@ -42,7 +44,7 @@ static p8080State   i8080_state_dcrT4[8] = {
     NAME_DCR_M1T4(E),
     NAME_DCR_M1T4(H),
     NAME_DCR_M1T4(L),
-    0,
+    NAME_DCR_M1T4(M),
     NAME_DCR_M1T4(A),
 };
 
@@ -102,6 +104,22 @@ static p8080State   i8080_state_dcx_t5[4] = {
     NAME_DCX_T5(SP),
 };
 
+// INR M and DCR M require two additional machine cycles.
+
+static f8080State   i8080_state_inrM2T1M;
+static f8080State   i8080_state_inrM2T2M;
+static f8080State   i8080_state_inrM2TWM;
+static f8080State   i8080_state_inrM2T3M;
+
+static f8080State   i8080_state_dcrM2T1M;
+static f8080State   i8080_state_dcrM2T2M;
+static f8080State   i8080_state_dcrM2TWM;
+static f8080State   i8080_state_dcrM2T3M;
+
+static f8080State   i8080_state_inrdcrM3T1M;
+static f8080State   i8080_state_inrdcrM3T2M;
+static f8080State   i8080_state_inrdcrM3T3M;
+
 static unsigned     i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old);
 
 // i8080_incdec_init(i8080): set up the opcode decode entries
@@ -110,19 +128,13 @@ static unsigned     i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old);
 void i8080_incdec_init(i8080 cpu)
 {
     for (int ddd = 0; ddd < 8; ++ddd) {
-        p8080State          m1t4 = i8080_state_inrT4[ddd];
-        if (NULL == m1t4)
-            continue;
         Byte                op = 0x04 | (ddd << 3);
-        cpu->m1t4[op] = m1t4;
+        cpu->m1t4[op] = i8080_state_inrT4[ddd];
     }
 
     for (int ddd = 0; ddd < 8; ++ddd) {
-        p8080State          m1t4 = i8080_state_dcrT4[ddd];
-        if (NULL == m1t4)
-            continue;
         Byte                op = 0x05 | (ddd << 3);
-        cpu->m1t4[op] = m1t4;
+        cpu->m1t4[op] = i8080_state_dcrT4[ddd];
     }
 
     for (int rp = 0; rp < 4; ++rp) {
@@ -255,34 +267,6 @@ IMPL_ALU_TO_R(E);
 IMPL_ALU_TO_R(H);
 IMPL_ALU_TO_R(L);
 
-// i8080_alu_flags: update the flags based on the extended
-// result of the ALU operation, with the aux carry provided
-// separately.
-
-static unsigned i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old)
-{
-
-    unsigned            cy = old & FLAGS_CY;
-
-    // FLAGS_P is set if there are an even number of bits
-    // set in the low 8 bits of the result.
-
-    unsigned            p = alu;
-    p ^= p >> 4;
-    p ^= p >> 2;
-    p ^= p >> 1;
-    p = (p & 1) ? 0 : FLAGS_P;
-
-    unsigned            s = alu & 0x80;
-
-    unsigned            z = alu ? 0 : FLAGS_Z;
-
-    // turn on the "always on" 0x02 bit.
-
-    return cy | 0x02 | p | ac | z | s;
-
-}
-
 // i8080_state_rp_idal_T4RP: latch a register pair into IDAL
 
 #define IMPL_RP_IDAL_T4(RH,RL)                                          \
@@ -404,4 +388,314 @@ static void i8080_state_dcx_t5SP(i8080 cpu, int phase)
       case PHI2_FALL:
           break;
     }
+}
+
+// TODO write function comment for i8080_state_inrM1T4M
+
+static void i8080_state_inrT4M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrM2T1M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrM2T1M
+
+static void i8080_state_inrM2T1M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
+          data_to(cpu->DATA, STATUS_MREAD);
+          edge_hi(cpu->SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrM2T2M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrM2T2M
+
+static void i8080_state_inrM2T2M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          data_z(cpu->DATA);
+          edge_lo(cpu->SYNC);
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_inrM2T3M;
+          else
+              cpu->state_next = i8080_state_inrM2TWM;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrM2T2M
+
+static void i8080_state_inrM2TWM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->WAIT);
+          break;
+      case PHI2_RISE:
+          // do not issue a falling edge,
+          // but do re-issue the rising edge.
+          cpu->DBIN->value = 0;
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_inrM2T3M;
+          else
+              cpu->state_next = i8080_state_inrM2TWM;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrM2T3M
+
+static void i8080_state_inrM2T3M(i8080 cpu, int phase)
+{
+    unsigned            old;
+    unsigned            tmp;
+    unsigned            alu;
+    unsigned            ac;
+    unsigned            flags;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_lo(cpu->WAIT);
+          break;
+      case PHI2_RISE:
+
+          old = cpu->FLAGS->value;
+          tmp = cpu->DATA->value;
+          alu = tmp + 1;
+          ac = 16 & ((tmp & 15) + 1);
+
+          flags = i8080_incdec_flags(alu, ac, old);
+
+          data_to(cpu->TMP, tmp);
+          data_to(cpu->ALU, alu);
+          data_to(cpu->FLAGS, flags);
+
+          edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrdcrM3T1M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_dcrM1T4M
+
+static void i8080_state_dcrT4M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_dcrM2T1M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_dcrM2T1M
+
+static void i8080_state_dcrM2T1M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
+          data_to(cpu->DATA, STATUS_MREAD);
+          edge_hi(cpu->SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_dcrM2T2M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_dcrM2T2M
+
+static void i8080_state_dcrM2T2M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          data_z(cpu->DATA);
+          edge_lo(cpu->SYNC);
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_dcrM2T3M;
+          else
+              cpu->state_next = i8080_state_dcrM2TWM;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_dcrM2T2M
+
+static void i8080_state_dcrM2TWM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->WAIT);
+          break;
+      case PHI2_RISE:
+          // do not issue a falling edge,
+          // but do re-issue the rising edge.
+          cpu->DBIN->value = 0;
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_dcrM2T3M;
+          else
+              cpu->state_next = i8080_state_dcrM2TWM;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_dcrM2T3M
+
+static void i8080_state_dcrM2T3M(i8080 cpu, int phase)
+{
+    unsigned            old;
+    unsigned            tmp;
+    unsigned            alu;
+    unsigned            ac;
+    unsigned            flags;
+
+    switch (phase) {
+      case PHI1_RISE:
+          edge_lo(cpu->WAIT);
+          break;
+      case PHI2_RISE:
+
+          old = cpu->FLAGS->value;
+          tmp = cpu->DATA->value;
+          alu = tmp - 1;
+          ac = 16 & ((tmp & 15) - 1);
+
+          flags = i8080_incdec_flags(alu, ac, old);
+
+          data_to(cpu->TMP, tmp);
+          data_to(cpu->ALU, alu);
+          data_to(cpu->FLAGS, flags);
+
+          edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrdcrM3T1M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrdcrM3T1M
+
+static void i8080_state_inrdcrM3T1M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
+          data_to(cpu->DATA, STATUS_MWRITE);
+          edge_hi(cpu->SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrdcrM3T2M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrdcrM3T2M
+
+static void i8080_state_inrdcrM3T2M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          edge_lo(cpu->SYNC);
+          data_to(cpu->DATA, cpu->ALU->value);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_inrdcrM3T3M;
+          break;
+    }
+}
+
+// TODO write function comment for i8080_state_inrdcrM3T3M
+
+static void i8080_state_inrdcrM3T3M(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->RETM1_INT);
+          edge_lo(cpu->WR_);
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          edge_hi(cpu->WR_);
+          addr_z(cpu->ADDR);
+          break;
+    }
+}
+
+// i8080_alu_flags: update the flags based on the extended
+// result of the ALU operation, with the aux carry provided
+// separately.
+
+static unsigned i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old)
+{
+
+    unsigned            cy = old & FLAGS_CY;
+
+    // FLAGS_P is set if there are an even number of bits
+    // set in the low 8 bits of the result.
+
+    unsigned            p = alu;
+    p ^= p >> 4;
+    p ^= p >> 2;
+    p ^= p >> 1;
+    p = (p & 1) ? 0 : FLAGS_P;
+
+    unsigned            s = alu & 0x80;
+
+    unsigned            z = alu ? 0 : FLAGS_Z;
+
+    // turn on the "always on" 0x02 bit.
+
+    return cy | 0x02 | p | ac | z | s;
+
 }

@@ -149,7 +149,10 @@ code and extends to the next newline.
 - '9': multibyte data, color 9
 
 * PENDING ITEMS
-** TODO write up more things that need to be done
+** TODO add comments where noted
+** TODO common support for "test program in .hex file"
+** TODO shift from "RST n" to illegal instructions for sim magic
+** TODO common test support provides 32K ram, 2K rom, and "SIGBUS" on "nobody there"
 * Code Tour from Bottom to Top
 
 ** headers: include the Standard C headers I expect to need
