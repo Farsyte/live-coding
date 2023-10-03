@@ -31,6 +31,7 @@ ASMDIR		:= asm/
 LSTDIR		:= lst/
 HEXDIR		:= hex/
 TESTDIR		:= test/
+PREDIR		:= pre/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
 COVDIR		:= cov/
@@ -124,6 +125,14 @@ ${OBJDIR}%.o:    ${TESTDIR}%.c
 	$E 'cc $* ...'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
+
+${PREDIR}%.E:    ${SRCDIR}%.c
+	$E 'cpp $* ...'
+	$Q $(CC) $(CFLAGS) $< -E | indent -st > $@
+
+${PREDIR}%.E:    ${TESTDIR}%.c
+	$E 'cpp $* ...'
+	$Q $(CC) $(CFLAGS) $< -E | indent -st > $@
 
 ${EXEC}:	${OBJS}
 	$E 'link ${PROG} ...'

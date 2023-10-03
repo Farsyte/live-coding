@@ -189,16 +189,33 @@ plot.
 
 *** ALUop M
 
-86 add  M
-8E adc  M
-96 sub  M
-9E sbb  M
-A6 ana  M
-AE xra  M
-B6 ora  M
-BE cmp  M
+[[file:img/i8080_movm_8.png]]
+
+[[file:img/i8080_movm_9.png]]
+
+[[file:img/i8080_movm_10.png]]
+
+[[file:img/i8080_movm_11.png]]
+
+[[file:img/i8080_movm_12.png]]
+
+[[file:img/i8080_movm_13.png]]
+
+[[file:img/i8080_movm_14.png]]
+
+[[file:img/i8080_movm_15.png]]
+
+*** PUSH rp, POP rp
+
+[[file:img/i8080_stack_1.png]]
+
+[[file:img/i8080_stack_2.png]]
 
 ** Not Yet Implemented
+
+*** XTHL
+
+E3 xthl
 
 *** LDA STA
 
@@ -214,20 +231,6 @@ BE cmp  M
 02 stax BC,##
 12 stax DE,##
 22 shld ##
-
-*** PUSH rp, POP rp
-
-C5 push BC
-D5 push DE
-E5 push HL
-F5 push PSW
-
-C1 pop  BC
-D1 pop  DE
-E1 pop  HL
-F1 pop  PSW
-
-E3 xthl
 
 *** CALL Cc
 

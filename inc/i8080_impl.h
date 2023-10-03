@@ -61,6 +61,7 @@ extern void         i8080_jmp_init(i8080 cpu);
 extern void         i8080_io_init(i8080 cpu);
 extern void         i8080_movm_init(i8080 cpu);
 extern void         i8080_dad_init(i8080 cpu);
+extern void         i8080_stack_init(i8080 cpu);
 
 extern void         i8080_reset_post(CpuTestSys ts);
 extern void         i8080_eidihlt_post(CpuTestSys ts);
@@ -74,6 +75,7 @@ extern void         i8080_jmp_post(CpuTestSys ts);
 extern void         i8080_io_post(CpuTestSys ts);
 extern void         i8080_movm_post(CpuTestSys ts);
 extern void         i8080_dad_post(CpuTestSys ts);
+extern void         i8080_stack_post(CpuTestSys ts);
 
 extern void         i8080_reset_bist(CpuTestSys ts);
 extern void         i8080_eidihlt_bist(CpuTestSys ts);
@@ -87,6 +89,7 @@ extern void         i8080_jmp_bist(CpuTestSys ts);
 extern void         i8080_io_bist(CpuTestSys ts);
 extern void         i8080_movm_bist(CpuTestSys ts);
 extern void         i8080_dad_bist(CpuTestSys ts);
+extern void         i8080_stack_bist(CpuTestSys ts);
 
 // Activity during a T-state is managed by a single
 // function, which is called three times.
