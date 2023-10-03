@@ -45,6 +45,7 @@ DEFN_M1T4(A);
 
 static f8080State   i8080_state_aluimmM1T4;
 static f8080State   i8080_state_aluimmM2T3;
+static f8080State   i8080_state_aluT4rdM;
 
 // Table of functions: indexed by the "sss" bits of the
 // opcode, giving the proper function.
@@ -56,9 +57,19 @@ static p8080State   i8080_state_aluT4[8] = {
     NAME_M1T4(E),
     NAME_M1T4(H),
     NAME_M1T4(L),
-    0,
+    i8080_state_aluT4rdM,
     NAME_M1T4(A),
 };
+
+// TODO write better comments here.
+//
+// ALU operations taking M as an operand need to do a machine
+// cycle that reads from (HL) into TMP.
+
+static f8080State   i8080_state_aluM2T1rdM;
+static f8080State   i8080_state_aluM2T2rdM;
+static f8080State   i8080_state_aluM2TWrdM;
+static f8080State   i8080_state_aluM2T3rdM;
 
 // i8080_alu uses a collection of t-state functions to handle the
 // distinct M1T2 operations which are used to compute the ALU result
@@ -129,14 +140,8 @@ void i8080_alu_init(i8080 cpu)
         for (int sss = 0; sss < 8; ++sss) {
             p8080State          m1t4 = i8080_state_aluT4[sss];
             Byte                op = 0x80 | (ooo << 3) | sss;
-            if (NULL == m1t4) {
-                // cpu->m1t4[op] = ... use 2bops to read TMP from (HL)
-            } else {
-                cpu->m1t4[op] = m1t4;
-            }
+            cpu->m1t4[op] = m1t4;
             cpu->m1t2[op] = i8080_state_aluT2[ooo];
-            // yes, we are getting here.
-            // STUB("i8080_alu_init: op %02X m1t2 %p", op, (void *)(cpu->m1t2[op]));
         }
     }
 
@@ -463,6 +468,109 @@ static void i8080_state_aluimmM1T4(i8080 cpu, int phase)
 // This is the M2T3 cycle shared by the eight ALU ops
 // when the 2nd operand is the 2nd byte of the opcode.
 static void i8080_state_aluimmM2T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_lo(cpu->WAIT);
+          edge_hi(cpu->RETM1_INT);
+          break;
+      case PHI2_RISE:
+          data_to(cpu->TMP, cpu->DATA->value);
+          edge_lo(cpu->DBIN);
+          addr_z(cpu->ADDR);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// TODO write better comments here.
+//
+// ALU operations taking M as an operand need to do a machine
+// cycle that reads from (HL) into TMP.
+
+// TODO add function comment
+
+static void i8080_state_aluT4rdM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          data_to(cpu->ACT, cpu->A->value);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_aluM2T1rdM;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_aluM2T1rdM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
+          addr_to(cpu->ADDR, cpu->IDAL->value);
+          data_to(cpu->DATA, STATUS_MREAD);
+          edge_hi(cpu->SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_aluM2T2rdM;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_aluM2T2rdM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          data_z(cpu->DATA);
+          edge_lo(cpu->SYNC);
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_aluM2T3rdM;
+          else
+              cpu->state_next = i8080_state_aluM2TWrdM;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_aluM2TWrdM(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          edge_hi(cpu->WAIT);
+          break;
+      case PHI2_RISE:
+          // do not issue a falling edge,
+          // but do re-issue the rising edge.
+          cpu->DBIN->value = 0;
+          edge_hi(cpu->DBIN);
+          break;
+      case PHI2_FALL:
+          if (cpu->READY->value)
+              cpu->state_next = i8080_state_aluM2T3rdM;
+          else
+              cpu->state_next = i8080_state_aluM2TWrdM;
+          break;
+    }
+}
+
+// TODO add function comment
+
+static void i8080_state_aluM2T3rdM(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:

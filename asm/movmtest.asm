@@ -49,6 +49,59 @@ START:
         INX     HL
         DCR	M
         INX     HL
+        RST     2
+
+        ;; This test program also tests the ALU operations
+        ;; that take M as an operand.
+
+        MVI     A,55H
+        ADD     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        STC
+        ADC     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        SUB     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        STC
+        MVI     A,55H
+        SBB     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        ANA     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        XRA     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        ORA     M
+        MOV     M,A
+        INX     HL
+        RST     2
+
+        MVI     A,55H
+        CMP     M
+        MOV     M,A
+        INX     HL
 
         RST     1
         NOP

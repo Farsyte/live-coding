@@ -167,7 +167,8 @@ plot.
  
 *** Operations on M
 
-**** MOV 
+*** MOV r,M; MOV m,r
+
 [[file:img/i8080_movm_1.png]]
 
 [[file:img/i8080_movm_2.png]]
@@ -178,19 +179,15 @@ plot.
 
 [[file:img/i8080_movm_5.png]]
 
-**** MVI  
+*** MVI M,imm8
 
 [[file:img/i8080_movm_6.png]]
 
-**** INR M, DCR M
+*** INR M, DCR M
 
 [[file:img/i8080_movm_7.png]]
 
-** Not Yet Implemented
-
-*** Operations on M
-
-**** ALUop
+*** ALUop M
 
 86 add  M
 8E adc  M
@@ -200,6 +197,8 @@ A6 ana  M
 AE xra  M
 B6 ora  M
 BE cmp  M
+
+** Not Yet Implemented
 
 *** LDA STA
 

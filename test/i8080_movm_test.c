@@ -120,7 +120,23 @@ void i8080_movm_bist(CpuTestSys ts)
         } else if (i == 7) {
             ASSERT_EQ_integer(rom[0]->cells[i] + 1, ram[0]->cells[i]);
         } else if (i == 8) {
-            ASSERT_EQ_integer(rom[0]->cells[i] - 1, ram[0]->cells[i]);
+            ASSERT_EQ_integer(255 & (rom[0]->cells[i] - 1), ram[0]->cells[i]);
+        } else if (i == 9) {
+            ASSERT_EQ_integer(255 & (0x55 + rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 10) {
+            ASSERT_EQ_integer(255 & (0x55 + 1 + rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 11) {
+            ASSERT_EQ_integer(255 & (0x55 - rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 12) {
+            ASSERT_EQ_integer(255 & (0x55 - 1 - rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 13) {
+            ASSERT_EQ_integer(255 & (0x55 & rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 14) {
+            ASSERT_EQ_integer(255 & (0x55 ^ rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 15) {
+            ASSERT_EQ_integer(255 & (0x55 | rom[0]->cells[i]), ram[0]->cells[i]);
+        } else if (i == 16) {
+            ASSERT_EQ_integer(rom[0]->cells[i], ram[0]->cells[i]);
         } else {
             ASSERT_EQ_integer(RAM_START_VAL, ram[0]->cells[i]);
         }

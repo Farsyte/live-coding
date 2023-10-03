@@ -49,13 +49,66 @@
     49 0029 23		        INX     HL
     50 002A 35		        DCR	M
     51 002B 23		        INX     HL
-    52
-    53 002C CF		        RST     1
-    54 002D 00		        NOP
-    55 002E 00		        NOP
-    56 002F 00		        NOP
-    57 0030 76		        HLT
-    58
+    52 002C D7		        RST     2
+    53
+    54 			        ;; This test program also tests the ALU operations
+    55 			        ;; that take M as an operand.
+    56
+    57 002D 3E 55	        MVI     A,55H
+    58 002F 86		        ADD     M
+    59 0030 77		        MOV     M,A
+    60 0031 23		        INX     HL
+    61 0032 D7		        RST     2
+    62
+    63 0033 3E 55	        MVI     A,55H
+    64 0035 37		        STC
+    65 0036 8E		        ADC     M
+    66 0037 77		        MOV     M,A
+    67 0038 23		        INX     HL
+    68 0039 D7		        RST     2
+    69
+    70 003A 3E 55	        MVI     A,55H
+    71 003C 96		        SUB     M
+    72 003D 77		        MOV     M,A
+    73 003E 23		        INX     HL
+    74 003F D7		        RST     2
+    75
+    76 0040 37		        STC
+    77 0041 3E 55	        MVI     A,55H
+    78 0043 9E		        SBB     M
+    79 0044 77		        MOV     M,A
+    80 0045 23		        INX     HL
+    81 0046 D7		        RST     2
+    82
+    83 0047 3E 55	        MVI     A,55H
+    84 0049 A6		        ANA     M
+    85 004A 77		        MOV     M,A
+    86 004B 23		        INX     HL
+    87 004C D7		        RST     2
+    88
+    89 004D 3E 55	        MVI     A,55H
+    90 004F AE		        XRA     M
+    91 0050 77		        MOV     M,A
+    92 0051 23		        INX     HL
+    93 0052 D7		        RST     2
+    94
+    95 0053 3E 55	        MVI     A,55H
+    96 0055 B6		        ORA     M
+    97 0056 77		        MOV     M,A
+    98 0057 23		        INX     HL
+    99 0058 D7		        RST     2
+   100
+   101 0059 3E 55	        MVI     A,55H
+   102 005B BE		        CMP     M
+   103 005C 77		        MOV     M,A
+   104 005D 23		        INX     HL
+   105
+   106 005E CF		        RST     1
+   107 005F 00		        NOP
+   108 0060 00		        NOP
+   109 0061 00		        NOP
+   110 0062 76		        HLT
+   111
 
 
 *******************************************************************************
