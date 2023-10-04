@@ -1,5 +1,5 @@
-#include "clock.h"
-#include "i8080_impl.h"
+#include "i8080_flags.h"
+#include "i8080_test.h"
 
 // i8080_alu: manage most ALU instructions
 //

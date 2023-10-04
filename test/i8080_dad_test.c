@@ -1,9 +1,4 @@
-#include "clock.h"
-#include "i8080_impl.h"
-
-// === === === === === === === === === === === === === === === ===
-//                COMMON SUPPORT FOR POST/BIST/BENCH
-// === === === === === === === === === === === === === === === ===
+#include "i8080_test.h"
 
 // === === === === === === === === === === === === === === === ===
 //                    POWER-ON SELF TEST SUPPORT

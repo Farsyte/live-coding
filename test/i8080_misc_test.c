@@ -1,5 +1,4 @@
-#include "clock.h"
-#include "i8080_impl.h"
+#include "i8080_test.h"
 
 // i8080_misc: test misc instructions
 

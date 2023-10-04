@@ -1,4 +1,5 @@
 #include "clock.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "edge.h"
 #include "support.h"
 

@@ -1,4 +1,8 @@
 #include "sigtrace.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <errno.h>      // Macros reporting error conditions
+#include <stdlib.h>     // General utilities
+#include <string.h>     // String handling
 #include <sys/stat.h>
 #include <sys/types.h>
 

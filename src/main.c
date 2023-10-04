@@ -1,5 +1,5 @@
 #include "main.h"
-#include "headers.h"
+#include <string.h>     // String handling
 #include "support.h"
 
 int main(int argc, char **argv)

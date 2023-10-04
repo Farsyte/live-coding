@@ -36,13 +36,13 @@ static void i8080_state_pc_out_status(i8080 cpu, int phase)
     switch (phase) {
       case PHI1_RISE:
           // Messing with IR here breaks ALU writeback in M1T2.
-          // data_z(cpu->IR);
+          // DTRI(IR);
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, cpu->PC->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_FETCH);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, VAL(PC));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_FETCH);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_pc_inc;
@@ -60,17 +60,17 @@ static void i8080_state_pc_inc(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          IR = cpu->IR->value;
+          IR = VAL(IR);
           m1t2 = cpu->m1t2[IR];
           if (NULL != m1t2)
               m1t2(cpu, phase);
-          addr_to(cpu->PC, cpu->IDAL->value + 1);
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          ASET(PC, INC(IDAL));
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_op_rd;      // no bist coverage
           else
               cpu->state_next = i8080_state_fetch_wait;
@@ -84,16 +84,16 @@ static void i8080_state_fetch_wait(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_op_rd;
           break;
     }
@@ -105,15 +105,15 @@ static void i8080_state_op_rd(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->IR, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(IR, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
-          cpu->state_next = cpu->m1t4[cpu->IR->value];
+          cpu->state_next = cpu->m1t4[VAL(IR)];
           break;
     }
 }
@@ -124,7 +124,7 @@ static void i8080_state_nop(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
           break;

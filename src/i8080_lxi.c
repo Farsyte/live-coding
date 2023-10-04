@@ -51,22 +51,22 @@ void i8080_lxi_init(i8080 cpu)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M2T3(RH,RL)                                        \
-    static void NAME_M2T3(RH,RL) (i8080 cpu, int phase) {       \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_lo(cpu->WAIT);                                 \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->RL, cpu->DATA->value);                 \
-            edge_lo(cpu->DBIN);                                 \
-            addr_z(cpu->ADDR);                                  \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = cpu->state_3bops_t1;              \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M2T3(RH,RL)                                                \
+    static void NAME_M2T3(RH,RL) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            LOWER(WAIT);                                                \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(RL, VAL(DATA));                                        \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = cpu->state_3bops_t1;                      \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M2T3(RH,RL)
 
 IMPL_M2T3(B, C);
@@ -75,21 +75,14 @@ IMPL_M2T3(H, L);
 
 static void i8080_state_lxiM2T3SP(i8080 cpu, int phase)
 {
-    unsigned            SP;
-    unsigned            P;
-
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          // write cpu->DATA->value to low byte of SP
-          P = cpu->DATA->value;
-          SP = cpu->SP->value;
-          SP = (SP & 0xFF00) | P;
-          addr_to(cpu->SP, SP);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          ASET(SP, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = cpu->state_3bops_t1;
@@ -101,22 +94,22 @@ static void i8080_state_lxiM2T3SP(i8080 cpu, int phase)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M3T3(RH,RL)                                        \
-    static void NAME_M3T3(RH,RL) (i8080 cpu, int phase) {       \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_lo(cpu->WAIT);                                 \
-            edge_hi(cpu->RETM1_INT);                            \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->RH, cpu->DATA->value);                 \
-            edge_lo(cpu->DBIN);                                 \
-            addr_z(cpu->ADDR);                                  \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M3T3(RH,RL)                                                \
+    static void NAME_M3T3(RH,RL) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            LOWER(WAIT);                                                \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(RH, VAL(DATA));                                        \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                                 \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M3T3(RH,RL)
 
 IMPL_M3T3(B, C);
@@ -125,22 +118,15 @@ IMPL_M3T3(H, L);
 
 static void i8080_state_lxiM3T3SP(i8080 cpu, int phase)
 {
-    unsigned            S;
-    unsigned            SP;
-
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          // write cpu->DATA->value to low byte of SP
-          S = cpu->DATA->value;
-          SP = cpu->SP->value;
-          SP = (S << 8) | (SP & 0x00FF);
-          addr_to(cpu->SP, SP);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          ASET(SP, RP(DATA, SP));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           break;

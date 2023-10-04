@@ -122,7 +122,7 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->IDAL, cpu->SP->value);                         \
+            ASET(IDAL, VAL(SP));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M1T5(RH,RL);                    \
@@ -138,7 +138,7 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->SP, cpu->IDAL->value - 1);                     \
+            ASET(SP, DEC(IDAL));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M2T1(RH,RL);                    \
@@ -156,10 +156,10 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->IDAL, cpu->SP->value);                         \
-            addr_to(cpu->ADDR, cpu->IDAL->value);                       \
-            data_to(cpu->DATA, STATUS_SWRITE);                          \
-            edge_hi(cpu->SYNC);                                         \
+            ASET(IDAL, VAL(SP));                                        \
+            ASET(ADDR, VAL(IDAL));                                      \
+            DSET(DATA, STATUS_SWRITE);                                  \
+            RAISE(SYNC);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M2T2(RH,RL);                    \
@@ -175,9 +175,9 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->SP, cpu->IDAL->value - 1);                     \
-            edge_lo(cpu->SYNC);                                         \
-            data_to(cpu->DATA, cpu->RH->value);                         \
+            ASET(SP, DEC(IDAL));                                        \
+            LOWER(SYNC);                                                \
+            DSET(DATA, VAL(RH));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M2T3(RH,RL);                    \
@@ -191,13 +191,13 @@ void i8080_stack_init(i8080 cpu)
     static void DECL_PUSH_M2T3(RH,RL) {                                 \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_lo(cpu->WR_);                                          \
+            LOWER(WR_);                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            edge_hi(cpu->WR_);                                          \
-            addr_z(cpu->ADDR);                                          \
+            RAISE(WR_);                                                 \
+            ATRI(ADDR);                                                 \
             cpu->state_next = NAME_PUSH_M3T1(RH,RL);                    \
             break;                                                      \
         }                                                               \
@@ -213,10 +213,10 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->IDAL, cpu->SP->value);                         \
-            addr_to(cpu->ADDR, cpu->IDAL->value);                       \
-            data_to(cpu->DATA, STATUS_SWRITE);                          \
-            edge_hi(cpu->SYNC);                                         \
+            ASET(IDAL, VAL(SP));                                        \
+            ASET(ADDR, VAL(IDAL));                                      \
+            DSET(DATA, STATUS_SWRITE);                                  \
+            RAISE(SYNC);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M3T2(RH,RL);                    \
@@ -232,8 +232,8 @@ void i8080_stack_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            edge_lo(cpu->SYNC);                                         \
-            data_to(cpu->DATA, cpu->RL->value);                         \
+            LOWER(SYNC);                                                \
+            DSET(DATA, VAL(RL));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_PUSH_M3T3(RH,RL);                    \
@@ -247,14 +247,14 @@ void i8080_stack_init(i8080 cpu)
     static void DECL_PUSH_M3T3(RH,RL) {                                 \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_hi(cpu->RETM1_INT);                                    \
-            edge_lo(cpu->WR_);                                          \
+            RAISE(RETM1_INT);                                           \
+            LOWER(WR_);                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            edge_hi(cpu->WR_);                                          \
-            addr_z(cpu->ADDR);                                          \
+            RAISE(WR_);                                                 \
+            ATRI(ADDR);                                                 \
             break;                                                      \
         }                                                               \
     }                                                                   \
@@ -291,9 +291,9 @@ static void i8080_push_M2T2PSW(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->SP, cpu->IDAL->value - 1);
-          edge_lo(cpu->SYNC);
-          data_to(cpu->DATA, cpu->A->value);
+          ASET(SP, DEC(IDAL));
+          LOWER(SYNC);
+          DSET(DATA, VAL(A));
           break;
       case PHI2_FALL:
           cpu->state_next = NAME_PUSH_M2T3(P, SW);
@@ -309,8 +309,8 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          edge_lo(cpu->SYNC);
-          data_to(cpu->DATA, cpu->FLAGS->value);
+          LOWER(SYNC);
+          DSET(DATA, (VAL(FLAGS) & ~0x28) | 0x02);
           break;
       case PHI2_FALL:
           cpu->state_next = NAME_PUSH_M3T3(P, SW);
@@ -342,10 +342,10 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->IDAL, cpu->SP->value);                         \
-            addr_to(cpu->ADDR, cpu->IDAL->value);                       \
-            data_to(cpu->DATA, STATUS_SREAD);                           \
-            edge_hi(cpu->SYNC);                                         \
+            ASET(IDAL, VAL(SP));                                        \
+            ASET(ADDR, VAL(IDAL));                                      \
+            DSET(DATA, STATUS_SREAD);                                   \
+            RAISE(SYNC);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_POP_M2T2(RH,RL);                     \
@@ -361,13 +361,13 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_z(cpu->DATA);                                          \
-            edge_lo(cpu->SYNC);                                         \
-            edge_hi(cpu->DBIN);                                         \
-            addr_to(cpu->SP, cpu->IDAL->value + 1);                     \
+            LOWER(SYNC);                                                \
+            DTRI(DATA);                                                 \
+            RAISE(DBIN);                                                \
+            ASET(SP, INC(IDAL));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            if (cpu->READY->value)                                      \
+            if (VAL(READY))                                             \
                 cpu->state_next = NAME_POP_M2T3(RH,RL);                 \
             else                                                        \
                 cpu->state_next = NAME_POP_M2TW(RH,RL);                 \
@@ -381,16 +381,16 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     static void DECL_POP_M2TW(RH,RL) {                                  \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_hi(cpu->WAIT);                                         \
+            RAISE(WAIT);                                                \
             break;                                                      \
         case PHI2_RISE:                                                 \
             /* do not issue a falling edge, */                          \
             /* but do re-issue the rising edge. */                      \
-            cpu->DBIN->value = 0;                                       \
-            edge_hi(cpu->DBIN);                                         \
+            VAL(DBIN) = 0;                                              \
+            RAISE(DBIN);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            if (cpu->READY->value)                                      \
+            if (VAL(READY))                                             \
                 cpu->state_next = NAME_POP_M2T3(RH,RL);                 \
             else                                                        \
                 cpu->state_next = NAME_POP_M2TW(RH,RL);                 \
@@ -404,12 +404,12 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     static void DECL_POP_M2T3(RH,RL) {                                  \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_lo(cpu->WAIT);                                         \
+            LOWER(WAIT);                                                \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_to(cpu->RL, cpu->DATA->value);                         \
-            edge_lo(cpu->DBIN);                                         \
-            addr_z(cpu->ADDR);                                          \
+            DSET(RL, VAL(DATA));                                        \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                                 \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_POP_M3T1(RH,RL);                     \
@@ -427,10 +427,10 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            addr_to(cpu->IDAL, cpu->SP->value);                         \
-            addr_to(cpu->ADDR, cpu->IDAL->value);                       \
-            data_to(cpu->DATA, STATUS_SREAD);                           \
-            edge_hi(cpu->SYNC);                                         \
+            ASET(IDAL, VAL(SP));                                        \
+            ASET(ADDR, VAL(IDAL));                                      \
+            DSET(DATA, STATUS_SREAD);                                   \
+            RAISE(SYNC);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_POP_M3T2(RH,RL);                     \
@@ -446,13 +446,13 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_z(cpu->DATA);                                          \
-            edge_lo(cpu->SYNC);                                         \
-            edge_hi(cpu->DBIN);                                         \
-            addr_to(cpu->SP, cpu->IDAL->value + 1);                     \
+            LOWER(SYNC);                                                \
+            DTRI(DATA);                                                 \
+            RAISE(DBIN);                                                \
+            ASET(SP, INC(IDAL));                                        \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            if (cpu->READY->value)                                      \
+            if (VAL(READY))                                             \
                 cpu->state_next = NAME_POP_M3T3(RH,RL);                 \
             else                                                        \
                 cpu->state_next = NAME_POP_M3TW(RH,RL);                 \
@@ -466,16 +466,16 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     static void DECL_POP_M3TW(RH,RL) {                                  \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_hi(cpu->WAIT);                                         \
+            RAISE(WAIT);                                                \
             break;                                                      \
         case PHI2_RISE:                                                 \
             /* do not issue a falling edge, */                          \
             /* but do re-issue the rising edge. */                      \
-            cpu->DBIN->value = 0;                                       \
-            edge_hi(cpu->DBIN);                                         \
+            VAL(DBIN) = 0;                                              \
+            RAISE(DBIN);                                                \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            if (cpu->READY->value)                                      \
+            if (VAL(READY))                                             \
                 cpu->state_next = NAME_POP_M3T3(RH,RL);                 \
             else                                                        \
                 cpu->state_next = NAME_POP_M3TW(RH,RL);                 \
@@ -489,13 +489,13 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     static void DECL_POP_M3T3(RH,RL) {                                  \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_hi(cpu->RETM1_INT);                                    \
-            edge_lo(cpu->WAIT);                                         \
+            RAISE(RETM1_INT);                                           \
+            LOWER(WAIT);                                                \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_to(cpu->RH, cpu->DATA->value);                         \
-            edge_lo(cpu->DBIN);                                         \
-            addr_z(cpu->ADDR);                                          \
+            DSET(RH, VAL(DATA));                                        \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                                 \
             break;                                                      \
         case PHI2_FALL:                                                 \
             break;                                                      \
@@ -503,15 +503,15 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M3T3(RH,RL)
 
-#define IMPL_POP(RH,RL)                                                \
-    IMPL_POP_M1T4(RH,RL);                                              \
-    IMPL_POP_M2T1(RH,RL);                                              \
-    IMPL_POP_M2T2(RH,RL);                                              \
-    IMPL_POP_M2TW(RH,RL);                                              \
-    IMPL_POP_M2T3(RH,RL);                                              \
-    IMPL_POP_M3T1(RH,RL);                                              \
-    IMPL_POP_M3T2(RH,RL);                                              \
-    IMPL_POP_M3TW(RH,RL);                                              \
+#define IMPL_POP(RH,RL)                                                 \
+    IMPL_POP_M1T4(RH,RL);                                               \
+    IMPL_POP_M2T1(RH,RL);                                               \
+    IMPL_POP_M2T2(RH,RL);                                               \
+    IMPL_POP_M2TW(RH,RL);                                               \
+    IMPL_POP_M2T3(RH,RL);                                               \
+    IMPL_POP_M3T1(RH,RL);                                               \
+    IMPL_POP_M3T2(RH,RL);                                               \
+    IMPL_POP_M3TW(RH,RL);                                               \
     IMPL_POP_M3T3(RH,RL)
 
 IMPL_POP(B, C);
@@ -531,18 +531,14 @@ IMPL_POP_M3TW(P, SW);
 // Specialize IMPL_POP_M2T3 for PSW
 static void i8080_pop_M2T3PSW(i8080 cpu, int phase)
 {
-    Byte                F;
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          F = cpu->DATA->value;
-          F |= 0x02;
-          F &= ~0x28;
-          data_to(cpu->FLAGS, F);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(FLAGS, (VAL(DATA) & ~0x28) | 0x02);
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = NAME_POP_M3T1(P, SW);
@@ -556,13 +552,13 @@ static void i8080_pop_M3T3PSW(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          edge_lo(cpu->WAIT);
+          RAISE(RETM1_INT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->A, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(A, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           break;

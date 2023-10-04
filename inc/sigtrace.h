@@ -2,8 +2,8 @@
 #include "addr.h"
 #include "data.h"
 #include "edge.h"
-#include "headers.h"
 #include "support.h"
+#include <stdio.h>      // Input/output
 
 // sigtrace: record signal trace data
 

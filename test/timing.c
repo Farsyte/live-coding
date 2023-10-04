@@ -1,4 +1,6 @@
 #include "timing.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <math.h>       // Common mathematics functions
 #include "clock.h"
 
 // timing: check simulated signal timing

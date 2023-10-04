@@ -1,3 +1,6 @@
+#include <errno.h>      // Macros reporting error conditions
+#include <string.h>     // String handling
+#include <time.h>       // Time/date utilities
 #include "support.h"
 
 // rtc: real time clock (host system wall-clock elapsed time)

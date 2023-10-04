@@ -30,13 +30,13 @@ static void i8080_io_in_M2T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->W, 0x00);
-          data_to(cpu->Z, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(W, 0x00);
+          DSET(Z, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_io_in_M3T1;
@@ -52,10 +52,10 @@ static void i8080_io_in_M3T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->W->value << 8) | cpu->Z->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_INPUTRD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(W, Z));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_INPUTRD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_io_in_M3T2;
@@ -71,12 +71,12 @@ static void i8080_io_in_M3T2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_io_in_M3T3;
           else
               cpu->state_next = i8080_io_in_M3TW;
@@ -90,16 +90,16 @@ static void i8080_io_in_M3TW(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_io_in_M3T3;
           else
               cpu->state_next = i8080_io_in_M3TW;
@@ -113,13 +113,13 @@ static void i8080_io_in_M3T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->A, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(A, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           break;
@@ -132,13 +132,13 @@ static void i8080_io_out_M2T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->W, 0x00);
-          data_to(cpu->Z, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(W, 0x00);
+          DSET(Z, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_io_out_M3T1;
@@ -154,10 +154,10 @@ static void i8080_io_out_M3T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->W->value << 8) | cpu->Z->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_OUTPUTWR);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(W, Z));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_OUTPUTWR);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_io_out_M3T2;
@@ -173,8 +173,8 @@ static void i8080_io_out_M3T2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_to(cpu->DATA, cpu->A->value);
-          edge_lo(cpu->SYNC);
+          LOWER(SYNC);
+          DSET(DATA, VAL(A));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_io_out_M3T3;
@@ -188,14 +188,14 @@ static void i8080_io_out_M3T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          edge_lo(cpu->WR_);
+          RAISE(RETM1_INT);
+          LOWER(WR_);
           break;
       case PHI2_RISE:
           break;
       case PHI2_FALL:
-          edge_hi(cpu->WR_);
-          addr_z(cpu->ADDR);
+          RAISE(WR_);
+          ATRI(ADDR);
           break;
     }
 }

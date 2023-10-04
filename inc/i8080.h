@@ -2,6 +2,7 @@
 #include "addr.h"
 #include "data.h"
 #include "edge.h"
+#include "support.h"
 
 // i8080: Single Chip 8-bit Microprocessor
 //
@@ -75,6 +76,7 @@ typedef struct s8080 {
     // T-state management functions
     p8080State          state_reset;            // entry T-state for reset
     p8080State          state_fetch;            // entry T-state for STATUS_FETCH cycles
+    p8080State          state_unimp;            // entry T-state for unimp ops
     p8080State          state_2bops;            // M1T4 handler for 2-byte ops
     p8080State          state_2bops_t1;         // M2T1 handler for 2-byte ops
     p8080State          state_3bops_t1;         // M3T1 handler for 3-byte ops

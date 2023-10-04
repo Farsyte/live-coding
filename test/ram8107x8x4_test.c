@@ -1,3 +1,4 @@
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "ram8107x8x4.h"
 
 // === === === === === === === === === === === === === === === ===

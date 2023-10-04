@@ -1,5 +1,4 @@
-#include "clock.h"
-#include "i8080_impl.h"
+#include "i8080_test.h"
 
 // i8080_stack: test the MOV M,Rs and MOV Rd,M instructions
 //

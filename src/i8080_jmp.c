@@ -1,3 +1,4 @@
+#include "i8080_flags.h"
 #include "i8080_impl.h"
 
 // i8080_jmp: transfer of control
@@ -68,25 +69,25 @@ void i8080_jmp_init(i8080 cpu)
 
 #define DECL_J_M1T4(CC) NAME_J_M1T4(CC) (i8080 cpu, int phase)
 
-#define IMPL_J_M1T4(CC,FB,FV)                                    \
-    static void DECL_J_M1T4(CC) {                                \
-        switch (phase) {                                         \
-        case PHI1_RISE:                                          \
-            break;                                               \
-        case PHI2_RISE:                                          \
-            if ((cpu->FLAGS->value & FB) == FV) {                \
-                cpu->m2t3[OP_J ## CC] = i8080_state_JMP_M2T3;    \
-                cpu->m3t3[OP_J ## CC] = i8080_state_JMP_M3T3;    \
-            } else {                                             \
-                cpu->m2t3[OP_J ## CC] = i8080_state_Jnot_M2T3;   \
-                cpu->m3t3[OP_J ## CC] = i8080_state_Jnot_M3T3;   \
-            }                                                    \
-            break;                                               \
-        case PHI2_FALL:                                          \
-            cpu->state_next = i8080_state_j_M1T5;                \
-            break;                                               \
-        }                                                        \
-    }                                                            \
+#define IMPL_J_M1T4(CC,FB,FV)                                           \
+    static void DECL_J_M1T4(CC) {                                       \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            if ((VAL(FLAGS) & FB) == FV) {                              \
+                cpu->m2t3[OP_J ## CC] = i8080_state_JMP_M2T3;           \
+                cpu->m3t3[OP_J ## CC] = i8080_state_JMP_M3T3;           \
+            } else {                                                    \
+                cpu->m2t3[OP_J ## CC] = i8080_state_Jnot_M2T3;          \
+                cpu->m3t3[OP_J ## CC] = i8080_state_Jnot_M3T3;          \
+            }                                                           \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = i8080_state_j_M1T5;                       \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_J_M1T4(CC)
 
 IMPL_J_M1T4(NZ, FLAGS_Z, 0);
@@ -118,12 +119,12 @@ static void i8080_state_JMP_M2T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->Z, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(Z, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = cpu->state_3bops_t1;
@@ -135,18 +136,18 @@ static void i8080_state_JMP_M3T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->W, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(W, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
-          addr_to(cpu->PC, (cpu->W->value << 8) | cpu->Z->value);
-          data_z(cpu->W);
-          data_z(cpu->Z);
+          ASET(PC, RP(W, Z));
+          DTRI(W);
+          DTRI(Z);
           break;
     }
 }
@@ -157,12 +158,12 @@ static void i8080_state_Jnot_M2T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-          data_to(cpu->Z, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(Z, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = cpu->state_3bops_t1;
@@ -174,18 +175,18 @@ static void i8080_state_Jnot_M3T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->W, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(W, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           // since the condition was false, do NOT copy WZ into PC.
-          data_z(cpu->W);
-          data_z(cpu->Z);
+          DTRI(W);
+          DTRI(Z);
           break;
     }
 }

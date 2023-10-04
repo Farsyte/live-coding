@@ -1,4 +1,5 @@
 #include "step.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "support.h"
 
 // step: a function to call, and a pointer to pass it.

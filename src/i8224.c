@@ -1,4 +1,5 @@
 #include "i8224.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "clock.h"
 #include "sigtrace.h"
 #include "support.h"

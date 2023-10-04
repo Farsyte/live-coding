@@ -1,3 +1,4 @@
+#include "i8080_flags.h"
 #include "i8080_impl.h"
 
 // i8080_misc: manage misc instructions
@@ -79,18 +80,18 @@ void i8080_dad_init(i8080 cpu)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M1T4(RH,RL)                                        \
-    static void NAME_M1T4(RH,RL) (i8080 cpu, int phase) {       \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = NAME_M2T1(RH,RL);                 \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M1T4(RH,RL)                                                \
+    static void NAME_M1T4(RH,RL) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = NAME_M2T1(RH,RL);                         \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M1T4(RH,RL)
 
 IMPL_M1T4(B, C);
@@ -104,19 +105,19 @@ IMPL_M1T4(S, P);
 
 #define	DECL_M2T1(RH,RL) NAME_M2T1(RH,RL) (i8080 cpu, int phase)
 
-#define IMPL_M2T1(RH,RL)                                        \
-    static void DECL_M2T1(RH,RL) {                              \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->ACT, cpu->RL->value);                  \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = NAME_M2T2(RH,RL);                 \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M2T1(RH,RL)                                                \
+    static void DECL_M2T1(RH,RL) {                                      \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(ACT, VAL(RL));                                         \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = NAME_M2T2(RH,RL);                         \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M2T1(RH,RL)
 
 IMPL_M2T1(B, C);
@@ -129,7 +130,7 @@ static void i8080_state_dadM2T1SP(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_to(cpu->ACT, cpu->SP->value);
+          DSET(ACT, VAL(SP));
           break;
       case PHI2_FALL:
           cpu->state_next = NAME_M2T2(S, P);
@@ -150,9 +151,9 @@ static void i8080_state_dadM2T1SP(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_to(cpu->TMP, cpu->L->value);                           \
-            alu = cpu->ACT->value + cpu->TMP->value;                    \
-            data_to(cpu->ALU, alu);                                     \
+            DSET(TMP, VAL(L));                                          \
+            alu = VAL(ACT) + VAL(TMP);                                  \
+            DSET(ALU, alu);                                             \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_M2T3(RH,RL);                         \
@@ -180,13 +181,13 @@ IMPL_M2T2(S, P);
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            alu = cpu->ACT->value + cpu->TMP->value;                    \
-            flags = cpu->FLAGS->value;                                  \
+            alu = VAL(ACT) + VAL(TMP);                                  \
+            flags = VAL(FLAGS);                                         \
             if (alu & 0x100)                                            \
-                data_to(cpu->FLAGS, flags | FLAGS_CY);                  \
+                DSET(FLAGS, flags | FLAGS_CY);                          \
             else                                                        \
-                data_to(cpu->FLAGS, flags &~ FLAGS_CY);                 \
-            data_to(cpu->L, cpu->ALU->value);                           \
+                DSET(FLAGS, flags &~ FLAGS_CY);                         \
+            DSET(L, VAL(ALU));                                          \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_M3T1(RH,RL);                         \
@@ -206,19 +207,19 @@ IMPL_M2T3(S, P);
 
 #define	DECL_M3T1(RH,RL) NAME_M3T1(RH,RL) (i8080 cpu, int phase)
 
-#define IMPL_M3T1(RH,RL)                                        \
-    static void DECL_M3T1(RH,RL) {                              \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->ACT, cpu->RH->value);                  \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = NAME_M3T2(RH,RL);                 \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M3T1(RH,RL)                                                \
+    static void DECL_M3T1(RH,RL) {                                      \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(ACT, VAL(RH));                                         \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = NAME_M3T2(RH,RL);                         \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M3T1(RH,RL)
 
 IMPL_M3T1(B, C);
@@ -231,7 +232,7 @@ static void i8080_state_dadM3T1SP(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_to(cpu->ACT, cpu->SP->value >> 8);
+          DSET(ACT, VAL(SP) >> 8);
           break;
       case PHI2_FALL:
           cpu->state_next = NAME_M3T2(S, P);
@@ -253,10 +254,10 @@ static void i8080_state_dadM3T1SP(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            data_to(cpu->TMP, cpu->H->value);                           \
-            alu = cpu->ACT->value + cpu->TMP->value +                   \
-                (FLAGS_CY & cpu->FLAGS->value);                         \
-            data_to(cpu->ALU, alu);                                     \
+            DSET(TMP, VAL(H));                                          \
+            alu = VAL(ACT) + VAL(TMP) +                                 \
+                (FLAGS_CY & VAL(FLAGS));                                \
+            DSET(ALU, alu);                                             \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = NAME_M3T3(RH, RL);                        \
@@ -282,17 +283,17 @@ IMPL_M3T2(S, P);
         unsigned alu;                                                   \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
-            edge_hi(cpu->RETM1_INT);                                    \
+            RAISE(RETM1_INT);                                           \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            flags = cpu->FLAGS->value;                                  \
-            alu = cpu->ACT->value + cpu->TMP->value +                   \
+            flags = VAL(FLAGS);                                         \
+            alu = VAL(ACT) + VAL(TMP) +                                 \
                 (FLAGS_CY & flags);                                     \
             if (alu & 0x100)                                            \
-                data_to(cpu->FLAGS, flags | FLAGS_CY);                  \
+                DSET(FLAGS, flags | FLAGS_CY);                          \
             else                                                        \
-                data_to(cpu->FLAGS, cpu->FLAGS->value & ~FLAGS_CY);     \
-            data_to(cpu->H, cpu->ALU->value);                           \
+                DSET(FLAGS, VAL(FLAGS) & ~FLAGS_CY);                    \
+            DSET(H, VAL(ALU));                                          \
             break;                                                      \
         case PHI2_FALL:                                                 \
             break;                                                      \

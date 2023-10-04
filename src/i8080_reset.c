@@ -26,7 +26,7 @@ void i8080_reset_init(i8080 cpu)
 
     EDGE_ON_RISE(cpu->RESET, i8080_reset_rise, cpu);
 
-    if (cpu->RESET->value)
+    if (VAL(RESET))
         i8080_reset_rise(cpu);
 }
 
@@ -43,20 +43,20 @@ static void i8080_reset_rise(i8080 cpu)
     cpu->state_next = i8080_state_reset;
     cpu->state_m1t1 = i8080_state_reset;
 
-    addr_z(cpu->PC);
-    addr_z(cpu->IDAL);
-    addr_z(cpu->ADDR);
+    ATRI(PC);
+    ATRI(IDAL);
+    ATRI(ADDR);
 
-    data_z(cpu->DATA);
-    data_z(cpu->IR);
-    data_z(cpu->ACT);
-    data_z(cpu->TMP);
-    data_z(cpu->ALU);
-    data_z(cpu->FLAGS);
+    DTRI(DATA);
+    DTRI(IR);
+    DTRI(ACT);
+    DTRI(TMP);
+    DTRI(ALU);
+    DTRI(FLAGS);
 
-    edge_lo(cpu->SYNC);
-    edge_lo(cpu->DBIN);
-    edge_lo(cpu->WAIT);
+    LOWER(SYNC);
+    LOWER(DBIN);
+    LOWER(WAIT);
 
 }
 
@@ -70,20 +70,20 @@ static void i8080_state_reset(i8080 cpu, int phase)
 
     // If RESET is still high, assure RESET_INT
     // is asserted and nothing more.
-    if (cpu->RESET->value) {
-        edge_hi(cpu->RESET_INT);
+    if (VAL(RESET)) {
+        RAISE(RESET_INT);
         return;
     }
     // We get here when RESET is finally released. Reset the PC to
     // zero and deliver control to the STATUS_FETCH machine cycle.
 
-    addr_to(cpu->PC, 0);
+    ASET(PC, 0);
     cpu->state_m1t1 = cpu->state_fetch;
 
     // Drop the internal reset signal and activate "RETURN M1"
     // so we make our way around to the M1T1 set above at the
     // appropriate time.
 
-    edge_lo(cpu->RESET_INT);
-    edge_hi(cpu->RETM1_INT);
+    LOWER(RESET_INT);
+    RAISE(RETM1_INT);
 }

@@ -13,7 +13,7 @@
 // pointer from different places for each function.
 //
 // using 64 distinct M1T4 functions would reduce runtime by whatever it
-// cost us to fetch from cpu->m1t5[cpu->IR->value], which may or may not
+// cost us to fetch from cpu->m1t5[VAL(IR)], which may or may not
 // be significant enough to warrent the cost of having so many more small
 // functions kicking around.
 
@@ -160,19 +160,19 @@ void i8080_mov_init(i8080 cpu)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M1T4(R)                                            \
-    static void NAME_M1T4(R) (i8080 cpu, int phase) {           \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->TMP, cpu->R->value);                   \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = cpu->m1t5[cpu->IR->value];        \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M1T4(R)                                                    \
+    static void NAME_M1T4(R) (i8080 cpu, int phase) {                   \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(TMP, VAL(R));                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = cpu->m1t5[VAL(IR)];                       \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M1T4(R)
 
 IMPL_M1T4(A);
@@ -187,19 +187,19 @@ IMPL_M1T4(L);
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M1T5(R)                                            \
-    static void NAME_M1T5(R) (i8080 cpu, int phase) {           \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_hi(cpu->RETM1_INT);                            \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->R, cpu->TMP->value);                   \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M1T5(R)                                                    \
+    static void NAME_M1T5(R) (i8080 cpu, int phase) {                   \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(R, VAL(TMP));                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M1T5(R)
 
 IMPL_M1T5(A);
@@ -235,10 +235,10 @@ static void i8080_state_movM2T1rd(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MREAD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, (VAL(H) << 8) | VAL(L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MREAD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_movM2T2rd;
@@ -254,13 +254,13 @@ static void i8080_state_movM2T2rd(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
-              cpu->state_next = cpu->m2t3[cpu->IR->value];
+          if (VAL(READY))
+              cpu->state_next = cpu->m2t3[VAL(IR)];
           else
               cpu->state_next = i8080_state_movM2TWrd;
           break;
@@ -273,17 +273,17 @@ static void i8080_state_movM2TWrd(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
-              cpu->state_next = cpu->m2t3[cpu->IR->value];
+          if (VAL(READY))
+              cpu->state_next = cpu->m2t3[VAL(IR)];
           else
               cpu->state_next = i8080_state_movM2TWrd;
           break;
@@ -295,22 +295,22 @@ static void i8080_state_movM2TWrd(i8080 cpu, int phase)
 // repeat the declaration of the function which allows (and needs) it.
 
 #define	DECL_RD_M2T3(R)	NAME_RD_M2T3(R)(i8080 cpu, int phase)
-#define IMPL_RD_M2T3(R)                        \
-    static void DECL_RD_M2T3(R) {              \
-        switch (phase) {                       \
-        case PHI1_RISE:                        \
-            edge_lo(cpu->WAIT);                \
-            edge_hi(cpu->RETM1_INT);           \
-            break;                             \
-        case PHI2_RISE:                        \
-            data_to(cpu->R, cpu->DATA->value); \
-            edge_lo(cpu->DBIN);                \
-            addr_z(cpu->ADDR);                 \
-            break;                             \
-        case PHI2_FALL:                        \
-            break;                             \
-        }                                      \
-    }                                          \
+#define IMPL_RD_M2T3(R)                                                 \
+    static void DECL_RD_M2T3(R) {                                       \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            LOWER(WAIT);                                                \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(R, VAL(DATA));                                         \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                                 \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_RD_M2T3(R)
 
 IMPL_RD_M2T3(B);
@@ -330,19 +330,19 @@ IMPL_RD_M2T3(A);
 // repeat the declaration of the function which allows (and needs) it.
 
 #define	DECL_WR_M1T4(R)	NAME_WR_M1T4(R)(i8080 cpu, int phase)
-#define IMPL_WR_M1T4(R)                              \
-    static void DECL_WR_M1T4(R) {                    \
-        switch (phase) {                             \
-        case PHI1_RISE:                              \
-            break;                                   \
-        case PHI2_RISE:                              \
-            data_to(cpu->TMP, cpu->R->value);        \
-            break;                                   \
-        case PHI2_FALL:                              \
-            cpu->state_next = i8080_state_movM2T1wr; \
-            break;                                   \
-        }                                            \
-    }                                                \
+#define IMPL_WR_M1T4(R)                                                 \
+    static void DECL_WR_M1T4(R) {                                       \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(TMP, VAL(R));                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = i8080_state_movM2T1wr;                    \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_WR_M1T4(R)
 
 IMPL_WR_M1T4(B);
@@ -361,10 +361,10 @@ static void i8080_state_movM2T1wr(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MWRITE);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, (VAL(H) << 8) | VAL(L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MWRITE);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_movM2T2wr;
@@ -380,8 +380,8 @@ static void i8080_state_movM2T2wr(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          edge_lo(cpu->SYNC);
-          data_to(cpu->DATA, cpu->TMP->value);
+          LOWER(SYNC);
+          DSET(DATA, VAL(TMP));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_movM2T3wr;
@@ -394,14 +394,14 @@ static void i8080_state_movM2T3wr(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          edge_lo(cpu->WR_);
+          RAISE(RETM1_INT);
+          LOWER(WR_);
           break;
       case PHI2_RISE:
           break;
       case PHI2_FALL:
-          edge_hi(cpu->WR_);
-          addr_z(cpu->ADDR);
+          RAISE(WR_);
+          ATRI(ADDR);
           break;
     }
 }

@@ -33,10 +33,10 @@ static void i8080_state_3bops_t1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, cpu->PC->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MREAD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, VAL(PC));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MREAD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_3bops_t2;
@@ -52,14 +52,14 @@ static void i8080_state_3bops_t2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->PC, cpu->IDAL->value + 1);
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          ASET(PC, INC(IDAL));
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
-              cpu->state_next = cpu->m3t3[cpu->IR->value];      // no bist coverage
+          if (VAL(READY))
+              cpu->state_next = cpu->m3t3[VAL(IR)];     // no bist coverage
           else
               cpu->state_next = i8080_state_3bops_tw;
           break;
@@ -72,17 +72,17 @@ static void i8080_state_3bops_tw(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
-              cpu->state_next = cpu->m3t3[cpu->IR->value];
+          if (VAL(READY))
+              cpu->state_next = cpu->m3t3[VAL(IR)];
           break;
     }
 }

@@ -1,4 +1,7 @@
 #include "support.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <stdarg.h>     // Variable arguments
+#include <stdlib.h>     // General utilities
 
 // This is the global TAU singleton, which represents the current
 // simulated time in undefined units with undefined zero point.

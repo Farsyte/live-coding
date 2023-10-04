@@ -1,13 +1,5 @@
-#include "clock.h"
-#include "decoder.h"
-#include "i8080.h"
-#include "i8080_impl.h"
-#include "i8224.h"
-#include "i8228.h"
-#include "ram8107x8x4.h"
-#include "rom8316.h"
-#include "sigtrace.h"
-#include "target.h"
+#include "i8080_test.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 
 static void         i8080_test_init();
 static void         i8080_trace_init();
@@ -303,6 +295,25 @@ void i8080_reset_for_testing(CpuTestSys ts)
     while (1 == PHI2->value)
         clock_run_one();
     clock_run_until(TAU + 11);
+}
+
+// i8080_unimp_ops(i8080 cpu): count opcodes missing from m1t4 table
+
+unsigned i8080_unimp_ops(i8080 cpu)
+{
+    unsigned            unset_count = 0;
+
+    FILE               *fp = fopen("log/i8080_unimp.txt", "w");
+
+    for (unsigned inst = 0x00; inst <= 0xFF; inst++) {
+        p8080State          m1t4 = cpu->m1t4[inst];
+        if (m1t4 != cpu->state_unimp)
+            continue;
+        fprintf(fp, "%02X %s\n", inst, i8080_instruction_name(inst));
+        ++unset_count;
+    }
+    fclose(fp);
+    return unset_count;
 }
 
 static void i8080_test_init()

@@ -1,3 +1,4 @@
+#include "i8080_flags.h"
 #include "i8080_impl.h"
 #include "support.h"
 
@@ -7,17 +8,18 @@ static unsigned     i8080_alu_flags(unsigned alu, unsigned hc);
 
 static f8080State   i8080_state_daaT4;
 static f8080State   i8080_state_rlcT4;
-static f8080State   i8080_state_rlcT2;
 static f8080State   i8080_state_rrcT4;
-static f8080State   i8080_state_rrcT2;
 static f8080State   i8080_state_ralT4;
-static f8080State   i8080_state_ralT2;
 static f8080State   i8080_state_rarT4;
-static f8080State   i8080_state_rarT2;
 
 static f8080State   i8080_state_cmaT4;
 static f8080State   i8080_state_cmcT4;
 static f8080State   i8080_state_stcT4;
+
+static f8080State   i8080_state_rlcT2;
+static f8080State   i8080_state_rrcT2;
+static f8080State   i8080_state_ralT2;
+static f8080State   i8080_state_rarT2;
 
 // i8080_alu uses a collection of t-state functions to handle
 // the distinct M1T4 operations, which for "ALU R" operations,
@@ -61,8 +63,6 @@ static p8080State   i8080_state_aluT4[8] = {
     NAME_M1T4(A),
 };
 
-// TODO write better comments here.
-//
 // ALU operations taking M as an operand need to do a machine
 // cycle that reads from (HL) into TMP.
 
@@ -112,6 +112,7 @@ static p8080State   i8080_state_aluT2[8] = {
     NAME_M1T2(ORA),
     NAME_M1T2(CMP),
 };
+
 // i8080_alu_init: set up decoding for ALU instructions
 // operating purely on our eight-bit registers.
 
@@ -152,11 +153,11 @@ void i8080_alu_init(i8080 cpu)
         cpu->m1t2[op] = i8080_state_aluT2[ooo];
     }
 
-    unsigned            flags = cpu->FLAGS->value;
+    unsigned            flags = VAL(FLAGS);
     flags |= 0x02;
     flags &= ~0x28;
 
-    cpu->FLAGS->value = flags;
+    VAL(FLAGS) = flags;
 }
 
 // i8080_state_daaT4: implement Decimal Adjust It is possible that the
@@ -174,22 +175,22 @@ static void i8080_state_daaT4(i8080 cpu, int phase)
 
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
 
           // pretend we had a DAA latch that was set with the results
           // of this computation, in EVERY arithmetic instruction.
 
-          daa = alu = cpu->A->value;
-          if (((daa & 15) > 9) || (cpu->FLAGS->value & FLAGS_AC))
+          daa = alu = VAL(A);
+          if (((daa & 15) > 9) || (VAL(FLAGS) & FLAGS_AC))
               daa += 0x06;
-          if ((((daa >> 4) & 15) > 9) || (cpu->FLAGS->value & FLAGS_CY))
+          if ((((daa >> 4) & 15) > 9) || (VAL(FLAGS) & FLAGS_CY))
               daa += 0x60;
 
           ac = (daa & 15) < (alu & 15) ? FLAGS_AC : 0;;
-          data_to(cpu->A, daa);
-          data_to(cpu->FLAGS, i8080_alu_flags(daa, ac));
+          DSET(A, daa);
+          DSET(FLAGS, i8080_alu_flags(daa, ac));
 
           break;
       case PHI2_FALL:
@@ -207,13 +208,13 @@ static void i8080_state_rlcT4(i8080 cpu, int phase)
 
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          act = cpu->A->value;
+          act = VAL(A);
           alu = (act << 1) | (act >> 7);
-          data_to(cpu->ACT, act);
-          data_to(cpu->ALU, alu);
+          DSET(ACT, act);
+          DSET(ALU, alu);
           break;
       case PHI2_FALL:
           break;
@@ -228,17 +229,17 @@ static void i8080_state_rlcT2(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            alu = cpu->ALU->value;
-    unsigned            f = cpu->FLAGS->value;
+    unsigned            act = VAL(ACT);
+    unsigned            alu = VAL(ALU);
+    unsigned            f = VAL(FLAGS);
 
     if (act & 0x80)
         f |= FLAGS_CY;
     else
         f &= ~FLAGS_CY;
 
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, f);
+    DSET(A, alu);
+    DSET(FLAGS, f);
 }
 
 // i8080_state_rrcT4(): rotate left circular
@@ -251,13 +252,13 @@ static void i8080_state_rrcT4(i8080 cpu, int phase)
 
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          act = cpu->A->value;
+          act = VAL(A);
           alu = (act >> 1) | (act << 7);
-          data_to(cpu->ACT, act);
-          data_to(cpu->ALU, alu);
+          DSET(ACT, act);
+          DSET(ALU, alu);
           break;
       case PHI2_FALL:
           break;
@@ -272,17 +273,17 @@ static void i8080_state_rrcT2(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            alu = cpu->ALU->value;
-    unsigned            f = cpu->FLAGS->value;
+    unsigned            act = VAL(ACT);
+    unsigned            alu = VAL(ALU);
+    unsigned            f = VAL(FLAGS);
 
     if (act & 0x01)
         f |= FLAGS_CY;
     else
         f &= ~FLAGS_CY;
 
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, f);
+    DSET(A, alu);
+    DSET(FLAGS, f);
 }
 
 // i8080_state_ralT4(): rotate left through carry
@@ -295,13 +296,13 @@ static void i8080_state_ralT4(i8080 cpu, int phase)
 
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          act = cpu->A->value;
-          alu = (act << 1) | (cpu->FLAGS->value & FLAGS_CY);
-          data_to(cpu->ACT, act);
-          data_to(cpu->ALU, alu);
+          act = VAL(A);
+          alu = (act << 1) | (VAL(FLAGS) & FLAGS_CY);
+          DSET(ACT, act);
+          DSET(ALU, alu);
           break;
       case PHI2_FALL:
           break;
@@ -316,17 +317,17 @@ static void i8080_state_ralT2(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            alu = cpu->ALU->value;
-    unsigned            f = cpu->FLAGS->value;
+    unsigned            act = VAL(ACT);
+    unsigned            alu = VAL(ALU);
+    unsigned            f = VAL(FLAGS);
 
     if (act & 0x80)
         f |= FLAGS_CY;
     else
         f &= ~FLAGS_CY;
 
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, f);
+    DSET(A, alu);
+    DSET(FLAGS, f);
 }
 
 // i8080_state_rarT4(): rotate right through carry
@@ -339,13 +340,13 @@ static void i8080_state_rarT4(i8080 cpu, int phase)
 
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          act = cpu->A->value;
-          alu = ((cpu->FLAGS->value & FLAGS_CY) << 7) | (act >> 1);
-          data_to(cpu->ACT, act);
-          data_to(cpu->ALU, alu);
+          act = VAL(A);
+          alu = ((VAL(FLAGS) & FLAGS_CY) << 7) | (act >> 1);
+          DSET(ACT, act);
+          DSET(ALU, alu);
           break;
       case PHI2_FALL:
           break;
@@ -360,17 +361,17 @@ static void i8080_state_rarT2(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            alu = cpu->ALU->value;
-    unsigned            f = cpu->FLAGS->value;
+    unsigned            act = VAL(ACT);
+    unsigned            alu = VAL(ALU);
+    unsigned            f = VAL(FLAGS);
 
     if (act & 0x01)
         f |= FLAGS_CY;
     else
         f &= ~FLAGS_CY;
 
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, f);
+    DSET(A, alu);
+    DSET(FLAGS, f);
 }
 
 // i8080_state_cmaT4: Complement Accumulator
@@ -379,10 +380,10 @@ static void i8080_state_cmaT4(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->A, ~cpu->A->value);
+          DSET(A, ~VAL(A));
           break;
       case PHI2_FALL:
           break;
@@ -395,10 +396,10 @@ static void i8080_state_cmcT4(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->FLAGS, FLAGS_CY ^ cpu->FLAGS->value);
+          DSET(FLAGS, FLAGS_CY ^ VAL(FLAGS));
           break;
       case PHI2_FALL:
           break;
@@ -411,10 +412,10 @@ static void i8080_state_stcT4(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->FLAGS, FLAGS_CY | cpu->FLAGS->value);
+          DSET(FLAGS, FLAGS_CY | VAL(FLAGS));
           break;
       case PHI2_FALL:
           break;
@@ -425,20 +426,20 @@ static void i8080_state_stcT4(i8080 cpu, int phase)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_M1T4(R)                                            \
-    static void NAME_M1T4(R) (i8080 cpu, int phase) {           \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_hi(cpu->RETM1_INT);                            \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->TMP, cpu->R->value);                   \
-            data_to(cpu->ACT, cpu->A->value);                   \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M1T4(R)                                                    \
+    static void NAME_M1T4(R) (i8080 cpu, int phase) {                   \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(TMP, VAL(R));                                          \
+            DSET(ACT, VAL(A));                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M1T4(R)
 
 IMPL_M1T4(A);
@@ -457,7 +458,7 @@ static void i8080_state_aluimmM1T4(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_to(cpu->ACT, cpu->A->value);
+          DSET(ACT, VAL(A));
           break;
       case PHI2_FALL:
           cpu->state_next = cpu->state_2bops_t1;
@@ -471,25 +472,25 @@ static void i8080_state_aluimmM2T3(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->TMP, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(TMP, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           break;
     }
 }
 
-// TODO write better comments here.
-//
 // ALU operations taking M as an operand need to do a machine
 // cycle that reads from (HL) into TMP.
 
-// TODO add function comment
+// The M1T4 cycle for ALU ops with M as an operand
+// latch ACC into ACT as above, then turn control over
+// to the logic to drive an MREAD cycle.
 
 static void i8080_state_aluT4rdM(i8080 cpu, int phase)
 {
@@ -497,7 +498,7 @@ static void i8080_state_aluT4rdM(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_to(cpu->ACT, cpu->A->value);
+          DSET(ACT, VAL(A));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_aluM2T1rdM;
@@ -505,7 +506,9 @@ static void i8080_state_aluT4rdM(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// The M2T1 state for ALU ops taking M initiates a memory read cycle:
+// put HL into IDAL and ADDR, put MREAD status onto DATA, raise SYNC,
+// and route control to the M2T2 handler.
 
 static void i8080_state_aluM2T1rdM(i8080 cpu, int phase)
 {
@@ -513,10 +516,10 @@ static void i8080_state_aluM2T1rdM(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MREAD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(H, L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MREAD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_aluM2T2rdM;
@@ -524,7 +527,10 @@ static void i8080_state_aluM2T1rdM(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// The M2T2 state for ALU ops taking M continues a memory read cycle:
+// drop SYNC, release DATA, and raise DBIN. Check READY to determine
+// whether or not to insert a WAIT state; if so, use M2TW; otherwise
+// proceed to M2T3.
 
 static void i8080_state_aluM2T2rdM(i8080 cpu, int phase)
 {
@@ -532,12 +538,12 @@ static void i8080_state_aluM2T2rdM(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_aluM2T3rdM;
           else
               cpu->state_next = i8080_state_aluM2TWrdM;
@@ -545,22 +551,26 @@ static void i8080_state_aluM2T2rdM(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// The M2TW state for ALU ops taking M continues a memory read cycle:
+// raise WAIT at the start of the cycle, re-issue the DBIN rising edge
+// notification (allowing the memory to reconsider READY), then Check
+// READY to determine whether or not to insert another WAIT state; if
+// so, use M2TW; otherwise proceed to M2T3.
 
 static void i8080_state_aluM2TWrdM(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_aluM2T3rdM;
           else
               cpu->state_next = i8080_state_aluM2TWrdM;
@@ -568,27 +578,36 @@ static void i8080_state_aluM2TWrdM(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// The M2TW state for ALU ops taking M completes a memory read cycle:
+// lower WAIT at the start of the cycle (in case it was raise), copy
+// the DATA bus into the TMP register, lower DBIN, and tristate ADDR.
+// Raise RETM1_INT at the start of the state to trigger the logic
+// leading into the next opcode fetch (or interrupt) cycle; the ALU
+// operation and writeback will happen in the T2 state of the next M1
+// machine cycle.
 
 static void i8080_state_aluM2T3rdM(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          edge_hi(cpu->RETM1_INT);
+          LOWER(WAIT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          data_to(cpu->TMP, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(TMP, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           break;
     }
 }
 
-// There is no good IMPL_M1T2 macro: too much varies between
-// the functions for it to be a win.
+// During M1T2 after an ALU operation, the 8080 writes the ALU result
+// back into ACC and updates FLAGS. Support for the Aux Carry forces
+// us to perform some ALU operations separately on just the low four
+// bits; strategies to make this "lazy" might some day be found that
+// do not impose a steady runtime cost.
 
 // i8080_state_aluT2ADD: trigger ALU ADD on ACT and TMP, storing the
 // result back into the accumulator and updating the flags
@@ -600,14 +619,14 @@ static void i8080_state_aluT2ADD(i8080 cpu, int phase)
 {
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act + tmp;
     unsigned            ac = ((act & 15) + (tmp & 15)) & 16;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, ac));
 }
 
 // i8080_state_aluT2ADC: trigger ALU ADC on ACT and TMP, storing the
@@ -620,15 +639,15 @@ static void i8080_state_aluT2ADC(i8080 cpu, int phase)
 {
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
-    unsigned            cy = cpu->FLAGS->value & FLAGS_CY;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
+    unsigned            cy = VAL(FLAGS) & FLAGS_CY;
     unsigned            alu = act + tmp + cy;
     unsigned            ac = ((act & 15) + (tmp & 15) + cy) & 16;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, ac));
 }
 
 // i8080_state_aluT2SUB: trigger ALU SUB on ACT and TMP, storing the
@@ -642,14 +661,14 @@ static void i8080_state_aluT2SUB(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act - tmp;
     unsigned            ac = ((act & 15) - (tmp & 15)) & 16;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, ac));
 }
 
 // i8080_state_aluT2SBB: trigger ALU SBB on ACT and TMP, storing the
@@ -662,15 +681,15 @@ static void i8080_state_aluT2SBB(i8080 cpu, int phase)
 {
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
-    unsigned            cy = cpu->FLAGS->value & FLAGS_CY;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
+    unsigned            cy = VAL(FLAGS) & FLAGS_CY;
     unsigned            ac = ((act & 15) - (tmp & 15) - cy) & 16;
     unsigned            alu = act - tmp - cy;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, ac));
 }
 
 // i8080_state_aluT2ANA: trigger ALU ANA on ACT and TMP, storing the
@@ -683,13 +702,13 @@ static void i8080_state_aluT2ANA(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act & tmp;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, 0));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, 0));
 }
 
 // i8080_state_aluT2XRA: trigger ALU XRA on ACT and TMP, storing the
@@ -702,13 +721,13 @@ static void i8080_state_aluT2XRA(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act ^ tmp;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, 0));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, 0));
 }
 
 // i8080_state_aluT2ORA: trigger ALU ORA on ACT and TMP, storing the
@@ -721,13 +740,13 @@ static void i8080_state_aluT2ORA(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act | tmp;
 
-    data_to(cpu->ALU, alu);
-    data_to(cpu->A, alu);
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, 0));
+    DSET(ALU, alu);
+    DSET(A, alu);
+    DSET(FLAGS, i8080_alu_flags(alu, 0));
 }
 
 // i8080_state_aluT2CMP: trigger ALU CMP on ACT and TMP, which
@@ -739,14 +758,14 @@ static void i8080_state_aluT2CMP(i8080 cpu, int phase)
 
     (void)phase;
 
-    unsigned            act = cpu->ACT->value;
-    unsigned            tmp = cpu->TMP->value;
+    unsigned            act = VAL(ACT);
+    unsigned            tmp = VAL(TMP);
     unsigned            alu = act - tmp;
     unsigned            ac = ((act & 15) - (tmp & 15)) & 16;
 
-    data_to(cpu->ALU, alu);
+    DSET(ALU, alu);
 
-    data_to(cpu->FLAGS, i8080_alu_flags(alu, ac));
+    DSET(FLAGS, i8080_alu_flags(alu, ac));
 
 }
 
@@ -756,24 +775,20 @@ static void i8080_state_aluT2CMP(i8080 cpu, int phase)
 
 static unsigned i8080_alu_flags(unsigned alu, unsigned ac)
 {
-
-    unsigned            cy = alu >> 8;
-    cy &= FLAGS_CY;
+    unsigned            cy = (alu >> 8) & FLAGS_CY;
+    unsigned            p = alu;
+    unsigned            s = alu & 0x80;
+    unsigned            z = alu ? 0 : FLAGS_Z;
 
     // FLAGS_P is set if there are an even number of bits
     // set in the low 8 bits of the result.
 
-    unsigned            p = alu;
     p ^= p >> 4;
     p ^= p >> 2;
     p ^= p >> 1;
     p = (p & 1) ? 0 : FLAGS_P;
 
-    unsigned            s = alu & 0x80;
-
-    unsigned            z = alu ? 0 : FLAGS_Z;
-
-    // turn on the "always on" 0x02 bit.
+    // The 0x02 bit is always on. The 0x28 bits are always off.
 
     return cy | 0x02 | p | ac | z | s;
 

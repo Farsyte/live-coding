@@ -1,5 +1,7 @@
 #pragma once
-#include "headers.h"
+#include <limits.h>     // Ranges of integer types
+#include <stdio.h>      // Input/output
+#include <string.h>     // String handling
 
 // === === === === === === === === === === === === === === === ===
 //                          UTILITY MACROS

@@ -1,4 +1,5 @@
 #include "i8080.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "clock.h"
 #include "decoder.h"
 #include "i8080_impl.h"
@@ -150,6 +151,7 @@ void i8080_init(i8080 cpu, Cstr name)
 
     cpu->state_reset = i8080_state_unimp;
     cpu->state_fetch = i8080_state_unimp;
+    cpu->state_unimp = i8080_state_unimp;
     cpu->state_2bops = i8080_state_unimp;
     cpu->state_2bops_t1 = i8080_state_unimp;
     cpu->state_3bops_t1 = i8080_state_unimp;
@@ -181,11 +183,11 @@ void i8080_linked(i8080 cpu)
 {
     i8080_invar(cpu);
 
-    ASSERT_EQ_integer(0, cpu->READY->value);
-    ASSERT_EQ_integer(1, cpu->RESET->value);
-    ASSERT_EQ_integer(1, cpu->RESET_INT->value);
-    ASSERT_EQ_integer(0, cpu->RETM1_INT->value);
-    ASSERT_EQ_integer(0, cpu->INH_PC_INC->value);
+    ASSERT_EQ_integer(0, VAL(READY));
+    ASSERT_EQ_integer(1, VAL(RESET));
+    ASSERT_EQ_integer(1, VAL(RESET_INT));
+    ASSERT_EQ_integer(0, VAL(RETM1_INT));
+    ASSERT_EQ_integer(0, VAL(INH_PC_INC));
 
     i8080_reset_init(cpu);
     i8080_fetch_init(cpu);
@@ -208,32 +210,13 @@ void i8080_linked(i8080 cpu)
     EDGE_ON_FALL(cpu->PHI2, i8080_phi2_fall, cpu);
 }
 
-// i8080_unimp_ops(i8080 cpu): count opcodes missing from m1t4 table
-
-unsigned i8080_unimp_ops(i8080 cpu)
-{
-    unsigned            unset_count = 0;
-
-    FILE               *fp = fopen("log/i8080_unimp.txt", "w");
-
-    for (unsigned inst = 0x00; inst <= 0xFF; inst++) {
-        p8080State          m1t4 = cpu->m1t4[inst];
-        if (m1t4 != i8080_state_unimp)
-            continue;
-        fprintf(fp, "%02X %s\n", inst, i8080_instruction_name(inst));
-        ++unset_count;
-    }
-    fclose(fp);
-    return unset_count;
-}
-
 // i8080_phi1_rise: actions at start of T-state
 
 static void i8080_phi1_rise(i8080 cpu)
 {
-    if (cpu->RETM1_INT->value) {
+    if (VAL(RETM1_INT)) {
         cpu->state_next = cpu->state_m1t1;
-        edge_lo(cpu->RETM1_INT);
+        LOWER(RETM1_INT);
     }
 
     cpu->state = cpu->state_next;
@@ -269,7 +252,7 @@ static void i8080_phi2_fall(i8080 cpu)
 static void i8080_state_unimp(i8080 cpu, int phase)
 {
     STUB("cpu '%s' in phase %d", cpu->name, phase);
-    STUB("  PC=0x%04X IR=0x%02X", cpu->PC->value, cpu->IR->value);
+    STUB("  PC=0x%04X IR=0x%02X", VAL(PC), VAL(IR));
     // abort();
-    edge_hi(cpu->RETM1_INT);
+    RAISE(RETM1_INT);
 }

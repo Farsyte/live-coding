@@ -3,7 +3,6 @@
 #include "data.h"
 #include "edge.h"
 #include "support.h"
-#include "target.h"
 
 // ram8107x8x4: 16 KiB memory for 8080-like microcomputer system
 //

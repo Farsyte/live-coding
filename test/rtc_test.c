@@ -1,3 +1,4 @@
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "support.h"
 
 // rtc_post: verify RTC is ready to use.

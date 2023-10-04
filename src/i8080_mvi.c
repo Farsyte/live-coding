@@ -54,22 +54,22 @@ void i8080_mvi_init(i8080 cpu)
 // repeat the declaration of the function which allows (and needs) it.
 
 #define DECL_M2T3(R)	NAME_M2T3(R) (i8080 cpu, int phase)
-#define IMPL_M2T3(R)                                            \
-    static void DECL_M2T3(R) {                                  \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_lo(cpu->WAIT);                                 \
-            edge_hi(cpu->RETM1_INT);                            \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->R, cpu->DATA->value);                  \
-            edge_lo(cpu->DBIN);                                 \
-            addr_z(cpu->ADDR);                                  \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_M2T3(R)                                                    \
+    static void DECL_M2T3(R) {                                          \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            LOWER(WAIT);                                                \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(R, VAL(DATA));                                         \
+            LOWER(DBIN);                                                \
+            ATRI(ADDR);                                                 \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_M2T3(R)
 
 IMPL_M2T3(A);
@@ -84,13 +84,13 @@ static void i8080_state_mviM2T3M(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
-          // edge_hi(cpu->RETM1_INT);                            
+          LOWER(WAIT);
+          // RAISE(RETM1_INT);                            
           break;
       case PHI2_RISE:
-          data_to(cpu->TMP, cpu->DATA->value);
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+          DSET(TMP, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_mviM3T1M;
@@ -106,10 +106,10 @@ static void i8080_state_mviM3T1M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MWRITE);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, (VAL(H) << 8) | VAL(L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MWRITE);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_mviM3T2M;
@@ -125,8 +125,8 @@ static void i8080_state_mviM3T2M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          edge_lo(cpu->SYNC);
-          data_to(cpu->DATA, cpu->TMP->value);
+          LOWER(SYNC);
+          DSET(DATA, VAL(TMP));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_mviM3T3M;
@@ -139,14 +139,14 @@ static void i8080_state_mviM3T3M(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          edge_lo(cpu->WR_);
+          RAISE(RETM1_INT);
+          LOWER(WR_);
           break;
       case PHI2_RISE:
           break;
       case PHI2_FALL:
-          edge_hi(cpu->WR_);
-          addr_z(cpu->ADDR);
+          RAISE(WR_);
+          ATRI(ADDR);
           break;
     }
 }

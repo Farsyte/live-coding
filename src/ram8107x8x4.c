@@ -1,4 +1,6 @@
 #include "ram8107x8x4.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <string.h>     // String handling
 
 static void         ram8107x8x4_rd(Ram8107x8x4);
 static void         ram8107x8x4_wr(Ram8107x8x4);

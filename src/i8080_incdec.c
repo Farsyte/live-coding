@@ -1,3 +1,4 @@
+#include "i8080_flags.h"
 #include "i8080_impl.h"
 
 // i8080_incdec: provide INR, DCR, INX, DCX
@@ -158,35 +159,28 @@ void i8080_incdec_init(i8080 cpu)
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_INR_M1T4(R)                                        \
-    static void NAME_INR_M1T4(R) (i8080 cpu, int phase) {       \
-        unsigned old;                                           \
-        unsigned tmp;                                           \
-        unsigned alu;                                           \
-        unsigned ac;                                            \
-        unsigned flags;                                         \
-                                                                \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-                                                                \
-            old = cpu->FLAGS->value;                            \
-            tmp = cpu->R->value;                                \
-            alu = tmp + 1;                                      \
-            ac = 16 & ((tmp & 15) + 1);                         \
-                                                                \
-            flags = i8080_incdec_flags(alu, ac, old);           \
-                                                                \
-            data_to(cpu->TMP, tmp);                             \
-            data_to(cpu->ALU, alu);                             \
-            data_to(cpu->FLAGS, flags);                         \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = NAME_ALU_TO_R(R);                 \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_INR_M1T4(R)                                                \
+    static void NAME_INR_M1T4(R) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+        {                                                               \
+            unsigned old = VAL(FLAGS);                                  \
+            unsigned tmp = VAL(R);                                      \
+            unsigned alu = tmp + 1;                                     \
+            unsigned ac = 16 & ((tmp & 15) + 1);                        \
+            unsigned flags = i8080_incdec_flags(alu, ac, old);          \
+            DSET(TMP, tmp);                                             \
+            DSET(ALU, alu);                                             \
+            DSET(FLAGS, flags);                                         \
+        }                                                               \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = NAME_ALU_TO_R(R);                         \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_INR_M1T4(R)
 
 IMPL_INR_M1T4(A);
@@ -201,35 +195,28 @@ IMPL_INR_M1T4(L);
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_DCR_M1T4(R)                                        \
-    static void NAME_DCR_M1T4(R) (i8080 cpu, int phase) {       \
-        unsigned old;                                           \
-        unsigned tmp;                                           \
-        unsigned alu;                                           \
-        unsigned ac;                                            \
-        unsigned flags;                                         \
-                                                                \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            break;                                              \
-        case PHI2_RISE:                                         \
-                                                                \
-            old = cpu->FLAGS->value;                            \
-            tmp = cpu->R->value;                                \
-            alu = tmp - 1;                                      \
-            ac = 16 & ((tmp & 15) - 1);                         \
-                                                                \
-            flags = i8080_incdec_flags(alu, ac, old);           \
-                                                                \
-            data_to(cpu->TMP, tmp);                             \
-            data_to(cpu->ALU, alu);                             \
-            data_to(cpu->FLAGS, flags);                         \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            cpu->state_next = NAME_ALU_TO_R(R);                 \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_DCR_M1T4(R)                                                \
+    static void NAME_DCR_M1T4(R) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+        {                                                               \
+            unsigned old = VAL(FLAGS);                                  \
+            unsigned tmp = VAL(R);                                      \
+            unsigned alu = tmp - 1;                                     \
+            unsigned ac = 16 & ((tmp & 15) - 1);                        \
+            unsigned flags = i8080_incdec_flags(alu, ac, old);          \
+            DSET(TMP, tmp);                                             \
+            DSET(ALU, alu);                                             \
+            DSET(FLAGS, flags);                                         \
+        }                                                               \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            cpu->state_next = NAME_ALU_TO_R(R);                         \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_DCR_M1T4(R)
 
 IMPL_DCR_M1T4(A);
@@ -244,19 +231,19 @@ IMPL_DCR_M1T4(L);
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
 
-#define IMPL_ALU_TO_R(R)                                        \
-    static void NAME_ALU_TO_R(R) (i8080 cpu, int phase) {       \
-        switch (phase) {                                        \
-        case PHI1_RISE:                                         \
-            edge_hi(cpu->RETM1_INT);                            \
-            break;                                              \
-        case PHI2_RISE:                                         \
-            data_to(cpu->R, cpu->ALU->value);                   \
-            break;                                              \
-        case PHI2_FALL:                                         \
-            break;                                              \
-        }                                                       \
-    }                                                           \
+#define IMPL_ALU_TO_R(R)                                                \
+    static void NAME_ALU_TO_R(R) (i8080 cpu, int phase) {               \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            DSET(R, VAL(ALU));                                          \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_ALU_TO_R(R)
 
 IMPL_ALU_TO_R(A);
@@ -271,18 +258,14 @@ IMPL_ALU_TO_R(L);
 
 #define IMPL_RP_IDAL_T4(RH,RL)                                          \
     static void NAME_RP_IDAL_T4(RH##RL) (i8080 cpu, int phase) {        \
-        Byte RH;                                                        \
-        Byte RL;                                                        \
         switch (phase) {                                                \
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            RH = cpu->RH->value;                                        \
-            RL = cpu->RL->value;                                        \
-            addr_to(cpu->IDAL, (((Word)RH)<<8) | RL);                   \
+            ASET(IDAL, RP(RH,RL));                                      \
             break;                                                      \
         case PHI2_FALL:                                                 \
-            cpu->state_next = cpu->m1t5[cpu->IR->value];                \
+            cpu->state_next = cpu->m1t5[VAL(IR)];                       \
             break;                                                      \
         }                                                               \
     }                                                                   \
@@ -300,33 +283,33 @@ static void i8080_state_rp_idal_T4SP(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, cpu->SP->value);
+          ASET(IDAL, VAL(SP));
           break;
       case PHI2_FALL:
-          cpu->state_next = cpu->m1t5[cpu->IR->value];
+          cpu->state_next = cpu->m1t5[VAL(IR)];
           break;
     }
 }
 
 // i8080_state_inx_t5RP: increment IDAL into RH,RL
 
-#define IMPL_INX_T5(RH,RL)                                          \
-    static void NAME_INX_T5(RH##RL) (i8080 cpu, int phase)          \
-    {                                                               \
-        Word RP;                                                    \
-        switch (phase) {                                            \
-        case PHI1_RISE:                                             \
-            edge_hi(cpu->RETM1_INT);                                \
-            break;                                                  \
-        case PHI2_RISE:                                             \
-            RP = cpu->IDAL->value + 1;                              \
-            data_to(cpu->RH, RP >> 8);                              \
-            data_to(cpu->RL, RP);                                   \
-            break;                                                  \
-        case PHI2_FALL:                                             \
-            break;                                                  \
-        }                                                           \
-    }                                                               \
+#define IMPL_INX_T5(RH,RL)                                              \
+    static void NAME_INX_T5(RH##RL) (i8080 cpu, int phase)              \
+    {                                                                   \
+        Word RP;                                                        \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            RP = INC(IDAL);                                             \
+            DSET(RH, RP >> 8);                                          \
+            DSET(RL, RP);                                               \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_INX_T5(RH##RL)
 
 IMPL_INX_T5(B, C);
@@ -339,10 +322,10 @@ static void i8080_state_inx_t5SP(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          addr_to(cpu->SP, cpu->IDAL->value + 1);
+          ASET(SP, INC(IDAL));
           break;
       case PHI2_FALL:
           break;
@@ -351,23 +334,23 @@ static void i8080_state_inx_t5SP(i8080 cpu, int phase)
 
 // i8080_state_dcx_t5RP: decrement IDAL into RP
 
-#define IMPL_DCX_T5(RH,RL)                                          \
-    static void NAME_DCX_T5(RH##RL) (i8080 cpu, int phase)          \
-    {                                                               \
-        Word RP;                                                    \
-        switch (phase) {                                            \
-        case PHI1_RISE:                                             \
-            edge_hi(cpu->RETM1_INT);                                \
-            break;                                                  \
-        case PHI2_RISE:                                             \
-            RP = cpu->IDAL->value - 1;                              \
-            data_to(cpu->RH, RP >> 8);                              \
-            data_to(cpu->RL, RP);                                   \
-            break;                                                  \
-        case PHI2_FALL:                                             \
-            break;                                                  \
-        }                                                           \
-    }                                                               \
+#define IMPL_DCX_T5(RH,RL)                                              \
+    static void NAME_DCX_T5(RH##RL) (i8080 cpu, int phase)              \
+    {                                                                   \
+        Word RP;                                                        \
+        switch (phase) {                                                \
+        case PHI1_RISE:                                                 \
+            RAISE(RETM1_INT);                                           \
+            break;                                                      \
+        case PHI2_RISE:                                                 \
+            RP = DEC(IDAL);                                             \
+            DSET(RH, RP >> 8);                                          \
+            DSET(RL, RP);                                               \
+            break;                                                      \
+        case PHI2_FALL:                                                 \
+            break;                                                      \
+        }                                                               \
+    }                                                                   \
     DEFN_DCX_T5(RH##RL)
 
 IMPL_DCX_T5(B, C);
@@ -380,10 +363,10 @@ static void i8080_state_dcx_t5SP(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          addr_to(cpu->SP, cpu->IDAL->value - 1);
+          ASET(SP, DEC(IDAL));
           break;
       case PHI2_FALL:
           break;
@@ -413,10 +396,10 @@ static void i8080_state_inrM2T1M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MREAD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(H, L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MREAD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_inrM2T2M;
@@ -432,12 +415,12 @@ static void i8080_state_inrM2T2M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_inrM2T3M;
           else
               cpu->state_next = i8080_state_inrM2TWM;
@@ -451,16 +434,16 @@ static void i8080_state_inrM2TWM(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_inrM2T3M;
           else
               cpu->state_next = i8080_state_inrM2TWM;
@@ -472,31 +455,23 @@ static void i8080_state_inrM2TWM(i8080 cpu, int phase)
 
 static void i8080_state_inrM2T3M(i8080 cpu, int phase)
 {
-    unsigned            old;
-    unsigned            tmp;
-    unsigned            alu;
-    unsigned            ac;
-    unsigned            flags;
-
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-
-          old = cpu->FLAGS->value;
-          tmp = cpu->DATA->value;
-          alu = tmp + 1;
-          ac = 16 & ((tmp & 15) + 1);
-
-          flags = i8080_incdec_flags(alu, ac, old);
-
-          data_to(cpu->TMP, tmp);
-          data_to(cpu->ALU, alu);
-          data_to(cpu->FLAGS, flags);
-
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+        {
+            unsigned            old = VAL(FLAGS);
+            unsigned            tmp = VAL(DATA);
+            unsigned            alu = tmp + 1;
+            unsigned            ac = 16 & ((tmp & 15) + 1);
+            unsigned            flags = i8080_incdec_flags(alu, ac, old);
+            DSET(TMP, tmp);
+            DSET(ALU, alu);
+            DSET(FLAGS, flags);
+        }
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_inrdcrM3T1M;
@@ -527,10 +502,10 @@ static void i8080_state_dcrM2T1M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MREAD);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(H, L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MREAD);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_dcrM2T2M;
@@ -546,12 +521,12 @@ static void i8080_state_dcrM2T2M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
-          edge_hi(cpu->DBIN);
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_dcrM2T3M;
           else
               cpu->state_next = i8080_state_dcrM2TWM;
@@ -565,16 +540,16 @@ static void i8080_state_dcrM2TWM(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           // do not issue a falling edge,
           // but do re-issue the rising edge.
-          cpu->DBIN->value = 0;
-          edge_hi(cpu->DBIN);
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
           break;
       case PHI2_FALL:
-          if (cpu->READY->value)
+          if (VAL(READY))
               cpu->state_next = i8080_state_dcrM2T3M;
           else
               cpu->state_next = i8080_state_dcrM2TWM;
@@ -586,31 +561,23 @@ static void i8080_state_dcrM2TWM(i8080 cpu, int phase)
 
 static void i8080_state_dcrM2T3M(i8080 cpu, int phase)
 {
-    unsigned            old;
-    unsigned            tmp;
-    unsigned            alu;
-    unsigned            ac;
-    unsigned            flags;
-
     switch (phase) {
       case PHI1_RISE:
-          edge_lo(cpu->WAIT);
+          LOWER(WAIT);
           break;
       case PHI2_RISE:
-
-          old = cpu->FLAGS->value;
-          tmp = cpu->DATA->value;
-          alu = tmp - 1;
-          ac = 16 & ((tmp & 15) - 1);
-
-          flags = i8080_incdec_flags(alu, ac, old);
-
-          data_to(cpu->TMP, tmp);
-          data_to(cpu->ALU, alu);
-          data_to(cpu->FLAGS, flags);
-
-          edge_lo(cpu->DBIN);
-          addr_z(cpu->ADDR);
+        {
+            unsigned            old = VAL(FLAGS);
+            unsigned            tmp = VAL(DATA);
+            unsigned            alu = tmp - 1;
+            unsigned            ac = 16 & ((tmp & 15) - 1);
+            unsigned            flags = i8080_incdec_flags(alu, ac, old);
+            DSET(TMP, tmp);
+            DSET(ALU, alu);
+            DSET(FLAGS, flags);
+        }
+          LOWER(DBIN);
+          ATRI(ADDR);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_inrdcrM3T1M;
@@ -626,10 +593,10 @@ static void i8080_state_inrdcrM3T1M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, (cpu->H->value << 8) | cpu->L->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_MWRITE);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, RP(H, L));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_MWRITE);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_inrdcrM3T2M;
@@ -645,8 +612,8 @@ static void i8080_state_inrdcrM3T2M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          edge_lo(cpu->SYNC);
-          data_to(cpu->DATA, cpu->ALU->value);
+          LOWER(SYNC);
+          DSET(DATA, VAL(ALU));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_inrdcrM3T3M;
@@ -660,14 +627,14 @@ static void i8080_state_inrdcrM3T3M(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
-          edge_lo(cpu->WR_);
+          RAISE(RETM1_INT);
+          LOWER(WR_);
           break;
       case PHI2_RISE:
           break;
       case PHI2_FALL:
-          edge_hi(cpu->WR_);
-          addr_z(cpu->ADDR);
+          RAISE(WR_);
+          ATRI(ADDR);
           break;
     }
 }
@@ -679,22 +646,20 @@ static void i8080_state_inrdcrM3T3M(i8080 cpu, int phase)
 static unsigned i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old)
 {
 
-    unsigned            cy = old & FLAGS_CY;
-
     // FLAGS_P is set if there are an even number of bits
     // set in the low 8 bits of the result.
 
+    unsigned            cy = old & FLAGS_CY;
     unsigned            p = alu;
+    unsigned            s = alu & 0x80;
+    unsigned            z = alu ? 0 : FLAGS_Z;
+
     p ^= p >> 4;
     p ^= p >> 2;
     p ^= p >> 1;
     p = (p & 1) ? 0 : FLAGS_P;
 
-    unsigned            s = alu & 0x80;
-
-    unsigned            z = alu ? 0 : FLAGS_Z;
-
-    // turn on the "always on" 0x02 bit.
+    // The 0x02 bit is always on.
 
     return cy | 0x02 | p | ac | z | s;
 

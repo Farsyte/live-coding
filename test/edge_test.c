@@ -1,3 +1,4 @@
+#include <stdlib.h>     // General utilities
 #include "edge.h"
 #include "stepat.h"
 #include "support.h"

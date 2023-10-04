@@ -25,10 +25,10 @@ static void i8080_state_ei(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          edge_hi(cpu->INTE);
+          RAISE(INTE);
           break;
       case PHI2_FALL:
           break;
@@ -41,10 +41,10 @@ static void i8080_state_di(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->RETM1_INT);
+          RAISE(RETM1_INT);
           break;
       case PHI2_RISE:
-          edge_lo(cpu->INTE);
+          LOWER(INTE);
           break;
       case PHI2_FALL:
           break;
@@ -72,13 +72,13 @@ static void i8080_state_hlt_m2t1(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          // data_z(cpu->IR);
+          // DTRI(IR);
           break;
       case PHI2_RISE:
-          addr_to(cpu->IDAL, cpu->PC->value);
-          addr_to(cpu->ADDR, cpu->IDAL->value);
-          data_to(cpu->DATA, STATUS_HALTACK);
-          edge_hi(cpu->SYNC);
+          ASET(IDAL, VAL(PC));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_HALTACK);
+          RAISE(SYNC);
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_hlt_m2t2;
@@ -94,8 +94,8 @@ static void i8080_state_hlt_m2t2(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          data_z(cpu->DATA);
-          edge_lo(cpu->SYNC);
+          LOWER(SYNC);
+          DTRI(DATA);
           cpu->state_next = i8080_state_hlt_m2wh;
           break;
       case PHI2_FALL:
@@ -109,7 +109,7 @@ static void i8080_state_hlt_m2wh(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
-          edge_hi(cpu->WAIT);
+          RAISE(WAIT);
           break;
       case PHI2_RISE:
           break;

@@ -1,4 +1,6 @@
 #include "hex.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <stdlib.h>     // General utilities
 
 // hex: parse the content of a hex file.
 
@@ -49,28 +51,28 @@ int hex_parse(Cstr filename, HexStoreFn * store, void *ctx)
                 ret = -2;       // no bist coverage
                 goto fail;      // no bist coverage
             }
-#define MERGE(var)                              \
-        ret = fgetb(fp);                        \
-        if (ret < 0)                            \
-            return ret;                         \
-        sum += ret;                             \
-        var <<= 8;                              \
+#define MERGE(var)                                                      \
+        ret = fgetb(fp);                                                \
+        if (ret < 0)                                                    \
+            return ret;                                                 \
+        sum += ret;                                                     \
+        var <<= 8;                                                      \
         var |= ret & 255;
 
-#define GETB(var)                               \
-        var = 0;                                \
+#define GETB(var)                                                       \
+        var = 0;                                                        \
         MERGE(var);
 
-#define GETW(var)                               \
-        var = 0;                                \
-        MERGE(var);                             \
+#define GETW(var)                                                       \
+        var = 0;                                                        \
+        MERGE(var);                                                     \
         MERGE(var);
 
-#define GETD(var)                               \
-        var = 0;                                \
-        MERGE(var);                             \
-        MERGE(var);                             \
-        MERGE(var);                             \
+#define GETD(var)                                                       \
+        var = 0;                                                        \
+        MERGE(var);                                                     \
+        MERGE(var);                                                     \
+        MERGE(var);                                                     \
         MERGE(var);
 
         GETB(size);

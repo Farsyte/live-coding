@@ -1,3 +1,5 @@
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include "i8080_test.h"
 #include "i8228.h"
 #include "sigtrace.h"
 

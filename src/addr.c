@@ -1,4 +1,5 @@
 #include "addr.h"
+#include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "stepat.h"
 #include "support.h"
 
