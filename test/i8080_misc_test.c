@@ -94,7 +94,7 @@ void i8080_misc_bist(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // SPHL
     ASSERT_EQ_integer(0x2900, cpu->SP->value);
 
-    sigplot_init(sigp, ss, "i8080_sphl",
+    sigplot_init(sigp, ss, "i8080_bist_sphl",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "MVI, MVI, SPHL", t0, TAU - t0);
     i8080_plot_sigs(sigp);
     sigplot_fini(sigp);
@@ -113,7 +113,7 @@ void i8080_misc_bist(CpuTestSys ts)
     ASSERT_EQ_integer(0x29, cpu->D->value);
     ASSERT_EQ_integer(0x00, cpu->E->value);
 
-    sigplot_init(sigp, ss, "i8080_xchg",
+    sigplot_init(sigp, ss, "i8080_bist_xchg",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "MVI, MVI, XCHG", t0, TAU - t0);
     i8080_plot_sigs(sigp);
     sigplot_fini(sigp);
@@ -131,7 +131,7 @@ void i8080_misc_bist(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // NOP
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sigp, ss, "i8080_pchl",
+    sigplot_init(sigp, ss, "i8080_bist_pchl",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "MVI, MVI, PCHL", t0, TAU - t0);
     i8080_plot_sigs(sigp);
     sigplot_fini(sigp);

@@ -14,14 +14,30 @@
 // of the module which communicate through the internal state
 // of the i8080 structure.
 
-// Initialization functions for the sub-modules
-// to be called after the CPU is marked as linked:
+#define	TDWP	55
+#define	TDRP	205
+
+// Testdev is our first I/O device, which stores the last
+// byte written to TDWP and reads it back via port TDRP.
+
+typedef struct sTestdev {
+    Cstr                name;
+
+    pData               DATA;
+
+    Edge                RD_;
+    Edge                WR_;
+
+    Data                REG;
+
+}                  *pTestdev, Testdev[1];
 
 typedef struct sCpuTestSys {
     i8080               cpu;
     i8224               gen;
     i8228               ctl;
     Decoder             dec;
+    Testdev             dev;
 
 #define ROM_CHIPS	8
     Rom8316             rom[ROM_CHIPS];
@@ -35,6 +51,9 @@ typedef struct sCpuTestSys {
     SigSess             ss;
 
 }                  *pCpuTestSys, CpuTestSys[1];
+
+extern void         testdev_init(Testdev dev, Cstr name);
+extern void         testdev_linked(Testdev dev);
 
 extern void         i8080_one_instruction(i8080 cpu, unsigned plus_TAU);
 
@@ -71,11 +90,11 @@ extern void         i8080_alu_post(CpuTestSys ts);
 extern void         i8080_incdec_post(CpuTestSys ts);
 extern void         i8080_misc_post(CpuTestSys ts);
 extern void         i8080_lxi_post(CpuTestSys ts);
-extern void         i8080_jmp_post(CpuTestSys ts);
-extern void         i8080_io_post(CpuTestSys ts);
 extern void         i8080_movm_post(CpuTestSys ts);
 extern void         i8080_dad_post(CpuTestSys ts);
 extern void         i8080_stack_post(CpuTestSys ts);
+
+extern void         i8080_asm_post(CpuTestSys ts, Cstr hexfile);
 
 extern void         i8080_reset_bist(CpuTestSys ts);
 extern void         i8080_eidihlt_bist(CpuTestSys ts);
@@ -85,11 +104,11 @@ extern void         i8080_alu_bist(CpuTestSys ts);
 extern void         i8080_incdec_bist(CpuTestSys ts);
 extern void         i8080_misc_bist(CpuTestSys ts);
 extern void         i8080_lxi_bist(CpuTestSys ts);
-extern void         i8080_jmp_bist(CpuTestSys ts);
-extern void         i8080_io_bist(CpuTestSys ts);
 extern void         i8080_movm_bist(CpuTestSys ts);
 extern void         i8080_dad_bist(CpuTestSys ts);
 extern void         i8080_stack_bist(CpuTestSys ts);
+
+extern void         i8080_asm_bist(CpuTestSys ts, Cstr hexfile, Cstr plotname);
 
 // Activity during a T-state is managed by a single
 // function, which is called three times.

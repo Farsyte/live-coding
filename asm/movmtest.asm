@@ -13,43 +13,43 @@ START:
         MOV     A,M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     B,55H
         MOV     B,M
         MOV     M,B
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     C,55H
         MOV     C,M
         MOV     M,C
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     D,55H
         MOV     D,M
         MOV     M,D
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     E,55H
         MOV     E,M
         MOV     M,E
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     M,055H
         INX     HL
         MVI     M,0AAH
         INX     HL
-        RST     2
+        DB      18H
 
         INR	M
         INX     HL
         DCR	M
         INX     HL
-        RST     2
+        DB      18H
 
         ;; This test program also tests the ALU operations
         ;; that take M as an operand.
@@ -58,52 +58,52 @@ START:
         ADD     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         STC
         ADC     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         SUB     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         STC
         MVI     A,55H
         SBB     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         ANA     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         XRA     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         ORA     M
         MOV     M,A
         INX     HL
-        RST     2
+        DB      18H
 
         MVI     A,55H
         CMP     M
         MOV     M,A
         INX     HL
 
-        RST     1
+        DB	10H             ;test complete
         NOP
         NOP
         NOP

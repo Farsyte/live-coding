@@ -13,7 +13,8 @@
     13 0005 E1		        POP     HL
     14 0006 F1		        POP     PSW
     15 0007 00		        NOP
-    16 0008 D7		        RST     2
+    16 0008		        DB	18H             ;next subtest
+            18 
     17
     18 0009 00		        NOP
     19 000A 00		        NOP
@@ -22,7 +23,8 @@
     22 000D D5		        PUSH    DE
     23 000E C5		        PUSH    BC
     24 000F 00		        NOP
-    25 0010 CF		        RST     1
+    25 0010		        DB	10H             ;test complete
+            10 
     26 0011 00		        NOP
     27 0012 00		        NOP
     28 0013 76		        HLT

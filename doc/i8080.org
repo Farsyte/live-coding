@@ -85,131 +85,131 @@ plot.
 
 *** ADD r, ADI imm8
 
-[[file:img/i8080_alu_add.png]]
+[[file:img/i8080_bist_alu_add.png]]
 
 *** ADC r, ACI imm8
 
-[[file:img/i8080_alu_adc.png]]
+[[file:img/i8080_bist_alu_adc.png]]
 
 *** SUB r, SUI imm8
 
-[[file:img/i8080_alu_sub.png]]
+[[file:img/i8080_bist_alu_sub.png]]
 
 *** SBB r, SBI imm8
 
-[[file:img/i8080_alu_sbb.png]]
+[[file:img/i8080_bist_alu_sbb.png]]
 
 *** ANA r, ANI imm8
 
-[[file:img/i8080_alu_ana.png]]
+[[file:img/i8080_bist_alu_ana.png]]
 
 *** XRA r, XRI imm8
 
-[[file:img/i8080_alu_xra.png]]
+[[file:img/i8080_bist_alu_xra.png]]
 
 *** ORA r, ORI imm8
 
-[[file:img/i8080_alu_ora.png]]
+[[file:img/i8080_bist_alu_ora.png]]
 
 *** CMP r, CPI imm8
 
-[[file:img/i8080_alu_cmp.png]]
+[[file:img/i8080_bist_alu_cmp.png]]
 
 *** INR r
 
-[[file:img/i8080_alu_inr.png]]
+[[file:img/i8080_bist_alu_inr.png]]
 
 *** DCR r
 
-[[file:img/i8080_alu_dcr.png]]
+[[file:img/i8080_bist_alu_dcr.png]]
 
 *** INX rp
 
-[[file:img/i8080_alu_inx.png]]
+[[file:img/i8080_bist_alu_inx.png]]
 
 *** DCX rp
 
-[[file:img/i8080_alu_dcx.png]]
+[[file:img/i8080_bist_alu_dcx.png]]
 
 *** LXI rp,imm16
 
-[[file:img/i8080_lxi.png]]
+[[file:img/i8080_bist_lxi.png]]
 
 *** DAD rp
 
-[[file:img/i8080_dad.png]]
+[[file:img/i8080_bist_dad.png]]
 
 *** JMP imm16, Jcc imm16
 
-[[file:img/i8080_jmp_1.png]]
+[[file:img/i8080_bist_jmp_1.png]]
 
-[[file:img/i8080_jmp_2.png]]
+[[file:img/i8080_bist_jmp_2.png]]
 
-[[file:img/i8080_jmp_3.png]]
+[[file:img/i8080_bist_jmp_3.png]]
 
-[[file:img/i8080_jmp_4.png]]
+[[file:img/i8080_bist_jmp_4.png]]
 
-[[file:img/i8080_jmp_5.png]]
+[[file:img/i8080_bist_jmp_5.png]]
 
-[[file:img/i8080_jmp_6.png]]
+[[file:img/i8080_bist_jmp_6.png]]
 
-[[file:img/i8080_jmp_7.png]]
+[[file:img/i8080_bist_jmp_7.png]]
 
-[[file:img/i8080_jmp_8.png]]
+[[file:img/i8080_bist_jmp_8.png]]
 
-[[file:img/i8080_jmp_9.png]]
+[[file:img/i8080_bist_jmp_9.png]]
 
 *** IN and OUT
 
-[[file:img/i8080_io_1.png]]
+[[file:img/i8080_bist_io_1.png]]
 
-[[file:img/i8080_io_2.png]]
+[[file:img/i8080_bist_io_2.png]]
  
 *** Operations on M
 
 *** MOV r,M; MOV m,r
 
-[[file:img/i8080_movm_1.png]]
+[[file:img/i8080_bist_movm_1.png]]
 
-[[file:img/i8080_movm_2.png]]
+[[file:img/i8080_bist_movm_2.png]]
 
-[[file:img/i8080_movm_3.png]]
+[[file:img/i8080_bist_movm_3.png]]
 
-[[file:img/i8080_movm_4.png]]
+[[file:img/i8080_bist_movm_4.png]]
 
-[[file:img/i8080_movm_5.png]]
+[[file:img/i8080_bist_movm_5.png]]
 
 *** MVI M,imm8
 
-[[file:img/i8080_movm_6.png]]
+[[file:img/i8080_bist_movm_6.png]]
 
 *** INR M, DCR M
 
-[[file:img/i8080_movm_7.png]]
+[[file:img/i8080_bist_movm_7.png]]
 
 *** ALUop M
 
-[[file:img/i8080_movm_8.png]]
+[[file:img/i8080_bist_movm_8.png]]
 
-[[file:img/i8080_movm_9.png]]
+[[file:img/i8080_bist_movm_9.png]]
 
-[[file:img/i8080_movm_10.png]]
+[[file:img/i8080_bist_movm_10.png]]
 
-[[file:img/i8080_movm_11.png]]
+[[file:img/i8080_bist_movm_11.png]]
 
-[[file:img/i8080_movm_12.png]]
+[[file:img/i8080_bist_movm_12.png]]
 
-[[file:img/i8080_movm_13.png]]
+[[file:img/i8080_bist_movm_13.png]]
 
-[[file:img/i8080_movm_14.png]]
+[[file:img/i8080_bist_movm_14.png]]
 
-[[file:img/i8080_movm_15.png]]
+[[file:img/i8080_bist_movm_15.png]]
 
 *** PUSH rp, POP rp
 
-[[file:img/i8080_stack_1.png]]
+[[file:img/i8080_bist_stack_1.png]]
 
-[[file:img/i8080_stack_2.png]]
+[[file:img/i8080_bist_stack_2.png]]
 
 ** Not Yet Implemented
 

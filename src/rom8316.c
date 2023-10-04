@@ -76,7 +76,8 @@ void rom8316_load(Rom8316 rom, Word base, Cstr file)
     int                 rv = hex_parse(file, rom_load_byte, rom);
     if (rv < 0) {
         if (rv == -1) { // no bist coverage
-            perror(file);       // no bist coverage
+            FAIL("hex_parse rejects file '%s'\n  error %d: %s", file, errno, strerror(errno));
+            // perror(file);       // no bist coverage
         } else {
             STUB("error code %d for file '%s'", rv, file);      // no bist coverage
         }

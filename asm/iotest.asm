@@ -11,9 +11,9 @@ TDRP	EQU	205
         IN      TDRP
         DCR     A
         JZ      PASS1
-        RST     0               ;fail
+        DB      08H             ;fail
 PASS1:  NOP
-        RST     2               ;next subtest
+        DB      18H             ;next subtest
 
 	MVI     A,80h
         OUT     TDWP
@@ -21,10 +21,10 @@ PASS1:  NOP
         IN      TDRP
         DCR     A
         JP      PASS2
-        RST     0               ;fail
+        DB      08H             ;fail
 PASS2:  NOP
 
-	RST	1               ;test complete
+	DB      10H             ;test complete
 	NOP
 	NOP
 

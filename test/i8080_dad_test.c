@@ -155,7 +155,7 @@ void i8080_dad_bist(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // NOP
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_dad",
+    sigplot_init(sp, ss, "i8080_bist_dad",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "DAD instructions", t0, TAU - t0);
     i8080_plot_sigs(sp);

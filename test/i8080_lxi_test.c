@@ -139,7 +139,7 @@ void i8080_lxi_bist(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // NOP
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_lxi",
+    sigplot_init(sp, ss, "i8080_bist_lxi",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "LXI instructions", t0, TAU - t0);
     i8080_plot_sigs(sp);

@@ -5,98 +5,98 @@
 	MVI	C,1
 
 	JMP	JMPP
-JMPF:	RST	0		;fail
+JMPF:	DB	08H		;fail
 JMPP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,1
 	SUB	C
 	JNZ	JNZF1
 	SUB	C
 	JNZ	JNZP
-JNZF2:	RST	0
-JNZF1:	RST	0
+JNZF2:	DB	08H
+JNZF1:	DB	08H
 JNZP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,2
 	SUB	C
 	JZ	JZF1
 	SUB	C
 	JZ	JZP
-JZF2:	RST	0
-JZF1:	RST	0
+JZF2:	DB	08H
+JZF1:	DB	08H
 JZP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,0
 	SUB	C
 	JNC	JNCF1
 	SUB	C
 	JNC	JNCP
-JNCF2:	RST	0
-JNCF1:	RST	0
+JNCF2:	DB	08H
+JNCF1:	DB	08H
 JNCP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,1
 	SUB	C
 	JC	JCF1
 	SUB	C
 	JC	JCP
-JCF2:	RST	0
-JCF1:	RST	0
+JCF2:	DB	08H
+JCF1:	DB	08H
 JCP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,6
 	SUB	C
 	JPO	JPOF1
 	SUB	C
 	JPO	JPOP
-JPOF2:	RST	0
-JPOF1:	RST	0
+JPOF2:	DB	08H
+JPOF1:	DB	08H
 JPOP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,8
 	SUB	C
 	JPE	JPEF1
 	SUB	C
 	JPE	JPEP
-JPEF2:	RST	0
-JPEF1:	RST	0
+JPEF2:	DB	08H
+JPEF1:	DB	08H
 JPEP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,81H
 	SUB	C
 	JP	JPF1
 	SUB	C
 	JP	JPP
-JPF2:	RST	0
-JPF1:	RST	0
+JPF2:	DB	08H
+JPF1:	DB	08H
 JPP:	NOP
 
-	RST	2		;next subtest
+	DB	18H		;next subtest
 
 	MVI	A,01H
 	SUB	C
 	JM	JMF1
 	SUB	C
 	JM	JMP
-JMF2:	RST	0
-JMF1:	RST	0
+JMF2:	DB	08H
+JMF1:	DB	08H
 JMP:	NOP
 
-	RST	1
+	DB	10H             ;test complete
 	NOP
 	NOP
 

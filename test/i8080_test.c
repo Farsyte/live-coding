@@ -19,6 +19,7 @@ static const p8080  cpu = ts->cpu;
 static const p8224  gen = ts->gen;
 static const p8228  ctl = ts->ctl;
 static const pDecoder dec = ts->dec;
+static const pTestdev dev = ts->dev;
 
 static Rom8316     *rom = ts->rom;
 
@@ -117,6 +118,8 @@ static SigTrace     trace_IOR_;
 static SigTrace     trace_IOW_;
 static SigTrace     trace_INTA_;
 
+static SigTrace     trace_TD;
+
 // i8080_post: Power-On Self Test for the i8080 code
 //
 // This function should be called every time the program starts
@@ -146,10 +149,10 @@ void i8080_post()
     i8080_lxi_post(ts);
 
     i8080_reset_for_testing(ts);
-    i8080_jmp_post(ts);
+    i8080_asm_post(ts, "hex/jmptest.hex");
 
     i8080_reset_for_testing(ts);
-    i8080_io_post(ts);
+    i8080_asm_post(ts, "hex/iotest.hex");
 
     i8080_reset_for_testing(ts);
     i8080_dad_post(ts);
@@ -212,6 +215,7 @@ void i8080_plot_sigs(SigPlot sp)
     sigplot_sig(sp, trace_W);
     sigplot_sig(sp, trace_Z);
     sigplot_sig(sp, trace_FLAGS);
+    sigplot_sig(sp, trace_TD);
 }
 
 void i8080_bist()
@@ -243,10 +247,10 @@ void i8080_bist()
     i8080_lxi_bist(ts);
 
     i8080_reset_for_testing(ts);
-    i8080_jmp_bist(ts);
+    i8080_asm_bist(ts, "hex/jmptest.hex", "jmp");
 
     i8080_reset_for_testing(ts);
-    i8080_io_bist(ts);
+    i8080_asm_bist(ts, "hex/iotest.hex", "io");
 
     i8080_reset_for_testing(ts);
     i8080_dad_bist(ts);
@@ -308,6 +312,7 @@ static void i8080_test_init()
     I8224_INIT(gen);
     I8228_INIT(ctl);
     DECODER_INIT(dec);
+    testdev_init(dev, "TD");
 
     for (int chip = 0; chip < ROM_CHIPS; ++chip) {
         rom8316_init(rom[chip], format("rom%d", chip + 1));
@@ -372,9 +377,14 @@ static void i8080_test_init()
 
     dec->shadow = rom[0]->RD_;
 
+    dev->DATA = cpu->DATA;
+    dec->dev_wr[TDWP] = dev->WR_;
+    dec->dev_rd[TDRP] = dev->RD_;
+
     i8080_linked(cpu);
     i8224_linked(gen);
     i8228_linked(ctl);
+    testdev_linked(dev);
     decoder_linked(dec);
 
     i8080_invar(cpu);
@@ -397,6 +407,35 @@ static void i8080_test_init()
     (void)INTE;         // output: "interrutps enabled"
 
     (void)INTA_;        // output: "fetching interrupt opcode"
+}
+
+void testdev_init(Testdev dev, Cstr name)
+{
+    assert(dev);
+    assert(name);
+    assert(name[0]);
+
+    dev->name = name;
+    edge_init(dev->RD_, format("%s:/RD", name), 1);
+    edge_init(dev->WR_, format("%s:/WR", name), 1);
+    data_init(dev->REG, format("%s:REG", name));
+}
+
+static void testdev_rd(Testdev dev)
+{
+    data_to(dev->DATA, dev->REG->value);
+}
+
+static void testdev_wr(Testdev dev)
+{
+    data_to(dev->REG, dev->DATA->value);
+}
+
+void testdev_linked(Testdev dev)
+{
+    EDGE_ON_FALL(dev->RD_, testdev_rd, dev);
+    EDGE_ON_FALL(dev->WR_, testdev_wr, dev);
+
 }
 
 static void i8080_trace_init()
@@ -444,6 +483,7 @@ static void i8080_trace_init()
     sigtrace_init_data(trace_W, ss, W);
     sigtrace_init_data(trace_Z, ss, Z);
     sigtrace_init_data(trace_FLAGS, ss, FLAGS);
+    sigtrace_init_data(trace_TD, ss, dev->REG);
 }
 
 static void i8080_trace_fini()
@@ -488,6 +528,7 @@ static void i8080_trace_fini()
     sigtrace_fini(trace_W);
     sigtrace_fini(trace_Z);
     sigtrace_fini(trace_FLAGS);
+    sigtrace_fini(trace_TD);
 
     sigsess_fini(ss);
 }

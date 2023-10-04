@@ -13,7 +13,7 @@ START:
         POP     HL
         POP     PSW
         NOP
-        RST     2
+        DB	18H             ;next subtest
 
         NOP
         NOP
@@ -22,7 +22,7 @@ START:
         PUSH    DE
         PUSH    BC
         NOP
-        RST     1
+        DB	10H             ;test complete
         NOP
         NOP
         HLT

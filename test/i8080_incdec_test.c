@@ -150,7 +150,7 @@ static void i8080_incdec_bist_inr(CpuTestSys ts)
     ASSERT_EQ_integer(0x16, FLAGS->value);      // Ac,P
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_inr",
+    sigplot_init(sp, ss, "i8080_bist_alu_inr",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "INR from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -257,7 +257,7 @@ static void i8080_incdec_bist_dcr(CpuTestSys ts)
     ASSERT_EQ_integer(0x96, FLAGS->value);      // S,Ac,P
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_dcr",
+    sigplot_init(sp, ss, "i8080_bist_alu_dcr",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "DCR from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -357,7 +357,7 @@ static void i8080_incdec_bist_inx(CpuTestSys ts)
     ASSERT_EQ_integer(0x00, L->value);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_inx",
+    sigplot_init(sp, ss, "i8080_bist_alu_inx",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "INX from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -457,7 +457,7 @@ static void i8080_incdec_bist_dcx(CpuTestSys ts)
     ASSERT_EQ_integer(0xFF, L->value);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_dcx",
+    sigplot_init(sp, ss, "i8080_bist_alu_dcx",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "DCX from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);

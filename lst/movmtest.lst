@@ -13,43 +13,50 @@
     13 0005 7E		        MOV     A,M
     14 0006 77		        MOV     M,A
     15 0007 23		        INX     HL
-    16 0008 D7		        RST     2
+    16 0008		        DB      18H
+            18 
     17
     18 0009 06 55	        MVI     B,55H
     19 000B 46		        MOV     B,M
     20 000C 70		        MOV     M,B
     21 000D 23		        INX     HL
-    22 000E D7		        RST     2
+    22 000E		        DB      18H
+            18 
     23
     24 000F 0E 55	        MVI     C,55H
     25 0011 4E		        MOV     C,M
     26 0012 71		        MOV     M,C
     27 0013 23		        INX     HL
-    28 0014 D7		        RST     2
+    28 0014		        DB      18H
+            18 
     29
     30 0015 16 55	        MVI     D,55H
     31 0017 56		        MOV     D,M
     32 0018 72		        MOV     M,D
     33 0019 23		        INX     HL
-    34 001A D7		        RST     2
+    34 001A		        DB      18H
+            18 
     35
     36 001B 1E 55	        MVI     E,55H
     37 001D 5E		        MOV     E,M
     38 001E 73		        MOV     M,E
     39 001F 23		        INX     HL
-    40 0020 D7		        RST     2
+    40 0020		        DB      18H
+            18 
     41
     42 0021 36 55	        MVI     M,055H
     43 0023 23		        INX     HL
     44 0024 36 AA	        MVI     M,0AAH
     45 0026 23		        INX     HL
-    46 0027 D7		        RST     2
+    46 0027		        DB      18H
+            18 
     47
     48 0028 34		        INR	M
     49 0029 23		        INX     HL
     50 002A 35		        DCR	M
     51 002B 23		        INX     HL
-    52 002C D7		        RST     2
+    52 002C		        DB      18H
+            18 
     53
     54 			        ;; This test program also tests the ALU operations
     55 			        ;; that take M as an operand.
@@ -58,52 +65,60 @@
     58 002F 86		        ADD     M
     59 0030 77		        MOV     M,A
     60 0031 23		        INX     HL
-    61 0032 D7		        RST     2
+    61 0032		        DB      18H
+            18 
     62
     63 0033 3E 55	        MVI     A,55H
     64 0035 37		        STC
     65 0036 8E		        ADC     M
     66 0037 77		        MOV     M,A
     67 0038 23		        INX     HL
-    68 0039 D7		        RST     2
+    68 0039		        DB      18H
+            18 
     69
     70 003A 3E 55	        MVI     A,55H
     71 003C 96		        SUB     M
     72 003D 77		        MOV     M,A
     73 003E 23		        INX     HL
-    74 003F D7		        RST     2
+    74 003F		        DB      18H
+            18 
     75
     76 0040 37		        STC
     77 0041 3E 55	        MVI     A,55H
     78 0043 9E		        SBB     M
     79 0044 77		        MOV     M,A
     80 0045 23		        INX     HL
-    81 0046 D7		        RST     2
+    81 0046		        DB      18H
+            18 
     82
     83 0047 3E 55	        MVI     A,55H
     84 0049 A6		        ANA     M
     85 004A 77		        MOV     M,A
     86 004B 23		        INX     HL
-    87 004C D7		        RST     2
+    87 004C		        DB      18H
+            18 
     88
     89 004D 3E 55	        MVI     A,55H
     90 004F AE		        XRA     M
     91 0050 77		        MOV     M,A
     92 0051 23		        INX     HL
-    93 0052 D7		        RST     2
+    93 0052		        DB      18H
+            18 
     94
     95 0053 3E 55	        MVI     A,55H
     96 0055 B6		        ORA     M
     97 0056 77		        MOV     M,A
     98 0057 23		        INX     HL
-    99 0058 D7		        RST     2
+    99 0058		        DB      18H
+            18 
    100
    101 0059 3E 55	        MVI     A,55H
    102 005B BE		        CMP     M
    103 005C 77		        MOV     M,A
    104 005D 23		        INX     HL
    105
-   106 005E CF		        RST     1
+   106 005E		        DB	10H             ;test complete
+            10 
    107 005F 00		        NOP
    108 0060 00		        NOP
    109 0061 00		        NOP

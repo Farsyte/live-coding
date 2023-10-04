@@ -237,7 +237,7 @@ static void i8080_alu_bist_add(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_add",
+    sigplot_init(sp, ss, "i8080_bist_alu_add",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "ADD from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -366,7 +366,7 @@ static void i8080_alu_bist_sub(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_sub",
+    sigplot_init(sp, ss, "i8080_bist_alu_sub",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "SUB from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -502,7 +502,7 @@ static void i8080_alu_bist_adc(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_adc",
+    sigplot_init(sp, ss, "i8080_bist_alu_adc",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "ADC from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -638,7 +638,7 @@ static void i8080_alu_bist_sbb(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_sbb",
+    sigplot_init(sp, ss, "i8080_bist_alu_sbb",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "SBB from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -767,7 +767,7 @@ static void i8080_alu_bist_ana(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_ana",
+    sigplot_init(sp, ss, "i8080_bist_alu_ana",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "ANA from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -896,7 +896,7 @@ static void i8080_alu_bist_ora(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_ora",
+    sigplot_init(sp, ss, "i8080_bist_alu_ora",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "ORA from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -1025,7 +1025,7 @@ static void i8080_alu_bist_xra(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_xra",
+    sigplot_init(sp, ss, "i8080_bist_alu_xra",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "XRA from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -1154,7 +1154,7 @@ static void i8080_alu_bist_cmp(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_cmp",
+    sigplot_init(sp, ss, "i8080_bist_alu_cmp",
                  "Intel 8080 Single Chip 8-bit Microprocessor",
                  "CMP from each register", t0, TAU - t0);
     i8080_plot_sigs(sp);
@@ -1213,7 +1213,7 @@ static void i8080_alu_bist_daa(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // NOP
 
     SigPlot             sp;
-    sigplot_init(sp, ss, "i8080_alu_daa",
+    sigplot_init(sp, ss, "i8080_bist_alu_daa",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1308,7 +1308,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_rlc",
+    sigplot_init(sp, ss, "i8080_bist_alu_rlc",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1333,7 +1333,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_rrc",
+    sigplot_init(sp, ss, "i8080_bist_alu_rrc",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1362,7 +1362,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_ral",
+    sigplot_init(sp, ss, "i8080_bist_alu_ral",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1391,7 +1391,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_rar",
+    sigplot_init(sp, ss, "i8080_bist_alu_rar",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1416,7 +1416,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_cma",
+    sigplot_init(sp, ss, "i8080_bist_alu_cma",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1440,7 +1440,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_cmc",
+    sigplot_init(sp, ss, "i8080_bist_alu_cmc",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
@@ -1464,7 +1464,7 @@ static void i8080_alu_bist_rot(CpuTestSys ts)
 
     i8080_one_instruction(cpu, 0);      // NOP
 
-    sigplot_init(sp, ss, "i8080_alu_stc",
+    sigplot_init(sp, ss, "i8080_bist_alu_stc",
                  "Intel 8080 Single Chip 8-bit Microprocessor", "DAA test", t0, TAU - t0);
     i8080_plot_sigs(sp);
     sigplot_fini(sp);
