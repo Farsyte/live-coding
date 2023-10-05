@@ -55,11 +55,11 @@ ops[0x22] = 'shld ##'
 
 for rp in range(2):
     op = 0x0A + rp*16
-    ops[op] = f'ldax {rr[rp]},##'
+    ops[op] = f'ldax {rr[rp]}'
 
 for rp in range(2):
     op = 0x02 + rp*16
-    ops[op] = f'stax {rr[rp]},##'
+    ops[op] = f'stax {rr[rp]}'
 
 ops[0xEB] = 'xchg'
 

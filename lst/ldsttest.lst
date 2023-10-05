@@ -1,0 +1,111 @@
+     1     		        TITLE   'test for PUSH and POP instructions'
+     2
+     3 			        ;; This test is being used before we deal with SHADOW,
+     4 			        ;; so it can only read the SHADOW ROM and writes will go
+     5 			        ;; to the shadowed ram area.
+     6
+     7      00 00	        ORG     00000h
+     8
+     9 			START:  
+    10 0000 01 80 00	        LXI     BC,BCDATA
+    11 0003 0A		        LDAX    BC
+    12 0004 FE 11	        CPI     11H
+    13 0006 CA 0A 00	        JZ      BCPASS
+    14 0009		        DB      08H             ;SUBTEST FAILED: WRONG DATA RECEIVED
+            08 
+    15 			BCPASS: 
+    16 000A 02		        STAX    BC
+    17
+    18 000B		        DB	18H             ;next subtest
+            18 
+    19
+    20 000C 11 81 00	        LXI     DE,DEDATA
+    21 000F 1A		        LDAX    DE
+    22 0010 FE 22	        CPI     22H
+    23 0012 CA 16 00	        JZ      DEPASS
+    24 0015		        DB      08H             ;SUBTEST FAILED: WRONG DATA RECEIVED
+            08 
+    25 			DEPASS: 
+    26 0016 12		        STAX    DE
+    27
+    28 0017		        DB	18H             ;next subtest
+            18 
+    29
+    30 0018 3A 82 00	        LDA     ADATA
+    31 001B FE 77	        CPI     77H
+    32 001D CA 21 00	        JZ      APASS
+    33 0020		        DB      08H             ;SUBEST FAILED: WRONG DATA RECEIVED
+            08 
+    34 			APASS:  
+    35 0021 32 82 00	        STA     ADATA
+    36
+    37 0024		        DB	18H             ;next subtest
+            18 
+    38
+    39 0025 00		        NOP                     ;left margin for plot
+    40 0026 2A 83 00	        LHLD    HLDATA
+    41
+    42 0029		        DB	18H             ;next subtest
+            18 
+    43
+    44 002A 7C		        MOV     A,H
+    45 002B FE 12	        CPI     12H
+    46 002D CA 31 00	        JZ      HPASS
+    47 0030		        DB      08H             ;SUBEST FAILED: WRONG DATA RECEIVED
+            08 
+    48 			HPASS:  
+    49 0031 7D		        MOV     A,L
+    50 0032 FE 34	        CPI     34H
+    51 0034 CA 38 00	        JZ      LPASS
+    52 0037		        DB      08H             ;SUBEST FAILED: WRONG DATA RECEIVED
+            08 
+    53 			LPASS:  
+    54 0038		        DB	18H             ;next subtest
+            18 
+    55
+    56 0039 00		        NOP                     ;left margin for plot
+    57 003A 22 83 00	        SHLD    HLDATA
+    58
+    59 003D		        DB	10H             ;test complete
+            10 
+    60
+    61 003E 00		        NOP
+    62 003F 00		        NOP
+    63 0040 76		        HLT
+    64
+    65      00 80	        ORG     0080H
+    66 0080		BCDATA: DB      11H             ;data for LDAX/STAX BC test
+            11 
+    67 0081		DEDATA: DB      22H             ;data for LDAX/STAX DE test
+            22 
+    68 0082		ADATA:  DB      77H             ;data for LDA/STA test
+            77 
+    69 0083		HLDATA: DW      1234H           ;data for LHLD/SHLD test
+            3412 
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+START		Label	00000h
+BCPASS		Label	0000Ah
+DEPASS		Label	00016h
+APASS		Label	00021h
+HPASS		Label	00031h
+LPASS		Label	00038h
+BCDATA		Label	00080h
+DEDATA		Label	00081h
+ADATA		Label	00082h
+HLDATA		Label	00083h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 10
+
+

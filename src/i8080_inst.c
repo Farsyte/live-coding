@@ -1,13 +1,13 @@
 #include "i8080_impl.h"
 
 static Cstr         i8080_instruction_names[256] = {
-    "nop       ", "lxi  BC,##", "stax BC,##", "inx  BC   ",
+    "nop       ", "lxi  BC,##", "stax BC   ", "inx  BC   ",
     "inr  B    ", "dcr  B    ", "mvi  B,#  ", "rlc       ",
-    "---- ---  ", "dad  BC   ", "ldax BC,##", "dcx  BC   ",
+    "---- ---  ", "dad  BC   ", "ldax BC   ", "dcx  BC   ",
     "inr  C    ", "dcr  C    ", "mvi  C,#  ", "rrc       ",
-    "---- ---  ", "lxi  DE,##", "stax DE,##", "inx  DE   ",
+    "---- ---  ", "lxi  DE,##", "stax DE   ", "inx  DE   ",
     "inr  D    ", "dcr  D    ", "mvi  D,#  ", "ral       ",
-    "---- ---  ", "dad  DE   ", "ldax DE,##", "dcx  DE   ",
+    "---- ---  ", "dad  DE   ", "ldax DE   ", "dcx  DE   ",
     "inr  E    ", "dcr  E    ", "mvi  E,#  ", "rar       ",
     "---- ---  ", "lxi  HL,##", "shld ##   ", "inx  HL   ",
     "inr  H    ", "dcr  H    ", "mvi  H,#  ", "daa       ",

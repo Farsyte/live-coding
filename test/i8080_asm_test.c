@@ -18,7 +18,7 @@ static p8080State   saved_op08;
 static p8080State   saved_op10;
 static p8080State   saved_op18;
 
-static Cstr         i8080_asm_plotname;
+static Cstr         i8080_asm_hexfile;
 
 // === === === === === === === === === === === === === === === ===
 //                    POWER-ON SELF TEST SUPPORT
@@ -26,6 +26,8 @@ static Cstr         i8080_asm_plotname;
 
 void i8080_asm_post(CpuTestSys ts, Cstr hexfile)
 {
+    i8080_asm_hexfile = hexfile;
+
     const p8080         cpu = ts->cpu;
 
     Rom8316            *rom = ts->rom;
@@ -72,9 +74,10 @@ void i8080_asm_post(CpuTestSys ts, Cstr hexfile)
     while (i8080_asm_test_done == 0) {
         clock_run_one();
         // ignore i8080_asm_test_page during POST
+        // TODO provide a timeout here.
     }
 
-    assert(i8080_asm_test_done > 0);
+    ASSERT_EQ_integer(1, i8080_asm_test_done);
 
     cpu->m1t4[OP__08] = saved_op08;
     cpu->m1t4[OP__10] = saved_op10;
@@ -87,7 +90,7 @@ void i8080_asm_post(CpuTestSys ts, Cstr hexfile)
 
 void i8080_asm_bist(CpuTestSys ts, Cstr hexfile, Cstr plotname)
 {
-    i8080_asm_plotname = plotname;
+    i8080_asm_hexfile = hexfile;
 
     Tau                 t0;
 
@@ -175,7 +178,7 @@ void i8080_asm_bist(CpuTestSys ts, Cstr hexfile, Cstr plotname)
         t0 = TAU;
     }
 
-    assert(i8080_asm_test_done > 0);
+    ASSERT_EQ_integer(1, i8080_asm_test_done);
 
     cpu->m1t4[OP__08] = saved_op08;
     cpu->m1t4[OP__10] = saved_op10;
@@ -195,7 +198,7 @@ static void i8080_state_asm_test_fail(i8080 cpu, int phase)
           break;
       case PHI2_RISE:
           i8080_asm_test_done = -1;
-          STUB("ASM '%s' FAIL hit at at PC=%04Xh", i8080_asm_plotname, cpu->PC->value - 1);
+          STUB("ASM '%s' FAIL hit at at PC=%04Xh", i8080_asm_hexfile, cpu->PC->value - 1);
           break;
       case PHI2_FALL:
           break;

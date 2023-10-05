@@ -60,7 +60,7 @@ void i8080_lxi_init(i8080 cpu)
         case PHI2_RISE:                                                 \
             DSET(RL, VAL(DATA));                                        \
             LOWER(DBIN);                                                \
-            ATRI(ADDR);                                          \
+            ATRI(ADDR);                                                 \
             break;                                                      \
         case PHI2_FALL:                                                 \
             cpu->state_next = cpu->state_3bops_t1;                      \

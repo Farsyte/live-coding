@@ -4,11 +4,15 @@
 
 Here is a handy table of all the instructions.
 
+The core "i8080" module will treat all undefined "----" instructions
+as NOP, but system simulations are expected to redirect their decode
+links to perform simulation magic.
+
 |----------+------------+------------+----------+----------+----------+----------+----------|
-| nop      | lxi  BC,## | stax BC,## | inx  BC  | inr  B   | dcr  B   | mvi  B,# | rlc      |
-| ---- --- | dad  BC    | ldax BC,## | dcx  BC  | inr  C   | dcr  C   | mvi  C,# | rrc      |
-| ---- --- | lxi  DE,## | stax DE,## | inx  DE  | inr  D   | dcr  D   | mvi  D,# | ral      |
-| ---- --- | dad  DE    | ldax DE,## | dcx  DE  | inr  E   | dcr  E   | mvi  E,# | rar      |
+| nop      | lxi  BC,## | stax BC    | inx  BC  | inr  B   | dcr  B   | mvi  B,# | rlc      |
+| ---- --- | dad  BC    | ldax BC    | dcx  BC  | inr  C   | dcr  C   | mvi  C,# | rrc      |
+| ---- --- | lxi  DE,## | stax DE    | inx  DE  | inr  D   | dcr  D   | mvi  D,# | ral      |
+| ---- --- | dad  DE    | ldax DE    | dcx  DE  | inr  E   | dcr  E   | mvi  E,# | rar      |
 | ---- --- | lxi  HL,## | shld ##    | inx  HL  | inr  H   | dcr  H   | mvi  H,# | daa      |
 | ---- --- | dad  HL    | lhld ##    | dcx  HL  | inr  L   | dcr  L   | mvi  L,# | cma      |
 | ---- --- | lxi  SP,## | sta  ##    | inx  SP  | inr  M   | dcr  M   | mvi  M,# | stc      |
@@ -211,26 +215,31 @@ plot.
 
 [[file:img/i8080_bist_stack_2.png]]
 
-** Not Yet Implemented
+*** LDAX STAX
 
-*** XTHL
+[[file:img/i8080_bist_ldst_1.png]]
 
-E3 xthl
+[[file:img/i8080_bist_ldst_2.png]]
 
 *** LDA STA
 
-3A lda  ##
-32 sta  ##
+[[file:img/i8080_bist_ldst_3.png]]
 
-*** LDAX LHLD STAX SHLD
+*** LHLD SHLD
 
-0A ldax BC,##
-1A ldax DE,##
-2A lhld ##
+**** LHLD alone
 
-02 stax BC,##
-12 stax DE,##
-22 shld ##
+[[file:img/i8080_bist_ldst_4.png]]
+
+**** check H,L values
+
+[[file:img/i8080_bist_ldst_5.png]]
+
+**** SHLD alone
+
+[[file:img/i8080_bist_ldst_6.png]]
+
+*** Not Yet Implemented
 
 *** CALL Cc
 
@@ -268,3 +277,8 @@ E7 rst  4
 EF rst  5
 F7 rst  6
 FF rst  7
+
+*** XTHL
+
+E3 xthl
+

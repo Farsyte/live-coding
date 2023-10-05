@@ -27,6 +27,22 @@ void i8080_fetch_init(i8080 cpu)
     cpu->state_fetch = i8080_state_pc_out_status;
 
     cpu->m1t4[OP_NOP] = i8080_state_nop;
+
+    // route the decode for all "undefined" instructions
+    // to the NOP handler.
+
+    cpu->m1t4[OP__08] = i8080_state_nop;
+    cpu->m1t4[OP__10] = i8080_state_nop;
+    cpu->m1t4[OP__18] = i8080_state_nop;
+    cpu->m1t4[OP__20] = i8080_state_nop;
+    cpu->m1t4[OP__28] = i8080_state_nop;
+    cpu->m1t4[OP__30] = i8080_state_nop;
+    cpu->m1t4[OP__38] = i8080_state_nop;
+    cpu->m1t4[OP__CB] = i8080_state_nop;
+    cpu->m1t4[OP__D9] = i8080_state_nop;
+    cpu->m1t4[OP__DD] = i8080_state_nop;
+    cpu->m1t4[OP__ED] = i8080_state_nop;
+    cpu->m1t4[OP__FD] = i8080_state_nop;
 }
 
 // i8080_state_pc_out_status: publish PC via IDAL, STATUS. Start SYNC.
