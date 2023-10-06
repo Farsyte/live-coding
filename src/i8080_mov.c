@@ -212,7 +212,7 @@ IMPL_M1T5(L);
 
 // MOV Rd,M: common code out until M2T3 which moves (HL) to R.
 
-// TODO add function comment
+// i8080_state_movT4rd: finish decode for MOV from M
 
 static void i8080_state_movT4rd(i8080 cpu, int phase)
 {
@@ -227,7 +227,7 @@ static void i8080_state_movT4rd(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_movM2T1rd: start read from HL for move from (HL)
 
 static void i8080_state_movM2T1rd(i8080 cpu, int phase)
 {
@@ -235,7 +235,7 @@ static void i8080_state_movM2T1rd(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(H) << 8) | VAL(L));
+          ASET(IDAL, RP(H, L));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MREAD);
           RAISE(SYNC);
@@ -246,7 +246,7 @@ static void i8080_state_movM2T1rd(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_movM2T2rd: continue read from HL for move from (HL)
 
 static void i8080_state_movM2T2rd(i8080 cpu, int phase)
 {
@@ -267,7 +267,7 @@ static void i8080_state_movM2T2rd(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_movM2TWrd: wait state for read from HL for move from (HL)
 
 static void i8080_state_movM2TWrd(i8080 cpu, int phase)
 {
@@ -290,6 +290,9 @@ static void i8080_state_movM2TWrd(i8080 cpu, int phase)
     }
 }
 
+// i8080_state_movM2T3rd<<R>>: finish read from HL for move from (HL),
+// routing the data to the desired register.
+//
 // The IMPL_M2T3(R) macro is followed by a semicolon at the call-site.
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
@@ -321,10 +324,9 @@ IMPL_RD_M2T3(H);
 IMPL_RD_M2T3(L);
 IMPL_RD_M2T3(A);
 
-// MOV M,Rs: M1T4 copies R to TMP, then common code to move TMP to (HL).
-
-// i8080_state_movT4wr ## R
-
+// i8080_state_movM1T4wr<<R>>: finish decode for MOV into (HL)
+// including routing data from the selected register to TMP.
+//
 // The IMPL_M2T3(R) macro is followed by a semicolon at the call-site.
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
@@ -353,7 +355,7 @@ IMPL_WR_M1T4(H);
 IMPL_WR_M1T4(L);
 IMPL_WR_M1T4(A);
 
-// TODO add function comment
+// i8080_state_movM2T1wr: start write operation for MOV into M.
 
 static void i8080_state_movM2T1wr(i8080 cpu, int phase)
 {
@@ -372,7 +374,7 @@ static void i8080_state_movM2T1wr(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_movM2T2wr: continue write operation for MOV into M.
 
 static void i8080_state_movM2T2wr(i8080 cpu, int phase)
 {
@@ -388,7 +390,7 @@ static void i8080_state_movM2T2wr(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_movM2T3wr: finish write operation for MOV into M.
 
 static void i8080_state_movM2T3wr(i8080 cpu, int phase)
 {

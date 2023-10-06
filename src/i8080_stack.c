@@ -101,7 +101,7 @@ static p8080State   i8080_pop_m1t4[4] = {
     NAME_POP_M1T4(PS, W),
 };
 
-// TODO write the function comment.
+// i8080_stack_init: link t-state handlers for stack ops into cpu state
 
 void i8080_stack_init(i8080 cpu)
 {
@@ -116,6 +116,19 @@ void i8080_stack_init(i8080 cpu)
 }
 
 #define DECL_PUSH_M1T4(RH,RL)	NAME_PUSH_M1T4(RH,RL) (i8080 cpu, int phase)
+#define DECL_PUSH_M1T5(RH,RL)	NAME_PUSH_M1T5(RH,RL) (i8080 cpu, int phase)
+
+#define DECL_PUSH_M2T1(RH,RL)	NAME_PUSH_M2T1(RH,RL) (i8080 cpu, int phase)
+#define DECL_PUSH_M2T2(RH,RL)	NAME_PUSH_M2T2(RH,RL) (i8080 cpu, int phase)
+#define DECL_PUSH_M2T3(RH,RL)	NAME_PUSH_M2T3(RH,RL) (i8080 cpu, int phase)
+
+#define DECL_PUSH_M3T1(RH,RL)	NAME_PUSH_M3T1(RH,RL) (i8080 cpu, int phase)
+#define DECL_PUSH_M3T2(RH,RL)	NAME_PUSH_M3T2(RH,RL) (i8080 cpu, int phase)
+#define DECL_PUSH_M3T3(RH,RL)	NAME_PUSH_M3T3(RH,RL) (i8080 cpu, int phase)
+
+// i8080_push_M1T4<<RP>>: finish decode for PUSH RP
+// load SP into IDAL preparing for predecrement in T5
+
 #define IMPL_PUSH_M1T4(RH,RL)                                           \
     static void DECL_PUSH_M1T4(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -131,7 +144,10 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M1T4(RH,RL)
 
-#define DECL_PUSH_M1T5(RH,RL)	NAME_PUSH_M1T5(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M1T5<<RP>>: finish decode for PUSH RP
+// store decremented IDAL back into SP and route control
+// to the stack write machine cycle.
+
 #define IMPL_PUSH_M1T5(RH,RL)                                           \
     static void DECL_PUSH_M1T5(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -147,9 +163,9 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M1T5(RH,RL)
 
-// m2 is a "write byte to stack" cycle.
+// i8080_push_M2T1<<RP>>: start high byte stack write operation
+// address comes from SP (do not assume IDAL still set)
 
-#define DECL_PUSH_M2T1(RH,RL)	NAME_PUSH_M2T1(RH,RL) (i8080 cpu, int phase)
 #define IMPL_PUSH_M2T1(RH,RL)                                           \
     static void DECL_PUSH_M2T1(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -168,7 +184,9 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M2T1(RH,RL)
 
-#define DECL_PUSH_M2T2(RH,RL)	NAME_PUSH_M2T2(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M2T2<<RP>>: continue high byte stack write operation
+// write decremented IDAL back to SP for next cycle
+
 #define IMPL_PUSH_M2T2(RH,RL)                                           \
     static void DECL_PUSH_M2T2(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -186,7 +204,8 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M2T2(RH,RL)
 
-#define DECL_PUSH_M2T3(RH,RL)	NAME_PUSH_M2T3(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M2T3<<RP>>: finish high byte stack write operation
+
 #define IMPL_PUSH_M2T3(RH,RL)                                           \
     static void DECL_PUSH_M2T3(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -204,9 +223,9 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M2T3(RH,RL)
 
-// m3 is a "write byte to stack" cycle.
+// i8080_push_M3T1<<RP>>: start low byte stack write operation
+// address comes from SP (do not assume IDAL still set)
 
-#define DECL_PUSH_M3T1(RH,RL)	NAME_PUSH_M3T1(RH,RL) (i8080 cpu, int phase)
 #define IMPL_PUSH_M3T1(RH,RL)                                           \
     static void DECL_PUSH_M3T1(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -225,7 +244,9 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M3T1(RH,RL)
 
-#define DECL_PUSH_M3T2(RH,RL)	NAME_PUSH_M3T2(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M3T2<<RP>>: continue low byte stack write operation
+// do not update SP, this is a pre-decrement store operation.
+
 #define IMPL_PUSH_M3T2(RH,RL)                                           \
     static void DECL_PUSH_M3T2(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -242,7 +263,9 @@ void i8080_stack_init(i8080 cpu)
     }                                                                   \
     DEFN_PUSH_M3T2(RH,RL)
 
-#define DECL_PUSH_M3T3(RH,RL)	NAME_PUSH_M3T3(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M3T3<<RP>>: finish low byte stack write operation
+// This is the final t-state of the instruction.
+
 #define IMPL_PUSH_M3T3(RH,RL)                                           \
     static void DECL_PUSH_M3T3(RH,RL) {                                 \
         switch (phase) {                                                \
@@ -283,7 +306,8 @@ IMPL_PUSH_M3T1(P, SW);
 // IMPL_PUSH_M3T2(P, SW) has to be specialized for PSW
 IMPL_PUSH_M3T3(P, SW);
 
-// specialized DECL_PUSH_M2T2(RH,RL) for the PSW
+// i8080_push_M2T2PSW: modified M2T2 for PSW
+// the high byte pushed comes from A.
 
 static void i8080_push_M2T2PSW(i8080 cpu, int phase)
 {
@@ -301,7 +325,9 @@ static void i8080_push_M2T2PSW(i8080 cpu, int phase)
     }
 }
 
-// specialized DECL_PUSH_M3T2(RH,RL) for the PSW
+// i8080_push_M3T2PSW: modified M2T2 for PSW
+// the low byte pushed comes from FLAGS, assuring
+// that the 0x02 bit is set and 0x28 bits are not.
 
 static void i8080_push_M3T2PSW(i8080 cpu, int phase)
 {
@@ -319,6 +345,19 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
 }
 
 #define DECL_POP_M1T4(RH,RL)	NAME_POP_M1T4(RH,RL) (i8080 cpu, int phase)
+
+#define DECL_POP_M2T1(RH,RL)	NAME_POP_M2T1(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M2T2(RH,RL)	NAME_POP_M2T2(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M2TW(RH,RL)	NAME_POP_M2TW(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M2T3(RH,RL)	NAME_POP_M2T3(RH,RL) (i8080 cpu, int phase)
+
+#define DECL_POP_M3T1(RH,RL)	NAME_POP_M3T1(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M3T2(RH,RL)	NAME_POP_M3T2(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M3TW(RH,RL)	NAME_POP_M3TW(RH,RL) (i8080 cpu, int phase)
+#define DECL_POP_M3T3(RH,RL)	NAME_POP_M3T3(RH,RL) (i8080 cpu, int phase)
+
+// i8080_pop_M1T4<<RP>>: finish decode for POP RP
+
 #define IMPL_POP_M1T4(RH,RL)                                            \
     static void DECL_POP_M1T4(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -333,9 +372,9 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M1T4(RH,RL)
 
-// m2 is a "write byte to stack" cycle.
+// i8080_pop_M2T1<<RP>>: start low byte stack read operation
+// address comes from SP
 
-#define DECL_POP_M2T1(RH,RL)	NAME_POP_M2T1(RH,RL) (i8080 cpu, int phase)
 #define IMPL_POP_M2T1(RH,RL)                                            \
     static void DECL_POP_M2T1(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -354,7 +393,9 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M2T1(RH,RL)
 
-#define DECL_POP_M2T2(RH,RL)	NAME_POP_M2T2(RH,RL) (i8080 cpu, int phase)
+// i8080_pop_M2T2<<RP>>: continue low byte stack read operation
+// write incremented IDAL back to SP for post-increment load
+
 #define IMPL_POP_M2T2(RH,RL)                                            \
     static void DECL_POP_M2T2(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -376,7 +417,8 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M2T2(RH,RL)
 
-#define DECL_POP_M2TW(RH,RL)	NAME_POP_M2TW(RH,RL) (i8080 cpu, int phase)
+// i8080_pop_M2T2<<RP>>: wait state for low byte stack read operation
+
 #define IMPL_POP_M2TW(RH,RL)                                            \
     static void DECL_POP_M2TW(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -399,7 +441,8 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M2TW(RH,RL)
 
-#define DECL_POP_M2T3(RH,RL)	NAME_POP_M2T3(RH,RL) (i8080 cpu, int phase)
+// i8080_pop_M2T3<<RP>>: finish low byte stack read operation
+
 #define IMPL_POP_M2T3(RH,RL)                                            \
     static void DECL_POP_M2T3(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -418,9 +461,9 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M2T3(RH,RL)
 
-// m3 is a "write byte to stack" cycle.
+// i8080_pop_M3T1<<RP>>: start high byte stack read operation
+// address comes from SP
 
-#define DECL_POP_M3T1(RH,RL)	NAME_POP_M3T1(RH,RL) (i8080 cpu, int phase)
 #define IMPL_POP_M3T1(RH,RL)                                            \
     static void DECL_POP_M3T1(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -439,7 +482,9 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M3T1(RH,RL)
 
-#define DECL_POP_M3T2(RH,RL)	NAME_POP_M3T2(RH,RL) (i8080 cpu, int phase)
+// i8080_pop_M3T2<<RP>>: continue high byte stack read operation
+// write back post-incremented address to SP
+
 #define IMPL_POP_M3T2(RH,RL)                                            \
     static void DECL_POP_M3T2(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -461,7 +506,8 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M3T2(RH,RL)
 
-#define DECL_POP_M3TW(RH,RL)	NAME_POP_M3TW(RH,RL) (i8080 cpu, int phase)
+// i8080_pop_M3TW<<RP>>: wait state for high byte stack read operation
+
 #define IMPL_POP_M3TW(RH,RL)                                            \
     static void DECL_POP_M3TW(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -484,7 +530,9 @@ static void i8080_push_M3T2PSW(i8080 cpu, int phase)
     }                                                                   \
     DEFN_POP_M3TW(RH,RL)
 
-#define DECL_POP_M3T3(RH,RL)	NAME_POP_M3T3(RH,RL) (i8080 cpu, int phase)
+// i8080_push_M3T3<<RP>>: finish high byte stack read operation
+// This is the final t-state of the instruction.
+
 #define IMPL_POP_M3T3(RH,RL)                                            \
     static void DECL_POP_M3T3(RH,RL) {                                  \
         switch (phase) {                                                \
@@ -528,7 +576,10 @@ IMPL_POP_M3T2(P, SW);
 IMPL_POP_M3TW(P, SW);
 // IMPL_POP_M3T3(P, SW); // has to be specialized for PSW
 
-// Specialize IMPL_POP_M2T3 for PSW
+// i8080_pop_M2T3PSW: specialized M2T3 pop for PSW
+// this byte is placed into FLAGS, after assuring
+// that the 0x02 bit is set and the 0x28 bits are clear.
+
 static void i8080_pop_M2T3PSW(i8080 cpu, int phase)
 {
     switch (phase) {
@@ -546,7 +597,8 @@ static void i8080_pop_M2T3PSW(i8080 cpu, int phase)
     }
 }
 
-// Specialize DECL_POP_M3T3 for PSW
+// i8080_pop_M3T3PSW: specialized M2T3 pop for PSW
+// this byte is placed into A.
 
 static void i8080_pop_M3T3PSW(i8080 cpu, int phase)
 {

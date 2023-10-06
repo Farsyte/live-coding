@@ -49,6 +49,9 @@ void i8080_mvi_init(i8080 cpu)
     }
 }
 
+// i8080_state_mviM2T3<<R>>: finish up the MVI instruction
+// by moving the immediate operand from DATA into the destination register.
+//
 // The IMPL_M2T3(R) macro is followed by a semicolon at the call-site.
 // Because we do not want a semicolon after the function definition,
 // repeat the declaration of the function which allows (and needs) it.
@@ -80,12 +83,15 @@ IMPL_M2T3(E);
 IMPL_M2T3(H);
 IMPL_M2T3(L);
 
+// i8080_state_mviM2T3M: Continue the MVI M instruction
+// accept the inbound immediate data into TMP, then route control
+// to the "write to (HL)" machine cycle.
+
 static void i8080_state_mviM2T3M(i8080 cpu, int phase)
 {
     switch (phase) {
       case PHI1_RISE:
           LOWER(WAIT);
-          // RAISE(RETM1_INT);                            
           break;
       case PHI2_RISE:
           DSET(TMP, VAL(DATA));
@@ -98,7 +104,7 @@ static void i8080_state_mviM2T3M(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_mviM3T1M: addr/sync part of "MVI M" write cycle
 
 static void i8080_state_mviM3T1M(i8080 cpu, int phase)
 {
@@ -117,7 +123,7 @@ static void i8080_state_mviM3T1M(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_mviM3T2M: data part of "MVI M" write cycle
 
 static void i8080_state_mviM3T2M(i8080 cpu, int phase)
 {
@@ -133,7 +139,7 @@ static void i8080_state_mviM3T2M(i8080 cpu, int phase)
     }
 }
 
-// TODO add function comment
+// i8080_state_mviM3T3M: finishing part of "MVI M" write cycle
 
 static void i8080_state_mviM3T3M(i8080 cpu, int phase)
 {

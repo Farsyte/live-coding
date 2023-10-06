@@ -373,7 +373,7 @@ static void i8080_state_dcx_t5SP(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrM1T4M
+// i8080_state_inrT4M: finish decode for INR M
 
 static void i8080_state_inrT4M(i8080 cpu, int phase)
 {
@@ -388,7 +388,7 @@ static void i8080_state_inrT4M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrM2T1M
+// i8080_state_inrM2T1M: ADDR and SYNC for reading M for INR M
 
 static void i8080_state_inrM2T1M(i8080 cpu, int phase)
 {
@@ -407,7 +407,7 @@ static void i8080_state_inrM2T1M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrM2T2M
+// i8080_state_inrM2T2M: DATA for reading M for INR M
 
 static void i8080_state_inrM2T2M(i8080 cpu, int phase)
 {
@@ -428,7 +428,7 @@ static void i8080_state_inrM2T2M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrM2T2M
+// i8080_state_inrM2TWM: WAIT STATE for reading M for INR M
 
 static void i8080_state_inrM2TWM(i8080 cpu, int phase)
 {
@@ -451,7 +451,7 @@ static void i8080_state_inrM2TWM(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrM2T3M
+// i8080_state_inrM2TWM: ALUOP STATE for INR M
 
 static void i8080_state_inrM2T3M(i8080 cpu, int phase)
 {
@@ -479,7 +479,7 @@ static void i8080_state_inrM2T3M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_dcrM1T4M
+// i8080_state_dcrT4M: finish decode for DCR M
 
 static void i8080_state_dcrT4M(i8080 cpu, int phase)
 {
@@ -494,7 +494,7 @@ static void i8080_state_dcrT4M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_dcrM2T1M
+// i8080_state_dcrM2T1M: ADDR and SYNC for reading M for DCR M
 
 static void i8080_state_dcrM2T1M(i8080 cpu, int phase)
 {
@@ -513,7 +513,7 @@ static void i8080_state_dcrM2T1M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_dcrM2T2M
+// i8080_state_dcrM2T2M: DATA for reading M for DCR M
 
 static void i8080_state_dcrM2T2M(i8080 cpu, int phase)
 {
@@ -534,7 +534,7 @@ static void i8080_state_dcrM2T2M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_dcrM2T2M
+// i8080_state_dcrM2TWM: WAIT STATE for reading M for DCR M
 
 static void i8080_state_dcrM2TWM(i8080 cpu, int phase)
 {
@@ -557,7 +557,7 @@ static void i8080_state_dcrM2TWM(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_dcrM2T3M
+// i8080_state_dcrM2TWM: ALUOP STATE for DCR M
 
 static void i8080_state_dcrM2T3M(i8080 cpu, int phase)
 {
@@ -585,7 +585,7 @@ static void i8080_state_dcrM2T3M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrdcrM3T1M
+// i8080_state_inrdcrM3T1M: ADDR state for writing M back for INR or DCR M
 
 static void i8080_state_inrdcrM3T1M(i8080 cpu, int phase)
 {
@@ -604,7 +604,7 @@ static void i8080_state_inrdcrM3T1M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrdcrM3T2M
+// i8080_state_inrdcrM3T2M: DATA state for writing M back for INR or DCR M
 
 static void i8080_state_inrdcrM3T2M(i8080 cpu, int phase)
 {
@@ -621,7 +621,7 @@ static void i8080_state_inrdcrM3T2M(i8080 cpu, int phase)
     }
 }
 
-// TODO write function comment for i8080_state_inrdcrM3T3M
+// i8080_state_inrdcrM3T3M: WR state for writing M back for INR or DCR M
 
 static void i8080_state_inrdcrM3T3M(i8080 cpu, int phase)
 {

@@ -239,20 +239,27 @@ plot.
 
 [[file:img/i8080_bist_ldst_6.png]]
 
-*** Not Yet Implemented
-
 *** CALL Cc
 
-CD call ##
+[[file:img/i8080_bist_call_1.png]]
 
-DC cc   ##
-FC cm   ##
-D4 cnc  ##
-C4 cnz  ##
-F4 cp   ##
-EC cpe  ##
-E4 cpo  ##
-CC cz   ##
+[[file:img/i8080_bist_call_2.png]]
+
+[[file:img/i8080_bist_call_3.png]]
+
+[[file:img/i8080_bist_call_4.png]]
+
+[[file:img/i8080_bist_call_5.png]]
+
+[[file:img/i8080_bist_call_6.png]]
+
+[[file:img/i8080_bist_call_7.png]]
+
+[[file:img/i8080_bist_call_8.png]]
+
+[[file:img/i8080_bist_call_9.png]]
+
+** Not Yet Implemented
 
 *** RET, Rc
 

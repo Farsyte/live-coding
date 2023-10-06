@@ -1,0 +1,44 @@
+
+
+
+
+
+
+| T  | Phi | memory read             | i/o port read      | memory write       | i/o port write    | halt ack         |
+|----+-----+-------------------------+--------------------+--------------------+-------------------+------------------|
+|    |     |                         |                    |                    |                   |                  |
+| T1 | Φ₁↑ |                         |                    |                    |                   |                  |
+| T1 | Φ₂↑ | IDAL:=<<RP>>            | IDAL:=<<RP>>       | IDAL:=<<RP>>       | IDAL:=<<RP>>      | IDAL:=<<RP>>     |
+|    |     | ADDR:=IDAL              | ADDR:=IDAL         | ADDR:=IDAL         | ADDR:=IDAL        | ADDR:=IDAL       |
+|    |     | DATA:=<<STATUS>>        | DATA:=<<STATUS>>   | DATA:=<<STATUS>>   | DATA:=<<STATUS>>  | DATA:=<<STATUS>> |
+|    |     | SYNC:=1                 | SYNC:=1            | SYNC:=1            | SYNC:=1           | SYNC:=1          |
+|    |     |                         |                    |                    |                   |                  |
+| T2 | Φ₂↑ | <<M1:may ALU commit>>   |                    |                    |                   |                  |
+|    |     | <<INC:RP:=IDAL+1>>      |                    | <<INC:RP:=IDAL+1>> |                   |                  |
+|    |     | <<DEC:RP:=IDAL-1>>      |                    | <<DEC:RP:=IDAL-1>> |                   |                  |
+|    |     | SYNC:=0                 | SYNC:=0            | SYNC:=0            | SYNC:=0           | SYNC:=0          |
+|    |     | DATA:=---               | DATA:=---          | DATA:=<<SSS>>      | DATA:=<<SSS>>     |                  |
+|    |     | DBIN:=1                 | DBIN:=1            |                    |                   |                  |
+| T2 | Φ₂↓ | if READY:→3Φ₁↑          | if READY:→3Φ₁↑     | <<no TW?>>         | <<no TW?>>        |                  |
+|    |     |                         |                    |                    |                   |                  |
+| TW | Φ₁↑ | WAIT:=1                 | WAIT:=1            | <<no TW?>>         | <<no TW?>>        | WAIT:=1          |
+| TW | Φ₂↑ | DBIN:=1                 | DBIN:=1            | <<no TW?>>         | <<no TW?>>        |                  |
+| TW | Φ₂↓ | if NOT READY:→WΦ₁↑      | if NOT READY:→WΦ₁↑ | <<no TW?>>         | <<no TW?>>        | Always:→WΦ₁↑     |
+|    |     | <<!M1:dispatch via IR>> |                    | <<no TW?>>         | <<no TW?>>        |                  |
+|    |     |                         |                    |                    |                   |                  |
+| T3 | Φ₁↑ | WAIT:=0                 | WAIT:=0            | <<no TW?>>         | <<no TW?>>        |                  |
+|    |     | <<END:RET_M1:=1>>       | <<END:RET_M1:=1>>  | <<END:RET_M1:=1>>  | <<END:RET_M1:=1>> |                  |
+|    |     |                         |                    | WR:=0              | WR:=0             |                  |
+| T3 | Φ₂↑ | <<DDD>>:=DATA           | <<DDD>>:=DATA      |                    |                   |                  |
+|    |     | DBIN:=0                 | DBIN:=0            |                    |                   |                  |
+| T3 | Φ₂↓ | <<M1:dispatch via IR>>  |                    | WR:=1              | WR:=1             |                  |
+
+
+
+
+
+
+
+TODO verify MEMW and IOW publish DATA at Phi2 rising.
+
+

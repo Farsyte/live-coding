@@ -4,122 +4,122 @@
      4
      5 0000 0E 01		MVI	C,1
      6
-     7 0002 C3 06 00		JMP	JMPP
-     8 0005		JMPF:	DB	08H		;fail
+     7 0002 C3 06 00		JMP	JMP_OK
+     8 0005		JMP_F	DB	08H		;fail
             08 
-     9 0006 00		JMPP:	NOP
+     9 0006 00		JMP_OK:	NOP
     10
     11 0007			DB	18H		;next subtest
             18 
     12
     13 0008 3E 01		MVI	A,1
     14 000A 91			SUB	C
-    15 000B C2 13 00		JNZ	JNZF1
+    15 000B C2 13 00		JNZ	JNZ_F1
     16 000E 91			SUB	C
-    17 000F C2 14 00		JNZ	JNZP
-    18 0012		JNZF2:	DB	08H
+    17 000F C2 14 00		JNZ	JNZ_OK
+    18 0012		JNZ_F2:	DB	08H
             08 
-    19 0013		JNZF1:	DB	08H
+    19 0013		JNZ_F1:	DB	08H
             08 
-    20 0014 00		JNZP:	NOP
+    20 0014 00		JNZ_OK:	NOP
     21
     22 0015			DB	18H		;next subtest
             18 
     23
     24 0016 3E 02		MVI	A,2
     25 0018 91			SUB	C
-    26 0019 CA 21 00		JZ	JZF1
+    26 0019 CA 21 00		JZ	JZ_F1
     27 001C 91			SUB	C
-    28 001D CA 22 00		JZ	JZP
-    29 0020		JZF2:	DB	08H
+    28 001D CA 22 00		JZ	JZ_OK
+    29 0020		JZ_F2:	DB	08H
             08 
-    30 0021		JZF1:	DB	08H
+    30 0021		JZ_F1:	DB	08H
             08 
-    31 0022 00		JZP:	NOP
+    31 0022 00		JZ_OK:	NOP
     32
     33 0023			DB	18H		;next subtest
             18 
     34
     35 0024 3E 00		MVI	A,0
     36 0026 91			SUB	C
-    37 0027 D2 2F 00		JNC	JNCF1
+    37 0027 D2 2F 00		JNC	JNC_F1
     38 002A 91			SUB	C
-    39 002B D2 30 00		JNC	JNCP
-    40 002E		JNCF2:	DB	08H
+    39 002B D2 30 00		JNC	JNC_OK
+    40 002E		JNC_F2:	DB	08H
             08 
-    41 002F		JNCF1:	DB	08H
+    41 002F		JNC_F1:	DB	08H
             08 
-    42 0030 00		JNCP:	NOP
+    42 0030 00		JNC_OK:	NOP
     43
     44 0031			DB	18H		;next subtest
             18 
     45
     46 0032 3E 01		MVI	A,1
     47 0034 91			SUB	C
-    48 0035 DA 3D 00		JC	JCF1
+    48 0035 DA 3D 00		JC	JC_F1
     49 0038 91			SUB	C
-    50 0039 DA 3E 00		JC	JCP
-    51 003C		JCF2:	DB	08H
+    50 0039 DA 3E 00		JC	JC_OK
+    51 003C		JC_F2:	DB	08H
             08 
-    52 003D		JCF1:	DB	08H
+    52 003D		JC_F1:	DB	08H
             08 
-    53 003E 00		JCP:	NOP
+    53 003E 00		JC_OK:	NOP
     54
     55 003F			DB	18H		;next subtest
             18 
     56
     57 0040 3E 06		MVI	A,6
     58 0042 91			SUB	C
-    59 0043 E2 4B 00		JPO	JPOF1
+    59 0043 E2 4B 00		JPO	JPO_F1
     60 0046 91			SUB	C
-    61 0047 E2 4C 00		JPO	JPOP
-    62 004A		JPOF2:	DB	08H
+    61 0047 E2 4C 00		JPO	JPO_OK
+    62 004A		JPO_F2:	DB	08H
             08 
-    63 004B		JPOF1:	DB	08H
+    63 004B		JPO_F1:	DB	08H
             08 
-    64 004C 00		JPOP:	NOP
+    64 004C 00		JPO_OK:	NOP
     65
     66 004D			DB	18H		;next subtest
             18 
     67
     68 004E 3E 08		MVI	A,8
     69 0050 91			SUB	C
-    70 0051 EA 59 00		JPE	JPEF1
+    70 0051 EA 59 00		JPE	JPE_F1
     71 0054 91			SUB	C
-    72 0055 EA 5A 00		JPE	JPEP
-    73 0058		JPEF2:	DB	08H
+    72 0055 EA 5A 00		JPE	JPE_OK
+    73 0058		JPE_F2:	DB	08H
             08 
-    74 0059		JPEF1:	DB	08H
+    74 0059		JPE_F1:	DB	08H
             08 
-    75 005A 00		JPEP:	NOP
+    75 005A 00		JPE_OK:	NOP
     76
     77 005B			DB	18H		;next subtest
             18 
     78
     79 005C 3E 81		MVI	A,81H
     80 005E 91			SUB	C
-    81 005F F2 67 00		JP	JPF1
+    81 005F F2 67 00		JP	JP_F1
     82 0062 91			SUB	C
-    83 0063 F2 68 00		JP	JPP
-    84 0066		JPF2:	DB	08H
+    83 0063 F2 68 00		JP	JP_OK
+    84 0066		JP_F2:	DB	08H
             08 
-    85 0067		JPF1:	DB	08H
+    85 0067		JP_F1:	DB	08H
             08 
-    86 0068 00		JPP:	NOP
+    86 0068 00		JP_OK:	NOP
     87
     88 0069			DB	18H		;next subtest
             18 
     89
     90 006A 3E 01		MVI	A,01H
     91 006C 91			SUB	C
-    92 006D FA 75 00		JM	JMF1
+    92 006D FA 75 00		JM	JM_F1
     93 0070 91			SUB	C
-    94 0071 FA 76 00		JM	JMP
-    95 0074		JMF2:	DB	08H
+    94 0071 FA 76 00		JM	JM_OK
+    95 0074		JM_F2:	DB	08H
             08 
-    96 0075		JMF1:	DB	08H
+    96 0075		JM_F1:	DB	08H
             08 
-    97 0076 00		JMP:	NOP
+    97 0076 00		JM_OK:	NOP
     98
     99 0077			DB	10H             ;test complete
             10 
@@ -135,32 +135,32 @@
 
 Names		Types	Values
 -----		-----	------
-JMPF		Label	00005h
-JMPP		Label	00006h
-JNZF2		Label	00012h
-JNZF1		Label	00013h
-JNZP		Label	00014h
-JZF2		Label	00020h
-JZF1		Label	00021h
-JZP		Label	00022h
-JNCF2		Label	0002Eh
-JNCF1		Label	0002Fh
-JNCP		Label	00030h
-JCF2		Label	0003Ch
-JCF1		Label	0003Dh
-JCP		Label	0003Eh
-JPOF2		Label	0004Ah
-JPOF1		Label	0004Bh
-JPOP		Label	0004Ch
-JPEF2		Label	00058h
-JPEF1		Label	00059h
-JPEP		Label	0005Ah
-JPF2		Label	00066h
-JPF1		Label	00067h
-JPP		Label	00068h
-JMF2		Label	00074h
-JMF1		Label	00075h
-JMP		Label	00076h
+JMP_F		Label	00005h
+JMP_OK		Label	00006h
+JNZ_F2		Label	00012h
+JNZ_F1		Label	00013h
+JNZ_OK		Label	00014h
+JZ_F2		Label	00020h
+JZ_F1		Label	00021h
+JZ_OK		Label	00022h
+JNC_F2		Label	0002Eh
+JNC_F1		Label	0002Fh
+JNC_OK		Label	00030h
+JC_F2		Label	0003Ch
+JC_F1		Label	0003Dh
+JC_OK		Label	0003Eh
+JPO_F2		Label	0004Ah
+JPO_F1		Label	0004Bh
+JPO_OK		Label	0004Ch
+JPE_F2		Label	00058h
+JPE_F1		Label	00059h
+JPE_OK		Label	0005Ah
+JP_F2		Label	00066h
+JP_F1		Label	00067h
+JP_OK		Label	00068h
+JM_F2		Label	00074h
+JM_F1		Label	00075h
+JM_OK		Label	00076h
 
 Statistics
 ----------
