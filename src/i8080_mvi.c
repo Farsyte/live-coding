@@ -112,7 +112,7 @@ static void i8080_state_mviM3T1M(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(H) << 8) | VAL(L));
+          ASET(IDAL, RP(H, L));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MWRITE);
           RAISE(SYNC);

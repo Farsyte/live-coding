@@ -25,7 +25,7 @@ static void i8080_state_sphl_t4(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (((Word) (VAL(H))) << 8) | VAL(L));
+          ASET(IDAL, RP(H, L));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_sphl_t5;
@@ -83,7 +83,7 @@ static void i8080_state_pchl_t4(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (((Word) (VAL(H))) << 8) | VAL(L));
+          ASET(IDAL, RP(H, L));
           break;
       case PHI2_FALL:
           cpu->state_next = i8080_state_pchl_t5;

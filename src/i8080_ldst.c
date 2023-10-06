@@ -128,7 +128,7 @@ void i8080_ldst_init(i8080 cpu)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            ASET(IDAL, (VAL(RH) << 8) | VAL(RL));                       \
+            ASET(IDAL, RP(RH,RL));                                      \
             ASET(ADDR, VAL(IDAL));                                      \
             DSET(DATA, STATUS_MREAD);                                   \
             RAISE(SYNC);                                                \
@@ -233,7 +233,7 @@ static void i8080_state_ldax_M2T3(i8080 cpu, int phase)
         case PHI1_RISE:                                                 \
             break;                                                      \
         case PHI2_RISE:                                                 \
-            ASET(IDAL, (VAL(RH) << 8) | VAL(RL));                       \
+            ASET(IDAL, RP(RH,RL));                                      \
             ASET(ADDR, VAL(IDAL));                                      \
             DSET(DATA, STATUS_MWRITE);                                  \
             RAISE(SYNC);                                                \
@@ -325,7 +325,7 @@ static void i8080_state_lda_M4T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MREAD);
           RAISE(SYNC);
@@ -432,7 +432,7 @@ static void i8080_state_sta_M4T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MWRITE);
           RAISE(SYNC);
@@ -514,7 +514,7 @@ static void i8080_state_lhld_M4T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MREAD);
           RAISE(SYNC);
@@ -590,7 +590,7 @@ static void i8080_state_lhld_M5T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MREAD);
           RAISE(SYNC);
@@ -698,7 +698,7 @@ static void i8080_state_shld_M4T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MWRITE);
           RAISE(SYNC);
@@ -748,7 +748,7 @@ static void i8080_state_shld_M5T1(i8080 cpu, int phase)
       case PHI1_RISE:
           break;
       case PHI2_RISE:
-          ASET(IDAL, (VAL(W) << 8) | VAL(Z));
+          ASET(IDAL, RP(W, Z));
           ASET(ADDR, VAL(IDAL));
           DSET(DATA, STATUS_MWRITE);
           RAISE(SYNC);

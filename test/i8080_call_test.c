@@ -1,6 +1,6 @@
 #include "i8080_test.h"
 
-// i8080_call: test the LOAD and STORE instructions.
+// i8080_call: test the CALL and Conditional Call instructions.
 //
 // set the ram to a known non-matching pattern
 // run the test program in "calltest.hex"

@@ -25,12 +25,13 @@ extern void         i8080_incdec_init(i8080 cpu);
 extern void         i8080_misc_init(i8080 cpu);
 extern void         i8080_lxi_init(i8080 cpu);
 extern void         i8080_jmp_init(i8080 cpu);
-extern void         i8080_call_init(i8080 cpu);
 extern void         i8080_io_init(i8080 cpu);
 extern void         i8080_movm_init(i8080 cpu);
 extern void         i8080_dad_init(i8080 cpu);
 extern void         i8080_stack_init(i8080 cpu);
 extern void         i8080_ldst_init(i8080 cpu);
+extern void         i8080_call_init(i8080 cpu);
+extern void         i8080_ret_init(i8080 cpu);
 
 // === === === === === === === === === === === === === === === ===
 // Macros to reduce small-scale boilerplate

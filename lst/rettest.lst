@@ -1,0 +1,264 @@
+     1     			TITLE	'test for CALL instructions'
+     2
+     3      00 00		ORG	00000H		;BASE OF MEMORY
+     4
+     5 0000 21 C0 00	        LXI     HL,LOG
+     6 0003 0E 01		MVI	C,1
+     7 0005 31 81 00	        LXI     SP, SBOT
+     8
+     9 0008 C9		        RET                     ;should "return" to CALL_P
+    10 0009		CALL_F: DB	08H		;fail
+            08 
+    11 000A 00		CALL_P:	NOP
+    12
+    13 000B 75		        MOV     M,L
+    14 000C 23		        INX     HL
+    15
+    16 000D			DB	18H		;next subtest
+            18 
+    17
+    18 000E 3E 01		MVI	A,1
+    19 0010 91			SUB	C
+    20 0011 C0			RNZ	CNZ_F1
+    21 0012 D1		        POP     DE              ;discard the "do not go here" address.
+    22 0013 91		CNZ_F3: SUB	C
+    23 0014 C0			RNZ	CNZ_OK
+    24 0015		CNZ_F2:	DB	08H
+            08 
+    25 0016		CNZ_F1:	DB	08H
+            08 
+    26 0017 00		CNZ_OK:	NOP
+    27
+    28 0018 75		        MOV     M,L
+    29 0019 23		        INX     HL
+    30
+    31 001A			DB	18H		;next subtest
+            18 
+    32
+    33 001B 3E 02		MVI	A,2
+    34 001D 91			SUB	C
+    35 001E C8			RZ
+    36 001F D1		        POP     DE              ;discard the "do not go here" address.
+    37 0020 91		CZ_F3:  SUB	C
+    38 0021 C8			RZ
+    39 0022		CZ_F2:	DB	08H
+            08 
+    40 0023		CZ_F1:	DB	08H
+            08 
+    41 0024 00		CZ_OK:	NOP
+    42
+    43 0025 75		        MOV     M,L
+    44 0026 23		        INX     HL
+    45
+    46 0027			DB	18H		;next subtest
+            18 
+    47
+    48 0028 3E 00		MVI	A,0
+    49 002A 91			SUB	C
+    50 002B D0			RNC
+    51 002C D1		        POP     DE              ;discard the "do not go here" address.
+    52 002D 91		CNC_F3: SUB	C
+    53 002E D0			RNC
+    54 002F		CNC_F2:	DB	08H
+            08 
+    55 0030		CNC_F1:	DB	08H
+            08 
+    56 0031 00		CNC_OK:	NOP
+    57
+    58 0032 75		        MOV     M,L
+    59 0033 23		        INX     HL
+    60
+    61 0034			DB	18H		;next subtest
+            18 
+    62
+    63 0035 3E 01		MVI	A,1
+    64 0037 91			SUB	C
+    65 0038 D8			RC
+    66 0039 D1		        POP     DE              ;discard the "do not go here" address.
+    67 003A 91		CC_F3:  SUB	C
+    68 003B D8			RC
+    69 003C		CC_F2:	DB	08H
+            08 
+    70 003D		CC_F1:	DB	08H
+            08 
+    71 003E 00		CC_OK:	NOP
+    72
+    73 003F 75		        MOV     M,L
+    74 0040 23		        INX     HL
+    75
+    76 0041			DB	18H		;next subtest
+            18 
+    77
+    78 0042 3E 06		MVI	A,6
+    79 0044 91			SUB	C
+    80 0045 E0			RPO
+    81 0046 D1		        POP     DE              ;discard the "do not go here" address.
+    82 0047 91		CPO_F3: SUB	C
+    83 0048 E0			RPO
+    84 0049		CPO_F2:	DB	08H
+            08 
+    85 004A		CPO_F1:	DB	08H
+            08 
+    86 004B 00		CPO_OK:	NOP
+    87
+    88 004C 75		        MOV     M,L
+    89 004D 23		        INX     HL
+    90
+    91 004E			DB	18H		;next subtest
+            18 
+    92
+    93 004F 3E 08		MVI	A,8
+    94 0051 91			SUB	C
+    95 0052 E8			RPE
+    96 0053 D1		        POP     DE              ;discard the "do not go here" address.
+    97 0054 91		CPE_F3: SUB	C
+    98 0055 E8			RPE
+    99 0056		CPE_F2:	DB	08H
+            08 
+   100 0057		CPE_F1:	DB	08H
+            08 
+   101 0058 00		CPE_OK:	NOP
+   102
+   103 0059 75		        MOV     M,L
+   104 005A 23		        INX     HL
+   105
+   106 005B			DB	18H		;next subtest
+            18 
+   107
+   108 005C 3E 81		MVI	A,81H
+   109 005E 91			SUB	C
+   110 005F F0			RP
+   111 0060 D1		        POP     DE              ;discard the "do not go here" address.
+   112 0061 91		CP_F3:  SUB	C
+   113 0062 F0			RP
+   114 0063		CP_F2:	DB	08H
+            08 
+   115 0064		CP_F1:	DB	08H
+            08 
+   116 0065 00		CP_OK:	NOP
+   117
+   118 0066 75		        MOV     M,L
+   119 0067 23		        INX     HL
+   120
+   121 0068			DB	18H		;next subtest
+            18 
+   122
+   123 0069 3E 01		MVI	A,01H
+   124 006B 91			SUB	C
+   125 006C F8			RM
+   126 006D D1		        POP     DE              ;discard the "do not go here" address.
+   127 006E 91		CM_F3:  SUB	C
+   128 006F F8			RM
+   129 0070		CM_F2:	DB	08H
+            08 
+   130 0071		CM_F1:	DB	08H
+            08 
+   131 0072 00		CM_OK:	NOP
+   132
+   133 0073 75		        MOV     M,L
+   134 0074 23		        INX     HL
+   135
+   136 0075			DB	10H             ;test complete
+            10 
+   137 0076 00			NOP
+   138 0077 00			NOP
+   139
+   140      00 80	        ORG     0080H
+   141 0080		        DB      STOP-SBOT
+            22 
+   142 			SBOT:
+   143 0081		        DW      CALL_P
+            0A00 
+   144 0083		        DW      CNZ_F1
+            1600 
+   145 0085		        DW      CNZ_OK
+            1700 
+   146 0087		        DW	CZ_F1
+            2300 
+   147 0089		        DW	CZ_OK
+            2400 
+   148 008B		        DW	CNC_F1
+            3000 
+   149 008D		        DW	CNC_OK
+            3100 
+   150 008F		        DW	CC_F1
+            3D00 
+   151 0091		        DW	CC_OK
+            3E00 
+   152 0093		        DW	CPO_F1
+            4A00 
+   153 0095		        DW	CPO_OK
+            4B00 
+   154 0097		        DW	CPE_F1
+            5700 
+   155 0099		        DW	CPE_OK
+            5800 
+   156 009B		        DW	CP_F1
+            6400 
+   157 009D		        DW	CP_OK
+            6500 
+   158 009F		        DW	CM_F1
+            7100 
+   159 00A1		        DW	CM_OK
+            7200 
+   160 			STOP:
+   161
+   162      00 C0	        ORG     00C0H
+   163 			LOG:
+   164 00C0			DS      32
+   165
+   166     		        END
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+CALL_F		Label	00009h
+CALL_P		Label	0000Ah
+CNZ_F3		Label	00013h
+CNZ_F2		Label	00015h
+CNZ_F1		Label	00016h
+CNZ_OK		Label	00017h
+CZ_F3		Label	00020h
+CZ_F2		Label	00022h
+CZ_F1		Label	00023h
+CZ_OK		Label	00024h
+CNC_F3		Label	0002Dh
+CNC_F2		Label	0002Fh
+CNC_F1		Label	00030h
+CNC_OK		Label	00031h
+CC_F3		Label	0003Ah
+CC_F2		Label	0003Ch
+CC_F1		Label	0003Dh
+CC_OK		Label	0003Eh
+CPO_F3		Label	00047h
+CPO_F2		Label	00049h
+CPO_F1		Label	0004Ah
+CPO_OK		Label	0004Bh
+CPE_F3		Label	00054h
+CPE_F2		Label	00056h
+CPE_F1		Label	00057h
+CPE_OK		Label	00058h
+CP_F3		Label	00061h
+CP_F2		Label	00063h
+CP_F1		Label	00064h
+CP_OK		Label	00065h
+CM_F3		Label	0006Eh
+CM_F2		Label	00070h
+CM_F1		Label	00071h
+CM_OK		Label	00072h
+SBOT		Label	00081h
+STOP		Label	000A3h
+LOG		Label	000C0h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 0
+"SET"	= 0
+Labels	= 37
+
+

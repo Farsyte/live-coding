@@ -259,20 +259,27 @@ plot.
 
 [[file:img/i8080_bist_call_9.png]]
 
-** Not Yet Implemented
-
 *** RET, Rc
 
-C9 ret
+[[file:img/i8080_bist_ret_1.png]]
 
-C0 rnz
-C8 rz
-D0 rnc
-D8 rc
-E0 rpo
-E8 rpe
-F0 rp
-F8 rm
+[[file:img/i8080_bist_ret_2.png]]
+
+[[file:img/i8080_bist_ret_3.png]]
+
+[[file:img/i8080_bist_ret_4.png]]
+
+[[file:img/i8080_bist_ret_5.png]]
+
+[[file:img/i8080_bist_ret_6.png]]
+
+[[file:img/i8080_bist_ret_7.png]]
+
+[[file:img/i8080_bist_ret_8.png]]
+
+[[file:img/i8080_bist_ret_9.png]]
+
+** Not Yet Implemented
 
 *** RST n
 
