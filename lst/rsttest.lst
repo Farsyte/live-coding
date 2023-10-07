@@ -1,0 +1,90 @@
+     1     			TITLE	'test for RST instructions'
+     2
+     3 			        ;; RST does a call to 00nnn000
+     4 			        ;; at that addresss, we call CHECK in the rom
+     5 			        ;; the rom CHECK subroutine pulls its return address
+     6 			        ;; which is in the RST service area, and logs the low byte;
+     7 			        ;; it then returns to just after the RST instruction.
+     8
+     9      00 80	LOG     EQU     00080H
+    10      00 80	STOP    EQU     00080H
+    11
+    12      F8 00	        ORG     0F800H
+    13 F800 C3 03 F8	        JMP     ROM
+    14 			ROM:
+    15 F803 3E CD	        MVI     A,0CDH
+    16 F805 21 4F F8	        LXI     HL,CHECK
+    17
+    18 F808 32 00 00	        STA     0000H
+    19 F80B 22 01 00	        SHLD    0001H
+    20 F80E 32 08 00	        STA     0008H
+    21 F811 22 09 00	        SHLD    0009H
+    22 F814 32 10 00	        STA     0010H
+    23 F817 22 11 00	        SHLD    0011H
+    24 F81A 32 18 00	        STA     0018H
+    25 F81D 22 19 00	        SHLD    0019H
+    26 F820 32 20 00	        STA     0020H
+    27 F823 22 21 00	        SHLD    0021H
+    28 F826 32 28 00	        STA     0028H
+    29 F829 22 29 00	        SHLD    0029H
+    30 F82C 32 30 00	        STA     0030H
+    31 F82F 22 31 00	        SHLD    0031H
+    32 F832 32 38 00	        STA     0038H
+    33 F835 22 39 00	        SHLD    0039H
+    34
+    35 F838 31 80 00	        LXI     SP,STOP
+    36 F83B 21 80 00	        LXI     HL,LOG
+    37
+    38 F83E		        DB      18H             ;next subtest
+            18 
+    39 F83F C7		        RST     0
+    40 F840		        DB      18H             ;next subtest
+            18 
+    41 F841 CF		        RST     1
+    42 F842		        DB      18H             ;next subtest
+            18 
+    43 F843 D7		        RST     2
+    44 F844		        DB      18H             ;next subtest
+            18 
+    45 F845 DF		        RST     3
+    46 F846		        DB      18H             ;next subtest
+            18 
+    47 F847 E7		        RST     4
+    48 F848		        DB      18H             ;next subtest
+            18 
+    49 F849 EF		        RST     5
+    50 F84A		        DB      18H             ;next subtest
+            18 
+    51 F84B F7		        RST     6
+    52 F84C		        DB      18H             ;next subtest
+            18 
+    53 F84D FF		        RST     7
+    54 F84E		        DB      10H             ;test complete
+            10 
+    55
+    56 			CHECK:
+    57 F84F D1		        POP     DE
+    58 F850 73		        MOV     M,E
+    59 F851 23		        INX     HL
+    60 F852 C9		        RET
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+LOG		EQU	00080h
+STOP		EQU	00080h
+ROM		Label	0F803h
+CHECK		Label	0F84Fh
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 2
+"SET"	= 0
+Labels	= 2
+
+
