@@ -54,9 +54,13 @@ static void i8080_reset_rise(i8080 cpu)
     DTRI(ALU);
     DTRI(FLAGS);
 
-    LOWER(SYNC);
-    LOWER(DBIN);
-    LOWER(WAIT);
+    // Update state of the edges, but
+    // DO NOT trigger callbacks for
+    // the falling edges!
+
+    VAL(SYNC) = 0;
+    VAL(DBIN) = 0;
+    VAL(WAIT) = 0;
 
 }
 

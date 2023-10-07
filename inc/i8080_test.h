@@ -42,10 +42,16 @@ typedef struct sCpuTestSys {
     Testdev             dev;
 
     // each Rom8316 represents 2 KiB of memory.
+    // rom[0] goes in the top 2 KiB (at F800H)
+    // rom[1] goes in the next 2 KiB (at F000H)
+    // and so on down.
 #define ROM_CHIPS	8
     Rom8316             rom[ROM_CHIPS];
 
     // each Ram8107x8x4 represents 16 KiB of memory.
+    // ram[0] goes in the bottom 16 KiB of memorty (at 0000H)
+    // ram[1] goes in the next 16 KiB of memorty (at 4000H)
+    // and so on, if we had more than two.
 #define RAM_BOARDS	2
     Ram8107x8x4         ram[RAM_BOARDS];
 

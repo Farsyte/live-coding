@@ -70,6 +70,7 @@ void i8080_asm_post(CpuTestSys ts, Cstr hexfile)
     i8080_asm_test_done = 0;
 
     rom8316_load(rom[0], 0x0000, hexfile);
+    rom8316_load(rom[0], 0xF800, hexfile);
 
     while (i8080_asm_test_done == 0) {
         clock_run_one();
@@ -140,6 +141,7 @@ void i8080_asm_bist(CpuTestSys ts, Cstr hexfile, Cstr plotname)
     i8080_asm_test_page = 0;
 
     rom8316_load(rom[0], 0x0000, hexfile);
+    rom8316_load(rom[0], 0xF800, hexfile);
 
     t0 = TAU;
 

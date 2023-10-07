@@ -5,6 +5,8 @@ static void         i8080_test_init();
 static void         i8080_trace_init();
 static void         i8080_trace_fini();
 
+static void         enable_shadow(CpuTestSys);
+
 static CpuTestSys   ts;
 
 static const p8080  cpu = ts->cpu;
@@ -384,10 +386,10 @@ static void i8080_test_init()
         // each rom chip is 2 KiB
         // each mem page is 1 KiB
 
-        int                 base = DEC_MEM_PAGES - (ROM_CHIPS - chip) * 2;
+        int                 below = DEC_MEM_PAGES - chip * 2;
         // STUB("for chip %d, base is %d, will write %d and %d", chip, base, base + 1, base + 2);
-        dec->mem_rd[base + 1] = rom[chip]->RD_;
-        dec->mem_rd[base + 0] = rom[chip]->RD_;
+        dec->mem_rd[below - 1] = rom[chip]->RD_;
+        dec->mem_rd[below - 2] = rom[chip]->RD_;
     }
 
     for (int board = 0; board < RAM_BOARDS; ++board) {
@@ -403,8 +405,6 @@ static void i8080_test_init()
             dec->mem_wr[base + bp] = ram[board]->WR_;
         }
     }
-
-    dec->shadow = rom[0]->RD_;
 
     dev->DATA = cpu->DATA;
     dec->dev_wr[TDWP] = dev->WR_;
@@ -428,6 +428,9 @@ static void i8080_test_init()
     for (int board = 0; board < RAM_BOARDS; ++board) {
         ram8107x8x4_linked(ram[board]);
     }
+
+    EDGE_ON_RISE(RESET, enable_shadow, ts);
+    enable_shadow(ts);
 
     (void)WAIT;         // output: "we are in a wait state."
     (void)HOLD;         // input: "please hold for DMA"
@@ -570,4 +573,9 @@ void i8080_one_instruction(i8080 cpu, unsigned plus_TAU)
     while (0 == RETM1_INT->value)
         clock_run_one();
     clock_run_until(TAU + 9 + plus_TAU);
+}
+
+static void enable_shadow(CpuTestSys ts)
+{
+    ts->dec->shadow = ts->rom[0]->RD_;
 }

@@ -75,8 +75,6 @@ void rom8316_load(Rom8316 rom, Word base, Cstr file)
 
     rom->rombase = base;
 
-    memset(rom->cells, 0xFF, sizeof(rom->cells));
-
     int                 rv = hex_parse(file, rom_load_byte, rom);
     if (rv < 0) {
         if (rv == -1) { // no bist coverage

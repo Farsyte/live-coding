@@ -128,15 +128,21 @@ void decoder_linked(Decoder dec)
 
 static void dec_memr_rise(Decoder dec)
 {
-    pEdge               e = dec->shadow;
-    if (!e) {
-        Word                addr = dec->ADDR->value;
-        Word                page = MEM_PAGE(addr);
-        e = dec->mem_rd[page];
+    Word                addr = dec->ADDR->value;
+    Word                page = MEM_PAGE(addr);
+    pEdge               e = dec->mem_rd[page];
+    pEdge               s = dec->shadow;
+
+    if (NULL != s) {
+        if (e == s) {
+            dec->shadow = NULL;
+        } else {
+            e = s;
+        }
     }
-    if (!e)
-        return;
-    edge_hi(e);
+
+    if (NULL != e)
+        edge_hi(e);
 }
 
 static void dec_memr_fall(Decoder dec)

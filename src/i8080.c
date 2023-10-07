@@ -1,5 +1,6 @@
 #include "i8080.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
+#include <stdlib.h>
 #include "clock.h"
 #include "decoder.h"
 #include "i8080_impl.h"
@@ -255,7 +256,7 @@ static void i8080_phi2_fall(i8080 cpu)
 static void i8080_state_unimp(i8080 cpu, int phase)
 {
     STUB("cpu '%s' in phase %d", cpu->name, phase);
-    STUB("  PC=0x%04X IR=0x%02X", VAL(PC), VAL(IR));
-    // abort();
+    STUB("  PC=0x%04X IR=0x%02X", VAL(PC) - 1, VAL(IR));
     RAISE(RETM1_INT);
+    abort();
 }

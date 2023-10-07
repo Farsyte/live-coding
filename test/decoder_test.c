@@ -265,6 +265,8 @@ void decoder_bench()
 
 static void decoder_test_init()
 {
+    ADDR_INIT(ADDR);
+
     EDGE_INIT(MEMR_, 0);
     EDGE_INIT(MEMW_, 0);
     EDGE_INIT(IOR_, 0);
