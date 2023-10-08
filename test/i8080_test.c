@@ -167,6 +167,9 @@ void i8080_post()
     i8080_ret_post(ts);
 
     i8080_reset_for_testing(ts);
+    i8080_rst_post(ts);
+
+    i8080_reset_for_testing(ts);
     i8080_eidihlt_post(ts);     // leaves us in HLT state.
 }
 
@@ -272,6 +275,9 @@ void i8080_bist()
 
     i8080_reset_for_testing(ts);
     i8080_ret_bist(ts);
+
+    i8080_reset_for_testing(ts);
+    i8080_rst_bist(ts);
 
     i8080_trace_fini();
 

@@ -81,6 +81,7 @@ extern void         i8080_stack_post(CpuTestSys ts);
 extern void         i8080_ldst_post(CpuTestSys ts);
 extern void         i8080_call_post(CpuTestSys ts);
 extern void         i8080_ret_post(CpuTestSys ts);
+extern void         i8080_rst_post(CpuTestSys ts);
 
 extern void         i8080_asm_post(CpuTestSys ts, Cstr hexfile);
 
@@ -98,6 +99,7 @@ extern void         i8080_stack_bist(CpuTestSys ts);
 extern void         i8080_ldst_bist(CpuTestSys ts);
 extern void         i8080_call_bist(CpuTestSys ts);
 extern void         i8080_ret_bist(CpuTestSys ts);
+extern void         i8080_rst_bist(CpuTestSys ts);
 
 extern void         i8080_asm_bist(CpuTestSys ts, Cstr hexfile, Cstr plotname);
 

@@ -15,8 +15,10 @@ DEFN_C_M1T4(PE);
 DEFN_C_M1T4(P);
 DEFN_C_M1T4(M);
 
-static f8080State   i8080_state_CALL_M1T4;
+static f8080State   i8080_state_RST_M1T4;
+static f8080State   i8080_state_RST_M1T5;
 
+static f8080State   i8080_state_CALL_M1T4;
 static f8080State   i8080_state_CALL_M1T5;
 
 static f8080State   i8080_state_CALL_M2T3;
@@ -44,6 +46,15 @@ static f8080State   i8080_state_Cnot_M3T3;
 
 void i8080_call_init(i8080 cpu)
 {
+
+    cpu->m1t4[OP_RST__0] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__1] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__2] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__3] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__4] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__5] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__6] = i8080_state_RST_M1T4;
+    cpu->m1t4[OP_RST__7] = i8080_state_RST_M1T4;
 
     cpu->m1t4[OP_CALL] = i8080_state_CALL_M1T4;
     cpu->m2t3[OP_CALL] = i8080_state_CALL_M2T3;
@@ -87,6 +98,48 @@ void i8080_call_init(i8080 cpu)
     // P        S == 0
     // M        S == 1
 
+// i8080_state_RST_M1T4: finish decode for RST
+// starts predecrement of SP
+
+static void i8080_state_RST_M1T4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, VAL(SP));
+
+          // The real 8080 hardware clears W in M1T3.
+          DSET(W, 0);
+          // The real 8080 hardware sets Z in the final T-state
+          // of the RST instruction.
+          DSET(Z, VAL(IR) & 0x38);
+
+          cpu->state_next = i8080_state_RST_M1T5;
+
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_RST_M1T5: finish decode for RST
+// finishes predecrement of SP
+
+static void i8080_state_RST_M1T5(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(SP, DEC(IDAL));
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_state_CALL_M4T1;
+          break;
+    }
+}
+
 // i8080_state_CALL_M1T4: finish decode for CALL
 // starts predecrement of SP
 
@@ -100,6 +153,23 @@ static void i8080_state_CALL_M1T4(i8080 cpu, int phase)
           cpu->state_next = i8080_state_CALL_M1T5;
           break;
       case PHI2_FALL:
+          break;
+    }
+}
+
+// i8080_state_CALL_M1T5: finish decode for CALL
+// finishes predecrement of SP
+
+static void i8080_state_CALL_M1T5(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(SP, DEC(IDAL));
+          break;
+      case PHI2_FALL:
+          cpu->state_next = cpu->state_2bops_t1;
           break;
     }
 }
@@ -145,23 +215,6 @@ IMPL_C_M1T4(PE, FLAGS_P, FLAGS_P);
 
 IMPL_C_M1T4(P, FLAGS_S, 0);
 IMPL_C_M1T4(M, FLAGS_S, FLAGS_S);
-
-// i8080_state_CALL_M1T4: finish decode for CALL
-// finishes predecrement of SP
-
-static void i8080_state_CALL_M1T5(i8080 cpu, int phase)
-{
-    switch (phase) {
-      case PHI1_RISE:
-          break;
-      case PHI2_RISE:
-          ASET(SP, DEC(IDAL));
-          break;
-      case PHI2_FALL:
-          cpu->state_next = cpu->state_2bops_t1;
-          break;
-    }
-}
 
 // i8080_state_CALL_M2T3: receive low byte of call target
 

@@ -101,6 +101,32 @@ static p8080State   i8080_pop_m1t4[4] = {
     NAME_POP_M1T4(PS, W),
 };
 
+static f8080State   i8080_xthl_M1T4;            // finish decode of XTHL (direct to xthl_M2T1)
+
+// read byte at stack+0 into Z, will go into L later.
+static f8080State   i8080_xthl_M2T1;            // SP->IDAL->ADDR, STATUS_SREAD
+static f8080State   i8080_xthl_M2T2;            // IDAL+1->SP
+static f8080State   i8080_xthl_M2TW;            // ... wait state
+static f8080State   i8080_xthl_M2T3;            // DATA->Z
+
+// read byte at stack+1 into W, will go into H later.
+static f8080State   i8080_xthl_M3T1;            // SP->IDAL->ADDR, STATUS_SREAD
+static f8080State   i8080_xthl_M3T2;            // do not IDAL+1->SP this time
+static f8080State   i8080_xthl_M3TW;            // ... wait state
+static f8080State   i8080_xthl_M3T3;            // DATA->W
+
+// write H to stack+1
+static f8080State   i8080_xthl_M4T1;            // SP->IDAL->ADDR, STATUS_SWRITE
+static f8080State   i8080_xthl_M4T2;            // H->DATA, IDAL-1->SP
+static f8080State   i8080_xthl_M4T3;            // WR low then high
+
+// write L to stack+0
+static f8080State   i8080_xthl_M5T1;            // SP->IDAL->ADDR, STATUS_SWRITE
+static f8080State   i8080_xthl_M5T2;            // L->DATA
+static f8080State   i8080_xthl_M5T3;            // WR low then high
+static f8080State   i8080_xthl_M5T4;            // WZ -> IDAL
+static f8080State   i8080_xthl_M5T5;            // IDAL -> HL
+
 // i8080_stack_init: link t-state handlers for stack ops into cpu state
 
 void i8080_stack_init(i8080 cpu)
@@ -113,6 +139,7 @@ void i8080_stack_init(i8080 cpu)
         Byte                op = 0xC1 | (rp << 4);
         cpu->m1t4[op] = i8080_pop_m1t4[rp];
     }
+    cpu->m1t4[OP_XTHL] = i8080_xthl_M1T4;
 }
 
 #define DECL_PUSH_M1T4(RH,RL)	NAME_PUSH_M1T4(RH,RL) (i8080 cpu, int phase)
@@ -611,6 +638,318 @@ static void i8080_pop_M3T3PSW(i8080 cpu, int phase)
           DSET(A, VAL(DATA));
           LOWER(DBIN);
           ATRI(ADDR);
+          break;
+      case PHI2_FALL:
+          break;
+    }
+}
+
+// === === === === === === === === === === === === === === === ===
+// XTHL: Exchange HL with word on top of stack
+// === === === === === === === === === === === === === === === ===
+
+// finish decode of XTHL (direct to xthl_M2T1)
+static void i8080_xthl_M1T4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M2T1;
+          break;
+    }
+}
+
+// read byte at stack+0 into Z, will go into L later.
+// SP->IDAL->ADDR, STATUS_SREAD
+static void i8080_xthl_M2T1(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, VAL(SP));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_SREAD);
+          RAISE(SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M2T2;
+          break;
+    }
+}
+
+// IDAL+1->SP
+static void i8080_xthl_M2T2(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
+          ASET(SP, INC(IDAL));
+          break;
+      case PHI2_FALL:
+          if (VAL(READY))
+              cpu->state_next = i8080_xthl_M2T3;
+          else
+              cpu->state_next = i8080_xthl_M2TW;
+          break;
+    }
+}
+
+// ... wait state
+static void i8080_xthl_M2TW(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          RAISE(WAIT);
+          break;
+      case PHI2_RISE:
+          // do not issue a falling edge,
+          // but do re-issue the rising edge.
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
+          break;
+      case PHI2_FALL:
+          if (VAL(READY))
+              cpu->state_next = i8080_xthl_M2T3;
+          else
+              cpu->state_next = i8080_xthl_M2TW;
+          break;
+    }
+}
+
+static void i8080_xthl_M2T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          LOWER(WAIT);
+          break;
+      case PHI2_RISE:
+          DSET(Z, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M3T1;
+          break;
+    }
+}
+
+// read byte at stack+1 into W, will go into H later.
+// SP->IDAL->ADDR, STATUS_SREAD
+static void i8080_xthl_M3T1(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, VAL(SP));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_SREAD);
+          RAISE(SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M3T2;
+          break;
+    }
+}
+
+// IDAL+1->SP
+static void i8080_xthl_M3T2(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          LOWER(SYNC);
+          DTRI(DATA);
+          RAISE(DBIN);
+          // NOT THIS TIME: ASET(SP, INC(IDAL));                                        
+          break;
+      case PHI2_FALL:
+          if (VAL(READY))
+              cpu->state_next = i8080_xthl_M3T3;
+          else
+              cpu->state_next = i8080_xthl_M3TW;
+          break;
+    }
+}
+
+// ... wait state
+static void i8080_xthl_M3TW(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          RAISE(WAIT);
+          break;
+      case PHI2_RISE:
+          // do not issue a falling edge,
+          // but do re-issue the rising edge.
+          VAL(DBIN) = 0;
+          RAISE(DBIN);
+          break;
+      case PHI2_FALL:
+          if (VAL(READY))
+              cpu->state_next = i8080_xthl_M3T3;
+          else
+              cpu->state_next = i8080_xthl_M3TW;
+          break;
+    }
+}
+
+static void i8080_xthl_M3T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          LOWER(WAIT);
+          break;
+      case PHI2_RISE:
+          DSET(W, VAL(DATA));
+          LOWER(DBIN);
+          ATRI(ADDR);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M4T1;
+          break;
+    }
+}
+
+// write H to stack+1
+// SP->IDAL->ADDR, STATUS_SWRITE
+static void i8080_xthl_M4T1(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, VAL(SP));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_SWRITE);
+          RAISE(SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M4T2;
+          break;
+    }
+}
+
+// H->DATA, IDAL-1->SP
+static void i8080_xthl_M4T2(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(SP, DEC(IDAL));
+          LOWER(SYNC);
+          DSET(DATA, VAL(H));
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M4T3;
+          break;
+    }
+}
+
+// WR low then high
+static void i8080_xthl_M4T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          LOWER(WR_);
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          RAISE(WR_);
+          ATRI(ADDR);
+          cpu->state_next = i8080_xthl_M5T1;
+          break;
+    }
+}
+
+// write L to stack+0
+// SP->IDAL->ADDR, STATUS_SWRITE
+static void i8080_xthl_M5T1(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, VAL(SP));
+          ASET(ADDR, VAL(IDAL));
+          DSET(DATA, STATUS_SWRITE);
+          RAISE(SYNC);
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M5T2;
+          break;
+    }
+}
+
+// H->DATA, IDAL-1->SP
+static void i8080_xthl_M5T2(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          LOWER(SYNC);
+          DSET(DATA, VAL(L));
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M5T3;
+          break;
+    }
+}
+
+// WR low then high
+static void i8080_xthl_M5T3(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          LOWER(WR_);
+          break;
+      case PHI2_RISE:
+          break;
+      case PHI2_FALL:
+          RAISE(WR_);
+          ATRI(ADDR);
+          cpu->state_next = i8080_xthl_M5T4;
+          break;
+    }
+}
+
+// WZ -> IDAL
+static void i8080_xthl_M5T4(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          break;
+      case PHI2_RISE:
+          ASET(IDAL, RP(W, Z));
+          break;
+      case PHI2_FALL:
+          cpu->state_next = i8080_xthl_M5T5;
+          break;
+    }
+}
+
+// IDAL -> HL
+static void i8080_xthl_M5T5(i8080 cpu, int phase)
+{
+    switch (phase) {
+      case PHI1_RISE:
+          RAISE(RETM1_INT);
+          break;
+      case PHI2_RISE:
+          DSET(H, VAL(IDAL) >> 8);
+          DSET(L, VAL(IDAL));
           break;
       case PHI2_FALL:
           break;

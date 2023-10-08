@@ -22,10 +22,23 @@ START:
         PUSH    DE
         PUSH    BC
         NOP
+        DB	18H             ;next subtest
+
+        LXI     DE,1234H
+        LXI     HL,5678H
+        PUSH    DE
+        DB	18H             ;next subtest
+        XTHL
+        PUSH    HL
         DB	10H             ;test complete
         NOP
         NOP
         HLT
+
+        ORG     007CH
+
+        DB      00H, 00H,
+        DB      34H, 12H,
 
         ORG     0080H
 DATA:

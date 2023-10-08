@@ -54,8 +54,16 @@ static void i8080_stack_test_fini(CpuTestSys ts)
     Byte               *ram = ts->ram[0]->cells;
 
     for (int i = 0; i < RAM_TEST_AREA_SIZE; ++i) {
-        if (i < 128) {
+        if (i < 124) {
             ASSERT_EQ_integer(RAM_START_VAL, ram[i]);
+        } else if (i == 124) {
+            ASSERT_EQ_integer(0x34, ram[i]);
+        } else if (i == 125) {
+            ASSERT_EQ_integer(0x12, ram[i]);
+        } else if (i == 126) {
+            ASSERT_EQ_integer(0x78, ram[i]);
+        } else if (i == 127) {
+            ASSERT_EQ_integer(0x56, ram[i]);
         } else if (i == 128) {
             ASSERT_EQ_integer(rom[i], ram[i]);
         } else if (i == 129) {

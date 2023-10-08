@@ -12,25 +12,40 @@ STOP    EQU     00080H
         ORG     0F800H
         JMP     ROM
 ROM:
-        MVI     A,0CDH
-        LXI     HL,CHECK
 
+        MVI     A,0             ;leading NOP to allow debug
         STA     0000H
-        SHLD    0001H
         STA     0008H
-        SHLD    0009H
         STA     0010H
-        SHLD    0011H
         STA     0018H
-        SHLD    0019H
         STA     0020H
-        SHLD    0021H
         STA     0028H
-        SHLD    0029H
         STA     0030H
-        SHLD    0031H
         STA     0038H
-        SHLD    0039H
+
+        MVI     A,0CDH
+        STA     0001H
+        STA     0009H
+        STA     0011H
+        STA     0019H
+        STA     0021H
+        STA     0029H
+        STA     0031H
+        STA     0039H
+
+        LXI     HL,CHECK
+        SHLD    0002H
+        SHLD    000AH
+        SHLD    0012H
+        SHLD    001AH
+        SHLD    0022H
+        SHLD    002AH
+        SHLD    0032H
+        SHLD    003AH
+
+        ;; write RST 1 to terminate test early.
+        ;;         MVI     A,010H
+        ;;         STA     0008H
 
         LXI     SP,STOP
         LXI     HL,LOG

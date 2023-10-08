@@ -12,61 +12,76 @@
     12      F8 00	        ORG     0F800H
     13 F800 C3 03 F8	        JMP     ROM
     14 			ROM:
-    15 F803 3E CD	        MVI     A,0CDH
-    16 F805 21 4F F8	        LXI     HL,CHECK
-    17
-    18 F808 32 00 00	        STA     0000H
-    19 F80B 22 01 00	        SHLD    0001H
-    20 F80E 32 08 00	        STA     0008H
-    21 F811 22 09 00	        SHLD    0009H
-    22 F814 32 10 00	        STA     0010H
-    23 F817 22 11 00	        SHLD    0011H
-    24 F81A 32 18 00	        STA     0018H
-    25 F81D 22 19 00	        SHLD    0019H
-    26 F820 32 20 00	        STA     0020H
-    27 F823 22 21 00	        SHLD    0021H
-    28 F826 32 28 00	        STA     0028H
-    29 F829 22 29 00	        SHLD    0029H
-    30 F82C 32 30 00	        STA     0030H
-    31 F82F 22 31 00	        SHLD    0031H
-    32 F832 32 38 00	        STA     0038H
-    33 F835 22 39 00	        SHLD    0039H
-    34
-    35 F838 31 80 00	        LXI     SP,STOP
-    36 F83B 21 80 00	        LXI     HL,LOG
-    37
-    38 F83E		        DB      18H             ;next subtest
+    15
+    16 F803 3E 00	        MVI     A,0             ;leading NOP to allow debug
+    17 F805 32 00 00	        STA     0000H
+    18 F808 32 08 00	        STA     0008H
+    19 F80B 32 10 00	        STA     0010H
+    20 F80E 32 18 00	        STA     0018H
+    21 F811 32 20 00	        STA     0020H
+    22 F814 32 28 00	        STA     0028H
+    23 F817 32 30 00	        STA     0030H
+    24 F81A 32 38 00	        STA     0038H
+    25
+    26 F81D 3E CD	        MVI     A,0CDH
+    27 F81F 32 01 00	        STA     0001H
+    28 F822 32 09 00	        STA     0009H
+    29 F825 32 11 00	        STA     0011H
+    30 F828 32 19 00	        STA     0019H
+    31 F82B 32 21 00	        STA     0021H
+    32 F82E 32 29 00	        STA     0029H
+    33 F831 32 31 00	        STA     0031H
+    34 F834 32 39 00	        STA     0039H
+    35
+    36 F837 21 69 F8	        LXI     HL,CHECK
+    37 F83A 22 02 00	        SHLD    0002H
+    38 F83D 22 0A 00	        SHLD    000AH
+    39 F840 22 12 00	        SHLD    0012H
+    40 F843 22 1A 00	        SHLD    001AH
+    41 F846 22 22 00	        SHLD    0022H
+    42 F849 22 2A 00	        SHLD    002AH
+    43 F84C 22 32 00	        SHLD    0032H
+    44 F84F 22 3A 00	        SHLD    003AH
+    45
+    46 			        ;; write RST 1 to terminate test early.
+    47 			        ;;         MVI     A,010H
+    48 			        ;;         STA     0008H
+    49
+    50 F852 31 80 00	        LXI     SP,STOP
+    51 F855 21 80 00	        LXI     HL,LOG
+    52
+    53 F858		        DB      18H             ;next subtest
             18 
-    39 F83F C7		        RST     0
-    40 F840		        DB      18H             ;next subtest
+    54 F859 C7		        RST     0
+    55 F85A		        DB      18H             ;next subtest
             18 
-    41 F841 CF		        RST     1
-    42 F842		        DB      18H             ;next subtest
+    56 F85B CF		        RST     1
+    57 F85C		        DB      18H             ;next subtest
             18 
-    43 F843 D7		        RST     2
-    44 F844		        DB      18H             ;next subtest
+    58 F85D D7		        RST     2
+    59 F85E		        DB      18H             ;next subtest
             18 
-    45 F845 DF		        RST     3
-    46 F846		        DB      18H             ;next subtest
+    60 F85F DF		        RST     3
+    61 F860		        DB      18H             ;next subtest
             18 
-    47 F847 E7		        RST     4
-    48 F848		        DB      18H             ;next subtest
+    62 F861 E7		        RST     4
+    63 F862		        DB      18H             ;next subtest
             18 
-    49 F849 EF		        RST     5
-    50 F84A		        DB      18H             ;next subtest
+    64 F863 EF		        RST     5
+    65 F864		        DB      18H             ;next subtest
             18 
-    51 F84B F7		        RST     6
-    52 F84C		        DB      18H             ;next subtest
+    66 F865 F7		        RST     6
+    67 F866		        DB      18H             ;next subtest
             18 
-    53 F84D FF		        RST     7
-    54 F84E		        DB      10H             ;test complete
+    68 F867 FF		        RST     7
+    69 F868		        DB      10H             ;test complete
             10 
-    55
-    56 			CHECK:
-    57 F84F D1		        POP     DE
-    58 F850 73		        MOV     M,E
-    59 F851 23		        INX     HL
-    60 F852 C9		        RET
+    70
+    71 			CHECK:
+    72 F869 D1		        POP     DE
+    73 F86A 73		        MOV     M,E
+    74 F86B 23		        INX     HL
+    75 F86C C9		        RET
 
 
 *******************************************************************************
@@ -78,7 +93,7 @@ Names		Types	Values
 LOG		EQU	00080h
 STOP		EQU	00080h
 ROM		Label	0F803h
-CHECK		Label	0F84Fh
+CHECK		Label	0F869h
 
 Statistics
 ----------
