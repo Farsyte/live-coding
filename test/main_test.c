@@ -1,4 +1,6 @@
 #include "addr.h"
+#include "bring.h"
+#include "cdev.h"
 #include "clock.h"
 #include "data.h"
 #include "decoder.h"
@@ -19,6 +21,7 @@
 int main_post()
 {
     tau_post();
+    bring_post();
     rtc_post();
     step_post();
     stepat_post();
@@ -61,6 +64,7 @@ int main_bist(int argc, char **argv)
     ram8107x8x4_bist();
     rom8316_bist();
     i8080_bist();
+    cdev_bist();
     return 0;
 }
 

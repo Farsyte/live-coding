@@ -1,6 +1,8 @@
 #pragma once
+#include <errno.h>
 #include <limits.h>     // Ranges of integer types
 #include <stdio.h>      // Input/output
+#include <stdlib.h>
 #include <string.h>     // String handling
 
 // === === === === === === === === === === === === === === === ===
@@ -51,6 +53,15 @@ extern Cstr         format(Cstr fmt, ...);
 extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, ...);
 #define STUB(...)	(_stub(0, __FILE__, __LINE__, __func__, __VA_ARGS__))
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
+
+#define FIN(var, func, ...)                                         \
+    int var = func(__VA_ARGS__);                                    \
+    if (var < 0) {                                                  \
+        fprintf(stderr, "error %d from '%s = %s(%s)':\n  %s\n",     \
+                errno, #var, #func, #__VA_ARGS__,                   \
+                strerror(errno));                                   \
+        abort();                                                    \
+    }
 
 extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...);
 

@@ -14,7 +14,7 @@ static int          subs_extend(Subs);
 // - each Step on the list must satisfy its invariant
 // bubble indicates a step to skip when checking invariants.
 
-void subs_invar(Subs s)
+void subs_invar(const Subs s)
 {
     assert(s);
     assert(s->cap >= s->len);

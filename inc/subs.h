@@ -17,7 +17,7 @@ typedef struct sSubs {
 // - each Step on the list must satisfy its invariant
 // bubble indicates a step to skip when checking invariants.
 
-extern void         subs_invar(Subs);
+extern void         subs_invar(const Subs);
 
 // subs_init(s): initialize the given Subs to be empty.
 
