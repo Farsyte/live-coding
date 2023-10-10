@@ -2,13 +2,13 @@
 #include <unistd.h>
 #include "cdev.h"
 
-Data                DATA;
-Cdev                d;
+static Data         DATA;
+static Cdev         d;
 
-pEdge               rdd_ = d->rd[0];
-pEdge               rdc_ = d->rd[1];
-pEdge               wrd_ = d->wr[0];
-pEdge               wrc_ = d->wr[1];
+static pEdge        rdd_ = d->rd[0];
+static pEdge        rdc_ = d->rd[1];
+static pEdge        wrd_ = d->wr[0];
+static pEdge        wrc_ = d->wr[1];
 
 // TODO add comments
 

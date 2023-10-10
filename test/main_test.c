@@ -1,4 +1,5 @@
 #include "addr.h"
+#include "bdev.h"
 #include "bring.h"
 #include "cdev.h"
 #include "clock.h"
@@ -65,6 +66,7 @@ int main_bist(int argc, char **argv)
     rom8316_bist();
     i8080_bist();
     cdev_bist();
+    bdev_bist();
     return 0;
 }
 
