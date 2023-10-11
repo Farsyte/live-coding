@@ -15,61 +15,121 @@
 // - which track (1 byte)
 // - which sector (1 byte)
 
-// Control Byte Values:
-#define BDEV_CTRL_NOP	0x00
-#define BDEV_CTRL_RD	0x01
-#define BDEV_CTRL_WR	0x02
-// Behavior is UNDEFINED if any other value is stored to CTRL.
+// To read a sector:
+//
+// - secrd:
+//   - DSK := disk number
+//   - TRK := track number
+//   - SEC := sector number
+// - secrd1:
+//   - *(HL)++ = DAT
+//   - back to secrd1 until all data moved
+// - done:
+//
+// Reading data after the last byte of a sector will get you the first
+// byte of the next sector on the track. Reading data after the last
+// byte of a track will get you the first byte of the first sector on
+// the next track. Reading data after the last byte of the last track
+// will get you TBD.
+//
+// This is done by selecting the next sector (which may be the first
+// sector of the next track) in the SEC and TRK registers when reading
+// the first byte of the sector. Due to this behavior, always set TRK
+// when setting SEC.
 
-// Status Byte Values:
-#define BDEV_STAT_IDLE	0x00
-#define BDEV_STAT_BUSY	0xFF
+// To write a sector:
+//
+// - secwr:
+//   - DSK := disk number
+//   - TRK := track number
+//   - SEC := sector number
+//   - CTRL := BDEV_CTRL_SEEK
+// - secwr1:
+//   - DAT := *(HL)++
+//   - back to secwr1 until all data moved
+// - error:
+//   - report error to console
+// - done:
+//
+// Writing data after the last byte of a sector will write to the
+// first byte of the next sector on the track. Writing data after the
+// last byte of a track will write to the first byte of the first
+// sector on the next track. Writing data after the last byte of the
+// last track will discard the data.
+//
+// This is done by selecting the next sector (which may be the first
+// sector of the next track) in the SEC and TRK registers when writing
+// the first byte of the sector. Due to this behavior, always set TRK
+// when setting SEC.
 
-#define BDEV_DSK_MIN	0
-#define BDEV_DSK_MAX	25
-// TRK: 1 is first track
-// SEC: 0 is first sector
-//   NOTE: the CP/M 1.4 manual shows a diskette allocation
-//   showing Track 1 sector 1 follows Track 0 sector 26,
-//   so it is likely that any disk image files I have on hand
-//   will be 26 sectors per track.
-
-// bdev state machine states
-#define	BDEV_STATE_IDLE	0
-#define	BDEV_STATE_RD	1
-#define	BDEV_STATE_WR	2
-
-typedef void bdev_impl_fn (void *bdev, void *ctx);
+typedef void bdev_seek_fn (void *ctx);
 
 typedef struct sBdev {
     Cstr                name;
 
-    Data                DMAH;
-    Data                DMAL;
+    // falling edge of RESET_ resets the controller.
+    // TODO reset should reset controller state to:
+    //   DSK=0 TRK=0 SEC=1
+    //   cursor = NULL
+    //   cursor_lim = NULL
+    Edge                RESET_;
 
-    Data                DSK;
-    Data                TRK;
-    Data                SEC;
+    Data                DSK;                    // drive number, 0..Ndisk-1
+    Edge                DSK_RD_;
+    Edge                DSK_WR_;
 
-    Edge                rd[6];                  // read strobes, active low
-    Edge                wr[6];                  // write strobes, active low
+    Data                TRK;                    // track number, 00..Ntrk-1
+    Edge                TRK_RD_;
+    Edge                TRK_WR_;
+
+    Data                SEC;                    // sector number, 01..Nsec
+    Edge                SEC_RD_;
+    Edge                SEC_WR_;
+
+    Edge                DAT_RD_;
+    Edge                DAT_WR_;
 
     pData               DATA;                   // system data bus
 
-    // storage for the mass storage state machine
-
-    int                 requested_op;
-    int                 current_state;
-
-    void               *impl_ctx;
-    bdev_impl_fn       *impl_fn;
+    bdev_seek_fn       *seek;
+    void               *seek_ctx;
+    Byte               *cursor;
+    Byte               *cursor_lim;
 
 }                  *pBdev, Bdev[1];
 
-extern void         bdev_init(Bdev, Cstr name);
-extern void         bdev_set_impl(Bdev, bdev_impl_fn *fn, void *ctx);
+#define BDEV_D(BDEV,REG)	pData REG = BDEV->REG; (void) REG
+#define BDEV_E(BDEV,SIG)	pEdge SIG = BDEV->SIG; (void) SIG
 
-#define BDEV_SET_IMPL(d,fn,ctx) bdev_set_impl(d, (bdev_impl_fn *)(fn), (void *)ctx);
+#define BDEV_ALL(BDEV)                                                  \
+    BDEV_E(BDEV,RESET_);                                                \
+                                                                        \
+    BDEV_D(BDEV,DSK);                                                   \
+    BDEV_E(BDEV,DSK_RD_);                                               \
+    BDEV_E(BDEV,DSK_WR_);                                               \
+                                                                        \
+    BDEV_D(BDEV,TRK);                                                   \
+    BDEV_E(BDEV,TRK_RD_);                                               \
+    BDEV_E(BDEV,TRK_WR_);                                               \
+                                                                        \
+    BDEV_D(BDEV,SEC);                                                   \
+    BDEV_E(BDEV,SEC_RD_);                                               \
+    BDEV_E(BDEV,SEC_WR_);                                               \
+                                                                        \
+    BDEV_E(BDEV,DAT_RD_);                                               \
+    BDEV_E(BDEV,DAT_WR_);                                               \
+                                                                        \
+    BDEV_D(BDEV,DATA);                                                  \
+                                                                        \
+    bdev_seek_fn *seek = BDEV->seek; (void) seek;                       \
+    void *seek_ctx = BDEV->seek_ctx; (void) seek_ctx;                   \
+    Byte *cursor = BDEV->cursor; (void) cursor;                         \
+    Byte *cursor_lim = BDEV->cursor_lim; (void) cursor_lim
+
+extern void         bdev_init(Bdev, Cstr name);
+extern void         bdev_set_seek(Bdev, bdev_seek_fn *fn, void *ctx);
+
+#define BDEV_SET_SEEK(d,fn,ctx) bdev_set_seek(d, (bdev_seek_fn *)(fn), (void *)ctx);
 
 extern void         bdev_linked(Bdev);
 extern void         bdev_close(Bdev);

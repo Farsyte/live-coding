@@ -29,7 +29,6 @@ void edge_invar(Edge e)
     assert(value == 0 || value == 1);
     subs_invar(rise);
     subs_invar(fall);
-    assert(!e->busy);
     assert(e->when <= TAU);
 }
 

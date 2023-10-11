@@ -2,90 +2,57 @@
 #include <unistd.h>
 #include "bdev.h"
 
-// Constants determining access times for rotating media
-// 1. TAU to load the head onto the media
-// 2. TAU per track for seek time
-// 3. TAU per sector of disk rotation
-// 4. TAU per byte when moving data
+// capacity numbers selected to match IBM format 8" diskette,
+// which is quoted 2.0 megabits per diskette.
+//
+// actual capacity is 256256 bytes, or 2,050,048 bits.
+//
+// IBM is using millions of bits, which became industry standard for
+// mass storage. This makes sense as the history before this was paper
+// tape and mag tape, where powers of two simply are not something
+// that comes to mind.
 
-#define TAU_US	(18)
-#define TAU_MS	(TAU_US * 1000)
+#define	BPS	128
+#define SPT	26
+#define TPD	77
+#define DPC	4
 
-// for testing: 10ms to switch drives
-#define TAU_NEW_DRIVE	(TAU_MS * 10)
+// Bctx: context for the Bdev Test code,
+// a controller containing four IBM-formatted 8-inch diskettes
+// containing a specific barber-pole data pattern (each byte
+// has the low 8 bits of the sum of the disk, track, sector,
+// and byte offset, where the first sector is 1).
 
-// for testing: 1ms to seek a track
-#define TAU_SEEK_ONE	(TAU_MS * 1)
-
-// for testing: 1ms per sector
-#define TAU_SECTOR	(TAU_MS * 1)
-
-// for testing: 1us per byte
-#define TAU_BYTE        (TAU_US * 1)
-
-typedef struct sBdevCtx {
-    Tau                 busy_until;
-    int                 last_state;
-    int                 curr_dsk;
-    int                 need_trk_0;
-    int                 curr_trk;
-    int                 curr_sec;
-    int                 curr_byte;
-    Word                curr_dma;
-}                  *pBdevCtx, BdevCtx[1];
+typedef struct sBctx {
+    pBdev               BDEV;
+    Byte                data[DPC][TPD][SPT][BPS];
+}                  *pBctx, Bctx[1];
 
 static Data         DATA;
-static Bdev         d;
-static BdevCtx      ctx;
+static Bdev         BDEV;
+static Bctx         BCTX;
 
-static pEdge        CTRL_WR_ = d->wr[0];
-static pEdge        STAT_RD_ = d->rd[0];
-
-static pData        DMAH = d->DMAH;
-static pEdge        DMAH_RD_ = d->rd[1];
-static pEdge        DMAH_WR_ = d->wr[1];
-
-static pData        DMAL = d->DMAL;
-static pEdge        DMAL_RD_ = d->rd[2];
-static pEdge        DMAL_WR_ = d->wr[2];
-
-static pData        DSK = d->DSK;
-static pEdge        DSK_RD_ = d->rd[3];
-static pEdge        DSK_WR_ = d->wr[3];
-
-static pData        TRK = d->TRK;
-static pEdge        TRK_RD_ = d->rd[4];
-static pEdge        TRK_WR_ = d->wr[4];
-
-static pData        SEC = d->SEC;
-static pEdge        SEC_RD_ = d->rd[5];
-static pEdge        SEC_WR_ = d->wr[5];
-
-static void         bdev_bist_impl(Bdev, BdevCtx);
+static void         bctx_init(Bctx BCTX, Bdev BDEV);
+static void         bctx_seek(Bctx BCTX);
 
 // TODO add comments
 
 void bdev_bist()
 {
-    Byte                b;
+    Byte                data;
+    Byte                exp;
 
     data_init(DATA, "DATA");
     DATA->value = 0;
 
-    bdev_init(d, "test_bdev");
-    d->DATA = DATA;
+    bdev_init(BDEV, "test_bdev");
+    BDEV->DATA = DATA;
 
-    ctx->busy_until = TAU;
-    ctx->curr_dsk = -1;
-    ctx->need_trk_0 = -1;
-    ctx->curr_trk = -1;
-    ctx->curr_sec = -1;
-    ctx->curr_byte = -1;
-    ctx->curr_dma = 0xFFFF;
+    bctx_init(BCTX, BDEV);
 
-    BDEV_SET_IMPL(d, bdev_bist_impl, ctx);
+    bdev_linked(BDEV);
 
-    bdev_linked(d);
+    BDEV_ALL(BDEV);
 
 #define WRR(REG,VAL)                            \
     ++TAU;                                      \
@@ -98,208 +65,206 @@ void bdev_bist()
     ++TAU;                                      \
     DATA->value = 0x55;                         \
     edge_lo(REG ## _RD_);                       \
-    b = DATA->value;                            \
+    data = DATA->value;                         \
     ++TAU;                                      \
     edge_hi(REG ## _RD_)
 
     WRR(SEC, 26);
     ASSERT_EQ_integer(26, SEC->value);
     RDR(SEC);
-    ASSERT_EQ_integer(26, b);
+    ASSERT_EQ_integer(26, data);
 
     WRR(TRK, 36);
     WRR(DSK, 3);
-    WRR(DMAL, 32);
-    WRR(DMAH, 2);
 
     ASSERT_EQ_integer(26, SEC->value);
     ASSERT_EQ_integer(36, TRK->value);
     ASSERT_EQ_integer(3, DSK->value);
-    ASSERT_EQ_integer(32, DMAL->value);
-    ASSERT_EQ_integer(2, DMAH->value);
 
     RDR(SEC);
-    ASSERT_EQ_integer(26, b);
+    ASSERT_EQ_integer(26, data);
 
     RDR(TRK);
-    ASSERT_EQ_integer(36, b);
+    ASSERT_EQ_integer(36, data);
 
     RDR(DSK);
-    ASSERT_EQ_integer(3, b);
-
-    RDR(DMAL);
-    ASSERT_EQ_integer(32, b);
-
-    RDR(DMAH);
-    ASSERT_EQ_integer(2, b);
+    ASSERT_EQ_integer(3, data);
 
     WRR(SEC, 1);
     WRR(TRK, 0);
     WRR(DSK, 0);
-    WRR(DMAL, 128);
-    WRR(DMAH, 0);
 
     ASSERT_EQ_integer(1, SEC->value);
     ASSERT_EQ_integer(0, TRK->value);
     ASSERT_EQ_integer(0, DSK->value);
-    ASSERT_EQ_integer(128, DMAL->value);
-    ASSERT_EQ_integer(0, DMAH->value);
 
     RDR(SEC);
-    ASSERT_EQ_integer(1, b);
+    ASSERT_EQ_integer(1, data);
 
     RDR(TRK);
-    ASSERT_EQ_integer(0, b);
+    ASSERT_EQ_integer(0, data);
 
     RDR(DSK);
-    ASSERT_EQ_integer(0, b);
+    ASSERT_EQ_integer(0, data);
 
-    RDR(DMAL);
-    ASSERT_EQ_integer(128, b);
+    // TODO read several sectors.
+    // verify we see the blank scratch disks.
 
-    RDR(DMAH);
-    ASSERT_EQ_integer(0, b);
-
-    WRR(CTRL, BDEV_CTRL_NOP);
-
-    RDR(STAT);
-    ASSERT_EQ_integer(BDEV_STAT_IDLE, b);
-
-    WRR(CTRL, BDEV_CTRL_RD);
-
-    // TODO read status up to N times until we get IDLE
-    //   error if we read anything but BUSY or IDLE
-    //   error if we do not read IDLE before the limit
-
-    for (int i = 0; i < 1000000000; ++i) {
-        RDR(STAT);
-        if (b == BDEV_STAT_IDLE) {
-            STUB("STAT IDLE at i=%d", i);
-            break;
+    // Read all storage without updating DSK/TRK/SEC
+    for (int dsk = 0; dsk < DPC; ++dsk) {
+        WRR(DSK, dsk);
+        WRR(TRK, 0);
+        WRR(SEC, 1);
+        for (int trk = 0; trk < TPD; ++trk) {
+            for (int sec = 1; sec <= SPT; ++sec) {
+                for (int b = 0; b < BPS; ++b) {
+                    exp = dsk + trk + sec + b;
+                    RDR(DAT);
+                    ASSERT_EQ_integer(exp, data);
+                }
+            }
         }
-        ASSERT_EQ_integer(BDEV_STAT_BUSY, b);
     }
-    RDR(STAT);
-    ASSERT_EQ_integer(BDEV_STAT_IDLE, b);
 
-    WRR(CTRL, BDEV_CTRL_WR);
-
-    // TODO read status up to N times until we get IDLE
-    //   error if we read anything but BUSY or IDLE
-    //   error if we do not read IDLE before the limit
-
-    for (int i = 0; i < 1000000000; ++i) {
-        RDR(STAT);
-        if (b == BDEV_STAT_IDLE) {
-            STUB("STAT IDLE at i=%d", i);
-            break;
+    // same thing, but reverse order, setting DSK/TRK/SEC
+    // as we step from one to the next.
+    for (int dsk = DPC - 1; dsk >= 0; --dsk) {
+        WRR(DSK, dsk);
+        for (int trk = TPD - 1; trk >= 0; --trk) {
+            for (int sec = SPT; sec >= 1; --sec) {
+                WRR(TRK, trk);
+                WRR(SEC, sec);
+                for (int b = 0; b < BPS; ++b) {
+                    exp = dsk + trk + sec + b;
+                    RDR(DAT);
+                    ASSERT_EQ_integer(exp, data);
+                }
+            }
         }
-        ASSERT_EQ_integer(BDEV_STAT_BUSY, b);
     }
-    RDR(STAT);
-    ASSERT_EQ_integer(BDEV_STAT_IDLE, b);
 
-    (void)CTRL_WR_;     // TODO impl
-    (void)STAT_RD_;     // TODO impl
+    // write several sectors.
+    // verify the BCTX receives the expected update.
 
-    PRINT_END();
+    for (int dsk = 1; dsk <= DPC; dsk += 2) {
+        WRR(DSK, dsk);
+        for (int trk = 13; trk >= 0; trk -= 10) {
+            for (int sec = 14; sec <= SPT; sec += 10) {
+                WRR(TRK, trk);
+                WRR(SEC, sec);
+                for (int b = 0; b < BPS; ++b) {
+                    exp = dsk + trk + sec + b + 0x55;
+                    WRR(DAT, exp);
+                    ASSERT_EQ_integer(exp, BCTX->data[dsk][trk][sec - 1][b]);
+                }
+            }
+        }
+    }
+
+    // read the sectors we wrote.
+    // verify we get back the updated data.
+
+    for (int dsk = 1; dsk <= DPC; dsk += 2) {
+        WRR(DSK, dsk);
+        for (int trk = 13; trk >= 0; trk -= 10) {
+            for (int sec = 14; sec <= SPT; sec += 10) {
+                WRR(TRK, trk);
+                WRR(SEC, sec);
+                for (int b = 0; b < BPS; ++b) {
+                    exp = dsk + trk + sec + b + 0x55;
+                    RDR(DAT);
+                    ASSERT_EQ_integer(exp, data);
+                }
+            }
+        }
+    }
+
+    // Start reading an arbitrary sector,
+    // and hit RESET in the middle to verify
+    // that we get back to the proper state.
+
+    WRR(DSK, 1);
+    WRR(TRK, 10);
+    WRR(SEC, 10);
+    for (int b = 0; b < 32; ++b) {
+        RDR(DAT);
+    }
+
+    ++TAU;
+    edge_lo(RESET_);
+
+    ++TAU;
+    edge_hi(RESET_);
+
+    // RESET should select the boot sector of the boot disk,
+    // and reading should get the boot data, NOT the remainder
+    // of what we were reading above.
+
+    RDR(DSK);
+    ASSERT_EQ_integer(0, data);
+
+    RDR(TRK);
+    ASSERT_EQ_integer(0, data);
+
+    RDR(SEC);
+    ASSERT_EQ_integer(1, data);
+
+    for (int b = 0; b < BPS; ++b) {
+        exp = 0 + 0 + 1 + b;
+        RDR(DAT);
+        ASSERT_EQ_integer(exp, data);
+    }
+
 }
 
-static void bdev_bist_impl(Bdev d, BdevCtx c)
+static void bctx_init(Bctx BCTX, Bdev BDEV)
 {
-    Byte                b = 0x55;
+    BCTX->BDEV = BDEV;
 
-    for (;;) {
-        if (TAU < c->busy_until)
-            return;
+    // Format the "blank" scratch disks to have data we can use
+    // to detect access to the wrong area.
 
-        if (d->current_state == BDEV_STATE_IDLE) {
-            c->last_state = d->current_state;
-            c->busy_until = TAU;
-            return;
-        }
+    for (int dsk = 0; dsk < DPC; ++dsk)
+        for (int trk = 0; trk < TPD; ++trk)
+            for (int sec = 1; sec <= SPT; ++sec)
+                for (int b = 0; b < BPS; ++b)
+                    BCTX->data[dsk][trk][sec - 1][b] = dsk + trk + sec + b;
 
-        if (c->last_state != d->current_state) {
-            c->last_state = d->current_state;
-            c->curr_byte = 0;
-            c->curr_dma = (d->DMAH->value << 8) | d->DMAL->value;
-            c->busy_until = TAU;
-            return;
-        }
+    BDEV_SET_SEEK(BDEV, bctx_seek, BCTX);
+}
 
-        if (c->curr_dsk != d->DSK->value) {
-            c->curr_dsk = d->DSK->value;
-            c->need_trk_0 = 1;
-            c->curr_trk = 34;
-            c->busy_until += TAU_NEW_DRIVE;
-            STUB("switch to drive %c", c->curr_dsk + 'A');
-            continue;
-        }
+static void bctx_seek(Bctx BCTX)
+{
+    pBdev               BDEV = BCTX->BDEV;
 
-        if (c->need_trk_0 && c->curr_trk > 0) {
-            STUB("recal, seek in");
-            c->curr_trk--;
-            c->busy_until += TAU_SEEK_ONE;
-            if (0 == c->curr_trk) {
-                STUB("recal found track 0");
-                c->need_trk_0 = 0;
-            }
-            continue;
-        }
+    ASSERT(BDEV, "BCTX has null BDEV");
 
-        if (c->curr_trk < d->TRK->value) {
-            STUB("seek out");
-            c->curr_trk++;
-            c->busy_until += TAU_SEEK_ONE;
-            continue;
-        }
+    BDEV_ALL(BDEV);
 
-        if (c->curr_trk > d->TRK->value) {
-            STUB("seek in");
-            c->curr_trk--;
-            c->busy_until += TAU_SEEK_ONE;
-            continue;
-        }
+    Byte                dsk = DSK->value;
+    Byte                trk = TRK->value;
+    Byte                sec = SEC->value;
 
-        if (c->curr_sec != d->SEC->value) {
-            STUB("sector wait");
-            c->curr_sec = (c->curr_sec % 26) + 1;
-            c->busy_until += TAU_SECTOR;
-            continue;
-        }
-
-        if (c->curr_byte < 128) {
-            switch (d->current_state) {
-              case BDEV_STATE_RD:
-                  // TODO get mass storage data into "b"
-                  // TODO put "b" into memory at curr_dma
-                  //
-                  // THINK. Would it be better to avoid DMA entirely
-                  // and have the CPU use PIO to receive each byte?
-                  //
-                  STUB("%s RD %04XH %c:%02d.%02d[%03d] ==> %02X",
-                       d->name, c->curr_dma,
-                       d->DSK->value + 'A', d->TRK->value, d->SEC->value, c->curr_byte, b);
-                  break;
-              case BDEV_STATE_WR:
-                  // TODO get "b" from memory at curr_dma
-                  // TODO put "b" into mass storage
-                  //
-                  // THINK. Would it be better to avoid DMA entirely
-                  // and have the CPU use PIO to provide each byte?
-                  //
-                  STUB("%s WR %04XH %c:%02d.%02d[%03d] <== %02X",
-                       d->name, c->curr_dma,
-                       d->DSK->value + 'A', d->TRK->value, d->SEC->value, c->curr_byte, b);
-                  break;
-            }
-            c->curr_byte++;
-            c->curr_dma++;
-            c->busy_until += TAU_BYTE;
-            continue;
-        }
-
-        STUB("%s operation complete", d->name);
-        d->current_state = BDEV_STATE_IDLE;
+    if ((dsk >= DPC) || (trk >= TPD) || (sec < 1) || (sec > SPT)) {
+//        STUB("%c:%02d.%02d is not a valid location", 'A' + dsk, trk, sec);
+        return;
     }
+
+    cursor = BCTX->data[dsk][trk][sec - 1];
+    cursor_lim = cursor + BPS;
+
+//    STUB("%c:%02d.%02d starts at offset %lu", 'A' + dsk, trk, sec,
+//         cursor - BCTX->data[0][0][0]);
+//    STUB("%c:%02d.%02d   ends at offset %lu", 'A' + dsk, trk, sec,
+//         cursor_lim - BCTX->data[0][0][0]);
+
+    if (sec < SPT) {
+        data_to(SEC, sec + 1);
+    } else {
+        data_to(SEC, 1);
+        data_to(TRK, trk + 1);
+    }
+
+    BDEV->cursor = cursor;
+    BDEV->cursor_lim = cursor_lim;
 }

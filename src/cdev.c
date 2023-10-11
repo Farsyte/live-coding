@@ -59,10 +59,10 @@ void cdev_invar(Cdev d)
     bring_invar(d->rx);
     bring_invar(d->tx);
 
-    // edge_invar(d->rd[0]);
-    // edge_invar(d->rd[1]);
-    // edge_invar(d->wr[0]);
-    // edge_invar(d->wr[1]);
+    edge_invar(d->rd[0]);
+    edge_invar(d->rd[1]);
+    edge_invar(d->wr[0]);
+    edge_invar(d->wr[1]);
 
     assert(NULL != d->DATA);
 }
@@ -97,6 +97,8 @@ void cdev_linked(Cdev d)
 
 static void cdev_rdd(Cdev d)
 {
+    cdev_invar(d);
+
     if (cdev_can_rx(d)) {
         Byte                b = cdev_rx(d);
         data_to(d->DATA, b);
@@ -106,6 +108,8 @@ static void cdev_rdd(Cdev d)
 }
 static void cdev_rdc(Cdev d)
 {
+    cdev_invar(d);
+
     Byte                b = 0;
     if (d->conn >= 0)
         b |= CDEV_STATUS_CONN;
@@ -117,6 +121,8 @@ static void cdev_rdc(Cdev d)
 }
 static void cdev_wrd(Cdev d)
 {
+    cdev_invar(d);
+
     if (cdev_can_tx(d)) {
         Byte                b = d->DATA->value;
         cdev_tx(d, b);
@@ -124,6 +130,8 @@ static void cdev_wrd(Cdev d)
 }
 static void cdev_wrc(Cdev d)
 {
+    cdev_invar(d);
+
     Byte                b = d->DATA->value;
     STUB("wr ctrl %02X --> UNDEFINED BEHAVIOR", b);
 }
@@ -161,6 +169,7 @@ void cdev_tx(Cdev d, Byte b)
 void cdev_conn(Cdev d, int tcp_port)
 {
     cdev_invar(d);
+
     assert(tcp_port > 0);
     assert(tcp_port < 65536);
 

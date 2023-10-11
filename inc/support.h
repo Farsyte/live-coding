@@ -54,101 +54,101 @@ extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, .
 #define STUB(...)	(_stub(0, __FILE__, __LINE__, __func__, __VA_ARGS__))
 #define FAIL(...)	(_stub(1, __FILE__, __LINE__, __func__, __VA_ARGS__))
 
-#define FIN(var, func, ...)                                         \
-    int var = func(__VA_ARGS__);                                    \
-    if (var < 0) {                                                  \
-        fprintf(stderr, "error %d from '%s = %s(%s)':\n  %s\n",     \
-                errno, #var, #func, #__VA_ARGS__,                   \
-                strerror(errno));                                   \
-        abort();                                                    \
+#define FIN(var, func, ...)                                             \
+    int var = func(__VA_ARGS__);                                        \
+    if (var < 0) {                                                      \
+        fprintf(stderr, "error %d from '%s = %s(%s)':\n  %s\n",         \
+                errno, #var, #func, #__VA_ARGS__,                       \
+                strerror(errno));                                       \
+        abort();                                                        \
     }
 
 extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...);
 
-#define	ASSERT(cond, ...)                       \
-    do {                                        \
-        if (0 != (cond))                        \
-            ;                                   \
-        else                                    \
-            _fail(__FILE__, __LINE__, __func__, \
-                  "" #cond, __VA_ARGS__);       \
+#define	ASSERT(cond, ...)                                               \
+    do {                                                                \
+        if (0 != (cond))                                                \
+            ;                                                           \
+        else                                                            \
+            _fail(__FILE__, __LINE__, __func__,                         \
+                  "" #cond, __VA_ARGS__);                               \
     } while (0)
 
-#define	ASSERT_OP_integer(expected, op, observed)               \
-    do {                                                        \
-        long long exp = ((long long)(expected));                \
-        long long obs = ((long long)(observed));                \
-        if ((obs) op (exp))                                     \
-            ;                                                   \
-        else                                                    \
-            _fail(__FILE__, __LINE__, __func__,                 \
-                  "" #observed " " #op " " #expected,           \
-                  "Comparison Failed:\n"                        \
-                  "  Expected value: %2s %lld == 0x%X (%s)\n"   \
-                  "  Observed value:    %lld == 0x%X (%s)\n"    \
-                  , #op                                         \
-                  , exp, exp, #expected                         \
-                  , obs, obs, #observed                         \
-                );                                              \
+#define	ASSERT_OP_integer(__exp_expr, op, __obs_expr)                   \
+    do {                                                                \
+        long long __exp = ((long long)(__exp_expr));                    \
+        long long __obs = ((long long)(__obs_expr));                    \
+        if ((__obs) op (__exp))                                         \
+            ;                                                           \
+        else                                                            \
+            _fail(__FILE__, __LINE__, __func__,                         \
+                  "" #__obs_expr " " #op " " #__exp_expr,               \
+                  "Comparison Failed:\n"                                \
+                  "  __Exp_Expr value: %2s %lld == 0x%X (%s)\n"         \
+                  "  __Obs_Expr value:    %lld == 0x%X (%s)\n"          \
+                  , #op                                                 \
+                  , __exp, __exp, #__exp_expr                           \
+                  , __obs, __obs, #__obs_expr                           \
+                );                                                      \
     } while (0)
 
-#define	ASSERT_EQ_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, ==, observed)
+#define	ASSERT_EQ_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, ==, __obs_expr)
 
-#define	ASSERT_NE_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, !=, observed)
+#define	ASSERT_NE_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, !=, __obs_expr)
 
-#define	ASSERT_LT_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, <, observed)
+#define	ASSERT_LT_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, <, __obs_expr)
 
-#define	ASSERT_GT_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, >, observed)
+#define	ASSERT_GT_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, >, __obs_expr)
 
-#define	ASSERT_LE_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, <=, observed)
+#define	ASSERT_LE_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, <=, __obs_expr)
 
-#define	ASSERT_GE_integer(expected, observed)                   \
-    ASSERT_OP_integer(expected, >=, observed)
+#define	ASSERT_GE_integer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_integer(__exp_expr, >=, __obs_expr)
 
-#define	ASSERT_EQ_string(expected, observed)                    \
-    do {                                                        \
-        Cstr exp = ((Cstr)(expected));                          \
-        Cstr obs = ((Cstr)(observed));                          \
-        if (!strcmp(obs, exp))                                  \
-            ;                                                   \
-        else                                                    \
-            _fail(__FILE__, __LINE__, __func__,                 \
-                  "\"" #observed "\" == \"" #expected "\"",     \
-                  "String Equaltiy Comparison Failed:\n"        \
-                  "  Expected value: \"%s\"\n"                  \
-                  "  Observed value: \"%s\"\n"                  \
-                  , exp, obs                                    \
-                );                                              \
+#define	ASSERT_EQ_string(__exp_expr, __obs_expr)                        \
+    do {                                                                \
+        Cstr __exp = ((Cstr)(__exp_expr));                              \
+        Cstr __obs = ((Cstr)(__obs_expr));                              \
+        if (!strcmp(__obs, __exp))                                      \
+            ;                                                           \
+        else                                                            \
+            _fail(__FILE__, __LINE__, __func__,                         \
+                  "\"" #__obs_expr "\" == \"" #__exp_expr "\"",         \
+                  "String Equaltiy Comparison Failed:\n"                \
+                  "  __Exp_Expr value: \"%s\"\n"                        \
+                  "  __Obs_Expr value: \"%s\"\n"                        \
+                  , __exp, __obs                                        \
+                );                                                      \
     } while (0)
 
-#define	ASSERT_OP_pointer(expected, op, observed)               \
-    do {                                                        \
-        void * exp = ((void *)(expected));                      \
-        void * obs = ((void *)(observed));                      \
-        if ((obs) op (exp))                                     \
-            ;                                                   \
-        else                                                    \
-            _fail(__FILE__, __LINE__, __func__,                 \
-                  "" #observed " " #op " " #expected,           \
-                  "Pointer Comparison Failed:\n"                \
-                  "  Expected value: %2s %lld (%s)\n"           \
-                  "  Observed value:    %lld (%s)\n"            \
-                  , #op                                         \
-                  , exp, #expected                              \
-                  , obs, #observed                              \
-                );                                              \
+#define	ASSERT_OP_pointer(__exp_expr, op, __obs_expr)                   \
+    do {                                                                \
+        void * __exp = ((void *)(__exp_expr));                          \
+        void * __obs = ((void *)(__obs_expr));                          \
+        if ((__obs) op (__exp))                                         \
+            ;                                                           \
+        else                                                            \
+            _fail(__FILE__, __LINE__, __func__,                         \
+                  "" #__obs_expr " " #op " " #__exp_expr,               \
+                  "Pointer Comparison Failed:\n"                        \
+                  "  __Exp_Expr value: %2s %lld (%s)\n"                 \
+                  "  __Obs_Expr value:    %lld (%s)\n"                  \
+                  , #op                                                 \
+                  , __exp, #__exp_expr                                  \
+                  , __obs, #__obs_expr                                  \
+                );                                                      \
     } while (0)
 
-#define	ASSERT_NE_pointer(expected, observed)                   \
-    ASSERT_OP_pointer(expected, !=, observed)
+#define	ASSERT_NE_pointer(__exp_expr, __obs_expr)                       \
+    ASSERT_OP_pointer(__exp_expr, !=, __obs_expr)
 
-#define	ASSERT_NZ_pointer(observed)                             \
-    ASSERT_NE_pointer(NULL, observed)
+#define	ASSERT_NZ_pointer(__obs_expr)                                   \
+    ASSERT_NE_pointer(NULL, __obs_expr)
 
 // === === === === === === === === === === === === === === === ===
 //                  SUPPORT TESTS AND TEST SUPPORT
