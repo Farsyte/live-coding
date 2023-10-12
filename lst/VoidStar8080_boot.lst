@@ -1,0 +1,761 @@
+     1     		        title	'Boot ROM for the (void *)8080 simulated microcomputer'
+     2
+     3 			;; === === === === === === === === === === === === === === === ===
+     4 			;; configuration constants for rom monitor and boot loader
+     5 			;; current configuration is 48 kib of ram and 16 kib of rom.
+     6 			;; === === === === === === === === === === === === === === === ===
+     7
+     8      00 10	rambdkb	equ     16              ;ram modules are 16 kib
+     9      00 03	rambdct	equ     3	        ;installed 3 ram modules
+    10
+    11      00 02	rombdkb	equ     2               ;rom modules are 2 kib
+    12      00 08	rombdct	equ     8	        ;installed 8 rom modules
+    13
+    14      00 30	ramkb   equ     rambdkb*rambdct
+    15      C0 00	ramtop  equ     1024*ramkb
+    16      C0 00	rombase equ     1024*(64-(rombdkb*rombdct))
+    17
+    18 			;;; === === === === === === === === === === === === === === === ===
+    19 			;;; Serial Device Ports
+    20 			;;; === === === === === === === === === === === === === === === ===
+    21
+    22      00 00	ttyd	equ     0               ;read/write data from/to printing console
+    23      00 01	ttyc	equ     1               ;printing console status/control port
+    24
+    25 			;;; === === === === === === === === === === === === === === === ===
+    26 			;;; Disk Controller Ports
+    27 			;;; === === === === === === === === === === === === === === === ===
+    28
+    29      00 0A	bdres	equ	10              ;reset controller (drv 0, trk 0, sec 1)
+    30      00 0B	bddrv	equ	11              ;select drive
+    31      00 0C	bdtrk	equ	12              ;select track
+    32      00 0D	bdsec	equ	13              ;select sector
+    33      00 0E	bddat	equ	14              ;read/write next byte
+    34
+    35 			;;; === === === === === === === === === === === === === === === ===
+    36 			;;; scratch memory
+    37 			;;; === === === === === === === === === === === === === === === ===
+    38
+    39      BF 00	kbbuf   equ     ramtop-0100h
+    40
+    41 			;;; The BOOT ROM provides very very very basic services and is
+    42 			;;; not called by FORTH, COLD, or BIOS. It does not present a
+    43 			;;; service entry point or a callable services vector.
+    44 			;;; 
+    45 			;;; At power on reset, the VoidStar8080 activates SHADOW, causing
+    46 			;;; the BOOT ROM to service all memory reads. This will start execution
+    47 			;;; with the code at the "cold" entry point but with PC=0.
+    48
+    49      C0 00		org     rombase
+    50 			        
+    51
+    52 			;;; The cold start entry point disables interrupts, then jumps to the
+    53 			;;; warm start code. If reached via power-on RESET, this jump will
+    54 			;;; cause the SHADOW mechanism to release.
+    55 			cold:
+    56 C000 F3		        di
+    57 C001 C3 04 C0	        jmp     warm
+    58
+    59 			;;; The warm start entry point does a soft reset of the BDEV
+    60 			;;; controller to terminate any partial read or write that was in
+    61 			;;; progress, and displays a greeting message on the primary serial
+    62 			;;; port (connected to a printing console).
+    63 			warm:   
+    64 C004 31 00 C0	        lxi     sp, ramtop
+    65 C007 AF		        xra     a
+    66 C008 D3 0A	        out     bdres
+    67
+    68 C00A CD A2 C0	        call    conmsg
+    69 C00D		        db      "VoidStar8080 BOOT version 0.0.1",10,13,0
+            56 6F 69 64 
+            53 74 61 72 
+            38 30 38 30 
+            20 42 4F 4F 
+            54 20 76 65 
+            72 73 69 6F 
+            6E 20 30 2E 
+            30 2E 31 0A 
+            0D 00 
+    70
+    71 			repl:
+    72 C02F CD A2 C0	        call    conmsg
+    73 C032		        db      "(void *) ",0
+            28 76 6F 69 
+            64 20 2A 29 
+            20 00 
+    74
+    75 C03C 21 00 BF	        lxi     hl, kbbuf
+    76 C03F CD 64 C0	        call    gets
+    77 C042 FE 0A	        cpi     0Ah
+    78 C044 CA 5F C0	        jz      docmd
+    79 C047 FE 0D	        cpi     0Dh
+    80 C049 CA 5F C0	        jz      docmd
+    81 C04C CD A2 C0	        call    conmsg
+    82 C04F		        db      10,13,"<cancel>",10,13,0
+            0A 0D 3C 63 
+            61 6E 63 65 
+            6C 3E 0A 0D 
+            00 
+    83
+    84 			        ;; kbbuf will have NUL, then the typed line.
+    85 			        ;; HL points at the
+    86 			        ;; TODO dispatch to the command handler for the typed command
+    87
+    88 C05C C3 2F C0	        jmp     repl
+    89
+    90
+    91 			docmd:
+    92 C05F FB		        ei
+    93 C060 76		        hlt
+    94 C061 C3 2F C0	        jmp     repl
+    95
+    96 			;;; === === === === === === === === === === === === === === === ===
+    97 			;;; read a line of text from the console to (HL)
+    98 			;;; returns to the byte after the nul.
+    99 			;;; calling this "gets" because it has no buffer limit check.
+   100 			;;; === === === === === === === === === === === === === === === ===
+   101 			gets:
+   102 C064 36 00	        mvi     m,0
+   103 C066 23		        inx     h
+   104 C067 CD 6D C0	        call    gets1
+   105 C06A 36 00	        mvi     m,0
+   106 C06C C9		        ret
+   107 			gets1:  
+   108 C06D CD 96 C0	        call    conget
+   109 C070 FE 0A	        cpi     0Ah             ;LF -> line complete
+   110 C072 C8		        rz
+   111 C073 FE 0D	        cpi     0Dh             ;CR -> line complete
+   112 C075 C8		        rz
+   113 C076 FE 15	        cpi     15h             ;SO (^U) -> kill line
+   114 C078 C8		        rz
+   115 C079 FE 08	        cpi     08h             ;BS (^H) -> backspace
+   116 C07B CA 83 C0	        jz      getsbs
+   117 C07E FE 7F	        cpi     7Fh             ;DEL (^?) -> backspace
+   118 C080 CA 83 C0	        jz      getsbs
+   119
+   120 			getsbs:
+   121 C083 2B		        dcx     hl
+   122 C084 7E		        mov     a,m             ;check for left margin
+   123 C085 23		        inx     hl
+   124 C086 FE 00	        cpi     0
+   125 C088 C8		        rz                      ;bs at left margin -> return
+   126
+   127 C089 2B		        dcx     hl
+   128 C08A 36 00	        mvi     m,0             ;NUL the character from the kbbuf
+   129
+   130 			        ;; our tty is special: if you print a space over something,
+   131 			        ;; the something you printed before goes away.
+   132
+   133 C08C CD A2 C0	        call    conmsg
+   134 C08F		        db      8,32,8,0
+            08 20 08 00 
+            
+   135 C093 C3 64 C0	        jmp     gets
+   136 			        
+   137
+   138 			;;; === === === === === === === === === === === === === === === ===
+   139 			;;; get next character from tty: into a and clear its parity bit.
+   140 			;;; if there is no data available, wait for some.
+   141 			;;; === === === === === === === === === === === === === === === ===
+   142 			conget:
+   143 C096 DB 01	        in      ttyc
+   144 C098 E6 01	        ani     01h
+   145 C09A CA 96 C0	        jz      conget
+   146 C09D DB 00	        in      ttyd
+   147 C09F E6 7F	        ani     7fh
+   148 C0A1 C9		        ret
+   149
+   150
+   151 			;;; === === === === === === === === === === === === === === === ===
+   152 			;;; print NUL terminated string at (pc) to con:
+   153 			;;; returns to the byte after the nul.
+   154 			;;; === === === === === === === === === === === === === === === ===
+   155 			conmsg:
+   156 C0A2 E1		        pop     hl
+   157 C0A3 CD A7 C0	        call    constr
+   158 C0A6 E9		        pchl
+   159
+   160
+   161 			;;; === === === === === === === === === === === === === === === ===
+   162 			;;; print nul terminated string at (hl) to con:
+   163 			;;; leaves hl pointing after the nul.
+   164 			;;; === === === === === === === === === === === === === === === ===
+   165 			constr:
+   166 C0A7 7E		        mov     a,m
+   167 C0A8 23		        inx     h
+   168 C0A9 FE 00	        cpi     0
+   169 C0AB C8		        rz
+   170 C0AC 4F		        mov     c,a
+   171 C0AD CD B3 C0	        call    conout
+   172 C0B0 C3 A7 C0	        jmp     constr
+   173
+   174
+   175 			;;; === === === === === === === === === === === === === === === ===
+   176 			;;; put the the character in c to the printing console
+   177 			;;; if the device can not accept data, wait until it can.
+   178 			;;; modifies the content of register a.
+   179 			;;; === === === === === === === === === === === === === === === ===
+   180 			conout: 
+   181 C0B3 DB 01	        in      ttyc
+   182 C0B5 E6 01	        ani     01h
+   183 C0B7 CA B3 C0	        jz      conout
+   184 C0BA 79		        mov     a,c
+   185 C0BB D3 00	        out     ttyd
+   186 C0BD C9		        ret
+   187
+   188
+   189
+   190 			;;;	;;; === === === === === === === === === === === === === === === ===
+   191 			;;;	;;; device i/o ports
+   192 			;;;	;;; === === === === === === === === === === === === === === === ===
+   193 			;;;	
+   194 			;;;	ttyd	equ     0               ;read/write data from/to printing console
+   195 			;;;	ttyc	equ     1               ;printing console status/control port
+   196 			;;;	
+   197 			;;;	crtd	equ     2               ;read/write data from/to video console
+   198 			;;;	crtc	equ     3               ;video console status/control port
+   199 			;;;	
+   200 			;;;	lptd	equ     4               ;write data to line printer
+   201 			;;;	lptc	equ     5               ;line printer status/control port
+   202 			;;;	
+   203 			;;;	pptd	equ     6               ;read/write data from/to paper tape
+   204 			;;;	pptc	equ     7               ;paper tape status/control port
+   205 			;;;	
+   206 			;;;	
+   207 			;;;	;;; === === === === === === === === === === === === === === === ===
+   208 			;;;	;;; ram addresses known to the rom monitor
+   209 			;;;	;;; note: should agree with cbios
+   210 			;;;	;;; === === === === === === === === === === === === === === === ===
+   211 			;;;	
+   212 			;;;	iobyte  equ     3               ;intel compatible i/o byte
+   213 			;;;	cdisk	equ     4               ;current disk drive
+   214 			;;;	
+   215 			;;;	dmaad	equ	0040h		;last selected dma address
+   216 			;;;	scr	equ     0080h           ;scratch buffer start
+   217 			;;;	scrend	equ     00ffh           ;scratch buffer end
+   218 			;;;	
+   219 			;;;	;;; === === === === === === === === === === === === === === === ===
+   220 			;;;	;;; voidstar8080 reset behavior:
+   221 			;;;	;;;
+   222 			;;;	;;; when the system starts exectution after reset, the shadow
+   223 			;;;	;;; facility is enabled in the address decoder, which routes all
+   224 			;;;	;;; memory read operations to the boot rom. this facility is
+   225 			;;;	;;; turned off the first time that the cpu issues a memory read
+   226 			;;;	;;; to an address that maps normally into the boot rom.
+   227 			;;;	;;; === === === === === === === === === === === === === === === ===
+   228 			;;;	
+   229 			;;;	;;; === === === === === === === === === === === === === === === ===
+   230 			;;;	;;; rom entry points currently match the cp/m bios
+   231 			;;;	;;; but this is not actually needed in any way.
+   232 			;;;	;;; === === === === === === === === === === === === === === === ===
+   233 			;;;	
+   234 			;;;	        org     rombase         ;boot operations
+   235 			;;;	        jmp     cold            ;cold start
+   236 			;;;	        jmp     warm            ;warm start
+   237 			;;;	
+   238 			;;;	        jmp     const           ;con status 00/ff to reg a
+   239 			;;;	        jmp     conin           ;con get char to reg a
+   240 			;;;	        jmp     conout          ;con put char from reg c
+   241 			;;;	        jmp     list            ;lst put char from reg c
+   242 			;;;	        jmp     punch           ;pun put char from reg c
+   243 			;;;	        jmp     reader          ;rdr get char to reg a
+   244 			;;;	
+   245 			;;;	        jmp     home            ;move head to home position
+   246 			;;;		jmp	seldsk          ;select disk
+   247 			;;;		jmp	settrk          ;set track number
+   248 			;;;		jmp	setsec          ;set sector number
+   249 			;;;	        jmp     setdma          ;set "dma" address
+   250 			;;;	        jmp     read            ;read disk
+   251 			;;;	        jmp     write           ;write disk
+   252 			;;;	
+   253 			;;;		jmp	listst		;return list status
+   254 			;;;		jmp	sectran		;sector translate
+   255 			;;;	
+   256 			;;;	        ;; unique to voidstar8080 rom: 
+   257 			;;;	        jmp     constr           ;con dev message at (hl)
+   258 			;;;	        jmp     conmsg           ;con dev message at (pc)
+   259 			;;;	        jmp     lsstr           ;lst dev message at (hl)
+   260 			;;;	        jmp     lsmsg           ;lst dev message at (pc)
+   261 			;;;	
+   262 			;;;	
+   263 			;;;	;;; === === === === === === === === === === === === === === === ===
+   264 			;;;	;;; monitor entry points
+   265 			;;;	;;; - prompt for input
+   266 			;;;	;;; - input a line of text with modest line editing
+   267 			;;;	;;; - dispatch to command handler based on first character on line
+   268 			;;;	;;; need this to poke around in memory before we have FORTH or CP/M
+   269 			;;;	;;; === === === === === === === === === === === === === === === ===
+   270 			;;;	cold:
+   271 			;;;	        ;; assure iobyte is sane.
+   272 			;;;	        ;; 00h uses tty for console, reader, punch, and list.
+   273 			;;;	        ;; 94h uses tty for console, ppt for reader and punch, and lpt for list.
+   274 			;;;	        ;; 95h uses crt for console, ppt for reader and punch, and lpt for list.
+   275 			;;;	        mvi     a,094h
+   276 			;;;	        sta     iobyte
+   277 			;;;	warm:
+   278 			;;;	        call    conmsg
+   279 			;;;	        db      10,13,10,"voidstar8080 version 0.0.1 [console]",10,13,0
+   280 			;;;	        call    lsmsg
+   281 			;;;	        db      10,13,10,"voidstar8080 version 0.0.1 [listing]",10,13,0
+   282 			;;;	
+   283 			;;;	        ;; todo copy cbios down to be00
+   284 			;;;	        ;; todo copy forth down to 0100
+   285 			;;;	
+   286 			;;;	        ei
+   287 			;;;	        hlt
+   288 			;;;	        jmp     cold
+   289 			;;;	        
+   290 			;;;	;;; === === === === === === === === === === === === === === === ===
+   291 			;;;	;;; return ff if a byte is available on tty: or 00 if not.
+   292 			;;;	;;; === === === === === === === === === === === === === === === ===
+   293 			;;;	ttyrdy:
+   294 			;;;	        in      ttyc
+   295 			;;;	        ani     02h
+   296 			;;;	        rz
+   297 			;;;	        mvi     a,0ffh
+   298 			;;;	        ret
+   299 			;;;	
+   300 			;;;	
+   301 			;;;	;;; === === === === === === === === === === === === === === === ===
+   302 			;;;	;;; return ff if tty: can accept a byte or 00 if not.
+   303 			;;;	;;; === === === === === === === === === === === === === === === ===
+   304 			;;;	ttycw:
+   305 			;;;	        in      ttyc
+   306 			;;;	        ani     04h
+   307 			;;;	        rz
+   308 			;;;	        mvi     a,0ffh
+   309 			;;;	        ret
+   310 			;;;	
+   311 			;;;	
+   312 			;;;	;;; === === === === === === === === === === === === === === === ===
+   313 			;;;	;;; return ff if a byte is available on crt: or 00 if not.
+   314 			;;;	;;; === === === === === === === === === === === === === === === ===
+   315 			;;;	crtrdy:
+   316 			;;;	        in      crtc
+   317 			;;;	        ani     02h
+   318 			;;;	        rz
+   319 			;;;	        mvi     a,0ffh
+   320 			;;;	        ret
+   321 			;;;	
+   322 			;;;	
+   323 			;;;	;;; === === === === === === === === === === === === === === === ===
+   324 			;;;	;;; return ff if crt: can accept a byte or 00 if not.
+   325 			;;;	;;; === === === === === === === === === === === === === === === ===
+   326 			;;;	crtcw:
+   327 			;;;	        in      crtc
+   328 			;;;	        ani     04h
+   329 			;;;	        rz
+   330 			;;;	        mvi     a,0ffh
+   331 			;;;	        ret
+   332 			;;;	
+   333 			;;;	
+   334 			;;;	;;; === === === === === === === === === === === === === === === ===
+   335 			;;;	;;; get next character from crt: into a and clear its parity bit.
+   336 			;;;	;;; if there is no data available, wait for some.
+   337 			;;;	;;; === === === === === === === === === === === === === === === ===
+   338 			;;;	crtget:
+   339 			;;;	        in      crtc
+   340 			;;;	        ani     01h
+   341 			;;;	        jz      crtget
+   342 			;;;	        in      crtd
+   343 			;;;	        ani     7fh
+   344 			;;;	        ret
+   345 			;;;	
+   346 			;;;	
+   347 			;;;	;;; === === === === === === === === === === === === === === === ===
+   348 			;;;	;;; put the the character in c to crt: 
+   349 			;;;	;;; if the device can not accept data, wait until it can.
+   350 			;;;	;;; modifies the content of register a.
+   351 			;;;	;;; === === === === === === === === === === === === === === === ===
+   352 			;;;	crtput:
+   353 			;;;	        in      crtc
+   354 			;;;	        ani     01h
+   355 			;;;	        jz      crtput
+   356 			;;;	        mov     a,c
+   357 			;;;	        out     crtd
+   358 			;;;	        ret
+   359 			;;;	
+   360 			;;;	;;; === === === === === === === === === === === === === === === ===
+   361 			;;;	;;; return ff if a byte is available on ppt: or 00 if not.
+   362 			;;;	;;; === === === === === === === === === === === === === === === ===
+   363 			;;;	pptrdy:
+   364 			;;;	        in      pptc
+   365 			;;;	        ani     02h
+   366 			;;;	        rz
+   367 			;;;	        mvi     a,0ffh
+   368 			;;;	        ret
+   369 			;;;	
+   370 			;;;	
+   371 			;;;	;;; === === === === === === === === === === === === === === === ===
+   372 			;;;	;;; get next character from ppt: into a and clear its parity bit.
+   373 			;;;	;;; if there is no data available, wait for some.
+   374 			;;;	;;; === === === === === === === === === === === === === === === ===
+   375 			;;;	pptget:
+   376 			;;;	        in      pptc
+   377 			;;;	        ani     01h
+   378 			;;;	        jz      pptget
+   379 			;;;	        in      pptd
+   380 			;;;	        ani     7fh
+   381 			;;;	        ret
+   382 			;;;	
+   383 			;;;	
+   384 			;;;	;;; === === === === === === === === === === === === === === === ===
+   385 			;;;	;;; put the the character in c to ppt: 
+   386 			;;;	;;; if the device can not accept data, wait until it can.
+   387 			;;;	;;; modifies the content of register a.
+   388 			;;;	;;; === === === === === === === === === === === === === === === ===
+   389 			;;;	pptput:
+   390 			;;;	        in      pptc
+   391 			;;;	        ani     01h
+   392 			;;;	        jz      pptput
+   393 			;;;	        mov     a,c
+   394 			;;;	        out     pptd
+   395 			;;;	        ret
+   396 			;;;	
+   397 			;;;	
+   398 			;;;	;;; === === === === === === === === === === === === === === === ===
+   399 			;;;	;;; return ff if lpt: can accept a byte or 00 if not.
+   400 			;;;	;;; === === === === === === === === === === === === === === === ===
+   401 			;;;	lptcw:
+   402 			;;;	        in      lptc
+   403 			;;;	        ani     04h
+   404 			;;;	        rz
+   405 			;;;	        mvi     a,0ffh
+   406 			;;;	        ret
+   407 			;;;	
+   408 			;;;	
+   409 			;;;	;;; === === === === === === === === === === === === === === === ===
+   410 			;;;	;;; put the the character in c to lpt: 
+   411 			;;;	;;; if the device can not accept data, wait until it can.
+   412 			;;;	;;; modifies the content of register a.
+   413 			;;;	;;; === === === === === === === === === === === === === === === ===
+   414 			;;;	lptput:
+   415 			;;;	        in      lptc
+   416 			;;;	        ani     01h
+   417 			;;;	        jz      lptput
+   418 			;;;	        mov     a,c
+   419 			;;;	        out     lptd
+   420 			;;;	        ret
+   421 			;;;	
+   422 			;;;	
+   423 			;;;	;;; === === === === === === === === === === === === === === === ===
+   424 			;;;	;;; return ff if a byte is available on con: or 00 if not.
+   425 			;;;	;;; use i/o byte to determine which device is the console.
+   426 			;;;	;;; === === === === === === === === === === === === === === === ===
+   427 			;;;	const:
+   428 			;;;	        lda     iobyte
+   429 			;;;	        ani     03h
+   430 			;;;	        jz      ttyrdy
+   431 			;;;	        cpi     1
+   432 			;;;	        jz      crtrdy
+   433 			;;;	        cpi     2
+   434 			;;;	        jz      pptrdy
+   435 			;;;	;;; user defined console 1 not implemented
+   436 			;;;	        ei
+   437 			;;;	        hlt
+   438 			;;;	        ret
+   439 			;;;	
+   440 			;;;	;;; === === === === === === === === === === === === === === === ===
+   441 			;;;	;;; get next character from con: into a and clear its parity bit.
+   442 			;;;	;;; if there is no data available, wait for some.
+   443 			;;;	;;; use i/o byte to determine which device is the console.
+   444 			;;;	;;; === === === === === === === === === === === === === === === ===
+   445 			;;;	conin:
+   446 			;;;	        lda     iobyte
+   447 			;;;	        ani     03h
+   448 			;;;	        jz      ttyget
+   449 			;;;	        cpi     1
+   450 			;;;	        jz      crtget
+   451 			;;;	        cpi     2
+   452 			;;;	        jz      pptget
+   453 			;;;	;;; user defined console 1 not implemented
+   454 			;;;	        ei
+   455 			;;;	        hlt
+   456 			;;;	        ret
+   457 			;;;	
+   458 			;;;	
+   459 			;;;	=== === === === === === === === === === === === === === === ===
+   460 			;;;	;;; get next character from rdr: into a and clear its parity bit.
+   461 			;;;	;;; if there is no data available, wait for some.
+   462 			;;;	;;; use i/o byte to determine which device is the reader.
+   463 			;;;	;;; === === === === === === === === === === === === === === === ===
+   464 			;;;	reader:
+   465 			;;;	        lda     iobyte
+   466 			;;;	        ani     0ch
+   467 			;;;	        jz      ttyget
+   468 			;;;	        cpi     08h
+   469 			;;;	        jz      pptget
+   470 			;;;	;;; user defined readers 1 and 2 not implemented
+   471 			;;;	        ei
+   472 			;;;	        hlt
+   473 			;;;	        ret
+   474 			;;;	
+   475 			;;;	
+   476 			;;;	;;; === === === === === === === === === === === === === === === ===
+   477 			;;;	;;; put the the character in c to pun: 
+   478 			;;;	;;; if the device can not accept data, wait until it can.
+   479 			;;;	;;; modifies the content of register a.
+   480 			;;;	;;; use i/o byte to determine which device is the console.
+   481 			;;;	;;; === === === === === === === === === === === === === === === ===
+   482 			;;;	punch:
+   483 			;;;	        lda     iobyte
+   484 			;;;	        ani     030h
+   485 			;;;	        jz      ttyput
+   486 			;;;	        cpi     010h
+   487 			;;;	        jz      pptput
+   488 			;;;	;;; user defined punches 1 and 2 not implemented
+   489 			;;;	        ei
+   490 			;;;	        hlt
+   491 			;;;	        ret
+   492 			;;;	
+   493 			;;;	
+   494 			;;;	;;; === === === === === === === === === === === === === === === ===
+   495 			;;;	;;; put the the character in c to lst: 
+   496 			;;;	;;; if the device can not accept data, wait until it can.
+   497 			;;;	;;; modifies the content of register a.
+   498 			;;;	;;; use i/o byte to determine which device is the console.
+   499 			;;;	;;; === === === === === === === === === === === === === === === ===
+   500 			;;;	list:
+   501 			;;;	        lda     iobyte
+   502 			;;;	        ani     0c0h
+   503 			;;;	        jz      ttyput
+   504 			;;;	        cpi     040h
+   505 			;;;	        jz      crtput
+   506 			;;;	        cpi     080h
+   507 			;;;	        jz      lptput
+   508 			;;;	;;; user defined list device 1 not implemented
+   509 			;;;	        ei
+   510 			;;;	        hlt
+   511 			;;;	        ret
+   512 			;;;	
+   513 			;;;	;;; === === === === === === === === === === === === === === === ===
+   514 			;;;	;;; put nul terminated string at (hl) to lst.
+   515 			;;;	;;; leaves hl pointing after the nul.
+   516 			;;;	;;; === === === === === === === === === === === === === === === ===
+   517 			;;;	lsstr:
+   518 			;;;	        mov     a,m
+   519 			;;;	        inx     h
+   520 			;;;	        cpi     0
+   521 			;;;	        rz
+   522 			;;;	        mov     c,a
+   523 			;;;	        call    list
+   524 			;;;	        jmp     lsstr
+   525 			;;;	
+   526 			;;;	
+   527 			;;;	;;; === === === === === === === === === === === === === === === ===
+   528 			;;;	;;; put nul terminated string at (pc) to ls.
+   529 			;;;	;;; returns to the byte after the nul.
+   530 			;;;	;;; === === === === === === === === === === === === === === === ===
+   531 			;;;	lsmsg:
+   532 			;;;	        pop     hl
+   533 			;;;	        call    lsstr
+   534 			;;;	        pchl
+   535 			;;;	
+   536 			;;;	
+   537 			;;;	;;; === === === === === === === === === === === === === === === ===
+   538 			;;;	;;; return the disk head of the currently selected disk (initially
+   539 			;;;	;;; disk a) to the track 00 position. if your controller allows
+   540 			;;;	;;; access to the track 0 flag from the device, step the head until
+   541 			;;;	;;; the track 0 flag is detected. if your controller does not
+   542 			;;;	;;; support this feature, you can translate the home call into a
+   543 			;;;	;;; call on settrk with a parameter of 0.
+   544 			;;;	;;; === === === === === === === === === === === === === === === ===
+   545 			;;;	
+   546 			;;;	home:
+   547 			;;;	        mvi     c,0
+   548 			;;;	        call    settrk
+   549 			;;;	        ret
+   550 			;;;	
+   551 			;;;	
+   552 			;;;	;;; === === === === === === === === === === === === === === === ===
+   553 			;;;	;;; select the disk drive given by register c for further opera-
+   554 			;;;	;;; tions, where register c contains 0 for drive a, 1 for drive b,
+   555 			;;;	;;; 2 for drive c, and 3 for drive d. (the standard cp/m
+   556 			;;;	;;; distribution supports a maximum of four drives). if
+   557 			;;;	;;; your system has less than 4 drives, you may wish to give an
+   558 			;;;	;;; error message at the console, and terminate execution. it is
+   559 			;;;	;;; advisable to postpone the actual disk operation until
+   560 			;;;	;;; an i/o function (seek, read or write) is actually performed,
+   561 			;;;	;;; since disk selects often occur without ultimately performing
+   562 			;;;	;;; any disk i/o, and many controllers will unload the head of the
+   563 			;;;	;;; current disk before selecting the new drive. this would
+   564 			;;;	;;; cause an excessive amount of noise and disk wear.
+   565 			;;;	;;;
+   566 			;;;	;;; voidstar8080: this call resets the controller, in case a previous
+   567 			;;;	;;; read or write operation did not complete properly.
+   568 			;;;	;;; === === === === === === === === === === === === === === === ===
+   569 			;;;	seldsk:
+   570 			;;;	        mov     a,c
+   571 			;;;	        out     bdres           ;reset bdev controller
+   572 			;;;	        out     bddrv           ;select bdev drive number
+   573 			;;;	        ret
+   574 			;;;	
+   575 			;;;	;;; === === === === === === === === === === === === === === === ===
+   576 			;;;	;;; register c contains the track number for subsequent disk
+   577 			;;;	;;; accesses on the currently selected drive. you can choose to
+   578 			;;;	;;; seek the selected track at this time, or delay the seek until
+   579 			;;;	;;; the next read or write actually occurs. register c can take
+   580 			;;;	;;; on values in the range 0-76 corresponding to valid track
+   581 			;;;	;;; numbers.
+   582 			;;;	;;; === === === === === === === === === === === === === === === ===
+   583 			;;;	settrk:
+   584 			;;;	        mov     a,c
+   585 			;;;	        out     bdtrk
+   586 			;;;	        ret
+   587 			;;;	
+   588 			;;;	;;; === === === === === === === === === === === === === === === ===
+   589 			;;;	;;; register c contains the sector number (1 through 26) for sub-
+   590 			;;;	;;; sequent disk accesses on the currently selected drive. you
+   591 			;;;	;;; can choose to send this information to the controller at this
+   592 			;;;	;;; point, or instead delay sector selectino until a read
+   593 			;;;	;;; or write opration occurs.
+   594 			;;;	;;; === === === === === === === === === === === === === === === ===
+   595 			;;;	setsec:
+   596 			;;;	        mov     a,c
+   597 			;;;	        out     bdsec
+   598 			;;;	        ret
+   599 			;;;	
+   600 			;;;	;;; registers b and c (high-order 8 bits in b, low-order 8 bits
+   601 			;;;	;;; in c) contain the dma (direct memory access) address for sub-
+   602 			;;;	;;; sequent read or write operations. for example, if b = 00h
+   603 			;;;	;;; and c = 80h when setdma is called, then all subsequent read
+   604 			;;;	;;; operations read their data into 80h through 0ffh, and all
+   605 			;;;	;;; subsequent write operations get their data from 80h through
+   606 			;;;	;;; 0ffh, until the next call to setdma occurs. the initial
+   607 			;;;	;;; dma address is assumed to be 80h. note that the controller
+   608 			;;;	;;; need not actually support direct memory access. if, for
+   609 			;;;	;;; example, all data is received and sent through i/o ports, the
+   610 			;;;	;;; cbios which you construct will use he 128-byte area starting
+   611 			;;;	;;; at the selected dma address for the memory buffer during the
+   612 			;;;	;;; following read or write operations.
+   613 			;;;	
+   614 			;;;	setdma:
+   615 			;;;	        mov     l,c
+   616 			;;;	        mov     h,b
+   617 			;;;	        shld    dmaad
+   618 			;;;	        ret
+   619 			;;;	
+   620 			;;;	;;; === === === === === === === === === === === === === === === ===
+   621 			;;;	;;; assuming the drive has been selected, the track has been set,
+   622 			;;;	;;; the sector has been set, and the dma address has been speci-
+   623 			;;;	;;; fied, the read subroutine attempts to read one sector based
+   624 			;;;	;;; upon these parameters, and returns the following error codes
+   625 			;;;	;;; in register a:
+   626 			;;;	;;;
+   627 			;;;	;;;            0      no errors occurred
+   628 			;;;	;;;            1      non-recoverable error condition occurred
+   629 			;;;	;;;
+   630 			;;;	;;; currently, cp/m responds only to a zero or non-zero value as
+   631 			;;;	;;; the return code. that is, if the value in register a is 0
+   632 			;;;	;;; then cp/m assumes that the disk operation completed properly.
+   633 			;;;	;;; if an error occurs, however, the cbios should attempt at
+   634 			;;;	;;; least 10 re-tries to see if the error is recoverable. when an
+   635 			;;;	;;; error is reported the bdos will print the message "bdos err
+   636 			;;;	;;; on x: bad sector." the operator then has the option of
+   637 			;;;	;;; typing <cr> to ignore the error, or control-c to abort.
+   638 			;;;	;;; === === === === === === === === === === === === === === === ===
+   639 			;;;	read:   
+   640 			;;;	        lhld    dmaad
+   641 			;;;	        mvi     c,128
+   642 			;;;	readl:
+   643 			;;;	        in      bddat
+   644 			;;;	        mov     m,a
+   645 			;;;	        inx     hl
+   646 			;;;	        dcr     c
+   647 			;;;	        jnz     readl
+   648 			;;;	        xra     a
+   649 			;;;	        ret
+   650 			;;;	
+   651 			;;;	;;; === === === === === === === === === === === === === === === ===
+   652 			;;;	;;; write the data from the currently selected dma address to the
+   653 			;;;	;;; currently selected drive, track, and sector. the data should
+   654 			;;;	;;; be marked as "non deleted data" to maintain compatibility
+   655 			;;;	;;; with other cp/m systems. the error codes given in the read
+   656 			;;;	;;; command are returned in register a, with error recovery at-
+   657 			;;;	;;; tempts as described above.
+   658 			;;;	;;; === === === === === === === === === === === === === === === ===
+   659 			;;;	write:  
+   660 			;;;	        lhld    dmaad
+   661 			;;;	        mvi     c,128
+   662 			;;;	writel:
+   663 			;;;	        mov     a,m
+   664 			;;;	        out     bddat
+   665 			;;;	        inx     hl
+   666 			;;;	        dcr     c
+   667 			;;;	        jnz     writel
+   668 			;;;	        xra     a
+   669 			;;;	        ret
+   670 			;;;	
+   671 			;;;	;;; === === === === === === === === === === === === === === === ===
+   672 			;;;	;;; return the ready status of the list device. used by
+   673 			;;;	;;; the despool program to improve console response during
+   674 			;;;	;;; its operation. the value 00 is returned in a it the
+   675 			;;;	;;; list device is not ready to accept a character, and
+   676 			;;;	;;; 0ffh if a character can be sent to the printer. note
+   677 			;;;	;;; that a 00 value always suffices.
+   678 			;;;	;;; === === === === === === === === === === === === === === === ===
+   679 			;;;	listst:
+   680 			;;;	        lda     iobyte
+   681 			;;;	        ani     0c0h
+   682 			;;;	        jz      ttycw
+   683 			;;;	        cpi     040h
+   684 			;;;	        jz      crtcw
+   685 			;;;	        cpi     080h
+   686 			;;;	        jz      lptcw
+   687 			;;;	;;; user defined list device 1 not implemented
+   688 			;;;	        ei
+   689 			;;;	        hlt
+   690 			;;;	        ret
+   691 			;;;	
+   692 			;;;	;;; === === === === === === === === === === === === === === === ===
+   693 			;;;	;;; performs sector logical to physical sector translation.
+   694 			;;;	;;; this is the simplest possible version.
+   695 			;;;	;;; === === === === === === === === === === === === === === === ===
+   696 			;;;	sectran:
+   697 			;;;	        ei
+   698 			;;;	        hlt
+   699 			;;;	        ret
+   700 			;;;	
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+rambdkb		EQU	00010h
+rambdct		EQU	00003h
+rombdkb		EQU	00002h
+rombdct		EQU	00008h
+ramkb		EQU	00030h
+ramtop		EQU	0C000h
+rombase		EQU	0C000h
+ttyd		EQU	00000h
+ttyc		EQU	00001h
+bdres		EQU	0000Ah
+bddrv		EQU	0000Bh
+bdtrk		EQU	0000Ch
+bdsec		EQU	0000Dh
+bddat		EQU	0000Eh
+kbbuf		EQU	0BF00h
+cold		Label	0C000h
+warm		Label	0C004h
+repl		Label	0C02Fh
+docmd		Label	0C05Fh
+gets		Label	0C064h
+gets1		Label	0C06Dh
+getsbs		Label	0C083h
+conget		Label	0C096h
+conmsg		Label	0C0A2h
+constr		Label	0C0A7h
+conout		Label	0C0B3h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 15
+"SET"	= 0
+Labels	= 11
+
+

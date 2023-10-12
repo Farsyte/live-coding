@@ -9,8 +9,8 @@
      9      A4 00	ccp	equ	3400h+bias	;base of ccp
     10      AC 06	bdos	equ	ccp+806h	;base of bdos
     11      BA 00	bios	equ	ccp+1600h	;base of bios
-    12      BD 80	bioslim	equ     ccp+1980H       ;end of data loaded from disk
-    13      02 80	uimem	equ	(msize*1024)-bioslim
+    12      BD 00	bioslim	equ     ccp+1900H       ;end of data loaded from disk
+    13      03 00	uimem	equ	(msize*1024)-bioslim
     14
     15 			; page zero locations
     16      00 04	cdisk	equ	0004h		;current disk number 0=a,... l5=p
@@ -48,36 +48,36 @@
     47 BA37			dw	0000h, 0000h
             0000 0000 
     48 BA3B			dw	dirbf, dpblk
-            82BD 8DBA 
+            02BD 8DBA 
     49 BA3F			dw	chk00, all00
-            7EBE 02BE 
+            FEBD 82BD 
     50 			;	disk parameter header for disk 01
     51 BA43			dw	trans, 0000h
             73BA 0000 
     52 BA47			dw	0000h, 0000h
             0000 0000 
     53 BA4B			dw	dirbf, dpblk
-            82BD 8DBA 
+            02BD 8DBA 
     54 BA4F			dw	chk01, all01
-            8EBE 21BE 
+            0EBE A1BD 
     55 			;	disk parameter header for disk 02
     56 BA53			dw	trans, 0000h
             73BA 0000 
     57 BA57			dw	0000h, 0000h
             0000 0000 
     58 BA5B			dw	dirbf, dpblk
-            82BD 8DBA 
+            02BD 8DBA 
     59 BA5F			dw	chk02, all02
-            9EBE 40BE 
+            1EBE C0BD 
     60 			;	disk parameter header for disk 03
     61 BA63			dw	trans, 0000h
             73BA 0000 
     62 BA67			dw	0000h, 0000h
             0000 0000 
     63 BA6B			dw	dirbf, dpblk
-            82BD 8DBA 
+            02BD 8DBA 
     64 BA6F			dw	chk03, all03
-            AEBE 5FBE 
+            2EBE DFBD 
     65 			;
     66 			;	sector translate vector
     67 BA73		trans:	db	 1,  7, 13, 19	;sectors  1,  2,  3,  4
@@ -461,7 +461,7 @@
    422 			setdma:
    423 BB85 69			mov	l, c		;low order address
    424 BB86 60			mov	h, b		;high order address
-   425 BB87 22 80 BD		shld	dmaad		;save the address
+   425 BB87 22 00 BD		shld	dmaad		;save the address
    426 BB8A C9			ret
    427
    428 			;;; === === === === === === === === === === === === === === === ===
@@ -484,7 +484,7 @@
    445 			;;; typing <cr> to ignore the error, or control-c to abort.
    446 			;;; === === === === === === === === === === === === === === === ===
    447 			read:   
-   448 BB8B 2A 80 BD	        lhld    dmaad
+   448 BB8B 2A 00 BD	        lhld    dmaad
    449 BB8E 0E 80	        mvi     c,128
    450 			readl:
    451 BB90 DB 0E	        in      bddat
@@ -504,7 +504,7 @@
    465 			;;; tempts as described above.
    466 			;;; === === === === === === === === === === === === === === === ===
    467 			write:  
-   468 BB9A 2A 80 BD	        lhld    dmaad
+   468 BB9A 2A 00 BD	        lhld    dmaad
    469 BB9D 0E 80	        mvi     c,128
    470 			writel:
    471 BB9F 7E		        mov     a,m
@@ -523,24 +523,24 @@
    484 			;	system memory image (the space must be available,
    485 			;	however, between the BIOS and the end of memory).
    486 			;
-   487      BD 80	        org	bioslim
+   487      BD 00	        org	bioslim
    488 			bss:    	 	;beginning of data area
    489
-   490 BD80		dmaad:	ds	2	;direct memory address
+   490 BD00		dmaad:	ds	2	;direct memory address
    491
-   492 BD82		dirbf:	ds	128	;scratch directory area
-   493 BE02		all00:	ds	31	;allocation vector 0
-   494 BE21		all01:	ds	31	;allocation vector 1
-   495 BE40		all02:	ds	31	;allocation vector 2
-   496 BE5F		all03:	ds	31	;allocation vector 3
-   497 BE7E		chk00:	ds	16	;check vector 0
-   498 BE8E		chk01:	ds	16	;check vector 1
-   499 BE9E		chk02:	ds	16	;check vector 2
-   500 BEAE		chk03:	ds	16	;check vector 3
+   492 BD02		dirbf:	ds	128	;scratch directory area
+   493 BD82		all00:	ds	31	;allocation vector 0
+   494 BDA1		all01:	ds	31	;allocation vector 1
+   495 BDC0		all02:	ds	31	;allocation vector 2
+   496 BDDF		all03:	ds	31	;allocation vector 3
+   497 BDFE		chk00:	ds	16	;check vector 0
+   498 BE0E		chk01:	ds	16	;check vector 1
+   499 BE1E		chk02:	ds	16	;check vector 2
+   500 BE2E		chk03:	ds	16	;check vector 3
    501 			endbss:			;end of data area
    502 			        
    503      01 A9	bioslen	equ     endbios-bios        
-   504      01 D7	biosavl	equ	bioslim-endbios	;can add this much to the BIOS segment
+   504      01 57	biosavl	equ	bioslim-endbios	;can add this much to the BIOS segment
    505
    506      01 3E	bsslen	equ	endbss-bss;	;size of bssa area
    507      01 42	bssavl	equ	0280H-bsslen	;can add this much to the BSS segment
@@ -559,8 +559,8 @@ bias		EQU	07000h
 ccp		EQU	0A400h
 bdos		EQU	0AC06h
 bios		EQU	0BA00h
-bioslim		EQU	0BD80h
-uimem		EQU	00280h
+bioslim		EQU	0BD00h
+uimem		EQU	00300h
 cdisk		EQU	00004h
 iobyte		EQU	00003h
 nsects		EQU	0002Ch
@@ -579,7 +579,7 @@ bdsec		EQU	0000Dh
 bddat		EQU	0000Eh
 endbios		EQU	0BBA9h
 bioslen		EQU	001A9h
-biosavl		EQU	001D7h
+biosavl		EQU	00157h
 bsslen		EQU	0013Eh
 bssavl		EQU	00142h
 wboote		Label	0BA03h
@@ -607,18 +607,18 @@ read		Label	0BB8Bh
 readl		Label	0BB90h
 write		Label	0BB9Ah
 writel		Label	0BB9Fh
-bss		Label	0BD80h
-dmaad		Label	0BD80h
-dirbf		Label	0BD82h
-all00		Label	0BE02h
-all01		Label	0BE21h
-all02		Label	0BE40h
-all03		Label	0BE5Fh
-chk00		Label	0BE7Eh
-chk01		Label	0BE8Eh
-chk02		Label	0BE9Eh
-chk03		Label	0BEAEh
-endbss		Label	0BEBEh
+bss		Label	0BD00h
+dmaad		Label	0BD00h
+dirbf		Label	0BD02h
+all00		Label	0BD82h
+all01		Label	0BDA1h
+all02		Label	0BDC0h
+all03		Label	0BDDFh
+chk00		Label	0BDFEh
+chk01		Label	0BE0Eh
+chk02		Label	0BE1Eh
+chk03		Label	0BE2Eh
+endbss		Label	0BE3Eh
 
 Statistics
 ----------

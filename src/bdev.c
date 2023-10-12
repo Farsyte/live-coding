@@ -119,6 +119,11 @@ void bdev_linked(Bdev BDEV)
     EDGE_ON_FALL(DAT_WR_, bdev_wr_DAT, BDEV);
 }
 
+// bdev_reset: performs a "soft" reset of the controller
+// terminating any read or write in progress and selecting
+// the first sector of the first track of the first drive
+// for the next operation.
+
 static void bdev_reset(Bdev BDEV)
 {
     BDEV_ALL(BDEV);

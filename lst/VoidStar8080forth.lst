@@ -1,0 +1,7268 @@
+     1     			TITLE	'8080 FIG-FORTH 1.1 VERSION A0 17SEP79 for VoidStar8080'
+     2 			;
+     3 			;	FIG-FORTH  RELEASE 1.1  FOR THE 8080 PROCESSOR
+     4 			;
+     5 			;	October 2023: Customized for the VoidStar8080
+     6 			;	-- customization in progress but not complete
+     7 			;	-- conversion to ROM resident not yet started
+     8 			;
+     9 			;	ALL PUBLICATIONS OF THE FORTH INTEREST GROUP
+    10 			;	ARE PUBLIC DOMAIN.  THEY MAY BE FURTHER
+    11 			;	DISTRIBUTED BY THE INCLUSION OF THIS CREDIT
+    12 			;	NOTICE:
+    13 			;
+    14 			;	THIS PUBLICATION HAS BEEN MADE AVAILABLE BY THE
+    15 			;		     FORTH INTEREST GROUP
+    16 			;		     P. O. BOX 1105
+    17 			;		     SAN CARLOS, CA 94070
+    18 			;
+    19 			;	IMPLEMENTATION BY:
+    20 			;		JOHN CASSADY
+    21 			;                FOR THE FORTH IMPLEMENTATION TEAM (FIT) MARCH 1979
+    22 			;	MODIFIED for CP/M by:
+    23 			;	   	KIM HARRIS
+    24 			;               FIT LIBRARIAN SEPT 1979
+    25 			;	ACKNOWLEDGEMENTS:
+    26 			;		GEORGE FLAMMER
+    27 			;		ROBT. D. VILLWOCK
+    28 			;               Microsystems inc. Pasadena Ca.
+    29 			;
+    30 			;        DISTRIBUTED BY    FORTH POWER
+    31 			;               P.O. BOX 2455 SAN RAFAEL CA
+    32 			;               94902   415-471-1762
+    33 			;               SUPPORT, SYSTEMS PROGRAMMING, 
+    34 			;               APPLICATIONS PROGRAMMING
+    35 			;
+    36 			;  UNLESS OTHERWISE INDICATED, THIS DISTRIBUTION IS SUPPORTED
+    37 			;  SOLELY BY THE FORTH INTEREST GROUP (LISTINGS) AND BY
+    38 			;  FORTH POWER (MACHINE READABLE COPIES AND EXTENSIONS).
+    39 			;
+    40 			;   COPYRIGHT AND TRADEMARK NOTICES:
+    41 			;   FORTH (C) 1974,1975,1976,1977,1978,1979 FORTH INC.
+    42 			;   FIST (C) 1979 FORTH INTERNATIONAL STANDARDS TEAM
+    43 			;   FIG, FORTH DIMENSIONS, FIT, (C) 1978, 1979 FORTH INTEREST GROUP
+    44 			;   FORTH POWER (C) 1978, 1979 MARIN SERVICES, INC.
+    45 			;   FORTH 77, FORTH 78, FORTH 79, STANDARD FORTH, FORTH INTERNATIONAL
+    46 			;   STANDARD, (C) 1976, 1977, 1978, 1979, FIST
+    47 			;   MULTI-FORTH (C) 1978, 1979 CREATIVE SOLUTIONS
+    48 			;   CP/M (C) 1979 DIGITAL RESEARCH INC.
+    49 			;   MOST ANYTHING WITH AN 11 IN IT (C) DIGITAL EQUIPMENT CORP
+    50 			;   THERE MAY BE OTHERS ! !
+    51 			;   MINIFORTH, MICROFORTH, POLYFORTH, FORTH  TM FORTH INC.
+    52 			;   FIG-FORTH (C) 1978 1979 FORTH INTEREST GROUP
+    53 			;   ALL RIGHTS RESERVED EXCEPT AS EXPRESSLY INDICATED !
+    54 			;
+    55 			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    56 			;
+    57 			;               UPDATES, PATCHES, BUG REPORTS, EXTENSIONS
+    58 			;               FOR THIS SOFTWARE IN  FORTH DIMENSIONS  
+    59 			;               NEWSLETTER OF FORTH INTEREST GROUP (FIG)
+    60 			;               6 issues $5.00 includes fig membership
+    61 			;
+    62 			;          DOCUMENTATION FROM FIG or FORTH POWER
+    63 			;        
+    64 			;               FORTH PRIMER (240pp) Richard Stevens
+    65 			;               KITT PEAK NATIONAL OBSERVATORY    $20.00
+    66 			;    
+    67 			;               FORTH IMPLEMENTATION TEAM LANGUAGE MODEL, EDITOR SOURCE,
+    68 			;               LANGUAGE GLOSSARY, AND IMPLEMENTATION GUIDE  $10.00
+    69 			;
+    70 			;               FORTH FOR MICROCOMPUTERS by JOHN S JAMES
+    71 			;               reprint from DDJ #25          $2.00
+    72 			;
+    73 			;               FORTH POCKET PROGRAMMERS CARD  FREE W/ S.A.S.E.
+    74 			;
+    75 			;               SOURCE CODE FOR TI990, 6502, 6800, PDP11, PACE,
+    76 			;               8080 (included here)    $10.00/ LISTING
+    77 			;
+    78 			;          DOCUMENTATION FROM FIG
+    79 			;
+    80 			;               USING FORTH by ELIZABETH RATHER (200pp)
+    81 			;               FORTH INC. 1979               $20.00
+    82 			;
+    83 			;          DOCUMENTATION FROM FORTH POWER
+    84 			;               
+    85 			;
+    86 			;               CP/M MULTI-FORTH USERS MANUAL  $20.00
+    87 			;               FORTH 79 INTERNATIONAL STANDARD 
+    88 			;
+    89 			;               CP/M 8080 FORTH BY FIG 8" DISKETT IBM STD.
+    90 			;               WITH EDITOR AND ASSEMBLER, COPY AND PRINT,
+    91 			;               AND USERS GUIDE                $65.00
+    92 			;
+    93 			;               also on 5" CP/M, 5 & 8 Northstar DOS
+    94 			;
+    95 			;               CP/M Multi-Forth, Full 79 International
+    96 			;               Standard with extensions, Strings, Prom burner,
+    97 			;               Real time clock, VIDEO EDITOR, UTILITIES
+    98 			;               A PROFESSIONAL LEVEL PRODUCT    $150.00
+    99 			;               includes manual
+   100 			;
+   101 			;               PDP 11 FORTH by JOHN S. JAMES
+   102 			;               8" RX01 diskett or 9 track 800 bpi DOS tape
+   103 			;               runs under OS or stand alone
+   104 			;               WITH USERS GUIDE                $150.00
+   105 			;
+   106 			;               FIG TRS 80 FORTH cassette or diskette
+   107 			;               WRITE FOR PRICES
+   108 			;
+   109 			;               APPLE FORTH BY CapN' SOFTWARE   $40.00
+   110 			;               EASYWRITER (word processor for APPLE
+   111 			;               by CapN' SOFTWARE)        $100.00
+   112 			;
+   113 			;               APPLE FORTH BY UNIVERSITY OF UTRECHT,
+   114 			;               includes floating pt and many extensions
+   115 			;               A PROFESSIONAL LEVEL PRODUCT  $100.00
+   116 			;
+   117 			;               FORTH FOR MICROPROSSOR DEVELOPMENT SYSTEMS,
+   118 			;               FORTH FOR D.G., VAX 11, INTERDATA, Series 1,
+   119 			;               C.A., HONEYWELL LEVEL 6, and others,   Write for prices
+   120 			;
+   121 			;          DOCUMENTATION FROM CALTECH
+   122 			;                CALTECH FORTH MANUAL $6.00
+   123 			;               CAL TECH BOOKSTORE PASADENA CA
+   124 			;               by MARTIN S. EWING 100pp postpaid
+   125 			;
+   126 			;  CALL FOR PAPERS, ARTICLES, SPEAKERS: FOR FORTH DIMENSIONS
+   127 			;   AND TRADE PUBLICATIONS SEND TO FIG.  FOR SPEAKERS, WORKSHOPS,
+   128 			;   SHOWS AND CONVENTIONS CONTACT FIG.  FIG SOLICITES FORTH SOFTWARE
+   129 			;   FOR INCLUSION IN THIS EFFORT.
+   130 			;               FORTH INTERNATIONAL STANDARDS TEAM (FIT)
+   131 			;              FORTH 79 INTERNATIONAL STANDARD, REQUIRED AND
+   132 			;              RESERVED WORD GLOSSARY, AND STANDARDS ACTIVITY
+   133 			;              DISTRIBUTION.  $30.00 TO FIT c/o FIG or to
+   134 			;
+   135 			;              CAROLYN ROSENBERG, FIT SECRETARY
+   136 			;              c/o FORTH INC. MANHATTAN BEACH CA.
+   137 			;
+   138 			;
+   139 			;-----------------------------------------------------
+   140 			;	LABELS USED WHICH DIFFER FROM FIG-FORTH PUBLISHED
+   141 			;	8080 LISTING 1.0:
+   142 			;
+   143 			;	REL 1.1		REL 1.0
+   144 			;	-------		-------
+   145 			;	ANDD		AND
+   146 			;	CSPP		CSP
+   147 			;	ELSEE		ELSE
+   148 			;	ENDD		END
+   149 			;	ENDIFF		ENDIF
+   150 			;	ERASEE		ERASE
+   151 			;	IDO		I
+   152 			;	IFF		IF
+   153 			;	INN		IN
+   154 			;	MODD		MOD
+   155 			;	ORR		OR
+   156 			;	OUTT		OUT
+   157 			;	RR		R
+   158 			;	RPP		RP
+   159 			;	SUBB		SUB
+   160 			;	XORR		XOR
+   161 			;
+   162 			;	SEE ALSO:
+   163 			;		RELEASE & VERSION NUMBERS
+   164 			;		ASCII CHARACTER EQUATES
+   165 			;		MEMORY ALLOCATION
+   166 			;		DISK INTERFACE
+   167 			;		CONSOLE & PRINTER INTERFACE
+   168 			;
+   169     			PAGE
+   170 			;
+   171 			;----------------------------------------------------------
+   172 			;
+   173 			;	RELEASE & VERSION NUMBERS
+   174 			;
+   175      00 01	FIGREL	EQU	1	; FIG RELEASE #
+   176      00 01	FIGREV	EQU	1	; FIG REVISION #
+   177      00 01	USRVER	EQU	1	; USER VERSION #
+   178 			;
+   179 			;	ASCII CHARACTERS USED
+   180 			;
+   181      00 20	ABL	EQU	20H	; SPACE
+   182      00 0D	ACR	EQU	0DH	; CARRIAGE RETURN
+   183      00 2E	ADOT	EQU	02EH	; PERIOD
+   184      00 07	BELL	EQU	07H	; (^G)
+   185      00 7F	BSIN	EQU	7FH	; INPUT BACKSPACE CHR = RUBOUT
+   186      00 08	BSOUT	EQU	08H	; OUTPUT BACKSPACE (^H)
+   187      00 10	DLE	EQU	10H	; (^P)
+   188      00 0A	LF	EQU	0AH	; LINE FEED
+   189      00 0C	FF	EQU	0CH	; FORM FEED (^L)
+   190 			;
+   191 			;	MEMORY ALLOCATION
+   192 			;
+   193      C0 00	EM	EQU	0C000H	; TOP OF MEMORY + 1 = LIMIT
+   194      00 01	NSCR	EQU	1	; NUMBER OF 1024 BYTE SCREENS
+   195      00 80	KBBUF	EQU	128	; DATA BYTES PER DISK BUFFER
+   196      00 40	US	EQU	40H	; USER VARIABLES SPACE
+   197      00 A0	RTS	EQU	0A0H	; RETURN STACK & TERM BUFF SPACE
+   198 			;
+   199      00 84	CO	EQU	KBBUF+4	; DISK BUFFER + 2 HEADER + 2 TAIL
+   200      00 08	NBUF	EQU	NSCR*400H/KBBUF	; NUMBER OF BUFFERS
+   201      BB E0	BUF1	EQU	EM-(CO*NBUF)	; ADDR FIRST DISK BUFFER
+   202      BB A0	INITR0	EQU	BUF1-US		; (R0)
+   203      BB 00	INITS0	EQU	INITR0-RTS	; (S0)
+   204 			;
+   205     			PAGE
+   206 			;
+   207 			;-------------------------------------------------------
+   208 			;
+   209      01 00		ORG	100H
+   210 0100 00		ORIG	NOP
+   211 0101 C3 2B 11		JMP	CLD	; VECTOR TO COLD START
+   212 0104 00			NOP
+   213 0105 C3 15 11		JMP	WRM	; VECTOR TO WARM START
+   214 0108			DB	FIGREL	; FIG RELEASE #
+            01 
+   215 0109			DB	FIGREV	; FIG REVISION #
+            01 
+   216 010A			DB	USRVER	; USER VERSION #
+            01 
+   217 010B			DB	0EH	; IMPLEMENTATION ATTRIBUTES
+            0E 
+   218 010C			DW	TASK-7  ; TOPMOST WORD IN FORTH VOCABULARY
+            6A1B 
+   219 010E			DW	BSIN	; BKSPACE CHARACTER
+            7F00 
+   220 0110			DW	INITR0	; INIT (UP)
+            A0BB 
+   221 			;<<<<<< FOLLOWING USED BY COLD;
+   222 			;	MUST BE IN SAME ORDER AS USER VARIABLES
+   223 0112			DW	INITS0	; INIT (S0)
+            00BB 
+   224 0114			DW	INITR0	; INIT (R0)
+            A0BB 
+   225 0116			DW	INITS0	; INIT (TIB)
+            00BB 
+   226 0118			DW	20H		; INIT (WIDTH)
+            2000 
+   227 011A			DW	0		; INIT (WARNING)
+            0000 
+   228 011C			DW	INITDP		; INIT (FENCE)
+            751B 
+   229 011E			DW	INITDP		; INIT (DP)
+            751B 
+   230 0120			DW	FORTH+6		; INIT (VOC-LINK)
+            8F10 
+   231 			;<<<<<< END DATA USED BY COLD
+   232 0122			DW	5H,0B320H	; CPU NAME	( HW,LW )
+            0500 20B3 
+   233 			;				  ( 32 BIT, BASE 36 INTEGER )
+   234 			;
+   235 			;
+   236 			;			+---------------+
+   237 			;	B +ORIGIN	| . . .W:I.E.B.A|	IMPLEMENTATION
+   238 			;			+---------------+	ATTRIBUTES
+   239 			;			       ^ ^ ^ ^ ^
+   240 			;			       | | | | +-- PROCESSOR ADDR =
+   241 			;			       | | | |     { 0 BYTE | 1 WORD }
+   242 			;			       | | | +---- HIGH BYTE AT
+   243 			;			       | | |       { 0 LOW ADDR |
+   244 			;			       | | |	     1 HIGH ADDR }
+   245 			;			       | | +------ ADDR MUST BE EVEN
+   246 			;			       | |	   { 0 YES | 1 NO }
+   247 			;			       | +-------- INTERPRETER IS
+   248 			;			       |	   { 0 PRE | 1 POST }
+   249 			;			       |	   INCREMENTING
+   250 			;			       +---------- { 0 ABOVE SUFFICIENT
+   251 			;					     | 1 OTHER DIFFER-
+   252 			;					     ENCES EXIST }
+   253 			;
+   254     			PAGE
+   255 			;
+   256 			;------------------------------------------------------
+   257 			;
+   258 			;	FORTH REGISTERS
+   259 			;
+   260 			;	FORTH	8080	FORTH PRESERVATION RULES
+   261 			;	-----	----	------------------------------------------------------------------------
+   262 			;	IP	BC	SHOULD BE PRESERVED ACROSS
+   263 			;			  FORTH WORDS
+   264 			;	W	DE	SOMETIMES OUTPUT FROM NEXT
+   265 			;			MAY BE ALTERED BEFORE JMP'ING TO NEXT
+   266 			;			INPUT ONLY WHEN 'DPUSH' CALLED
+   267 			;	SP	SP	SHOULD BE USED ONLY AS DATA STACK
+   268 			;			  ACROSS FORTH WORDS
+   269 			;			MAY BE USED WITHIN FORTH WORDS
+   270 			;			  IF RESTORED BEFORE 'NEXT'
+   271 			;		HL	NEVER OUTPUT FROM NEXT
+   272 			;			INPUT ONLY WHEN 'HPUSH' CALLED
+   273 			;
+   274 0126		UP	DW	INITR0	; USER AREA POINTER
+            A0BB 
+   275 0128		RPP	DW	INITR0	; RETURN STACK POINTER
+            A0BB 
+   276 			;
+   277 			;------------------------------------------------------
+   278 			;
+   279 			;	COMMENT CONVENTIONS:
+   280 			;
+   281 			;	=	MEANS	"IS EQUAL TO"
+   282 			;	<-	MEANS	ASSIGNMENT
+   283 			;
+   284 			;	NAME	=	ADDRESS OF NAME
+   285 			;	(NAME)	=	CONTENTS AT NAME
+   286 			;	((NAME))=	INDIRECT CONTENTS
+   287 			;
+   288 			;	CFA	=	ADDRESS OF CODE FIELD
+   289 			;	LFA	=	ADDRESS OF LINK FIELD
+   290 			;	NFA	=	ADDR OF START OF NAME FIELD
+   291 			;	PFA	=	ADDR OF START OF PARAMETER FIELD
+   292 			;
+   293 			;	S1	=	ADDR OF 1ST WORD OF PARAMETER STACK
+   294 			;	S2	=	ADDR OF 2ND WORD OF PARAMETER STACK
+   295 			;	R1	=	ADDR OF 1ST WORD OF RETURN STACK
+   296 			;	R2	=	ADDR OF 2ND WORD OF RETURN STACK
+   297 			;	( ABOVE STACK POSITIONS VALID BEFORE & AFTER EXECUTION
+   298 			;	OF ANY WORD, NOT DURING. )
+   299 			;
+   300 			;	LSB	=	LEAST SIGNIFICANT BIT
+   301 			;	MSB	=	MOST SIGNIFICANT BIT
+   302 			;	LB	=	LOW BYTE
+   303 			;	HB	=	HIGH BYTE
+   304 			;	LW	=	LOW WORD
+   305 			;	HW	=	HIGH WORD
+   306 			;	( MAY BE USED AS SUFFIX TO ABOVE NAMES )
+   307 			;
+   308     			PAGE
+   309 			;
+   310 			;---------------------------------------------------
+   311 			;	DEBUG SUPPORT
+   312 			;
+   313 			;	TO USE:
+   314 			;	(1)	SET 'BIP' TO IP VALUE TO HALT, CANNOT BE CFA
+   315 			;	(2)	SET MONITOR'S BREAKPOINT PC TO 'BREAK'
+   316 			;			OR PATCH 'HLT' INSTR. THERE
+   317 			;	(3)	PATCH A 'JMP TNEXT' AT 'NEXT'
+   318 			;	WHEN (IP) = (BIP) CPU WILL HALT
+   319 			;
+   320 012A		BIP	DW	0	; BREAKPOINT ON IP VALUE
+            0000 
+   321 			;
+   322 012C 21 2A 01	TNEXT	LXI	H,BIP
+   323 012F 7E			MOV	A,M	; LB
+   324 0130 B9			CMP	C
+   325 0131 C2 3D 01		JNZ	TNEXT1
+   326 0134 23			INX	H
+   327 0135 7E			MOV	A,M	; HB
+   328 0136 B8			CMP	B
+   329 0137 C2 3D 01		JNZ	TNEXT1
+   330 013A 00		BREAK	NOP		; PLACE BREAKPOINT HERE
+   331 013B 00			NOP
+   332 013C 00			NOP
+   333 013D 0A		TNEXT1	LDAX	B
+   334 013E 03			INX	B
+   335 013F 6F			MOV	L,A
+   336 0140 C3 48 01		JMP	NEXT+3
+   337 			;
+   338 			;--------------------------------------------------
+   339 			;
+   340 			;	NEXT, THE FORTH ADDRESS INTERPRETER
+   341 			;	  ( POST INCREMENTING VERSION )
+   342 			;
+   343 0143 D5		DPUSH	PUSH	D
+   344 0144 E5		HPUSH	PUSH	H
+   345 0145 0A		NEXT	LDAX	B	;(W) <- ((IP))
+   346 0146 03			INX	B	;(IP) <- (IP)+2
+   347 0147 6F			MOV	L,A
+   348 0148 0A			LDAX	B
+   349 0149 03			INX	B
+   350 014A 67			MOV	H,A	; (HL) <- CFA
+   351 014B 5E		NEXT1:	MOV	E,M	;(PC) <- ((W))
+   352 014C 23			INX	H
+   353 014D 56			MOV	D,M
+   354 014E EB			XCHG
+   355 014F E9			PCHL		; NOTE: (DE) = CFA+1
+   356 			;
+   357     			PAGE
+   358 			;
+   359 			;		FORTH DICTIONARY
+   360 			;
+   361 			;
+   362 			;	DICTIONARY FORMAT:
+   363 			;
+   364 			;				BYTE
+   365 			;	ADDRESS	NAME		CONTENTS
+   366 			;	------- ----		--------
+   367 			;					  ( MSB=1
+   368 			;					  ( P=PRECEDENCE BIT
+   369 			;					  ( S=SMUDGE BIT
+   370 			;	NFA	NAME FIELD	1PS<LEN>  < NAME LENGTH
+   371 			;				0<1CHAR>  MSB=0, NAME'S 1ST CHAR
+   372 			;				0<2CHAR>
+   373 			;				  ...
+   374 			;				1<LCHAR>  MSB=1, NAME'S LAST CHR
+   375 			;	LFA	LINK FIELD	<LINKLB>  = PREVIOUS WORD'S NFA
+   376 			;				<LINKHB>
+   377 			;LABEL:	CFA	CODE FIELD	<CODELB>  = ADDR CPU CODE
+   378 			;				<CODEHB>
+   379 			;	PFA	PARAMETER	<1PARAM>  1ST PARAMETER BYTE
+   380 			;		FIELD		<2PARAM>
+   381 			;				  ...
+   382 			;
+   383 			;
+   384 0150		DP0:	DB	83H	; LIT
+            83 
+   385 0151			DB	'LI'
+            4C 49 
+   386 0153			DB	'T'+80H
+            54 80 
+   387 0155			DW	0	; (LFA)=0 MARKS END OF DICTIONARY
+            0000 
+   388 0157		LIT	DW	$+2	;(S1) <- ((IP))
+            5901 
+   389 0159 0A			LDAX	B	; (HL) <- ((IP)) = LITERAL
+   390 015A 03			INX	B	; (IP) <- (IP) + 2
+   391 015B 6F			MOV	L,A	; LB
+   392 015C 0A			LDAX	B	; HB
+   393 015D 03			INX	B
+   394 015E 67			MOV	H,A
+   395 015F C3 44 01		JMP	HPUSH	; (S1) <- (HL)
+   396 			 ;
+   397 0162			DB	87H	; EXECUTE
+            87 
+   398 0163			DB	'EXECUT'
+            45 58 45 43 
+            55 54 
+   399 0169			DB	'E'+80H
+            45 80 
+   400 016B			DW	LIT-6
+            5101 
+   401 016D		EXEC	DW	$+2
+            6F01 
+   402 016F E1			POP	H	; (HL) <- (S1) = CFA
+   403 0170 C3 4B 01		JMP	NEXT1
+   404 			;
+   405 0173			DB	86H	; BRANCH
+            86 
+   406 0174			DB	'BRANC'
+            42 52 41 4E 
+            43 
+   407 0179			DB	'H'+80H
+            48 80 
+   408 017B			DW	EXEC-0AH
+            6301 
+   409 017D		BRAN	DW	$+2	;(IP) <- (IP) + ((IP))
+            7F01 
+   410 017F 60		BRAN1	MOV	H,B	; (HL) <- (IP)
+   411 0180 69			MOV	L,C
+   412 0181 5E			MOV	E,M	; (DE) <- ((IP)) = BRANCH OFFSET
+   413 0182 23			INX	H
+   414 0183 56			MOV	D,M
+   415 0184 2B			DCX	H
+   416 0185 19			DAD	D	; (HL) <- (HL) + ((IP))
+   417 0186 4D			MOV	C,L	; (IP) <- (HL)
+   418 0187 44			MOV	B,H
+   419 0188 C3 45 01		JMP	NEXT
+   420 			;
+   421 018B			DB	87H	; 0BRANCH
+            87 
+   422 018C			DB	'0BRANC'
+            30 42 52 41 
+            4E 43 
+   423 0192			DB	'H'+80H
+            48 80 
+   424 0194			DW	BRAN-9
+            7401 
+   425 0196		ZBRAN	DW	$+2
+            9801 
+   426 0198 E1			POP	H
+   427 0199 7D			MOV	A,L
+   428 019A B4			ORA	H
+   429 019B CA 7F 01		JZ	BRAN1	; IF (S1)=0 THEN BRANCH
+   430 019E 03			INX	B	; ELSE SKIP BRANCH OFFSET
+   431 019F 03			INX	B
+   432 01A0 C3 45 01		JMP	NEXT
+   433 			;
+   434 01A3			DB	86H	; (LOOP)
+            86 
+   435 01A4			DB	'(LOOP'
+            28 4C 4F 4F 
+            50 
+   436 01A9			DB	')'+80H
+            29 80 
+   437 01AB			DW	ZBRAN-0AH
+            8C01 
+   438 01AD		XLOOP	DW	$+2
+            AF01 
+   439 01AF 11 01 00		LXI	D,1	; (DE) <- INCREMENT
+   440 01B2 2A 28 01	XLOO1	LHLD	RPP	; ((HL)) = INDEX
+   441 01B5 7E			MOV	A,M	; INDEX <- INDEX + INCR
+   442 01B6 83			ADD	E
+   443 01B7 77			MOV	M,A
+   444 01B8 5F			MOV	E,A
+   445 01B9 23			INX	H
+   446 01BA 7E			MOV	A,M
+   447 01BB 8A			ADC	D
+   448 01BC 77			MOV	M,A
+   449 01BD 23			INX	H	; ((HL)) = LIMIT
+   450 01BE 14			INR	D
+   451 01BF 15			DCR	D
+   452 01C0 57			MOV	D,A	; (DE) <- NEW INDEX
+   453 01C1 FA CC 01		JM	XLOO2	; IF INCR > 0
+   454 01C4 7B			MOV	A,E
+   455 01C5 96			SUB	M	; THEN (A) <- INDEX - LIMIT
+   456 01C6 7A			MOV	A,D
+   457 01C7 23			INX	H
+   458 01C8 9E			SBB	M
+   459 01C9 C3 D1 01		JMP	XLOO3
+   460 01CC 7E		XLOO2	MOV	A,M	; ELSE (A) <- LIMIT - INDEX
+   461 01CD 93			SUB	E
+   462 01CE 23			INX	H
+   463 01CF 7E			MOV	A,M
+   464 01D0 9A			SBB	D
+   465 			;			; IF (A) < 0
+   466 01D1 FA 7F 01	XLOO3	JM	BRAN1	; THEN LOOP AGAIN
+   467 01D4 23			INX	H	; ELSE DONE
+   468 01D5 22 28 01		SHLD	RPP	; DISCARD R1 & R2
+   469 01D8 03			INX	B	; SKIP BRANCH OFFSET
+   470 01D9 03			INX	B
+   471 01DA C3 45 01		JMP	NEXT
+   472 			;
+   473 01DD			DB	87H	; (+LOOP)
+            87 
+   474 01DE			DB	'(+LOOP'
+            28 2B 4C 4F 
+            4F 50 
+   475 01E4			DB	')'+80H
+            29 80 
+   476 01E6			DW	XLOOP-9
+            A401 
+   477 01E8		XPLOO	DW	$+2
+            EA01 
+   478 01EA D1			POP	D	; (DE) <- INCR
+   479 01EB C3 B2 01		JMP	XLOO1
+   480 			;
+   481 01EE			DB	84H	; (DO)
+            84 
+   482 01EF			DB	'(DO'
+            28 44 4F 
+   483 01F2			DB	')'+80H
+            29 80 
+   484 01F4			DW	XPLOO-0AH
+            DE01 
+   485 01F6		XDO	DW	$+2
+            F801 
+   486 01F8 2A 28 01		LHLD	RPP	; (RP) <- (RP) - 4
+   487 01FB 2B			DCX	H
+   488 01FC 2B			DCX	H
+   489 01FD 2B			DCX	H
+   490 01FE 2B			DCX	H
+   491 01FF 22 28 01		SHLD	RPP
+   492 0202 D1			POP	D	; (R1) <- (S1) = INIT INDEX
+   493 0203 73			MOV	M,E
+   494 0204 23			INX	H
+   495 0205 72			MOV	M,D
+   496 0206 D1			POP	D	; (R2) <- (S2) = LIMIT
+   497 0207 23			INX	H
+   498 0208 73			MOV	M,E
+   499 0209 23			INX	H
+   500 020A 72			MOV	M,D
+   501 020B C3 45 01		JMP	NEXT
+   502 			;
+   503 020E			DB	81H	; I
+            81 
+   504 020F			DB	'I'+80H
+            49 80 
+   505 0211			DW	XDO-7
+            EF01 
+   506 0213		IDO	DW	$+2	;(S1) <- (R1) , (R1) UNCHANGED
+            1502 
+   507 0215 2A 28 01		LHLD	RPP
+   508 0218 5E			MOV	E,M	; (DE) <- (R1)
+   509 0219 23			INX	H
+   510 021A 56			MOV	D,M
+   511 021B D5			PUSH	D	; (S1) <- (DE)
+   512 021C C3 45 01		JMP	NEXT
+   513 			;
+   514 021F			DB	85H	; DIGIT
+            85 
+   515 0220			DB	'DIGI'
+            44 49 47 49 
+            
+   516 0224			DB	'T'+80H
+            54 80 
+   517 0226			DW	IDO-4
+            0F02 
+   518 0228		DIGIT	DW	$+2
+            2A02 
+   519 022A E1			POP	H	; (L) <- (S1)LB = ASCII CHR TO BE
+   520 			;			 CONVERTED
+   521 022B D1			POP	D	; (DE) <- (S2) = BASE VALUE
+   522 022C 7B			MOV	A,E
+   523 022D D6 30		SUI	30H	; IF CHR > "0"
+   524 022F FA 49 02		JM	DIGI2
+   525 0232 FE 0A		CPI	0AH	; AND IF CHR > "9"
+   526 0234 FA 3E 02		JM	DIGI1
+   527 0237 D6 07		SUI	7
+   528 0239 FE 0A		CPI	0AH	; AND IF CHR >= "A"
+   529 023B FA 49 02		JM	DIGI2
+   530 			;			; THEN VALID NUMERIC OR ALPHA CHR
+   531 023E BD		DIGI1	CMP	L	; IF < BASE VALUE
+   532 023F F2 49 02		JP	DIGI2
+   533 			;			; THEN VALID DIGIT CHR
+   534 0242 5F			MOV	E,A	; (S2) <- (DE) = CONVERTED DIGIT
+   535 0243 21 01 00		LXI	H,1	; (S1) <- TRUE
+   536 0246 C3 43 01		JMP	DPUSH
+   537 			;			; ELSE INVALID DIGIT CHR
+   538 0249 6C		DIGI2	MOV	L,H	; (HL) <- FALSE
+   539 024A C3 44 01		JMP	HPUSH	; (S1) <- FALSE
+   540 			;
+   541 024D			DB	86H	; (FIND)  (2-1)FAILURE
+            86 
+   542 024E			DB	'(FIND'	; (2-3)SUCCESS
+            28 46 49 4E 
+            44 
+   543 0253			DB	')'+80H
+            29 80 
+   544 0255			DW	DIGIT-8
+            2002 
+   545 0257		PFIND	DW	$+2
+            5902 
+   546 0259 D1			POP	D	; (DE) <- NFA
+   547 025A E1		PFIN1	POP	H	; (HL) <- STRING ADDR
+   548 025B E5			PUSH	H	; SAVE STRING ADDR FOR NEXT ITERATION
+   549 025C 1A			LDAX	D
+   550 025D AE			XRA	M	; CHECK LENGTHS & SMUDGE BIT
+   551 025E E6 3F		ANI	3FH
+   552 0260 C2 85 02		JNZ	PFIN4	; LENGTHS DIFFERENT
+   553 			;			; LENGTHS MATCH, CHECK EACH CHR
+   554 0263 23		PFIN2	INX	H	; (HL) <- ADDR NEXT CHR IN STRING
+   555 0264 13			INX	D	; (DE) <- ADDR NEXT CHR IN NF
+   556 0265 1A			LDAX	D
+   557 0266 AE			XRA	M	; IGNORE MSB
+   558 0267 87			ADD	A
+   559 0268 C2 82 02		JNZ	PFIN3	; NO MATCH
+   560 026B D2 63 02		JNC	PFIN2	; MATCH SO FAR, LOOP AGAIN
+   561 026E 21 05 00		LXI	H,5	; STRING MATCHES
+   562 0271 19			DAD	D	; ((SP)) <- PFA
+   563 0272 E3			XTHL
+   564 			;			; BACK UP TO LENGTH BYTE OF NF = NFA
+   565 0273 1B		PFIN6	DCX	D
+   566 0274 1A			LDAX	D
+   567 0275 B7			ORA	A
+   568 0276 F2 73 02		JP	PFIN6	; IF MSB = 1 THEN (DE) = NFA
+   569 0279 5F			MOV	E,A	; (DE) <- LENGTH BYTE
+   570 027A 16 00		MVI	D,0
+   571 027C 21 01 00		LXI	H,1	; (HL) <- TRUE
+   572 027F C3 43 01		JMP	DPUSH  ; RETURN, NF FOUND
+   573 			;	ABOVE NF NOT A MATCH, TRY ANOTHER
+   574 0282 DA 8B 02	PFIN3	JC	PFIN5	; IF NOT END OF NF
+   575 0285 13		PFIN4	INX	D	; THEN FIND END OF NF
+   576 0286 1A			LDAX	D
+   577 0287 B7			ORA	A
+   578 0288 F2 85 02		JP	PFIN4
+   579 028B 13		PFIN5	INX	D	; (DE) <- LFA
+   580 028C EB			XCHG
+   581 028D 5E			MOV	E,M	; (DE) <- (LFA)
+   582 028E 23			INX	H
+   583 028F 56			MOV	D,M
+   584 0290 7A			MOV	A,D
+   585 0291 B3			ORA	E	; IF (LFA) <> 0
+   586 0292 C2 5A 02		JNZ	PFIN1	; THEN TRY PREVIOUS DICT. DEF.
+   587 			;			; ELSE END OF DICTIONARY
+   588 0295 E1			POP	H	; DISCARD STRING ADDR
+   589 0296 21 00 00		LXI	H,0	; (HL) <- FALSE
+   590 0299 C3 44 01		JMP	HPUSH  	; RETURN, NO MATCH FOUND
+   591 			;
+   592 029C			DB	87H	; ENCLOSE
+            87 
+   593 029D			DB	'ENCLOS'
+            45 4E 43 4C 
+            4F 53 
+   594 02A3			DB	'E'+80H
+            45 80 
+   595 02A5			DW	PFIND-9
+            4E02 
+   596 02A7		ENCL	DW	$+2
+            A902 
+   597 02A9 D1			POP	D	; (DE) <- (S1) = DELIMITER CHAR
+   598 02AA E1			POP	H	; (HL) <- (S2) = ADDR TEXT TO SCAN
+   599 02AB E5			PUSH	H	; (S4) <- ADDR
+   600 02AC 7B			MOV	A,E
+   601 02AD 57			MOV	D,A	; (D) <- DELIM CHR
+   602 02AE 1E FF		MVI	E,-1	; INITIALIZE CHR OFFSET COUNTER
+   603 02B0 2B			DCX	H	; (HL) <- ADDR-1
+   604 			;			; SKIP OVER LEADING DELIMITER CHRS
+   605 02B1 23		ENCL1	INX	H
+   606 02B2 1C			INR	E
+   607 02B3 BE			CMP	M	; IF TEXT CHR = DELIM CHR
+   608 02B4 CA B1 02		JZ	ENCL1	; THEN LOOP AGAIN
+   609 			;			; ELSE NON-DELIM CHR FOUND
+   610 02B7 16 00		MVI	D,0	; (S3) <- (E) = OFFSET TO 1ST NON-DELIM
+   611 02B9 D5			PUSH	D
+   612 02BA 57			MOV	D,A	; (D) <- DELIM CHR
+   613 02BB 7E			MOV	A,M	; IF 1ST NON-DELIM = NULL
+   614 02BC A7			ANA	A
+   615 02BD C2 C9 02		JNZ	ENCL2
+   616 02C0 16 00		MVI	D,0	; THEN (S2) <- OFFSET TO BYTE
+   617 02C2 1C			INR	E	;   FOLLOWING NULL
+   618 02C3 D5			PUSH	D
+   619 02C4 1D			DCR	E	; (S1) <- OFFSET TO NULL
+   620 02C5 D5			PUSH	D
+   621 02C6 C3 45 01		JMP	NEXT
+   622 			;			; ELSE TEXT CONTAINS NON-DELIM &
+   623 			;			  NON-NULL CHR
+   624 02C9 7A		ENCL2	MOV	A,D	; (A) <- DELIM CHR
+   625 02CA 23			INX	H	; (HL) <- ADDR NEXT CHR
+   626 02CB 1C			INR	E	; (E) <- OFFSET TO NEXT CHR
+   627 02CC BE			CMP	M	; IF NEXT CHR <> DELIM CHR
+   628 02CD CA DC 02		JZ	ENCL4
+   629 02D0 7E			MOV	A,M	; AND IF NEXT CHR <> NULL
+   630 02D1 A7			ANA	A
+   631 02D2 C2 C9 02		JNZ	ENCL2	; THEN CONTINUE SCAN
+   632 			;			; ELSE CHR = NULL
+   633 02D5 16 00	ENCL3	MVI	D,0	; (S2) <- OFFSET TO NULL
+   634 02D7 D5			PUSH	D
+   635 02D8 D5			PUSH	D	; (S1) <- OFFSET TO NULL
+   636 02D9 C3 45 01		JMP	NEXT
+   637 			;			; ELSE CHR = DELIM CHR
+   638 02DC 16 00	ENCL4	MVI	D,0	; (S2) <- OFFSET TO BYTE
+   639 			;			  FOLLOWING TEXT
+   640 02DE D5			PUSH	D
+   641 02DF 1C			INR	E	; (S1) <- OFFSET TO 2 BYTES AFTER
+   642 			;			    END OF WORD
+   643 02E0 D5			PUSH	D
+   644 02E1 C3 45 01		JMP	NEXT
+   645 			;
+   646 02E4			DB	84H	; EMIT
+            84 
+   647 02E5			DB	'EMI'
+            45 4D 49 
+   648 02E8			DB	'T'+80H
+            54 80 
+   649 02EA			DW	ENCL-0AH
+            9D02 
+   650 02EC		EMIT	DW	DOCOL
+            4306 
+   651 02EE			DW	PEMIT
+            6917 
+   652 02F0			DW	ONE,OUTT
+            CF06 BA07 
+   653 02F4			DW	PSTOR,SEMIS
+            9C05 6104 
+   654 			;
+   655 02F8			DB	83H	; KEY
+            83 
+   656 02F9			DB	'KE'
+            4B 45 
+   657 02FB			DB	'Y'+80H
+            59 80 
+   658 02FD			DW	EMIT-7
+            E502 
+   659 02FF		KEY	DW	$+2
+            0103 
+   660 0301 C3 51 17		JMP	PKEY
+   661 			;
+   662 0304			DB	89H	; ?TERMINAL
+            89 
+   663 0305			DB	'?TERMINA'
+            3F 54 45 52 
+            4D 49 4E 41 
+            
+   664 030D			DB	'L'+80H
+            4C 80 
+   665 030F			DW	KEY-6
+            F902 
+   666 0311		QTERM	DW	$+2
+            1303 
+   667 0313 21 00 00		LXI	H,0
+   668 0316 C3 43 17		JMP	PQTER
+   669 			;
+   670 0319			DB	82H	; CR
+            82 
+   671 031A			DB	'C'
+            43 
+   672 031B			DB	'R'+80H
+            52 80 
+   673 031D			DW	QTERM-0CH
+            0503 
+   674 031F		CR	DW	$+2
+            2103 
+   675 0321 C3 75 17		JMP	PCR
+   676 			;
+   677 0324			DB	85H	; CMOVE
+            85 
+   678 0325			DB	'CMOV'
+            43 4D 4F 56 
+            
+   679 0329			DB	'E'+80H
+            45 80 
+   680 032B			DW	CR-5
+            1A03 
+   681 032D		CMOVE	DW	$+2
+            2F03 
+   682 032F 69			MOV	L,C	; (HL) <- (IP)
+   683 0330 60			MOV	H,B
+   684 0331 C1			POP	B	; (BC) <- (S1) = #CHRS
+   685 0332 D1			POP	D	; (DE) <- (S2) = DEST ADDR
+   686 0333 E3			XTHL		; (HL) <- (S3) = SOURCE ADDR
+   687 			;			; (S1) <- (IP)
+   688 0334 C3 3C 03		JMP	CMOV2	; RETURN IF #CHRS = 0
+   689 0337 7E		CMOV1	MOV	A,M	; ((DE)) <- ((HL))
+   690 0338 23			INX	H	; INC SOURCE ADDR
+   691 0339 12			STAX	D
+   692 033A 13			INX	D	; INC DEST ADDR
+   693 033B 0B			DCX	B	; DEC #CHRS
+   694 033C 78		CMOV2	MOV	A,B
+   695 033D B1			ORA	C
+   696 033E C2 37 03		JNZ	CMOV1	; REPEAT IF #CHRS <> 0
+   697 0341 C1			POP	B	; RESTORE (IP) FROM (S1)
+   698 0342 C3 45 01		JMP	NEXT
+   699 			;
+   700 0345			DB	82H	; U*	16X16 UNSIGNED MULTIPLY
+            82 
+   701 0346			DB	'U'	; AVG EXECUUION TIME = 994 CYCLES
+            55 
+   702 0347			DB	'*'+80H
+            2A 80 
+   703 0349			DW	CMOVE-8
+            2503 
+   704 034B		USTAR	DW	$+2
+            4D03 
+   705 034D D1			POP	D	; (DE) <- MPLIER
+   706 034E E1			POP	H	; (HL) <- MPCAND
+   707 034F C5			PUSH	B	; SAVE IP
+   708 0350 44			MOV	B,H
+   709 0351 7D			MOV	A,L	; (BA) <- MPCAND
+   710 0352 CD 69 03		CALL	MPYX	; (AHL)1 <- MPCAND.LB * MPLIER
+   711 			;			       1ST PARTIAL PRODUCT
+   712 0355 E5			PUSH	H	; SAVE (HL)1
+   713 0356 67			MOV	H,A
+   714 0357 78			MOV	A,B
+   715 0358 44			MOV	B,H	; SAVE (A)1
+   716 0359 CD 69 03		CALL	MPYX	; (AHL)2 <- MPCAND.HB * MPLIER
+   717 			;			       2ND PARTIAL PRODUCT
+   718 035C D1			POP	D	; (DE) <- (HL)1
+   719 035D 4A			MOV	C,D	; (BC) <- (AH)1
+   720 			;	FORM SUM OF PARTIALS:
+   721 			;			   (AHL) 1
+   722 			;			+ (AHL)  2
+   723 			;			--------
+   724 			;			  (AHLE)
+   725 035E 09			DAD	B	; (HL) <- (HL)2 + (AH)1
+   726 035F CE 00		ACI	0	; (AHLE) <- (BA) * (DE)
+   727 0361 55			MOV	D,L
+   728 0362 6C			MOV	L,H
+   729 0363 67			MOV	H,A	; (HLDE) <- MPLIER * MPCAND
+   730 0364 C1			POP	B	; RESTORE IP
+   731 0365 D5			PUSH	D	; (S2) <- PRODUCT.LW
+   732 0366 C3 44 01		JMP	HPUSH	; (S1) <- PRODUCT.HW
+   733 			;
+   734 			;	MULTIPLY PRIMITIVE
+   735 			;		(AHL) <- (A) * (DE)
+   736 			;	#BITS =	 24	  8	16
+   737 0369 21 00 00	MPYX	LXI	H,0	; (HL) <- 0 = PARTIAL PRODUCT.LW
+   738 036C 0E 08		MVI	C,8	; LOOP COUNTER
+   739 036E 29		MPYX1	DAD	H	; LEFT SHIFT (AHL) 24 BITS
+   740 036F 17			RAL
+   741 0370 D2 76 03		JNC	MPYX2	; IF NEXT MPLIER BIT = 1
+   742 0373 19			DAD	D	; THEN ADD MPCAND
+   743 0374 CE 00		ACI	0
+   744 0376 0D		MPYX2	DCR	C	; IF NOT LAST MPLIER BIT
+   745 0377 C2 6E 03		JNZ	MPYX1	; THEN LOOP AGAIN
+   746 037A C9			RET		; ELSE DONE
+   747 			;
+   748 037B			DB	82H	; U/
+            82 
+   749 037C			DB	'U'
+            55 
+   750 037D			DB	'/'+80H
+            2F 80 
+   751 037F			DW	USTAR-5
+            4603 
+   752 0381		USLAS	DW	$+2
+            8303 
+   753 0383 21 04 00		LXI	H,4
+   754 0386 39			DAD	SP	; ((HL)) <- NUMERATOR.LW
+   755 0387 5E			MOV	E,M	; (DE) <- NUMER.LW
+   756 0388 71			MOV	M,C	; SAVE IP ON STACK
+   757 0389 23			INX	H
+   758 038A 56			MOV	D,M
+   759 038B 70			MOV	M,B
+   760 038C C1			POP	B	; (BC) <- DENOMINATOR
+   761 038D E1			POP	H	; (HL) <- NUMER.HW
+   762 038E 7D			MOV	A,L
+   763 038F 91			SUB	C	; IF NUMER >= DENOM
+   764 0390 7C			MOV	A,H
+   765 0391 98			SBB	B
+   766 0392 DA 9E 03		JC	USLA1
+   767 0395 21 FF FF		LXI	H,0FFFFH	; THEN OVERFLOW
+   768 0398 11 FF FF		LXI	D,0FFFFH	; SET REM & QUOT TO MAX
+   769 039B C3 C9 03		JMP	USLA7
+   770 039E 3E 10	USLA1	MVI	A,16	; LOOP COUNTER
+   771 03A0 29		USLA2	DAD	H	; LEFT SHIFT (HLDE) THRU CARRY
+   772 03A1 17			RAL
+   773 03A2 EB			XCHG
+   774 03A3 29			DAD	H
+   775 03A4 D2 A9 03		JNC	USLA3
+   776 03A7 13			INX	D
+   777 03A8 A7			ANA	A
+   778 03A9 EB		USLA3	XCHG		; SHIFT DONE
+   779 03AA 1F			RAR		; RESTORE 1ST CARRY
+   780 03AB F5			PUSH	PSW	; SAVE COUNTER
+   781 03AC D2 B8 03		JNC	USLA4	; IF CARRY = 1
+   782 03AF 7D			MOV	A,L	; THEN (HL) <- (HL) - (BC)
+   783 03B0 91			SUB	C
+   784 03B1 6F			MOV	L,A
+   785 03B2 7C			MOV	A,H
+   786 03B3 98			SBB	B
+   787 03B4 67			MOV	H,A
+   788 03B5 C3 C3 03		JMP	USLA5
+   789 03B8 7D		USLA4	MOV	A,L	; ELSE TRY (HL) <- (HL) - (BC)
+   790 03B9 91			SUB	C
+   791 03BA 6F			MOV	L,A
+   792 03BB 7C			MOV	A,H
+   793 03BC 98			SBB	B	; (HL) <- PARTIAL REMAINDER
+   794 03BD 67			MOV	H,A
+   795 03BE D2 C3 03		JNC	USLA5
+   796 03C1 09			DAD	B	; UNDERFLOW, RESTORE
+   797 03C2 1B			DCX	D
+   798 03C3 13		USLA5	INX	D	; INC QUOT
+   799 03C4 F1		USLA6	POP	PSW	; RESTORE COUNTER
+   800 03C5 3D			DCR	A	; IF COUNTER > 0
+   801 03C6 C2 A0 03		JNZ	USLA2	; THEN LOOP AGAIN
+   802 03C9 C1		USLA7	POP	B	; ELSE DONE, RESTORE IP
+   803 03CA E5			PUSH	H	; (S2) <- REMAINDER
+   804 03CB D5			PUSH	D	; (S1) <- QUOTIENT
+   805 03CC C3 45 01		JMP	NEXT
+   806 			;
+   807 03CF			DB	83H	; AND
+            83 
+   808 03D0			DB	'AN'
+            41 4E 
+   809 03D2			DB	'D'+80H
+            44 80 
+   810 03D4			DW	USLAS-5
+            7C03 
+   811 03D6		ANDD	DW	$+2	; (S1) <- (S1) AND (S2)
+            D803 
+   812 03D8 D1			POP	D
+   813 03D9 E1			POP	H
+   814 03DA 7B			MOV	A,E
+   815 03DB A5			ANA	L
+   816 03DC 6F			MOV	L,A
+   817 03DD 7A			MOV	A,D
+   818 03DE A4			ANA	H
+   819 03DF 67			MOV	H,A
+   820 03E0 C3 44 01		JMP	HPUSH
+   821 			;
+   822 03E3			DB	82H	; OR
+            82 
+   823 03E4			DB	'O'
+            4F 
+   824 03E5			DB	'V'+80H
+            56 80 
+   825 03E7			DW	ANDD-6
+            D003 
+   826 03E9		ORR	DW	$+2	; (S1) <- (S1) OR (S2)
+            EB03 
+   827 03EB D1			POP	D
+   828 03EC E1			POP	H
+   829 03ED 7B			MOV	A,E
+   830 03EE B5			ORA	L
+   831 03EF 6F			MOV	L,A
+   832 03F0 7A			MOV	A,D
+   833 03F1 B4			ORA	H
+   834 03F2 67			MOV	H,A
+   835 03F3 C3 44 01		JMP	HPUSH
+   836 			;
+   837 03F6			DB	83H	; XOR
+            83 
+   838 03F7			DB	'XO'
+            58 4F 
+   839 03F9			DB	'R'+80H
+            52 80 
+   840 03FB			DW	ORR-5
+            E403 
+   841 03FD		XORR	DW	$+2	; (S1) <- (S1) XOR (S2)
+            FF03 
+   842 03FF D1			POP	D
+   843 0400 E1			POP	H
+   844 0401 7B			MOV	A,E
+   845 0402 AD			XRA	L
+   846 0403 6F			MOV	L,A
+   847 0404 7A			MOV	A,D
+   848 0405 AC			XRA	H
+   849 0406 67			MOV	H,A
+   850 0407 C3 44 01		JMP	HPUSH
+   851 			;
+   852 040A			DB	83H	; SP@
+            83 
+   853 040B			DB	'SP'
+            53 50 
+   854 040D			DB	'@'+80H
+            40 80 
+   855 040F			DW	XORR-6
+            F703 
+   856 0411		SPAT	DW	$+2	;(S1) <- (SP)
+            1304 
+   857 0413 21 00 00		LXI	H,0
+   858 0416 39			DAD	SP	; (HL) <- (SP)
+   859 0417 C3 44 01		JMP	HPUSH	; (S1) <- (HL)
+   860 			;
+   861 041A			DB	83H	; STACK POINTER STORE
+            83 
+   862 041B			DB	'SP'
+            53 50 
+   863 041D			DB	'!'+80H
+            21 80 
+   864 041F			DW	SPAT-6
+            0B04 
+   865 0421		SPSTO	DW	$+2	;(SP) <- (S0) ( USER VARIABLE )
+            2304 
+   866 0423 2A 26 01		LHLD	UP	; (HL) <- USER VAR BASE ADDR
+   867 0426 11 06 00		LXI	D,6
+   868 0429 19			DAD	D	; (HL) <- S0
+   869 042A 5E			MOV	E,M	; (DE) <- (S0)
+   870 042B 23			INX	H
+   871 042C 56			MOV	D,M
+   872 042D EB			XCHG
+   873 042E F9			SPHL		; (SP) <- (S0)
+   874 042F C3 45 01		JMP	NEXT
+   875 			;
+   876 0432			DB	83H	; RP@
+            83 
+   877 0433			DB	'RP'
+            52 50 
+   878 0435			DB	'@'+80H
+            40 80 
+   879 0437			DW	SPSTO-6
+            1B04 
+   880 0439		RPAT	DW	$+2	;(S1) <- (RP)
+            3B04 
+   881 043B 2A 28 01		LHLD	RPP
+   882 043E C3 44 01		JMP	HPUSH
+   883 			;
+   884 0441			DB	83H	; RETURN STACK POINTER STORE
+            83 
+   885 0442			DB	'RP'
+            52 50 
+   886 0444			DB	'!'+80H
+            21 80 
+   887 0446			DW	RPAT-6
+            3304 
+   888 0448		RPSTO	DW	$+2	;(RP) <- (R0) ( USER VARIABLE )
+            4A04 
+   889 044A 2A 26 01		LHLD	UP	; (HL) <- USER VARIABLE BASE ADDR
+   890 044D 11 08 00		LXI	D,8
+   891 0450 19			DAD	D	; (HL) <- R0
+   892 0451 5E			MOV	E,M	; (DE) <- (R0)
+   893 0452 23			INX	H
+   894 0453 56			MOV	D,M
+   895 0454 EB			XCHG
+   896 0455 22 28 01		SHLD	RPP	; (RP) <- (R0)
+   897 0458 C3 45 01		JMP	NEXT
+   898 			;
+   899 045B			DB	82H	; ;S
+            82 
+   900 045C			DB	3BH ; asm8080 thinks ';' contains a comment start
+            3B 
+   901 045D			DB	'S'+80H
+            53 80 
+   902 045F			DW	RPSTO-6
+            4204 
+   903 0461		SEMIS	DW	$+2	;(IP) <- (R1)
+            6304 
+   904 0463 2A 28 01		LHLD	RPP
+   905 0466 4E			MOV	C,M	; (BC) <- (R1)
+   906 0467 23			INX	H
+   907 0468 46			MOV	B,M
+   908 0469 23			INX	H
+   909 046A 22 28 01		SHLD	RPP	; (RP) <- (RP) + 2
+   910 046D C3 45 01		JMP	NEXT
+   911 			;
+   912 0470			DB	85H	; LEAVE
+            85 
+   913 0471			DB	'LEAV'
+            4C 45 41 56 
+            
+   914 0475			DB	'E'+80H
+            45 80 
+   915 0477			DW	SEMIS-5
+            5C04 
+   916 0479		LEAVE	DW	$+2	;LIMIT <- INDEX
+            7B04 
+   917 047B 2A 28 01		LHLD	RPP
+   918 047E 5E			MOV	E,M	; (DE) <- (R1) = INDEX
+   919 047F 23			INX	H
+   920 0480 56			MOV	D,M
+   921 0481 23			INX	H
+   922 0482 73			MOV	M,E	; (R2) <- (DE) = LIMIT
+   923 0483 23			INX	H
+   924 0484 72			MOV	M,D
+   925 0485 C3 45 01		JMP	NEXT
+   926 			;
+   927 0488			DB	82H	; >R
+            82 
+   928 0489			DB	'>'
+            3E 
+   929 048A			DB	'R'+80H
+            52 80 
+   930 048C			DW	LEAVE-8
+            7104 
+   931 048E		TOR	DW	$+2	;(R1) <- (S1)
+            9004 
+   932 0490 D1			POP	D	; (DE) <- (S1)
+   933 0491 2A 28 01		LHLD	RPP
+   934 0494 2B			DCX	H	; (RP) <- (RP) - 2
+   935 0495 2B			DCX	H
+   936 0496 22 28 01		SHLD	RPP
+   937 0499 73			MOV	M,E	; ((HL)) <- (DE)
+   938 049A 23			INX	H
+   939 049B 72			MOV	M,D
+   940 049C C3 45 01		JMP	NEXT
+   941 			;
+   942 049F			DB	82H	; R>
+            82 
+   943 04A0			DB	'R'
+            52 
+   944 04A1			DB	'>'+80H
+            3E 80 
+   945 04A3			DW	TOR-5
+            8904 
+   946 04A5		FROMR	DW	$+2	;(S1) <- (R1)
+            A704 
+   947 04A7 2A 28 01		LHLD	RPP
+   948 04AA 5E			MOV	E,M	; (DE) <- (R1)
+   949 04AB 23			INX	H
+   950 04AC 56			MOV	D,M
+   951 04AD 23			INX	H
+   952 04AE 22 28 01		SHLD	RPP	; (RP) <- (RP) + 2
+   953 04B1 D5			PUSH	D	; (S1) <- (DE)
+   954 04B2 C3 45 01		JMP	NEXT
+   955 			;
+   956 04B5			DB	81H	; R
+            81 
+   957 04B6			DB	'R'+80H
+            52 80 
+   958 04B8			DW	FROMR-5
+            A004 
+   959 04BA		RR	DW	IDO+2
+            1502 
+   960 			;
+   961 04BC			DB	82H	; 0=
+            82 
+   962 04BD			DB	'0'
+            30 
+   963 04BE			DB	'='+80H
+            3D 80 
+   964 04C0			DW	RR-4
+            B604 
+   965 04C2		ZEQU	DW	$+2
+            C404 
+   966 04C4 E1			POP	H	; (HL) <- (S1)
+   967 04C5 7D			MOV	A,L
+   968 04C6 B4			ORA	H	; IF (HL) = 0
+   969 04C7 21 00 00		LXI	H,0	; THEN (HL) <- FALSE
+   970 04CA C2 CE 04		JNZ	ZEQU1
+   971 04CD 23			INX	H	; ELSE (HL) <- TRUE
+   972 04CE C3 44 01	ZEQU1	JMP	HPUSH	; (S1) <- (HL)
+   973 			;
+   974 04D1			DB	82H	; 0<
+            82 
+   975 04D2			DB	'0'
+            30 
+   976 04D3			DB	'<'+80H
+            3C 80 
+   977 04D5			DW	ZEQU-5
+            BD04 
+   978 04D7		ZLESS	DW	$+2
+            D904 
+   979 04D9 E1			POP	H	; (HL) <- (S1)
+   980 04DA 29			DAD	H	; IF (HL) >= 0
+   981 04DB 21 00 00		LXI	H,0	; THEN (HL) <- FALSE
+   982 04DE D2 E2 04		JNC	ZLES1
+   983 04E1 23			INX	H	; ELSE (HL) <- TRUE
+   984 04E2 C3 44 01	ZLES1	JMP	HPUSH	; (S1) <- (HL)
+   985 			;
+   986 04E5			DB	81H	; +
+            81 
+   987 04E6			DB	'+'+80H
+            2B 80 
+   988 04E8			DW	ZLESS-5
+            D204 
+   989 04EA		PLUS	DW	$+2	;(S1) <- (S1) + (S2)
+            EC04 
+   990 04EC D1			POP	D
+   991 04ED E1			POP	H
+   992 04EE 19			DAD	D
+   993 04EF C3 44 01		JMP	HPUSH
+   994 			;
+   995 04F2			DB	82H	; D+	(4-2)
+            82 
+   996 04F3			DB	'D'	; XLW XHW  YLW YHW  ---  SLW SHW
+            44 
+   997 04F4			DB	'+'+80H	; S4  S3   S2  S1        S2  S1
+            2B 80 
+   998 04F6			DW	PLUS-4
+            E604 
+   999 04F8		DPLUS	DW	$+2
+            FA04 
+  1000 04FA 21 06 00		LXI	H,6
+  1001 04FD 39			DAD	SP	; ((HL)) = XLW
+  1002 04FE 5E			MOV	E,M	; (DE) = XLW
+  1003 04FF 71			MOV	M,C	; SAVE IP ON STACK
+  1004 0500 23			INX	H
+  1005 0501 56			MOV	D,M
+  1006 0502 70			MOV	M,B
+  1007 0503 C1			POP	B	; (BC) <- YHW
+  1008 0504 E1			POP	H	; (HL) <- YLW
+  1009 0505 19			DAD	D
+  1010 0506 EB			XCHG		; (DE) <- YLW + XLW = SUM.LW
+  1011 0507 E1			POP	H	; (HL) <- XHW
+  1012 0508 7D			MOV	A,L
+  1013 0509 89			ADC	C
+  1014 050A 6F			MOV	L,A	; (HL) <- YHW + XHW + CARRY
+  1015 050B 7C			MOV	A,H
+  1016 050C 88			ADC	B
+  1017 050D 67			MOV	H,A
+  1018 050E C1			POP	B	; RESTORE IP
+  1019 050F D5			PUSH	D	; (S2) <- SUM.LW
+  1020 0510 C3 44 01		JMP	HPUSH	; (S1) <- SUM.HW
+  1021 			;
+  1022 0513			DB	85H	; MINUS
+            85 
+  1023 0514			DB	'MINU'
+            4D 49 4E 55 
+            
+  1024 0518			DB	'S'+80H
+            53 80 
+  1025 051A			DW	DPLUS-5
+            F304 
+  1026 051C		MINUS	DW	$+2	;(S1) <- -(S1)	( 2'S COMPLEMENT )
+            1E05 
+  1027 051E E1			POP	H
+  1028 051F 7D			MOV	A,L
+  1029 0520 2F			CMA
+  1030 0521 6F			MOV	L,A
+  1031 0522 7C			MOV	A,H
+  1032 0523 2F			CMA
+  1033 0524 67			MOV	H,A
+  1034 0525 23			INX	H
+  1035 0526 C3 44 01		JMP	HPUSH
+  1036 			;
+  1037 0529			DB	86H	; DMINUS
+            86 
+  1038 052A			DB	'DMINU'
+            44 4D 49 4E 
+            55 
+  1039 052F			DB	'S'+80H
+            53 80 
+  1040 0531			DW	MINUS-8
+            1405 
+  1041 0533		DMINU	DW	$+2
+            3505 
+  1042 0535 E1			POP	H	; (HL) <- HW
+  1043 0536 D1			POP	D	; (DE) <- LW
+  1044 0537 97			SUB	A
+  1045 0538 93			SUB	E	; (DE) <- 0 - (DE)
+  1046 0539 5F			MOV	E,A
+  1047 053A 3E 00		MVI	A,0
+  1048 053C 9A			SBB	D
+  1049 053D 57			MOV	D,A
+  1050 053E 3E 00		MVI	A,0
+  1051 0540 9D			SBB	L	; (HL) <- 0 - (HL)
+  1052 0541 6F			MOV	L,A
+  1053 0542 3E 00		MVI	A,0
+  1054 0544 9C			SBB	H
+  1055 0545 67			MOV	H,A
+  1056 0546 D5			PUSH	D	; (S2) <- LW
+  1057 0547 C3 44 01		JMP	HPUSH	; (S1) <- HW
+  1058 			;
+  1059 054A			DB	84H	; OVER
+            84 
+  1060 054B			DB	'OVE'
+            4F 56 45 
+  1061 054E			DB	'R'+80H
+            52 80 
+  1062 0550			DW	DMINU-9
+            2A05 
+  1063 0552		OVER	DW	$+2
+            5405 
+  1064 0554 D1			POP	D
+  1065 0555 E1			POP	H
+  1066 0556 E5			PUSH	H
+  1067 0557 C3 43 01		JMP	DPUSH
+  1068 			;
+  1069 055A			DB	84H	; DROP
+            84 
+  1070 055B			DB	'DRO'
+            44 52 4F 
+  1071 055E			DB	'P'+80H
+            50 80 
+  1072 0560			DW	OVER-7
+            4B05 
+  1073 0562		DROP	DW	$+2
+            6405 
+  1074 0564 E1			POP	H
+  1075 0565 C3 45 01		JMP	NEXT
+  1076 			;
+  1077 0568			DB	84H	; SWAP
+            84 
+  1078 0569			DB	'SWA'
+            53 57 41 
+  1079 056C			DB	'P'+80H
+            50 80 
+  1080 056E			DW	DROP-7
+            5B05 
+  1081 0570		SWAP	DW	$+2
+            7205 
+  1082 0572 E1			POP	H
+  1083 0573 E3			XTHL
+  1084 0574 C3 44 01		JMP	HPUSH
+  1085 			;
+  1086 0577			DB	83H	; DUP
+            83 
+  1087 0578			DB	'DU'
+            44 55 
+  1088 057A			DB	'P'+80H
+            50 80 
+  1089 057C			DW	SWAP-7
+            6905 
+  1090 057E		DUP	DW	$+2
+            8005 
+  1091 0580 E1			POP	H
+  1092 0581 E5			PUSH	H
+  1093 0582 C3 44 01		JMP	HPUSH
+  1094 			;
+  1095 0585			DB	84H	; 2DUP
+            84 
+  1096 0586			DB	'2DU'
+            32 44 55 
+  1097 0589			DB	'P'+80H
+            50 80 
+  1098 058B			DW	DUP-6
+            7805 
+  1099 058D		TDUP	DW	$+2
+            8F05 
+  1100 058F E1			POP	H
+  1101 0590 D1			POP	D
+  1102 0591 D5			PUSH	D
+  1103 0592 E5			PUSH	H
+  1104 0593 C3 43 01		JMP	DPUSH
+  1105 			;
+  1106 0596			DB	82H	; PLUS STORE
+            82 
+  1107 0597			DB	'+'
+            2B 
+  1108 0598			DB	'!'+80H
+            21 80 
+  1109 059A			DW	TDUP-7
+            8605 
+  1110 059C		PSTOR	DW	$+2	;((S1)) <- ((S1)) + (S2)
+            9E05 
+  1111 059E E1			POP	H	; (HL) <- (S1) = ADDR
+  1112 059F D1			POP	D	; (DE) <- (S2) = INCR
+  1113 05A0 7E			MOV	A,M	; ((HL)) <- ((HL)) + (DE)
+  1114 05A1 83			ADD	E
+  1115 05A2 77			MOV	M,A
+  1116 05A3 23			INX	H
+  1117 05A4 7E			MOV	A,M
+  1118 05A5 8A			ADC	D
+  1119 05A6 77			MOV	M,A
+  1120 05A7 C3 45 01		JMP	NEXT
+  1121 			;
+  1122 05AA			DB	86H	; TOGGLE
+            86 
+  1123 05AB			DB	'TOGGL'
+            54 4F 47 47 
+            4C 
+  1124 05B0			DB	'E'+80H
+            45 80 
+  1125 05B2			DW	PSTOR-5
+            9705 
+  1126 05B4		TOGGL	DW	$+2	;((S2)) <- ((S2)) XOR (S1)LB
+            B605 
+  1127 05B6 D1			POP	D	; (E) <- BYTE MASK
+  1128 05B7 E1			POP	H	; (HL) <- ADDR
+  1129 05B8 7E			MOV	A,M
+  1130 05B9 AB			XRA	E
+  1131 05BA 77			MOV	M,A	; (ADDR) <- (ADDR) XOR (E)
+  1132 05BB C3 45 01		JMP	NEXT
+  1133 			;
+  1134 05BE			DB	81H	; @
+            81 
+  1135 05BF			DB	'@'+80H
+            40 80 
+  1136 05C1			DW	TOGGL-9
+            AB05 
+  1137 05C3		AT	DW	$+2	;(S1) <- ((S1))
+            C505 
+  1138 05C5 E1			POP	H	; (HL) <- ADDR
+  1139 05C6 5E			MOV	E,M	; (DE) <- (ADDR)
+  1140 05C7 23			INX	H
+  1141 05C8 56			MOV	D,M
+  1142 05C9 D5			PUSH	D	; (S1) <- (DE)
+  1143 05CA C3 45 01		JMP	NEXT
+  1144 			;
+  1145 05CD			DB	82H	; C@
+            82 
+  1146 05CE			DB	'C'
+            43 
+  1147 05CF			DB	'@'+80H
+            40 80 
+  1148 05D1			DW	AT-4
+            BF05 
+  1149 05D3		CAT	DW	$+2	;(S1) <- ((S1))LB
+            D505 
+  1150 05D5 E1			POP	H	; (HL) <- ADDR
+  1151 05D6 6E			MOV	L,M	; (HL) <- (ADDR)LB
+  1152 05D7 26 00		MVI	H,0
+  1153 05D9 C3 44 01		JMP	HPUSH
+  1154 			;
+  1155 05DC			DB	82H	; 2@
+            82 
+  1156 05DD			DB	'2'
+            32 
+  1157 05DE			DB	'@'+80H
+            40 80 
+  1158 05E0			DW	CAT-5
+            CE05 
+  1159 05E2		TAT	DW	$+2
+            E405 
+  1160 05E4 E1			POP	H	; (HL) <- ADDR HW
+  1161 05E5 11 02 00		LXI	D,2
+  1162 05E8 19			DAD	D	; (HL) <- ADDR LW
+  1163 05E9 5E			MOV	E,M	; (DE) <- LW
+  1164 05EA 23			INX	H
+  1165 05EB 56			MOV	D,M
+  1166 05EC D5			PUSH	D	; (S2) <- LW
+  1167 05ED 11 FD FF		LXI	D,-3	; (HL) <- ADDR HW
+  1168 05F0 19			DAD	D
+  1169 05F1 5E			MOV	E,M	; (DE) <- HW
+  1170 05F2 23			INX	H
+  1171 05F3 56			MOV	D,M
+  1172 05F4 D5			PUSH	D	; (S1) <- HW
+  1173 05F5 C3 45 01		JMP	NEXT
+  1174 			;
+  1175 05F8			DB	81H	; STORE
+            81 
+  1176 05F9			DB	'!'+80H
+            21 80 
+  1177 05FB			DW	TAT-5
+            DD05 
+  1178 05FD		STORE	DW	$+2	;((S1)) <- (S2)
+            FF05 
+  1179 05FF E1			POP	H	; (HL) <- (S1) = ADDR
+  1180 0600 D1			POP	D	; (DE) <- (S2) = VALUE
+  1181 0601 73			MOV	M,E	; ((HL)) <- (DE)
+  1182 0602 23			INX	H
+  1183 0603 72			MOV	M,D
+  1184 0604 C3 45 01		JMP	NEXT
+  1185 			;
+  1186 0607			DB	82H	; C STORE
+            82 
+  1187 0608			DB	'C'
+            43 
+  1188 0609			DB	'!'+80H
+            21 80 
+  1189 060B			DW	STORE-4
+            F905 
+  1190 060D		CSTOR	DW	$+2	;((S1))LB <- (S2)LB
+            0F06 
+  1191 060F E1			POP	H	; (HL) <- (S1) = ADDR
+  1192 0610 D1			POP	D	; (DE) <- (S2) = BYTE
+  1193 0611 73			MOV	M,E	; ((HL))LB <- (E)
+  1194 0612 C3 45 01		JMP	NEXT
+  1195 			;
+  1196 0615			DB	82H	; 2 STORE
+            82 
+  1197 0616			DB	'2'
+            32 
+  1198 0617			DB	'!'+80H
+            21 80 
+  1199 0619			DW	CSTOR-5
+            0806 
+  1200 061B		TSTOR	DW	$+2
+            1D06 
+  1201 061D E1			POP	H	; (HL) <- ADDR
+  1202 061E D1			POP	D	; (DE) <- HW
+  1203 061F 73			MOV	M,E	; (ADDR) <- HW
+  1204 0620 23			INX	H
+  1205 0621 72			MOV	M,D
+  1206 0622 23			INX	H	; (HL) <- ADDR LW
+  1207 0623 D1			POP	D	; (DE) <- LW
+  1208 0624 73			MOV	M,E	; (ADDR+2) <- LW
+  1209 0625 23			INX	H
+  1210 0626 72			MOV	M,D
+  1211 0627 C3 45 01		JMP	NEXT
+  1212 			;
+  1213 062A			DB	0C1H	; :
+            C1 
+  1214 062B			DB	':'+80H
+            3A 80 
+  1215 062D			DW	TSTOR-5
+            1606 
+  1216 062F		COLON	DW	DOCOL
+            4306 
+  1217 0631			DW	QEXEC
+            190A 
+  1218 0633			DW	SCSP
+            D109 
+  1219 0635			DW	CURR
+            ED07 
+  1220 0637			DW	AT
+            C305 
+  1221 0639			DW	CONT
+            DF07 
+  1222 063B			DW	STORE
+            FD05 
+  1223 063D			DW	CREAT
+            0E0F 
+  1224 063F			DW	RBRAC
+            A40A 
+  1225 0641			DW	PSCOD
+            FB0A 
+  1226 0643 2A 28 01	DOCOL	LHLD	RPP
+  1227 0646 2B			DCX	H	; (R1) <- (IP)
+  1228 0647 70			MOV	M,B
+  1229 0648 2B			DCX	H	; (RP) <- (RP) - 2
+  1230 0649 71			MOV	M,C
+  1231 064A 22 28 01		SHLD	RPP
+  1232 064D 13			INX	D	; (DE) <- CFA+2 = (W)
+  1233 064E 4B			MOV	C,E	; (IP) <- (DE) = (W)
+  1234 064F 42			MOV	B,D
+  1235 0650 C3 45 01		JMP	NEXT
+  1236 			;
+  1237 0653			DB	0C1H	; ;
+            C1 
+  1238 0654			DB	0BBH ; asm8080 thinks ';'+80H contains a comment start
+            BB 
+  1239 0655			DW	COLON-4
+            2B06 
+  1240 0657		SEMI	DW	DOCOL
+            4306 
+  1241 0659			DW	QCSP
+            450A 
+  1242 065B			DW	COMP
+            7E0A 
+  1243 065D			DW	SEMIS
+            6104 
+  1244 065F			DW	SMUDG
+            BA0A 
+  1245 0661			DW	LBRAC
+            950A 
+  1246 0663			DW	SEMIS
+            6104 
+  1247 			;
+  1248 0665			DB	84H	; NOOP
+            84 
+  1249 0666			DB	'NOO'
+            4E 4F 4F 
+  1250 0669			DB	'P'+80H
+            50 80 
+  1251 066B			DW	SEMI-4
+            5306 
+  1252 066D		NOOP	DW	DOCOL
+            4306 
+  1253 066F			DW	SEMIS
+            6104 
+  1254 			 ;
+  1255 0671			DB	88H	; CONSTANT
+            88 
+  1256 0672			DB	'CONSTAN'
+            43 4F 4E 53 
+            54 41 4E 
+  1257 0679			DB	'T'+80H
+            54 80 
+  1258 067B			DW	NOOP-7
+            6606 
+  1259 067D		CON	DW	DOCOL
+            4306 
+  1260 067F			DW	CREAT
+            0E0F 
+  1261 0681			DW	SMUDG
+            BA0A 
+  1262 0683			DW	COMMA
+            7B08 
+  1263 0685			DW	PSCOD
+            FB0A 
+  1264 0687 13		DOCON	INX	D	; (DE) <- PFA
+  1265 0688 EB			XCHG
+  1266 0689 5E			MOV	E,M	; (DE) <- (PFA)
+  1267 068A 23			INX	H
+  1268 068B 56			MOV	D,M
+  1269 068C D5			PUSH	D	; (S1) <- (PFA)
+  1270 068D C3 45 01		JMP	NEXT
+  1271 			;
+  1272 0690			DB	88H	; VARIABLE
+            88 
+  1273 0691			DB	'VARIABL'
+            56 41 52 49 
+            41 42 4C 
+  1274 0698			DB	'E'+80H
+            45 80 
+  1275 069A			DW	CON-0BH
+            7206 
+  1276 069C		VAR	DW	DOCOL
+            4306 
+  1277 069E			DW	CON
+            7D06 
+  1278 06A0			DW	PSCOD
+            FB0A 
+  1279 06A2 13		DOVAR	INX	D	; (DE) <- PFA
+  1280 06A3 D5			PUSH	D	; (S1) <- PFA
+  1281 06A4 C3 45 01		JMP	NEXT
+  1282 			;
+  1283 06A7			DB	84H	; USER
+            84 
+  1284 06A8			DB	'USE'
+            55 53 45 
+  1285 06AB			DB	'R'+80H
+            52 80 
+  1286 06AD			DW	VAR-0BH
+            9106 
+  1287 06AF		USER	DW	DOCOL
+            4306 
+  1288 06B1			DW	CON
+            7D06 
+  1289 06B3			DW	PSCOD
+            FB0A 
+  1290 06B5 13		DOUSE	INX	D	; (DE) <- PFA
+  1291 06B6 EB			XCHG
+  1292 06B7 5E			MOV	E,M	; (DE) <- USER VARIABLE OFFSET
+  1293 06B8 16 00		MVI	D,0
+  1294 06BA 2A 26 01		LHLD	UP	; (HL) <- USER VARIABLE BASE ADDR
+  1295 06BD 19			DAD	D	; (HL) <- (HL) + (DE)
+  1296 06BE C3 44 01		JMP	HPUSH	; (S1) <- BASE + OFFSET
+  1297 			;
+  1298 06C1			DB	81H	; 0
+            81 
+  1299 06C2			DB	'0'+80H
+            30 80 
+  1300 06C4			DW	USER-7
+            A806 
+  1301 06C6		ZERO	DW	DOCON
+            8706 
+  1302 06C8			DW	0
+            0000 
+  1303 			;
+  1304 06CA			DB	81H	; 1
+            81 
+  1305 06CB			DB	'1'+80H
+            31 80 
+  1306 06CD			DW	ZERO-4
+            C206 
+  1307 06CF		ONE	DW	DOCON
+            8706 
+  1308 06D1			DW	1
+            0100 
+  1309 			;
+  1310 06D3			DB	81H	; 2
+            81 
+  1311 06D4			DB	'2'+80H
+            32 80 
+  1312 06D6			DW	ONE-4
+            CB06 
+  1313 06D8		TWO	DW	DOCON
+            8706 
+  1314 06DA			DW	2
+            0200 
+  1315 			;
+  1316 06DC			DB	81H	; 3
+            81 
+  1317 06DD			DB	'3'+80H
+            33 80 
+  1318 06DF			DW	TWO-4
+            D406 
+  1319 06E1		THREE	DW	DOCON
+            8706 
+  1320 06E3			DW	3
+            0300 
+  1321 			;
+  1322 06E5			DB	82H	; BL
+            82 
+  1323 06E6			DB	'B'
+            42 
+  1324 06E7			DB	'L'+80H
+            4C 80 
+  1325 06E9			DW	THREE-4
+            DD06 
+  1326 06EB		BL	DW	DOCON
+            8706 
+  1327 06ED			DW	20H
+            2000 
+  1328 			;
+  1329 06EF			DB	83H	; C/L ( CHARACTERS/LINE )
+            83 
+  1330 06F0			DB	'C/'
+            43 2F 
+  1331 06F2			DB	'L'+80H
+            4C 80 
+  1332 06F4			DW	BL-5
+            E606 
+  1333 06F6		CSLL	DW	DOCON
+            8706 
+  1334 06F8			DW	64
+            4000 
+  1335 			;
+  1336 06FA			DB	85H	; FIRST
+            85 
+  1337 06FB			DB	'FIRS'
+            46 49 52 53 
+            
+  1338 06FF			DB	'T'+80H
+            54 80 
+  1339 0701			DW	CSLL-6
+            F006 
+  1340 0703		FIRST	DW	DOCON
+            8706 
+  1341 0705			DW	BUF1
+            E0BB 
+  1342 			;
+  1343 0707			DB	85H	; LIMIT
+            85 
+  1344 0708			DB	'LIMI'
+            4C 49 4D 49 
+            
+  1345 070C			DB	'T'+80H
+            54 80 
+  1346 070E			DW	FIRST-8
+            FB06 
+  1347 0710		LIMIT	DW	DOCON
+            8706 
+  1348 0712			DW	EM
+            00C0 
+  1349 			;
+  1350 0714			DB	85H	; B/BUF ( BYTES/BUFFER )
+            85 
+  1351 0715			DB	'B/BU'
+            42 2F 42 55 
+            
+  1352 0719			DB	'F'+80H
+            46 80 
+  1353 071B			DW	LIMIT-8
+            0807 
+  1354 071D		BBUF	DW	DOCON
+            8706 
+  1355 071F			DW	KBBUF
+            8000 
+  1356 			;
+  1357 0721			DB	85H	; B/SCR ( BUFFERS/SCREEN )
+            85 
+  1358 0722			DB	'B/SC'
+            42 2F 53 43 
+            
+  1359 0726			DB	'R'+80H
+            52 80 
+  1360 0728			DW	BBUF-8
+            1507 
+  1361 072A		BSCR	DW	DOCON
+            8706 
+  1362 072C			DW	400H/KBBUF
+            0800 
+  1363 			;
+  1364 072E			DB	87H	; +ORIGIN
+            87 
+  1365 072F			DB	'+ORIGI'
+            2B 4F 52 49 
+            47 49 
+  1366 0735			DB	'N'+80H
+            4E 80 
+  1367 0737			DW	BSCR-8
+            2207 
+  1368 0739		PORIG	DW	DOCOL
+            4306 
+  1369 073B			DW	LIT
+            5701 
+  1370 073D			DW	ORIG
+            0001 
+  1371 073F			DW	PLUS
+            EA04 
+  1372 0741			DW	SEMIS
+            6104 
+  1373 			;
+  1374 			;	USER VARIABLES
+  1375 			;
+  1376 0743			DB	82H	; S0
+            82 
+  1377 0744			DB	'S'
+            53 
+  1378 0745			DB	'0'+80H
+            30 80 
+  1379 0747			DW	PORIG-0AH
+            2F07 
+  1380 0749		SZERO	DW	DOUSE
+            B506 
+  1381 074B			DW	6
+            0600 
+  1382 			;
+  1383 074D			DB	82H	; R0
+            82 
+  1384 074E			DB	'R'
+            52 
+  1385 074F			DB	'0'+80H
+            30 80 
+  1386 0751			DW	SZERO-5
+            4407 
+  1387 0753		RZERO	DW	DOUSE
+            B506 
+  1388 0755			DW	8
+            0800 
+  1389 			;
+  1390 0757			DB	83H	; TIB
+            83 
+  1391 0758			DB	'TI'
+            54 49 
+  1392 075A			DB	'B'+80H
+            42 80 
+  1393 075C			DW	RZERO-5
+            4E07 
+  1394 075E		TIB	DW	DOUSE
+            B506 
+  1395 0760			DB	0AH
+            0A 
+  1396 			;
+  1397 0761			DB	85H	; WIDTH
+            85 
+  1398 0762			DB	'WIDT'
+            57 49 44 54 
+            
+  1399 0766			DB	'H'+80H
+            48 80 
+  1400 0768			DW	TIB-6
+            5807 
+  1401 076A		WIDTH	DW	DOUSE
+            B506 
+  1402 076C			DB	0CH
+            0C 
+  1403 			;
+  1404 076D			DB	87H	; WARNING
+            87 
+  1405 076E			DB	'WARNIN'
+            57 41 52 4E 
+            49 4E 
+  1406 0774			DB	'G'+80H
+            47 80 
+  1407 0776			DW	WIDTH-8
+            6207 
+  1408 0778		WARN	DW	DOUSE
+            B506 
+  1409 077A			DB	0EH
+            0E 
+  1410 			;
+  1411 077B			DB	85H	; FENCE
+            85 
+  1412 077C			DB	'FENC'
+            46 45 4E 43 
+            
+  1413 0780			DB	'E'+80H
+            45 80 
+  1414 0782			DW	WARN-0AH
+            6E07 
+  1415 0784		FENCE	DW	DOUSE
+            B506 
+  1416 0786			DB	10H
+            10 
+  1417 			;
+  1418 0787			DB	82H	; DP
+            82 
+  1419 0788			DB	'D'
+            44 
+  1420 0789			DB	'P'+80H
+            50 80 
+  1421 078B			DW	FENCE-8
+            7C07 
+  1422 078D		DP	DW	DOUSE
+            B506 
+  1423 078F			DB	12H
+            12 
+  1424 			;
+  1425 0790			DB	88H	; VOC-LINK
+            88 
+  1426 0791			DB	'VOC-LIN'
+            56 4F 43 2D 
+            4C 49 4E 
+  1427 0798			DB	'K'+80H
+            4B 80 
+  1428 079A			DW	DP-5
+            8807 
+  1429 079C		VOCL	DW	DOUSE
+            B506 
+  1430 079E			DW	14H
+            1400 
+  1431 			;
+  1432 07A0			DB	83H	; BLK
+            83 
+  1433 07A1			DB	'BL'
+            42 4C 
+  1434 07A3			DB	'K'+80H
+            4B 80 
+  1435 07A5			DW	VOCL-0BH
+            9107 
+  1436 07A7		BLK	DW	DOUSE
+            B506 
+  1437 07A9			DB	16H
+            16 
+  1438 			;
+  1439 07AA			DB	82H	; IN
+            82 
+  1440 07AB			DB	'I'
+            49 
+  1441 07AC			DB	'N'+80H
+            4E 80 
+  1442 07AE			DW	BLK-6
+            A107 
+  1443 07B0		INN	DW	DOUSE
+            B506 
+  1444 07B2			DB	18H
+            18 
+  1445 			;
+  1446 07B3			DB	83H	; OUT
+            83 
+  1447 07B4			DB	'OU'
+            4F 55 
+  1448 07B6			DB	'T'+80H
+            54 80 
+  1449 07B8			DW	INN-5
+            AB07 
+  1450 07BA		OUTT	DW	DOUSE
+            B506 
+  1451 07BC			DB	1AH
+            1A 
+  1452 			;
+  1453 07BD			DB	83H	; SCR
+            83 
+  1454 07BE			DB	'SC'
+            53 43 
+  1455 07C0			DB	'R'+80H
+            52 80 
+  1456 07C2			DW	OUTT-6
+            B407 
+  1457 07C4		SCR	DW	DOUSE
+            B506 
+  1458 07C6			DB	1CH
+            1C 
+  1459 			;
+  1460 07C7			DB	86H	; OFFSET
+            86 
+  1461 07C8			DB	'OFFSE'
+            4F 46 46 53 
+            45 
+  1462 07CD			DB	'T'+80H
+            54 80 
+  1463 07CF			DW	SCR-6
+            BE07 
+  1464 07D1		OFSET	DW	DOUSE
+            B506 
+  1465 07D3			DB	1EH
+            1E 
+  1466 			;
+  1467 07D4			DB	87H	; CONTEXT
+            87 
+  1468 07D5			DB	'CONTEX'
+            43 4F 4E 54 
+            45 58 
+  1469 07DB			DB	'T'+80H
+            54 80 
+  1470 07DD			DW	OFSET-9
+            C807 
+  1471 07DF		CONT	DW	DOUSE
+            B506 
+  1472 07E1			DB	20H
+            20 
+  1473 			;
+  1474 07E2			DB	87H	; CURRENT
+            87 
+  1475 07E3			DB	'CURREN'
+            43 55 52 52 
+            45 4E 
+  1476 07E9			DB	'T'+80H
+            54 80 
+  1477 07EB			DW	CONT-0AH
+            D507 
+  1478 07ED		CURR	DW	DOUSE
+            B506 
+  1479 07EF			DB	22H
+            22 
+  1480 			;
+  1481 07F0			DB	85H	; STATE
+            85 
+  1482 07F1			DB	'STAT'
+            53 54 41 54 
+            
+  1483 07F5			DB	'E'+80H
+            45 80 
+  1484 07F7			DW	CURR-0AH
+            E307 
+  1485 07F9		STATE	DW	DOUSE
+            B506 
+  1486 07FB			DB	24H
+            24 
+  1487 			;
+  1488 07FC			DB	84H	; BASE
+            84 
+  1489 07FD			DB	'BAS'
+            42 41 53 
+  1490 0800			DB	'E'+80H
+            45 80 
+  1491 0802			DW	STATE-8
+            F107 
+  1492 0804		BASE	DW	DOUSE
+            B506 
+  1493 0806			DB	26H
+            26 
+  1494 			;
+  1495 0807			DB	83H	; DPL
+            83 
+  1496 0808			DB	'DP'
+            44 50 
+  1497 080A			DB	'L'+80H
+            4C 80 
+  1498 080C			DW	BASE-7
+            FD07 
+  1499 080E		DPL	DW	DOUSE
+            B506 
+  1500 0810			DB	28H
+            28 
+  1501 			;
+  1502 0811			DB	83H	; FLD
+            83 
+  1503 0812			DB	'FL'
+            46 4C 
+  1504 0814			DB	'D'+80H
+            44 80 
+  1505 0816			DW	DPL-6
+            0808 
+  1506 0818		FLD	DW	DOUSE
+            B506 
+  1507 081A			DB	2AH
+            2A 
+  1508 			;
+  1509 081B			DB	83H	; CSP
+            83 
+  1510 081C			DB	'CS'
+            43 53 
+  1511 081E			DB	'P'+80H
+            50 80 
+  1512 0820			DW	FLD-6
+            1208 
+  1513 0822		CSPP	DW	DOUSE
+            B506 
+  1514 0824			DB	2CH
+            2C 
+  1515 			;
+  1516 0825			DB	82H	; R#
+            82 
+  1517 0826			DB	'R'
+            52 
+  1518 0827			DB	'#'+80H
+            23 80 
+  1519 0829			DW	CSPP-6
+            1C08 
+  1520 082B		RNUM	DW	DOUSE
+            B506 
+  1521 082D			DB	2EH
+            2E 
+  1522 			;
+  1523 082E			DB	83H	; HLD
+            83 
+  1524 082F			DB	'HL'
+            48 4C 
+  1525 0831			DB	'D'+80H
+            44 80 
+  1526 0833			DW	RNUM-5
+            2608 
+  1527 0835		HLD	DW	DOUSE
+            B506 
+  1528 0837			DW	30H
+            3000 
+  1529 			;
+  1530 			;	END OF USER VARIABLES
+  1531 			;
+  1532 0839			DB	82H	; 1+
+            82 
+  1533 083A			DB	'1'
+            31 
+  1534 083B			DB	'+'+80H
+            2B 80 
+  1535 083D			DW	HLD-6
+            2F08 
+  1536 083F		ONEP	DW	DOCOL
+            4306 
+  1537 0841			DW	ONE
+            CF06 
+  1538 0843			DW	PLUS
+            EA04 
+  1539 0845			DW	SEMIS
+            6104 
+  1540 			;
+  1541 0847			DB	82H	; 2+
+            82 
+  1542 0848			DB	'2'
+            32 
+  1543 0849			DB	'+'+80H
+            2B 80 
+  1544 084B			DW	ONEP-5
+            3A08 
+  1545 084D		TWOP	DW	DOCOL
+            4306 
+  1546 084F			DW	TWO
+            D806 
+  1547 0851			DW	PLUS
+            EA04 
+  1548 0853			DW	SEMIS
+            6104 
+  1549 			;
+  1550 0855			DB	84H	; HERE
+            84 
+  1551 0856			DB	'HER'
+            48 45 52 
+  1552 0859			DB	'E'+80H
+            45 80 
+  1553 085B			DW	TWOP-5
+            4808 
+  1554 085D		HERE	DW	DOCOL
+            4306 
+  1555 085F			DW	DP
+            8D07 
+  1556 0861			DW	AT
+            C305 
+  1557 0863			DW	SEMIS
+            6104 
+  1558 			;
+  1559 0865			DB	85H	; ALLOT
+            85 
+  1560 0866			DB	'ALLO'
+            41 4C 4C 4F 
+            
+  1561 086A			DB	'T'+80H
+            54 80 
+  1562 086C			DW	HERE-7
+            5608 
+  1563 086E		ALLOT	DW	DOCOL
+            4306 
+  1564 0870			DW	DP
+            8D07 
+  1565 0872			DW	PSTOR
+            9C05 
+  1566 0874			DW	SEMIS
+            6104 
+  1567 			;
+  1568 0876			DB	81H	; ,
+            81 
+  1569 0877			DB	','+80H
+            2C 80 
+  1570 0879			DW	ALLOT-8
+            6608 
+  1571 087B		COMMA	DW	DOCOL
+            4306 
+  1572 087D			DW	HERE
+            5D08 
+  1573 087F			DW	STORE
+            FD05 
+  1574 0881			DW	TWO
+            D806 
+  1575 0883			DW	ALLOT
+            6E08 
+  1576 0885			DW	SEMIS
+            6104 
+  1577 			;
+  1578 0887			DB	82H	; C,
+            82 
+  1579 0888			DB	'C'
+            43 
+  1580 0889			DB	','+80H
+            2C 80 
+  1581 088B			DW	COMMA-4
+            7708 
+  1582 088D		CCOMM	DW	DOCOL
+            4306 
+  1583 088F			DW	HERE
+            5D08 
+  1584 0891			DW	CSTOR
+            0D06 
+  1585 0893			DW	ONE
+            CF06 
+  1586 0895			DW	ALLOT
+            6E08 
+  1587 0897			DW	SEMIS
+            6104 
+  1588 			;
+  1589 			;	SUBROUTINE USED BY - AND <
+  1590 			;			; (HL) <- (HL) - (DE)
+  1591 0899 7D		SSUB	MOV	A,L	; LB
+  1592 089A 93			SUB	E
+  1593 089B 6F			MOV	L,A
+  1594 089C 7C			MOV	A,H	; HB
+  1595 089D 9A			SBB	D
+  1596 089E 67			MOV	H,A
+  1597 089F C9			RET
+  1598 			;
+  1599 08A0			DB	81H	; -
+            81 
+  1600 08A1			DB	'-'+80H
+            2D 80 
+  1601 08A3			DW	CCOMM-5
+            8808 
+  1602 08A5		SUBB	DW	$+2
+            A708 
+  1603 08A7 D1			POP	D	; (DE) <- (S1) = Y
+  1604 08A8 E1			POP	H	; (HL) <- (S2) = X
+  1605 08A9 CD 99 08		CALL	SSUB
+  1606 08AC C3 44 01		JMP	HPUSH	; (S1) <- X - Y
+  1607 			;
+  1608 08AF			DB	81H	; =
+            81 
+  1609 08B0			DB	'='+80H
+            3D 80 
+  1610 08B2			DW	SUBB-4
+            A108 
+  1611 08B4		EQUAL	DW	DOCOL
+            4306 
+  1612 08B6			DW	SUBB
+            A508 
+  1613 08B8			DW	ZEQU
+            C204 
+  1614 08BA			DW	SEMIS
+            6104 
+  1615 			;
+  1616 08BC			DB	81H	; <
+            81 
+  1617 08BD			DB	'<'+80H		; X  <  Y
+            3C 80 
+  1618 08BF			DW	EQUAL-4		; S2    S1
+            B008 
+  1619 08C1		LESS	DW	$+2
+            C308 
+  1620 08C3 D1			POP	D	; (DE) <- (S1) = Y
+  1621 08C4 E1			POP	H	; (HL) <- (S2) = X
+  1622 08C5 7A			MOV	A,D	; IF X & Y HAVE SAME SIGNS
+  1623 08C6 AC			XRA	H
+  1624 08C7 FA CD 08		JM	LES1
+  1625 08CA CD 99 08		CALL	SSUB	; (HL) <- X - Y
+  1626 08CD 24		LES1	INR	H	; IF (HL) >= 0
+  1627 08CE 25			DCR	H
+  1628 08CF FA D8 08		JM	LES2
+  1629 08D2 21 00 00		LXI	H,0	; THEN X >= Y
+  1630 08D5 C3 44 01		JMP	HPUSH	; (S1) <- FALSE
+  1631 08D8 21 01 00	LES2	LXI	H,1	; ELSE X < Y
+  1632 08DB C3 44 01		JMP	HPUSH	; (S1) <- TRUE
+  1633 			;
+  1634 08DE			DB	82H	; U< ( UNSIGNED < )
+            82 
+  1635 08DF			DB	'U'
+            55 
+  1636 08E0			DB	'<'+80H
+            3C 80 
+  1637 08E2			DW	LESS-4
+            BD08 
+  1638 08E4		ULESS	DW	DOCOL,TDUP
+            4306 8D05 
+  1639 08E8			DW	XORR,ZLESS
+            FD03 D704 
+  1640 08EC			DW	ZBRAN,ULES1-$	; IF
+            9601 0E00 
+  1641 08F0			DW	DROP,ZLESS
+            6205 D704 
+  1642 08F4			DW	ZEQU
+            C204 
+  1643 08F6			DW	BRAN,ULES2-$
+            7D01 0800 
+  1644 08FA		ULES1	DW	SUBB,ZLESS	; ELSE
+            A508 D704 
+  1645 08FE		ULES2	DW	SEMIS		; ENDIF
+            6104 
+  1646 			;
+  1647 0900			DB	81H	; >
+            81 
+  1648 0901			DB	'>'+80H
+            3E 80 
+  1649 0903			DW	ULESS-5
+            DF08 
+  1650 0905		GREAT	DW	DOCOL
+            4306 
+  1651 0907			DW	SWAP
+            7005 
+  1652 0909			DW	LESS
+            C108 
+  1653 090B			DW	SEMIS
+            6104 
+  1654 			;
+  1655 090D			DB	83H	; ROT
+            83 
+  1656 090E			DB	'RO'
+            52 4F 
+  1657 0910			DB	'T'+80H
+            54 80 
+  1658 0912			DW	GREAT-4
+            0109 
+  1659 0914		ROT	DW	$+2
+            1609 
+  1660 0916 D1			POP	D
+  1661 0917 E1			POP	H
+  1662 0918 E3			XTHL
+  1663 0919 C3 43 01		JMP	DPUSH
+  1664 			;
+  1665 091C			DB	85H	; SPACE
+            85 
+  1666 091D			DB	'SPAC'
+            53 50 41 43 
+            
+  1667 0921			DB	'E'+80H
+            45 80 
+  1668 0923			DW	ROT-6
+            0E09 
+  1669 0925		SPACE	DW	DOCOL
+            4306 
+  1670 0927			DW	BL
+            EB06 
+  1671 0929			DW	EMIT
+            EC02 
+  1672 092B			DW	SEMIS
+            6104 
+  1673 			;
+  1674 092D			DB	84H	; -DUP
+            84 
+  1675 092E			DB	'-DU'
+            2D 44 55 
+  1676 0931			DB	'P'+80H
+            50 80 
+  1677 0933			DW	SPACE-8
+            1D09 
+  1678 0935		DDUP	DW	DOCOL
+            4306 
+  1679 0937			DW	DUP
+            7E05 
+  1680 0939			DW	ZBRAN	; IF
+            9601 
+  1681 093B			DW	DDUP1-$
+            0400 
+  1682 093D			DW	DUP	; ENDIF
+            7E05 
+  1683 093F		DDUP1	DW	SEMIS
+            6104 
+  1684 			;
+  1685 0941			DB	88H	; TRAVERSE
+            88 
+  1686 0942			DB	'TRAVERS'
+            54 52 41 56 
+            45 52 53 
+  1687 0949			DB	'E'+80H
+            45 80 
+  1688 094B			DW	DDUP-7
+            2E09 
+  1689 094D		TRAV	DW	DOCOL
+            4306 
+  1690 094F			DW	SWAP
+            7005 
+  1691 0951		TRAV1	DW	OVER	; BEGIN
+            5205 
+  1692 0953			DW	PLUS
+            EA04 
+  1693 0955			DW	LIT
+            5701 
+  1694 0957			DW	7FH
+            7F00 
+  1695 0959			DW	OVER
+            5205 
+  1696 095B			DW	CAT
+            D305 
+  1697 095D			DW	LESS
+            C108 
+  1698 095F			DW	ZBRAN	; UNTIL
+            9601 
+  1699 0961			DW	TRAV1-$
+            F0FFFFFFFF 
+  1700 0963			DW	SWAP
+            7005 
+  1701 0965			DW	DROP
+            6205 
+  1702 0967			DW	SEMIS
+            6104 
+  1703 			;
+  1704 0969			DB	86H	; LATEST
+            86 
+  1705 096A			DB	'LATES'
+            4C 41 54 45 
+            53 
+  1706 096F			DB	'T'+80H
+            54 80 
+  1707 0971			DW	TRAV-0BH
+            4209 
+  1708 0973		LATES	DW	DOCOL
+            4306 
+  1709 0975			DW	CURR
+            ED07 
+  1710 0977			DW	AT
+            C305 
+  1711 0979			DW	AT
+            C305 
+  1712 097B			DW	SEMIS
+            6104 
+  1713 			;
+  1714 097D			DB	83H	; LFA
+            83 
+  1715 097E			DB	'LF'
+            4C 46 
+  1716 0980			DB	'A'+80H
+            41 80 
+  1717 0982			DW	LATES-9
+            6A09 
+  1718 0984		LFA	DW	DOCOL
+            4306 
+  1719 0986			DW	LIT
+            5701 
+  1720 0988			DW	4
+            0400 
+  1721 098A			DW	SUBB
+            A508 
+  1722 098C			DW	SEMIS
+            6104 
+  1723 			;
+  1724 098E			DB	83H	; CFA
+            83 
+  1725 098F			DB	'CF'
+            43 46 
+  1726 0991			DB	'A'+80H
+            41 80 
+  1727 0993			DW	LFA-6
+            7E09 
+  1728 0995		CFA	DW	DOCOL
+            4306 
+  1729 0997			DW	TWO
+            D806 
+  1730 0999			DW	SUBB
+            A508 
+  1731 099B			DW	SEMIS
+            6104 
+  1732 			;
+  1733 099D			DB	83H	; NFA
+            83 
+  1734 099E			DB	'NF'
+            4E 46 
+  1735 09A0			DB	'A'+80H
+            41 80 
+  1736 09A2			DW	CFA-6
+            8F09 
+  1737 09A4		NFA	DW	DOCOL
+            4306 
+  1738 09A6			DW	LIT
+            5701 
+  1739 09A8			DW	5
+            0500 
+  1740 09AA			DW	SUBB
+            A508 
+  1741 09AC			DW	LIT
+            5701 
+  1742 09AE			DW	-1
+            FFFFFFFFFF 
+  1743 09B0			DW	TRAV
+            4D09 
+  1744 09B2			DW	SEMIS
+            6104 
+  1745 			;
+  1746 09B4			DB	83H	; PFA
+            83 
+  1747 09B5			DB	'PF'
+            50 46 
+  1748 09B7			DB	'A'+80H
+            41 80 
+  1749 09B9			DW	NFA-6
+            9E09 
+  1750 09BB		PFA	DW	DOCOL
+            4306 
+  1751 09BD			DW	ONE
+            CF06 
+  1752 09BF			DW	TRAV
+            4D09 
+  1753 09C1			DW	LIT
+            5701 
+  1754 09C3			DW	5
+            0500 
+  1755 09C5			DW	PLUS
+            EA04 
+  1756 09C7			DW	SEMIS
+            6104 
+  1757 			;
+  1758 09C9			DB	84H	; STORE CSP
+            84 
+  1759 09CA			DB	'!CS'
+            21 43 53 
+  1760 09CD			DB	'P'+80H
+            50 80 
+  1761 09CF			DW	PFA-6
+            B509 
+  1762 09D1		SCSP	DW	DOCOL
+            4306 
+  1763 09D3			DW	SPAT
+            1104 
+  1764 09D5			DW	CSPP
+            2208 
+  1765 09D7			DW	STORE
+            FD05 
+  1766 09D9			DW	SEMIS
+            6104 
+  1767 			;
+  1768 09DB			DB	86H	; ?ERROR
+            86 
+  1769 09DC			DB	'?ERRO'
+            3F 45 52 52 
+            4F 
+  1770 09E1			DB	'R'+80H
+            52 80 
+  1771 09E3			DW	SCSP-7
+            CA09 
+  1772 09E5		QERR	DW	DOCOL
+            4306 
+  1773 09E7			DW	SWAP
+            7005 
+  1774 09E9			DW	ZBRAN	; IF
+            9601 
+  1775 09EB			DW	QERR1-$
+            0800 
+  1776 09ED			DW	ERROR
+            A00E 
+  1777 09EF			DW	BRAN	; ELSE
+            7D01 
+  1778 09F1			DW	QERR2-$
+            0400 
+  1779 09F3		QERR1	DW	DROP	; ENDIF
+            6205 
+  1780 09F5		QERR2	DW	SEMIS
+            6104 
+  1781 			;
+  1782 09F7			DB	85H	; ?COMP
+            85 
+  1783 09F8			DB	'?COM'
+            3F 43 4F 4D 
+            
+  1784 09FC			DB	'P'+80H
+            50 80 
+  1785 09FE			DW	QERR-9
+            DC09 
+  1786 0A00		QCOMP	DW	DOCOL
+            4306 
+  1787 0A02			DW	STATE
+            F907 
+  1788 0A04			DW	AT
+            C305 
+  1789 0A06			DW	ZEQU
+            C204 
+  1790 0A08			DW	LIT
+            5701 
+  1791 0A0A			DW	11H
+            1100 
+  1792 0A0C			DW	QERR
+            E509 
+  1793 0A0E			DW	SEMIS
+            6104 
+  1794 			;
+  1795 0A10			DB	85H	; ?EXEC
+            85 
+  1796 0A11			DB	'?EXE'
+            3F 45 58 45 
+            
+  1797 0A15			DB	'C'+80H
+            43 80 
+  1798 0A17			DW	QCOMP-8
+            F809 
+  1799 0A19		QEXEC	DW	DOCOL
+            4306 
+  1800 0A1B			DW	STATE
+            F907 
+  1801 0A1D			DW	AT
+            C305 
+  1802 0A1F			DW	LIT
+            5701 
+  1803 0A21			DW	12H
+            1200 
+  1804 0A23			DW	QERR
+            E509 
+  1805 0A25			DW	SEMIS
+            6104 
+  1806 			;
+  1807 0A27			DB	86H	; ?PAIRS
+            86 
+  1808 0A28			DB	'?PAIR'
+            3F 50 41 49 
+            52 
+  1809 0A2D			DB	'S'+80H
+            53 80 
+  1810 0A2F			DW	QEXEC-8
+            110A 
+  1811 0A31		QPAIR	DW	DOCOL
+            4306 
+  1812 0A33			DW	SUBB
+            A508 
+  1813 0A35			DW	LIT
+            5701 
+  1814 0A37			DW	13H
+            1300 
+  1815 0A39			DW	QERR
+            E509 
+  1816 0A3B			DW	SEMIS
+            6104 
+  1817 			;
+  1818 0A3D			DB	84H	; ?CSP
+            84 
+  1819 0A3E			DB	'?CS'
+            3F 43 53 
+  1820 0A41			DB	'P'+80H
+            50 80 
+  1821 0A43			DW	QPAIR-9
+            280A 
+  1822 0A45		QCSP	DW	DOCOL
+            4306 
+  1823 0A47			DW	SPAT
+            1104 
+  1824 0A49			DW	CSPP
+            2208 
+  1825 0A4B			DW	AT
+            C305 
+  1826 0A4D			DW	SUBB
+            A508 
+  1827 0A4F			DW	LIT
+            5701 
+  1828 0A51			DW	14H
+            1400 
+  1829 0A53			DW	QERR
+            E509 
+  1830 0A55			DW	SEMIS
+            6104 
+  1831 			;
+  1832 0A57			DB	88H	; ?LOADING
+            88 
+  1833 0A58			DB	'?LOADIN'
+            3F 4C 4F 41 
+            44 49 4E 
+  1834 0A5F			DB	'G'+80H
+            47 80 
+  1835 0A61			DW	QCSP-7
+            3E0A 
+  1836 0A63		QLOAD	DW	DOCOL
+            4306 
+  1837 0A65			DW	BLK
+            A707 
+  1838 0A67			DW	AT
+            C305 
+  1839 0A69			DW	ZEQU
+            C204 
+  1840 0A6B			DW	LIT
+            5701 
+  1841 0A6D			DW	16H
+            1600 
+  1842 0A6F			DW	QERR
+            E509 
+  1843 0A71			DW	SEMIS
+            6104 
+  1844 			;
+  1845 0A73			DB	87H	; COMPILE
+            87 
+  1846 0A74			DB	'COMPIL'
+            43 4F 4D 50 
+            49 4C 
+  1847 0A7A			DB	'E'+80H
+            45 80 
+  1848 0A7C			DW	QLOAD-0BH
+            580A 
+  1849 0A7E		COMP	DW	DOCOL
+            4306 
+  1850 0A80			DW	QCOMP
+            000A 
+  1851 0A82			DW	FROMR
+            A504 
+  1852 0A84			DW	DUP
+            7E05 
+  1853 0A86			DW	TWOP
+            4D08 
+  1854 0A88			DW	TOR
+            8E04 
+  1855 0A8A			DW	AT
+            C305 
+  1856 0A8C			DW	COMMA
+            7B08 
+  1857 0A8E			DW	SEMIS
+            6104 
+  1858 			;
+  1859 0A90			DB	0C1H	; [
+            C1 
+  1860 0A91			DB	'['+80H
+            5B 80 
+  1861 0A93			DW	COMP-0AH
+            740A 
+  1862 0A95		LBRAC	DW	DOCOL
+            4306 
+  1863 0A97			DW	ZERO
+            C606 
+  1864 0A99			DW	STATE
+            F907 
+  1865 0A9B			DW	STORE
+            FD05 
+  1866 0A9D			DW	SEMIS
+            6104 
+  1867 			;
+  1868 0A9F			DB	81H	; ]
+            81 
+  1869 0AA0			DB	']'+80H
+            5D 80 
+  1870 0AA2			DW	LBRAC-4
+            910A 
+  1871 0AA4		RBRAC	DW	DOCOL
+            4306 
+  1872 0AA6			DW	LIT,0C0H
+            5701 C000 
+  1873 0AAA			DW	STATE,STORE
+            F907 FD05 
+  1874 0AAE			DW	SEMIS
+            6104 
+  1875 			;
+  1876 0AB0			DB	86H	; SMUDGE
+            86 
+  1877 0AB1			DB	'SMUDG'
+            53 4D 55 44 
+            47 
+  1878 0AB6			DB	'E'+80H
+            45 80 
+  1879 0AB8			DW	RBRAC-4
+            A00A 
+  1880 0ABA		SMUDG	DW	DOCOL
+            4306 
+  1881 0ABC			DW	LATES
+            7309 
+  1882 0ABE			DW	LIT
+            5701 
+  1883 0AC0			DW	20H
+            2000 
+  1884 0AC2			DW	TOGGL
+            B405 
+  1885 0AC4			DW	SEMIS
+            6104 
+  1886 			;
+  1887 0AC6			DB	83H	; HEX
+            83 
+  1888 0AC7			DB	'HE'
+            48 45 
+  1889 0AC9			DB	'X'+80H
+            58 80 
+  1890 0ACB			DW	SMUDG-9
+            B10A 
+  1891 0ACD		HEX	DW	DOCOL
+            4306 
+  1892 0ACF			DW	LIT
+            5701 
+  1893 0AD1			DW	10H
+            1000 
+  1894 0AD3			DW	BASE
+            0408 
+  1895 0AD5			DW	STORE
+            FD05 
+  1896 0AD7			DW	SEMIS
+            6104 
+  1897 			;
+  1898 0AD9			DB	87H	; DECIMAL
+            87 
+  1899 0ADA			DB	'DECIMA'
+            44 45 43 49 
+            4D 41 
+  1900 0AE0			DB	'L'+80H
+            4C 80 
+  1901 0AE2			DW	HEX-6
+            C70A 
+  1902 0AE4		DEC	DW	DOCOL
+            4306 
+  1903 0AE6			DW	LIT
+            5701 
+  1904 0AE8			DW	0AH
+            0A00 
+  1905 0AEA			DW	BASE
+            0408 
+  1906 0AEC			DW	STORE
+            FD05 
+  1907 0AEE			DW	SEMIS
+            6104 
+  1908 			;
+  1909 0AF0			DB	87H	; (;CODE)
+            87 
+  1910 0AF1			DB	'('
+            28 
+  1911 0AF2			DB	3BH     ;asm8080 thinks ';' in a string starts a comment.
+            3B 
+  1912 0AF3			DB	'CODE'
+            43 4F 44 45 
+            
+  1913 0AF7			DB	')'+80H
+            29 80 
+  1914 0AF9			DW	DEC-0AH
+            DA0A 
+  1915 0AFB		PSCOD	DW	DOCOL
+            4306 
+  1916 0AFD			DW	FROMR
+            A504 
+  1917 0AFF			DW	LATES
+            7309 
+  1918 0B01			DW	PFA
+            BB09 
+  1919 0B03			DW	CFA
+            9509 
+  1920 0B05			DW	STORE
+            FD05 
+  1921 0B07			DW	SEMIS
+            6104 
+  1922 			;
+  1923 0B09			DB	0C5H	; ;CODE
+            C5 
+  1924 0B0A			DB	3BH     ;asm8080 thinks ';' in a string starts a comment.
+            3B 
+  1925 0B0B			DB	'COD'
+            43 4F 44 
+  1926 0B0E			DB	'E'+80H
+            45 80 
+  1927 0B10			DW	PSCOD-0AH
+            F10A 
+  1928 0B12		SEMIC	DW	DOCOL
+            4306 
+  1929 0B14			DW	QCSP
+            450A 
+  1930 0B16			DW	COMP
+            7E0A 
+  1931 0B18			DW	PSCOD
+            FB0A 
+  1932 0B1A			DW	LBRAC
+            950A 
+  1933 0B1C		SEMI1	DW	NOOP	; ( ASSEMBLER )
+            6D06 
+  1934 0B1E			DW	SEMIS
+            6104 
+  1935 			;
+  1936 0B20			DB	87H	; <BUILDS
+            87 
+  1937 0B21			DB	'<BUILD'
+            3C 42 55 49 
+            4C 44 
+  1938 0B27			DB	'S'+80H
+            53 80 
+  1939 0B29			DW	SEMIC-8
+            0A0B 
+  1940 0B2B		BUILD	DW	DOCOL
+            4306 
+  1941 0B2D			DW	ZERO
+            C606 
+  1942 0B2F			DW	CON
+            7D06 
+  1943 0B31			DW	SEMIS
+            6104 
+  1944 			;
+  1945 0B33			DB	85H	; DOES>
+            85 
+  1946 0B34			DB	'DOES'
+            44 4F 45 53 
+            
+  1947 0B38			DB	'>'+80H
+            3E 80 
+  1948 0B3A			DW	BUILD-0AH
+            210B 
+  1949 0B3C		DOES	DW	DOCOL
+            4306 
+  1950 0B3E			DW	FROMR
+            A504 
+  1951 0B40			DW	LATES
+            7309 
+  1952 0B42			DW	PFA
+            BB09 
+  1953 0B44			DW	STORE
+            FD05 
+  1954 0B46			DW	PSCOD
+            FB0A 
+  1955 0B48 2A 28 01	DODOE	LHLD	RPP	; (HL) <- (RP)
+  1956 0B4B 2B			DCX	H
+  1957 0B4C 70			MOV	M,B	; (R1) <- (IP) = PFA = (SUBSTITUTE CFA)
+  1958 0B4D 2B			DCX	H
+  1959 0B4E 71			MOV	M,C
+  1960 0B4F 22 28 01		SHLD	RPP	; (RP) <- (RP) - 2
+  1961 0B52 13			INX	D	; (DE) <- PFA = (SUBSTITUTE CFA)
+  1962 0B53 EB			XCHG
+  1963 0B54 4E			MOV	C,M	; (IP) <- (SUBSTITUTE CFA)
+  1964 0B55 23			INX	H
+  1965 0B56 46			MOV	B,M
+  1966 0B57 23			INX	H
+  1967 0B58 C3 44 01		JMP	HPUSH	; (S1) <- PFA+2 = SUBSTITUTE PFA
+  1968 			;
+  1969 0B5B			DB	85H	; COUNT
+            85 
+  1970 0B5C			DB	'COUN'
+            43 4F 55 4E 
+            
+  1971 0B60			DB	'T'+80H
+            54 80 
+  1972 0B62			DW	DOES-8
+            340B 
+  1973 0B64		COUNT	DW	DOCOL
+            4306 
+  1974 0B66			DW	DUP
+            7E05 
+  1975 0B68			DW	ONEP
+            3F08 
+  1976 0B6A			DW	SWAP
+            7005 
+  1977 0B6C			DW	CAT
+            D305 
+  1978 0B6E			DW	SEMIS
+            6104 
+  1979 			;
+  1980 0B70			DB	84H	; TYPE
+            84 
+  1981 0B71			DB	'TYP'
+            54 59 50 
+  1982 0B74			DB	'E'+80H
+            45 80 
+  1983 0B76			DW	COUNT-8
+            5C0B 
+  1984 0B78		TYPE	DW	DOCOL
+            4306 
+  1985 0B7A			DW	DDUP
+            3509 
+  1986 0B7C			DW	ZBRAN	; IF
+            9601 
+  1987 0B7E			DW	TYPE1-$
+            1800 
+  1988 0B80			DW	OVER
+            5205 
+  1989 0B82			DW	PLUS
+            EA04 
+  1990 0B84			DW	SWAP
+            7005 
+  1991 0B86			DW	XDO	; DO
+            F601 
+  1992 0B88		TYPE2	DW	IDO
+            1302 
+  1993 0B8A			DW	CAT
+            D305 
+  1994 0B8C			DW	EMIT
+            EC02 
+  1995 0B8E			DW	XLOOP	; LOOP
+            AD01 
+  1996 0B90			DW	TYPE2-$
+            F8FFFFFFFF 
+  1997 0B92			DW	BRAN	; ELSE
+            7D01 
+  1998 0B94			DW	TYPE3-$
+            0400 
+  1999 0B96		TYPE1	DW	DROP	; ENDIF
+            6205 
+  2000 0B98		TYPE3	DW	SEMIS
+            6104 
+  2001 			;
+  2002 0B9A			DB	89H	; -TRAILING
+            89 
+  2003 0B9B			DB	'-TRAILIN'
+            2D 54 52 41 
+            49 4C 49 4E 
+            
+  2004 0BA3			DB	'G'+80H
+            47 80 
+  2005 0BA5			DW	TYPE-7
+            710B 
+  2006 0BA7		DTRAI	DW	DOCOL
+            4306 
+  2007 0BA9			DW	DUP
+            7E05 
+  2008 0BAB			DW	ZERO
+            C606 
+  2009 0BAD			DW	XDO	; DO
+            F601 
+  2010 0BAF		DTRA1	DW	OVER
+            5205 
+  2011 0BB1			DW	OVER
+            5205 
+  2012 0BB3			DW	PLUS
+            EA04 
+  2013 0BB5			DW	ONE
+            CF06 
+  2014 0BB7			DW	SUBB
+            A508 
+  2015 0BB9			DW	CAT
+            D305 
+  2016 0BBB			DW	BL
+            EB06 
+  2017 0BBD			DW	SUBB
+            A508 
+  2018 0BBF			DW	ZBRAN	; IF
+            9601 
+  2019 0BC1			DW	DTRA2-$
+            0800 
+  2020 0BC3			DW	LEAVE
+            7904 
+  2021 0BC5			DW	BRAN	; ELSE
+            7D01 
+  2022 0BC7			DW	DTRA3-$
+            0600 
+  2023 0BC9		DTRA2	DW	ONE
+            CF06 
+  2024 0BCB			DW	SUBB	; ENDIF
+            A508 
+  2025 0BCD		DTRA3	DW	XLOOP	; LOOP
+            AD01 
+  2026 0BCF			DW	DTRA1-$
+            E0FFFFFFFF 
+  2027 0BD1			DW	SEMIS
+            6104 
+  2028 			;
+  2029 0BD3			DB	84H	; (.")
+            84 
+  2030 0BD4			DB	'(.'
+            28 2E 
+  2031 0BD6			DB	22H     ;asm8080 thinks '"' in a string starts a comment.
+            22 
+  2032 0BD7			DB	')'+80H
+            29 80 
+  2033 0BD9			DW	DTRAI-0CH
+            9B0B 
+  2034 0BDB		PDOTQ	DW	DOCOL
+            4306 
+  2035 0BDD			DW	RR
+            BA04 
+  2036 0BDF			DW	COUNT
+            640B 
+  2037 0BE1			DW	DUP
+            7E05 
+  2038 0BE3			DW	ONEP
+            3F08 
+  2039 0BE5			DW	FROMR
+            A504 
+  2040 0BE7			DW	PLUS
+            EA04 
+  2041 0BE9			DW	TOR
+            8E04 
+  2042 0BEB			DW	TYPE
+            780B 
+  2043 0BED			DW	SEMIS
+            6104 
+  2044 			;
+  2045 0BEF			DB	0C2H	; ."
+            C2 
+  2046 0BF0			DB	'.'
+            2E 
+  2047 0BF1			DB	82H     ;asm8080 thinks '"' in a string starts a comment.
+            82 
+  2048 0BF2			DW	PDOTQ-7
+            D40B 
+  2049 0BF4		DOTQ	DW	DOCOL
+            4306 
+  2050 0BF6			DW	LIT
+            5701 
+  2051 0BF8			DW	22H
+            2200 
+  2052 0BFA			DW	STATE
+            F907 
+  2053 0BFC			DW	AT
+            C305 
+  2054 0BFE			DW	ZBRAN	; IF
+            9601 
+  2055 0C00			DW	DOTQ1-$
+            1400 
+  2056 0C02			DW	COMP
+            7E0A 
+  2057 0C04			DW	PDOTQ
+            DB0B 
+  2058 0C06			DW	WORD
+            6D0D 
+  2059 0C08			DW	HERE
+            5D08 
+  2060 0C0A			DW	CAT
+            D305 
+  2061 0C0C			DW	ONEP
+            3F08 
+  2062 0C0E			DW	ALLOT
+            6E08 
+  2063 0C10			DW	BRAN	; ELSE
+            7D01 
+  2064 0C12			DW	DOTQ2-$
+            0A00 
+  2065 0C14		DOTQ1	DW	WORD
+            6D0D 
+  2066 0C16			DW	HERE
+            5D08 
+  2067 0C18			DW	COUNT
+            640B 
+  2068 0C1A			DW	TYPE	; ENDIF
+            780B 
+  2069 0C1C		DOTQ2	DW	SEMIS
+            6104 
+  2070 			;
+  2071 0C1E			DB	86H	; EXPECT
+            86 
+  2072 0C1F			DB	'EXPEC'
+            45 58 50 45 
+            43 
+  2073 0C24			DB	'T'+80H
+            54 80 
+  2074 0C26			DW	DOTQ-5
+            EF0B 
+  2075 0C28		EXPEC	DW	DOCOL
+            4306 
+  2076 0C2A			DW	OVER
+            5205 
+  2077 0C2C			DW	PLUS
+            EA04 
+  2078 0C2E			DW	OVER
+            5205 
+  2079 0C30			DW	XDO	; DO
+            F601 
+  2080 0C32		EXPE1	DW	KEY
+            FF02 
+  2081 0C34			DW	DUP
+            7E05 
+  2082 0C36			DW	LIT
+            5701 
+  2083 0C38			DW	0EH
+            0E00 
+  2084 0C3A			DW	PORIG
+            3907 
+  2085 0C3C			DW	AT
+            C305 
+  2086 0C3E			DW	EQUAL
+            B408 
+  2087 0C40			DW	ZBRAN	; IF
+            9601 
+  2088 0C42			DW	EXPE2-$
+            2A00 
+  2089 0C44			DW	DROP
+            6205 
+  2090 0C46			DW	DUP
+            7E05 
+  2091 0C48			DW	IDO
+            1302 
+  2092 0C4A			DW	EQUAL
+            B408 
+  2093 0C4C			DW	DUP
+            7E05 
+  2094 0C4E			DW	FROMR
+            A504 
+  2095 0C50			DW	TWO
+            D806 
+  2096 0C52			DW	SUBB
+            A508 
+  2097 0C54			DW	PLUS
+            EA04 
+  2098 0C56			DW	TOR
+            8E04 
+  2099 0C58			DW	ZBRAN	; IF
+            9601 
+  2100 0C5A			DW	EXPE6-$
+            0A00 
+  2101 0C5C			DW	LIT
+            5701 
+  2102 0C5E			DW	BELL
+            0700 
+  2103 0C60			DW	BRAN	; ELSE
+            7D01 
+  2104 0C62			DW	EXPE7-$
+            0600 
+  2105 0C64		EXPE6	DW	LIT
+            5701 
+  2106 0C66			DW	BSOUT	; ENDIF
+            0800 
+  2107 0C68		EXPE7	DW	BRAN	; ELSE
+            7D01 
+  2108 0C6A			DW	EXPE3-$
+            2800 
+  2109 0C6C		EXPE2	DW	DUP
+            7E05 
+  2110 0C6E			DW	LIT
+            5701 
+  2111 0C70			DW	0DH
+            0D00 
+  2112 0C72			DW	EQUAL
+            B408 
+  2113 0C74			DW	ZBRAN	; IF
+            9601 
+  2114 0C76			DW	EXPE4-$
+            0E00 
+  2115 0C78			DW	LEAVE
+            7904 
+  2116 0C7A			DW	DROP
+            6205 
+  2117 0C7C			DW	BL
+            EB06 
+  2118 0C7E			DW	ZERO
+            C606 
+  2119 0C80			DW	BRAN	; ELSE
+            7D01 
+  2120 0C82			DW	EXPE5-$
+            0400 
+  2121 0C84		EXPE4	DW	DUP	; ENDIF
+            7E05 
+  2122 0C86		EXPE5	DW	IDO
+            1302 
+  2123 0C88			DW	CSTOR
+            0D06 
+  2124 0C8A			DW	ZERO
+            C606 
+  2125 0C8C			DW	IDO
+            1302 
+  2126 0C8E			DW	ONEP
+            3F08 
+  2127 0C90			DW	STORE	; ENDIF
+            FD05 
+  2128 0C92		EXPE3	DW	EMIT
+            EC02 
+  2129 0C94			DW	XLOOP	; LOOP
+            AD01 
+  2130 0C96			DW	EXPE1-$
+            9CFFFFFFFF 
+  2131 0C98			DW	DROP
+            6205 
+  2132 0C9A			DW	SEMIS
+            6104 
+  2133 			;
+  2134 0C9C			DB	85H	; QUERY
+            85 
+  2135 0C9D			DB	'QUER'
+            51 55 45 52 
+            
+  2136 0CA1			DB	'Y'+80H
+            59 80 
+  2137 0CA3			DW	EXPEC-9
+            1F0C 
+  2138 0CA5		QUERY	DW	DOCOL
+            4306 
+  2139 0CA7			DW	TIB
+            5E07 
+  2140 0CA9			DW	AT
+            C305 
+  2141 0CAB			DW	LIT
+            5701 
+  2142 0CAD			DW	50H
+            5000 
+  2143 0CAF			DW	EXPEC
+            280C 
+  2144 0CB1			DW	ZERO
+            C606 
+  2145 0CB3			DW	INN
+            B007 
+  2146 0CB5			DW	STORE
+            FD05 
+  2147 0CB7			DW	SEMIS
+            6104 
+  2148 			;
+  2149 0CB9			DB	0C1H	; 0 (NULL)
+            C1 
+  2150 0CBA			DB	80H
+            80 
+  2151 0CBB			DW	QUERY-8
+            9D0C 
+  2152 0CBD		NULL	DW	DOCOL
+            4306 
+  2153 0CBF			DW	BLK
+            A707 
+  2154 0CC1			DW	AT
+            C305 
+  2155 0CC3			DW	ZBRAN	; IF
+            9601 
+  2156 0CC5			DW	NULL1-$
+            2A00 
+  2157 0CC7			DW	ONE
+            CF06 
+  2158 0CC9			DW	BLK
+            A707 
+  2159 0CCB			DW	PSTOR
+            9C05 
+  2160 0CCD			DW	ZERO
+            C606 
+  2161 0CCF			DW	INN
+            B007 
+  2162 0CD1			DW	STORE
+            FD05 
+  2163 0CD3			DW	BLK
+            A707 
+  2164 0CD5			DW	AT
+            C305 
+  2165 0CD7			DW	BSCR
+            2A07 
+  2166 0CD9			DW	ONE
+            CF06 
+  2167 0CDB			DW	SUBB
+            A508 
+  2168 0CDD			DW	ANDD
+            D603 
+  2169 0CDF			DW	ZEQU
+            C204 
+  2170 0CE1			DW	ZBRAN	; IF
+            9601 
+  2171 0CE3			DW	NULL2-$
+            0800 
+  2172 0CE5			DW	QEXEC
+            190A 
+  2173 0CE7			DW	FROMR
+            A504 
+  2174 0CE9			DW	DROP	; ENDIF
+            6205 
+  2175 0CEB		NULL2	DW	BRAN	; ELSE
+            7D01 
+  2176 0CED			DW	NULL3-$
+            0600 
+  2177 0CEF		NULL1	DW	FROMR
+            A504 
+  2178 0CF1			DW	DROP	; ENDIF
+            6205 
+  2179 0CF3		NULL3	DW	SEMIS
+            6104 
+  2180 			;
+  2181 0CF5			DB	84H	; FILL
+            84 
+  2182 0CF6			DB	'FIL'
+            46 49 4C 
+  2183 0CF9			DB	'L'+80H
+            4C 80 
+  2184 0CFB			DW	NULL-4
+            B90C 
+  2185 0CFD		FILL	DW	$+2
+            FF0C 
+  2186 0CFF 69			MOV	L,C
+  2187 0D00 60			MOV	H,B
+  2188 0D01 D1			POP	D
+  2189 0D02 C1			POP	B
+  2190 0D03 E3			XTHL
+  2191 0D04 EB			XCHG
+  2192 0D05 78		FILL1	MOV	A,B	; BEGIN
+  2193 0D06 B1			ORA	C
+  2194 0D07 CA 11 0D		JZ	FILL2	; WHILE
+  2195 0D0A 7D			MOV	A,L
+  2196 0D0B 12			STAX	D
+  2197 0D0C 13			INX	D
+  2198 0D0D 0B			DCX	B
+  2199 0D0E C3 05 0D		JMP	FILL1	; REPEAT
+  2200 0D11 C1		FILL2	POP	B
+  2201 0D12 C3 45 01		JMP	NEXT
+  2202 			;
+  2203 0D15			DB	85H	; ERASE
+            85 
+  2204 0D16			DB	'ERAS'
+            45 52 41 53 
+            
+  2205 0D1A			DB	'E'+80H
+            45 80 
+  2206 0D1C			DW	FILL-7
+            F60C 
+  2207 0D1E		ERASEE	DW	DOCOL
+            4306 
+  2208 0D20			DW	ZERO
+            C606 
+  2209 0D22			DW	FILL
+            FD0C 
+  2210 0D24			DW	SEMIS
+            6104 
+  2211 			;
+  2212 0D26			DB	86H	; BLANKS
+            86 
+  2213 0D27			DB	'BLANK'
+            42 4C 41 4E 
+            4B 
+  2214 0D2C			DB	'S'+80H
+            53 80 
+  2215 0D2E			DW	ERASEE-8
+            160D 
+  2216 0D30		BLANK	DW	DOCOL
+            4306 
+  2217 0D32			DW	BL
+            EB06 
+  2218 0D34			DW	FILL
+            FD0C 
+  2219 0D36			DW	SEMIS
+            6104 
+  2220 			;
+  2221 0D38			DB	84H	; HOLD
+            84 
+  2222 0D39			DB	'HOL'
+            48 4F 4C 
+  2223 0D3C			DB	'D'+80H
+            44 80 
+  2224 0D3E			DW	BLANK-9
+            270D 
+  2225 0D40		HOLD	DW	DOCOL
+            4306 
+  2226 0D42			DW	LIT
+            5701 
+  2227 0D44			DW	-1
+            FFFFFFFFFF 
+  2228 0D46			DW	HLD
+            3508 
+  2229 0D48			DW	PSTOR
+            9C05 
+  2230 0D4A			DW	HLD
+            3508 
+  2231 0D4C			DW	AT
+            C305 
+  2232 0D4E			DW	CSTOR
+            0D06 
+  2233 0D50			DW	SEMIS
+            6104 
+  2234 			;
+  2235 0D52			DB	83H	; PAD
+            83 
+  2236 0D53			DB	'PA'
+            50 41 
+  2237 0D55			DB	'D'+80H
+            44 80 
+  2238 0D57			DW	HOLD-7
+            390D 
+  2239 0D59		PAD	DW	DOCOL
+            4306 
+  2240 0D5B			DW	HERE
+            5D08 
+  2241 0D5D			DW	LIT
+            5701 
+  2242 0D5F			DW	44H
+            4400 
+  2243 0D61			DW	PLUS
+            EA04 
+  2244 0D63			DW	SEMIS
+            6104 
+  2245 			;
+  2246 0D65			DB	84H	; WORD
+            84 
+  2247 0D66			DB	'WOR'
+            57 4F 52 
+  2248 0D69			DB	'D'+80H
+            44 80 
+  2249 0D6B			DW	PAD-6
+            530D 
+  2250 0D6D		WORD	DW	DOCOL
+            4306 
+  2251 0D6F			DW	BLK
+            A707 
+  2252 0D71			DW	AT
+            C305 
+  2253 0D73			DW	ZBRAN	; IF
+            9601 
+  2254 0D75			DW	WORD1-$
+            0C00 
+  2255 0D77			DW	BLK
+            A707 
+  2256 0D79			DW	AT
+            C305 
+  2257 0D7B			DW	BLOCK
+            E314 
+  2258 0D7D			DW	BRAN	; ELSE
+            7D01 
+  2259 0D7F			DW	WORD2-$
+            0600 
+  2260 0D81		WORD1	DW	TIB
+            5E07 
+  2261 0D83			DW	AT	; ENDIF
+            C305 
+  2262 0D85		WORD2	DW	INN
+            B007 
+  2263 0D87			DW	AT
+            C305 
+  2264 0D89			DW	PLUS
+            EA04 
+  2265 0D8B			DW	SWAP
+            7005 
+  2266 0D8D			DW	ENCL
+            A702 
+  2267 0D8F			DW	HERE
+            5D08 
+  2268 0D91			DW	LIT
+            5701 
+  2269 0D93			DW	22H
+            2200 
+  2270 0D95			DW	BLANK
+            300D 
+  2271 0D97			DW	INN
+            B007 
+  2272 0D99			DW	PSTOR
+            9C05 
+  2273 0D9B			DW	OVER
+            5205 
+  2274 0D9D			DW	SUBB
+            A508 
+  2275 0D9F			DW	TOR
+            8E04 
+  2276 0DA1			DW	RR
+            BA04 
+  2277 0DA3			DW	HERE
+            5D08 
+  2278 0DA5			DW	CSTOR
+            0D06 
+  2279 0DA7			DW	PLUS
+            EA04 
+  2280 0DA9			DW	HERE
+            5D08 
+  2281 0DAB			DW	ONEP
+            3F08 
+  2282 0DAD			DW	FROMR
+            A504 
+  2283 0DAF			DW	CMOVE
+            2D03 
+  2284 0DB1			DW	SEMIS
+            6104 
+  2285 			;
+  2286 0DB3			DB	88H	; (NUMBER)
+            88 
+  2287 0DB4			DB	'(NUMBER'
+            28 4E 55 4D 
+            42 45 52 
+  2288 0DBB			DB	')'+80H
+            29 80 
+  2289 0DBD			DW	WORD-7
+            660D 
+  2290 0DBF		PNUMB	DW	DOCOL
+            4306 
+  2291 0DC1		PNUM1	DW	ONEP	; BEGIN
+            3F08 
+  2292 0DC3			DW	DUP
+            7E05 
+  2293 0DC5			DW	TOR
+            8E04 
+  2294 0DC7			DW	CAT
+            D305 
+  2295 0DC9			DW	BASE
+            0408 
+  2296 0DCB			DW	AT
+            C305 
+  2297 0DCD			DW	DIGIT
+            2802 
+  2298 0DCF			DW	ZBRAN	; WHILE
+            9601 
+  2299 0DD1			DW	PNUM2-$
+            2C00 
+  2300 0DD3			DW	SWAP
+            7005 
+  2301 0DD5			DW	BASE
+            0408 
+  2302 0DD7			DW	AT
+            C305 
+  2303 0DD9			DW	USTAR
+            4B03 
+  2304 0DDB			DW	DROP
+            6205 
+  2305 0DDD			DW	ROT
+            1409 
+  2306 0DDF			DW	BASE
+            0408 
+  2307 0DE1			DW	AT
+            C305 
+  2308 0DE3			DW	USTAR
+            4B03 
+  2309 0DE5			DW	DPLUS
+            F804 
+  2310 0DE7			DW	DPL
+            0E08 
+  2311 0DE9			DW	AT
+            C305 
+  2312 0DEB			DW	ONEP
+            3F08 
+  2313 0DED			DW	ZBRAN	; IF
+            9601 
+  2314 0DEF			DW	PNUM3-$
+            0800 
+  2315 0DF1			DW	ONE
+            CF06 
+  2316 0DF3			DW	DPL
+            0E08 
+  2317 0DF5			DW	PSTOR	; ENDIF
+            9C05 
+  2318 0DF7		PNUM3	DW	FROMR
+            A504 
+  2319 0DF9			DW	BRAN	; REPEAT
+            7D01 
+  2320 0DFB			DW	PNUM1-$
+            C6FFFFFFFF 
+  2321 0DFD		PNUM2	DW	FROMR
+            A504 
+  2322 0DFF			DW	SEMIS
+            6104 
+  2323 			;
+  2324 0E01			DB	86H	; NUMBER
+            86 
+  2325 0E02			DB	'NUMBE'
+            4E 55 4D 42 
+            45 
+  2326 0E07			DB	'R'+80H
+            52 80 
+  2327 0E09			DW	PNUMB-0BH
+            B40D 
+  2328 0E0B		NUMB	DW	DOCOL
+            4306 
+  2329 0E0D			DW	ZERO
+            C606 
+  2330 0E0F			DW	ZERO
+            C606 
+  2331 0E11			DW	ROT
+            1409 
+  2332 0E13			DW	DUP
+            7E05 
+  2333 0E15			DW	ONEP
+            3F08 
+  2334 0E17			DW	CAT
+            D305 
+  2335 0E19			DW	LIT
+            5701 
+  2336 0E1B			DW	2DH
+            2D00 
+  2337 0E1D			DW	EQUAL
+            B408 
+  2338 0E1F			DW	DUP
+            7E05 
+  2339 0E21			DW	TOR
+            8E04 
+  2340 0E23			DW	PLUS
+            EA04 
+  2341 0E25			DW	LIT
+            5701 
+  2342 0E27			DW	-1
+            FFFFFFFFFF 
+  2343 0E29		NUMB1	DW	DPL	; BEGIN
+            0E08 
+  2344 0E2B			DW	STORE
+            FD05 
+  2345 0E2D			DW	PNUMB
+            BF0D 
+  2346 0E2F			DW	DUP
+            7E05 
+  2347 0E31			DW	CAT
+            D305 
+  2348 0E33			DW	BL
+            EB06 
+  2349 0E35			DW	SUBB
+            A508 
+  2350 0E37			DW	ZBRAN	; WHILE
+            9601 
+  2351 0E39			DW	NUMB2-$
+            1600 
+  2352 0E3B			DW	DUP
+            7E05 
+  2353 0E3D			DW	CAT
+            D305 
+  2354 0E3F			DW	LIT
+            5701 
+  2355 0E41			DW	2EH
+            2E00 
+  2356 0E43			DW	SUBB
+            A508 
+  2357 0E45			DW	ZERO
+            C606 
+  2358 0E47			DW	QERR
+            E509 
+  2359 0E49			DW	ZERO
+            C606 
+  2360 0E4B			DW	BRAN	; REPEAT
+            7D01 
+  2361 0E4D			DW	NUMB1-$
+            DCFFFFFFFF 
+  2362 0E4F		NUMB2	DW	DROP
+            6205 
+  2363 0E51			DW	FROMR
+            A504 
+  2364 0E53			DW	ZBRAN	; IF
+            9601 
+  2365 0E55			DW	NUMB3-$
+            0400 
+  2366 0E57			DW	DMINU	; ENDIF
+            3305 
+  2367 0E59		NUMB3	DW	SEMIS
+            6104 
+  2368 			;
+  2369 0E5B			DB	85H	; -FIND	(0-3) SUCCESS
+            85 
+  2370 0E5C			DB	'-FIN'	; (0-1) FAILURE
+            2D 46 49 4E 
+            
+  2371 0E60			DB	'D'+80H
+            44 80 
+  2372 0E62			DW	NUMB-9
+            020E 
+  2373 0E64		DFIND	DW	DOCOL
+            4306 
+  2374 0E66			DW	BL
+            EB06 
+  2375 0E68			DW	WORD
+            6D0D 
+  2376 0E6A			DW	HERE
+            5D08 
+  2377 0E6C			DW	CONT
+            DF07 
+  2378 0E6E			DW	AT
+            C305 
+  2379 0E70			DW	AT
+            C305 
+  2380 0E72			DW	PFIND
+            5702 
+  2381 0E74			DW	DUP
+            7E05 
+  2382 0E76			DW	ZEQU
+            C204 
+  2383 0E78			DW	ZBRAN	; IF
+            9601 
+  2384 0E7A			DW	DFIN1-$
+            0A00 
+  2385 0E7C			DW	DROP
+            6205 
+  2386 0E7E			DW	HERE
+            5D08 
+  2387 0E80			DW	LATES
+            7309 
+  2388 0E82			DW	PFIND	; ENDIF
+            5702 
+  2389 0E84		DFIN1	DW	SEMIS
+            6104 
+  2390 			;
+  2391 0E86			DB	87H	; (ABORT)
+            87 
+  2392 0E87			DB	'(ABORT'
+            28 41 42 4F 
+            52 54 
+  2393 0E8D			DB	')'+80H
+            29 80 
+  2394 0E8F			DW	DFIND-8
+            5C0E 
+  2395 0E91		PABOR	DW	DOCOL
+            4306 
+  2396 0E93			DW	ABORT
+            F310 
+  2397 0E95			DW	SEMIS
+            6104 
+  2398 			;
+  2399 0E97			DB	85H	; ERROR
+            85 
+  2400 0E98			DB	'ERRO'
+            45 52 52 4F 
+            
+  2401 0E9C			DB	'R'+80H
+            52 80 
+  2402 0E9E			DW	PABOR-0AH
+            870E 
+  2403 0EA0		ERROR	DW	DOCOL
+            4306 
+  2404 0EA2			DW	WARN
+            7807 
+  2405 0EA4			DW	AT
+            C305 
+  2406 0EA6			DW	ZLESS
+            D704 
+  2407 0EA8			DW	ZBRAN	; IF
+            9601 
+  2408 0EAA			DW	ERRO1-$
+            0400 
+  2409 0EAC			DW	PABOR	; ENDIF
+            910E 
+  2410 0EAE		ERRO1	DW	HERE
+            5D08 
+  2411 0EB0			DW	COUNT
+            640B 
+  2412 0EB2			DW	TYPE
+            780B 
+  2413 0EB4			DW	PDOTQ
+            DB0B 
+  2414 0EB6			DB	2
+            02 
+  2415 0EB7			DB	'? '
+            3F 20 
+  2416 0EB9			DW	MESS
+            2013 
+  2417 0EBB			DW	SPSTO
+            2104 
+  2418 			;	CHANGE FROM FIG MODEL
+  2419 			;	DW	INN,AT,BLK,AT
+  2420 0EBD			DW	BLK,AT
+            A707 C305 
+  2421 0EC1			DW	DDUP
+            3509 
+  2422 0EC3			DW	ZBRAN,ERRO2-$	; IF
+            9601 0A00 
+  2423 0EC7			DW	INN,AT
+            B007 C305 
+  2424 0ECB			DW	SWAP		; ENDIF
+            7005 
+  2425 0ECD		ERRO2	DW	QUIT
+            C510 
+  2426 			;
+  2427 0ECF			DB	83H	; ID.
+            83 
+  2428 0ED0			DB	'ID'
+            49 44 
+  2429 0ED2			DB	'.'+80H
+            2E 80 
+  2430 0ED4			DW	ERROR-8
+            980E 
+  2431 0ED6		IDDOT	DW	DOCOL
+            4306 
+  2432 0ED8			DW	PAD
+            590D 
+  2433 0EDA			DW	LIT
+            5701 
+  2434 0EDC			DW	20H
+            2000 
+  2435 0EDE			DW	LIT
+            5701 
+  2436 0EE0			DW	5FH
+            5F00 
+  2437 0EE2			DW	FILL
+            FD0C 
+  2438 0EE4			DW	DUP
+            7E05 
+  2439 0EE6			DW	PFA
+            BB09 
+  2440 0EE8			DW	LFA
+            8409 
+  2441 0EEA			DW	OVER
+            5205 
+  2442 0EEC			DW	SUBB
+            A508 
+  2443 0EEE			DW	PAD
+            590D 
+  2444 0EF0			DW	SWAP
+            7005 
+  2445 0EF2			DW	CMOVE
+            2D03 
+  2446 0EF4			DW	PAD
+            590D 
+  2447 0EF6			DW	COUNT
+            640B 
+  2448 0EF8			DW	LIT
+            5701 
+  2449 0EFA			DW	1FH
+            1F00 
+  2450 0EFC			DW	ANDD
+            D603 
+  2451 0EFE			DW	TYPE
+            780B 
+  2452 0F00			DW	SPACE
+            2509 
+  2453 0F02			DW	SEMIS
+            6104 
+  2454 			;
+  2455 0F04			DB	86H	; CREATE
+            86 
+  2456 0F05			DB	'CREAT'
+            43 52 45 41 
+            54 
+  2457 0F0A			DB	'E'+80H
+            45 80 
+  2458 0F0C			DW	IDDOT-6
+            D00E 
+  2459 0F0E		CREAT	DW	DOCOL
+            4306 
+  2460 0F10			DW	DFIND
+            640E 
+  2461 0F12			DW	ZBRAN	; IF
+            9601 
+  2462 0F14			DW	CREA1-$
+            1000 
+  2463 0F16			DW	DROP
+            6205 
+  2464 0F18			DW	NFA
+            A409 
+  2465 0F1A			DW	IDDOT
+            D60E 
+  2466 0F1C			DW	LIT
+            5701 
+  2467 0F1E			DW	4
+            0400 
+  2468 0F20			DW	MESS
+            2013 
+  2469 0F22			DW	SPACE	; ENDIF
+            2509 
+  2470 0F24		CREA1	DW	HERE
+            5D08 
+  2471 0F26			DW	DUP
+            7E05 
+  2472 0F28			DW	CAT
+            D305 
+  2473 0F2A			DW	WIDTH
+            6A07 
+  2474 0F2C			DW	AT
+            C305 
+  2475 0F2E			DW	MIN
+            EC11 
+  2476 0F30			DW	ONEP
+            3F08 
+  2477 0F32			DW	ALLOT
+            6E08 
+  2478 0F34			DW	DUP
+            7E05 
+  2479 0F36			DW	LIT
+            5701 
+  2480 0F38			DW	0A0H
+            A000 
+  2481 0F3A			DW	TOGGL
+            B405 
+  2482 0F3C			DW	HERE
+            5D08 
+  2483 0F3E			DW	ONE
+            CF06 
+  2484 0F40			DW	SUBB
+            A508 
+  2485 0F42			DW	LIT
+            5701 
+  2486 0F44			DW	80H
+            8000 
+  2487 0F46			DW	TOGGL
+            B405 
+  2488 0F48			DW	LATES
+            7309 
+  2489 0F4A			DW	COMMA
+            7B08 
+  2490 0F4C			DW	CURR
+            ED07 
+  2491 0F4E			DW	AT
+            C305 
+  2492 0F50			DW	STORE
+            FD05 
+  2493 0F52			DW	HERE
+            5D08 
+  2494 0F54			DW	TWOP
+            4D08 
+  2495 0F56			DW	COMMA
+            7B08 
+  2496 0F58			DW	SEMIS
+            6104 
+  2497 			;
+  2498 0F5A			DB	0C9H	; [COMPILE]
+            C9 
+  2499 0F5B			DB	'[COMPILE'
+            5B 43 4F 4D 
+            50 49 4C 45 
+            
+  2500 0F63			DB	']'+80H
+            5D 80 
+  2501 0F65			DW	CREAT-9
+            050F 
+  2502 0F67		BCOMP	DW	DOCOL
+            4306 
+  2503 0F69			DW	DFIND
+            640E 
+  2504 0F6B			DW	ZEQU
+            C204 
+  2505 0F6D			DW	ZERO
+            C606 
+  2506 0F6F			DW	QERR
+            E509 
+  2507 0F71			DW	DROP
+            6205 
+  2508 0F73			DW	CFA
+            9509 
+  2509 0F75			DW	COMMA
+            7B08 
+  2510 0F77			DW	SEMIS
+            6104 
+  2511 			;
+  2512 0F79			DB	0C7H	; LITERAL
+            C7 
+  2513 0F7A			DB	'LITERA'
+            4C 49 54 45 
+            52 41 
+  2514 0F80			DB	'L'+80H
+            4C 80 
+  2515 0F82			DW	BCOMP-0CH
+            5B0F 
+  2516 0F84		LITER	DW	DOCOL
+            4306 
+  2517 0F86			DW	STATE
+            F907 
+  2518 0F88			DW	AT
+            C305 
+  2519 0F8A			DW	ZBRAN	; IF
+            9601 
+  2520 0F8C			DW	LITE1-$
+            0800 
+  2521 0F8E			DW	COMP
+            7E0A 
+  2522 0F90			DW	LIT
+            5701 
+  2523 0F92			DW	COMMA	; ENDIF
+            7B08 
+  2524 0F94		LITE1	DW	SEMIS
+            6104 
+  2525 			;
+  2526 0F96			DB	0C8H	; DLITERAL
+            C8 
+  2527 0F97			DB	'DLITERA'
+            44 4C 49 54 
+            45 52 41 
+  2528 0F9E			DB	'L'+80H
+            4C 80 
+  2529 0FA0			DW	LITER-0AH
+            7A0F 
+  2530 0FA2		DLITE	DW	DOCOL
+            4306 
+  2531 0FA4			DW	STATE
+            F907 
+  2532 0FA6			DW	AT
+            C305 
+  2533 0FA8			DW	ZBRAN	; IF
+            9601 
+  2534 0FAA			DW	DLIT1-$
+            0800 
+  2535 0FAC			DW	SWAP
+            7005 
+  2536 0FAE			DW	LITER
+            840F 
+  2537 0FB0			DW	LITER	; ENDIF
+            840F 
+  2538 0FB2		DLIT1	DW	SEMIS
+            6104 
+  2539 			;
+  2540 0FB4			DB	86H	; ?STACK
+            86 
+  2541 0FB5			DB	'?STAC'
+            3F 53 54 41 
+            43 
+  2542 0FBA			DB	'K'+80H
+            4B 80 
+  2543 0FBC			DW	DLITE-0BH
+            970F 
+  2544 0FBE		QSTAC	DW	DOCOL
+            4306 
+  2545 0FC0			DW	SPAT
+            1104 
+  2546 0FC2			DW	SZERO
+            4907 
+  2547 0FC4			DW	AT
+            C305 
+  2548 0FC6			DW	SWAP
+            7005 
+  2549 0FC8			DW	ULESS
+            E408 
+  2550 0FCA			DW	ONE
+            CF06 
+  2551 0FCC			DW	QERR
+            E509 
+  2552 0FCE			DW	SPAT
+            1104 
+  2553 0FD0			DW	HERE
+            5D08 
+  2554 0FD2			DW	LIT
+            5701 
+  2555 0FD4			DW	80H
+            8000 
+  2556 0FD6			DW	PLUS
+            EA04 
+  2557 0FD8			DW	ULESS
+            E408 
+  2558 0FDA			DW	LIT
+            5701 
+  2559 0FDC			DW	7
+            0700 
+  2560 0FDE			DW	QERR
+            E509 
+  2561 0FE0			DW	SEMIS
+            6104 
+  2562 			;
+  2563 0FE2			DB	89H	; INTERPRET
+            89 
+  2564 0FE3			DB	'INTERPRE'
+            49 4E 54 45 
+            52 50 52 45 
+            
+  2565 0FEB			DB	'T'+80H
+            54 80 
+  2566 0FED			DW	QSTAC-9
+            B50F 
+  2567 0FEF		INTER	DW	DOCOL
+            4306 
+  2568 0FF1		INTE1	DW	DFIND	; BEGIN
+            640E 
+  2569 0FF3			DW	ZBRAN	; IF
+            9601 
+  2570 0FF5			DW	INTE2-$
+            1E00 
+  2571 0FF7			DW	STATE
+            F907 
+  2572 0FF9			DW	AT
+            C305 
+  2573 0FFB			DW	LESS
+            C108 
+  2574 0FFD			DW	ZBRAN	; IF
+            9601 
+  2575 0FFF			DW	INTE3-$
+            0A00 
+  2576 1001			DW	CFA
+            9509 
+  2577 1003			DW	COMMA
+            7B08 
+  2578 1005			DW	BRAN	; ELSE
+            7D01 
+  2579 1007			DW	INTE4-$
+            0600 
+  2580 1009		INTE3	DW	CFA
+            9509 
+  2581 100B			DW	EXEC	; ENDIF
+            6D01 
+  2582 100D		INTE4	DW	QSTAC
+            BE0F 
+  2583 100F			DW	BRAN	; ELSE
+            7D01 
+  2584 1011			DW	INTE5-$
+            1C00 
+  2585 1013		INTE2	DW	HERE
+            5D08 
+  2586 1015			DW	NUMB
+            0B0E 
+  2587 1017			DW	DPL
+            0E08 
+  2588 1019			DW	AT
+            C305 
+  2589 101B			DW	ONEP
+            3F08 
+  2590 101D			DW	ZBRAN	; IF
+            9601 
+  2591 101F			DW	INTE6-$
+            0800 
+  2592 1021			DW	DLITE
+            A20F 
+  2593 1023			DW	BRAN	; ELSE
+            7D01 
+  2594 1025			DW	INTE7-$
+            0600 
+  2595 1027		INTE6	DW	DROP
+            6205 
+  2596 1029			DW	LITER	; ENDIF
+            840F 
+  2597 102B		INTE7	DW	QSTAC	; ENDIF
+            BE0F 
+  2598 102D		INTE5	DW	BRAN	; AGAIN
+            7D01 
+  2599 102F			DW	INTE1-$
+            C2FFFFFFFF 
+  2600 			;
+  2601 1031			DB	89H	; IMMEDIATE
+            89 
+  2602 1032			DB	'IMMEDIAT'
+            49 4D 4D 45 
+            44 49 41 54 
+            
+  2603 103A			DB	'E'+80H
+            45 80 
+  2604 103C			DW	INTER-0CH
+            E30F 
+  2605 103E		IMMED	DW	DOCOL
+            4306 
+  2606 1040			DW	LATES
+            7309 
+  2607 1042			DW	LIT
+            5701 
+  2608 1044			DW	40H
+            4000 
+  2609 1046			DW	TOGGL
+            B405 
+  2610 1048			DW	SEMIS
+            6104 
+  2611 			;
+  2612 104A			DB	8AH	; VOCABULARY
+            8A 
+  2613 104B			DB	'VOCABULAR'
+            56 4F 43 41 
+            42 55 4C 41 
+            52 
+  2614 1054			DB	'Y'+80H
+            59 80 
+  2615 1056			DW	IMMED-0CH
+            3210 
+  2616 1058		VOCAB	DW	DOCOL
+            4306 
+  2617 105A			DW	BUILD
+            2B0B 
+  2618 105C			DW	LIT
+            5701 
+  2619 105E			DW	0A081H
+            81A0 
+  2620 1060			DW	COMMA
+            7B08 
+  2621 1062			DW	CURR
+            ED07 
+  2622 1064			DW	AT
+            C305 
+  2623 1066			DW	CFA
+            9509 
+  2624 1068			DW	COMMA
+            7B08 
+  2625 106A			DW	HERE
+            5D08 
+  2626 106C			DW	VOCL
+            9C07 
+  2627 106E			DW	AT
+            C305 
+  2628 1070			DW	COMMA
+            7B08 
+  2629 1072			DW	VOCL
+            9C07 
+  2630 1074			DW	STORE
+            FD05 
+  2631 1076			DW	DOES
+            3C0B 
+  2632 1078		DOVOC	DW	TWOP
+            4D08 
+  2633 107A			DW	CONT
+            DF07 
+  2634 107C			DW	STORE
+            FD05 
+  2635 107E			DW	SEMIS
+            6104 
+  2636 			;
+  2637 1080			DB	0C5H	; FORTH
+            C5 
+  2638 1081			DB	'FORT'
+            46 4F 52 54 
+            
+  2639 1085			DB	'H'+80H
+            48 80 
+  2640 1087			DW	VOCAB-0DH
+            4B10 
+  2641 1089		FORTH	DW	DODOE
+            480B 
+  2642 108B			DW	DOVOC
+            7810 
+  2643 108D			DW	0A081H
+            81A0 
+  2644 108F			DW	TASK-7	; COLD START VALUE ONLY
+            6A1B 
+  2645 			;			  CHANGED EACH TIME A DEF IS APPENDED
+  2646 			;			  TO THE FORTH VOCABULARY
+  2647 1091			DW	0	; END OF VOCABULARY LIST
+            0000 
+  2648 			;
+  2649 1093			DB	8BH	; DEFINITIONS
+            8B 
+  2650 1094			DB	'DEFINITION'
+            44 45 46 49 
+            4E 49 54 49 
+            4F 4E 
+  2651 109E			DB	'S'+80H
+            53 80 
+  2652 10A0			DW	FORTH-8
+            8110 
+  2653 10A2		DEFIN	DW	DOCOL
+            4306 
+  2654 10A4			DW	CONT
+            DF07 
+  2655 10A6			DW	AT
+            C305 
+  2656 10A8			DW	CURR
+            ED07 
+  2657 10AA			DW	STORE
+            FD05 
+  2658 10AC			DW	SEMIS
+            6104 
+  2659 			;
+  2660 10AE			DB	0C1H	; (
+            C1 
+  2661 10AF			DB	'('+80H
+            28 80 
+  2662 10B1			DW	DEFIN-0EH
+            9410 
+  2663 10B3		PAREN	DW	DOCOL
+            4306 
+  2664 10B5			DW	LIT
+            5701 
+  2665 10B7			DW	29H
+            2900 
+  2666 10B9			DW	WORD
+            6D0D 
+  2667 10BB			DW	SEMIS
+            6104 
+  2668 			;
+  2669 10BD			DB	84H	; QUIT
+            84 
+  2670 10BE			DB	'QUI'
+            51 55 49 
+  2671 10C1			DB	'T'+80H
+            54 80 
+  2672 10C3			DW	PAREN-4
+            AF10 
+  2673 10C5		QUIT	DW	DOCOL
+            4306 
+  2674 10C7			DW	ZERO
+            C606 
+  2675 10C9			DW	BLK
+            A707 
+  2676 10CB			DW	STORE
+            FD05 
+  2677 10CD			DW	LBRAC
+            950A 
+  2678 10CF		QUIT1	DW	RPSTO	; BEGIN
+            4804 
+  2679 10D1			DW	CR
+            1F03 
+  2680 10D3			DW	QUERY
+            A50C 
+  2681 10D5			DW	INTER
+            EF0F 
+  2682 10D7			DW	STATE
+            F907 
+  2683 10D9			DW	AT
+            C305 
+  2684 10DB			DW	ZEQU
+            C204 
+  2685 10DD			DW	ZBRAN	; IF
+            9601 
+  2686 10DF			DW	QUIT2-$
+            0700 
+  2687 10E1			DW	PDOTQ
+            DB0B 
+  2688 10E3			DB	2
+            02 
+  2689 10E4			DB	'OK'	; ENDIF
+            4F 4B 
+  2690 10E6		QUIT2	DW	BRAN	; AGAIN
+            7D01 
+  2691 10E8			DW	QUIT1-$
+            E7FFFFFFFF 
+  2692 			;
+  2693 10EA			DB	85H	; ABORT
+            85 
+  2694 10EB			DB	'ABOR'
+            41 42 4F 52 
+            
+  2695 10EF			DB	'T'+80H
+            54 80 
+  2696 10F1			DW	QUIT-7
+            BE10 
+  2697 10F3		ABORT	DW	DOCOL
+            4306 
+  2698 10F5			DW	SPSTO
+            2104 
+  2699 10F7			DW	DEC
+            E40A 
+  2700 10F9			DW	QSTAC
+            BE0F 
+  2701 10FB			DW	CR
+            1F03 
+  2702 10FD			DW	DOTCPU
+            4B1B 
+  2703 10FF			DW	PDOTQ
+            DB0B 
+  2704 1101			DB	0DH
+            0D 
+  2705 1102			DB	'fig-FORTH '
+            66 69 67 2D 
+            46 4F 52 54 
+            48 20 
+  2706 110C			DB	FIGREL+30H,ADOT,FIGREV+30H
+            31 2E 31 
+  2707 110F			DW	FORTH
+            8910 
+  2708 1111			DW	DEFIN
+            A210 
+  2709 1113			DW	QUIT
+            C510 
+  2710 			;
+  2711 1115 01 1B 11	WRM	LXI	B,WRM1
+  2712 1118 C3 45 01		JMP	NEXT
+  2713 111B		WRM1	DW	WARM
+            2511 
+  2714 			;
+  2715 111D			DB	84H	; WARM
+            84 
+  2716 111E			DB	'WAR'
+            57 41 52 
+  2717 1121			DB	'M'+80H
+            4D 80 
+  2718 1123			DW	ABORT-8
+            EB10 
+  2719 1125		WARM	DW	DOCOL
+            4306 
+  2720 1127			DW	MTBUF
+            4E14 
+  2721 1129			DW	ABORT
+            F310 
+  2722 			;
+  2723 112B 01 35 11	CLD	LXI	B,CLD1
+  2724 112E 2A 12 01		LHLD	ORIG+12H
+  2725 1131 F9			SPHL
+  2726 1132 C3 45 01		JMP	NEXT
+  2727 1135		CLD1	DW	COLD
+            3F11 
+  2728 			;
+  2729 1137			DB	84H	; COLD
+            84 
+  2730 1138			DB	'COL'
+            43 4F 4C 
+  2731 113B			DB	'D'+80H
+            44 80 
+  2732 113D			DW	WARM-7
+            1E11 
+  2733 113F		COLD	DW	DOCOL
+            4306 
+  2734 1141			DW	MTBUF
+            4E14 
+  2735 1143			DW	ZERO,DENSTY
+            C606 DF13 
+  2736 1147			DW	STORE
+            FD05 
+  2737 1149			DW	LIT,BUF1
+            5701 E0BB 
+  2738 114D			DW	USE,STORE
+            A813 FD05 
+  2739 1151			DW	LIT,BUF1
+            5701 E0BB 
+  2740 1155			DW	PREV,STORE
+            B413 FD05 
+  2741 1159			DW	DRZER
+            6314 
+  2742 115B			DW	LIT,0
+            5701 0000 
+  2743 115F			DW	LIT,EPRINT
+            5701 0E17 
+  2744 1163			DW	STORE
+            FD05 
+  2745 			;
+  2746 1165			DW	LIT
+            5701 
+  2747 1167			DW	ORIG+12H
+            1201 
+  2748 1169			DW	LIT
+            5701 
+  2749 116B			DW	UP
+            2601 
+  2750 116D			DW	AT
+            C305 
+  2751 116F			DW	LIT
+            5701 
+  2752 1171			DW	6
+            0600 
+  2753 1173			DW	PLUS
+            EA04 
+  2754 1175			DW	LIT
+            5701 
+  2755 1177			DW	10H
+            1000 
+  2756 1179			DW	CMOVE
+            2D03 
+  2757 117B			DW	LIT
+            5701 
+  2758 117D			DW	ORIG+0CH
+            0C01 
+  2759 117F			DW	AT
+            C305 
+  2760 1181			DW	LIT
+            5701 
+  2761 1183			DW	FORTH+6
+            8F10 
+  2762 1185			DW	STORE
+            FD05 
+  2763 1187			DW	ABORT
+            F310 
+  2764 			;
+  2765 1189			DB	84H	; S->D
+            84 
+  2766 118A			DB	'S->'
+            53 2D 3E 
+  2767 118D			DB	'D'+80H
+            44 80 
+  2768 118F			DW	COLD-7
+            3811 
+  2769 1191		STOD	DW	$+2
+            9311 
+  2770 1193 D1			POP	D
+  2771 1194 21 00 00		LXI	H,0
+  2772 1197 7A			MOV	A,D
+  2773 1198 E6 80		ANI	80H
+  2774 119A CA 9E 11		JZ	STOD1
+  2775 119D 2B			DCX	H
+  2776 119E C3 43 01	STOD1	JMP	DPUSH
+  2777 			;
+  2778 11A1			DB	82H	; +-
+            82 
+  2779 11A2			DB	'+'
+            2B 
+  2780 11A3			DB	'-'+80H
+            2D 80 
+  2781 11A5			DW	STOD-7
+            8A11 
+  2782 11A7		PM	DW	DOCOL
+            4306 
+  2783 11A9			DW	ZLESS
+            D704 
+  2784 11AB			DW	ZBRAN	; IF
+            9601 
+  2785 11AD			DW	PM1-$
+            0400 
+  2786 11AF			DW	MINUS	; ENDIF
+            1C05 
+  2787 11B1		PM1	DW	SEMIS
+            6104 
+  2788 			;
+  2789 11B3			DB	83H	; D+-
+            83 
+  2790 11B4			DB	'D+'
+            44 2B 
+  2791 11B6			DB	'-'+80H
+            2D 80 
+  2792 11B8			DW	PM-5
+            A211 
+  2793 11BA		DPM	DW	DOCOL
+            4306 
+  2794 11BC			DW	ZLESS
+            D704 
+  2795 11BE			DW	ZBRAN	; IF
+            9601 
+  2796 11C0			DW	DPM1-$
+            0400 
+  2797 11C2			DW	DMINU	; ENDIF
+            3305 
+  2798 11C4		DPM1	DW	SEMIS
+            6104 
+  2799 			;
+  2800 11C6			DB	83H	; ABS
+            83 
+  2801 11C7			DB	'AB'
+            41 42 
+  2802 11C9			DB	'S'+80H
+            53 80 
+  2803 11CB			DW	DPM-6
+            B411 
+  2804 11CD		ABS	DW	DOCOL
+            4306 
+  2805 11CF			DW	DUP
+            7E05 
+  2806 11D1			DW	PM
+            A711 
+  2807 11D3			DW	SEMIS
+            6104 
+  2808 			;
+  2809 11D5			DB	84H	; DABS
+            84 
+  2810 11D6			DB	'DAB'
+            44 41 42 
+  2811 11D9			DB	'S'+80H
+            53 80 
+  2812 11DB			DW	ABS-6
+            C711 
+  2813 11DD		DABS	DW	DOCOL
+            4306 
+  2814 11DF			DW	DUP
+            7E05 
+  2815 11E1			DW	DPM
+            BA11 
+  2816 11E3			DW	SEMIS
+            6104 
+  2817 			;
+  2818 11E5			DB	83H	; MIN
+            83 
+  2819 11E6			DB	'MI'
+            4D 49 
+  2820 11E8			DB	'N'+80H
+            4E 80 
+  2821 11EA			DW	DABS-7
+            D611 
+  2822 11EC		MIN	DW	DOCOL,TDUP
+            4306 8D05 
+  2823 11F0			DW	GREAT
+            0509 
+  2824 11F2			DW	ZBRAN	; IF
+            9601 
+  2825 11F4			DW	MIN1-$
+            0400 
+  2826 11F6			DW	SWAP	; ENDIF
+            7005 
+  2827 11F8		MIN1	DW	DROP
+            6205 
+  2828 11FA			DW	SEMIS
+            6104 
+  2829 			;
+  2830 11FC			DB	83H	; MAX
+            83 
+  2831 11FD			DB	'MA'
+            4D 41 
+  2832 11FF			DB	'X'+80H
+            58 80 
+  2833 1201			DW	MIN-6
+            E611 
+  2834 1203		MAX	DW	DOCOL,TDUP
+            4306 8D05 
+  2835 1207			DW	LESS
+            C108 
+  2836 1209			DW	ZBRAN	; IF
+            9601 
+  2837 120B			DW	MAX1-$
+            0400 
+  2838 120D			DW	SWAP	; ENDIF
+            7005 
+  2839 120F		MAX1	DW	DROP
+            6205 
+  2840 1211			DW	SEMIS
+            6104 
+  2841 			;
+  2842 1213			DB	82H	; M*
+            82 
+  2843 1214			DB	'M'
+            4D 
+  2844 1215			DB	'*'+80H
+            2A 80 
+  2845 1217			DW	MAX-6
+            FD11 
+  2846 1219		MSTAR	DW	DOCOL,TDUP
+            4306 8D05 
+  2847 121D			DW	XORR
+            FD03 
+  2848 121F			DW	TOR
+            8E04 
+  2849 1221			DW	ABS
+            CD11 
+  2850 1223			DW	SWAP
+            7005 
+  2851 1225			DW	ABS
+            CD11 
+  2852 1227			DW	USTAR
+            4B03 
+  2853 1229			DW	FROMR
+            A504 
+  2854 122B			DW	DPM
+            BA11 
+  2855 122D			DW	SEMIS
+            6104 
+  2856 			;
+  2857 122F			DB	82H	; M/
+            82 
+  2858 1230			DB	'M'
+            4D 
+  2859 1231			DB	'/'+80H
+            2F 80 
+  2860 1233			DW	MSTAR-5
+            1412 
+  2861 1235		MSLAS	DW	DOCOL
+            4306 
+  2862 1237			DW	OVER
+            5205 
+  2863 1239			DW	TOR
+            8E04 
+  2864 123B			DW	TOR
+            8E04 
+  2865 123D			DW	DABS
+            DD11 
+  2866 123F			DW	RR
+            BA04 
+  2867 1241			DW	ABS
+            CD11 
+  2868 1243			DW	USLAS
+            8103 
+  2869 1245			DW	FROMR
+            A504 
+  2870 1247			DW	RR
+            BA04 
+  2871 1249			DW	XORR
+            FD03 
+  2872 124B			DW	PM
+            A711 
+  2873 124D			DW	SWAP
+            7005 
+  2874 124F			DW	FROMR
+            A504 
+  2875 1251			DW	PM
+            A711 
+  2876 1253			DW	SWAP
+            7005 
+  2877 1255			DW	SEMIS
+            6104 
+  2878 			;
+  2879 1257			DB	81H	; *
+            81 
+  2880 1258			DB	'*'+80H
+            2A 80 
+  2881 125A			DW	MSLAS-5
+            3012 
+  2882 125C		STAR	DW	DOCOL
+            4306 
+  2883 125E			DW	MSTAR
+            1912 
+  2884 1260			DW	DROP
+            6205 
+  2885 1262			DW	SEMIS
+            6104 
+  2886 			;
+  2887 1264			DB	84H	; /MOD
+            84 
+  2888 1265			DB	'/MO'
+            2F 4D 4F 
+  2889 1268			DB	'D'+80H
+            44 80 
+  2890 126A			DW	STAR-4
+            5812 
+  2891 126C		SLMOD	DW	DOCOL
+            4306 
+  2892 126E			DW	TOR
+            8E04 
+  2893 1270			DW	STOD
+            9111 
+  2894 1272			DW	FROMR
+            A504 
+  2895 1274			DW	MSLAS
+            3512 
+  2896 1276			DW	SEMIS
+            6104 
+  2897 			;
+  2898 1278			DB	81H	; /
+            81 
+  2899 1279			DB	'/'+80H
+            2F 80 
+  2900 127B			DW	SLMOD-7
+            6512 
+  2901 127D		SLASH	DW	DOCOL
+            4306 
+  2902 127F			DW	SLMOD
+            6C12 
+  2903 1281			DW	SWAP
+            7005 
+  2904 1283			DW	DROP
+            6205 
+  2905 1285			DW	SEMIS
+            6104 
+  2906 			;
+  2907 1287			DB	83H	; MOD
+            83 
+  2908 1288			DB	'MO'
+            4D 4F 
+  2909 128A			DB	'D'+80H
+            44 80 
+  2910 128C			DW	SLASH-4
+            7912 
+  2911 128E		MODD	DW	DOCOL
+            4306 
+  2912 1290			DW	SLMOD
+            6C12 
+  2913 1292			DW	DROP
+            6205 
+  2914 1294			DW	SEMIS
+            6104 
+  2915 			;
+  2916 1296			DB	85H	; */MOD
+            85 
+  2917 1297			DB	'*/MO'
+            2A 2F 4D 4F 
+            
+  2918 129B			DB	'D'+80H
+            44 80 
+  2919 129D			DW	MODD-6
+            8812 
+  2920 129F		SSMOD	DW	DOCOL
+            4306 
+  2921 12A1			DW	TOR
+            8E04 
+  2922 12A3			DW	MSTAR
+            1912 
+  2923 12A5			DW	FROMR
+            A504 
+  2924 12A7			DW	MSLAS
+            3512 
+  2925 12A9			DW	SEMIS
+            6104 
+  2926 			;
+  2927 12AB			DB	82H	; */
+            82 
+  2928 12AC			DB	'*'
+            2A 
+  2929 12AD			DB	'/'+80H
+            2F 80 
+  2930 12AF			DW	SSMOD-8
+            9712 
+  2931 12B1		SSLA	DW	DOCOL
+            4306 
+  2932 12B3			DW	SSMOD
+            9F12 
+  2933 12B5			DW	SWAP
+            7005 
+  2934 12B7			DW	DROP
+            6205 
+  2935 12B9			DW	SEMIS
+            6104 
+  2936 			;
+  2937 12BB			DB	85H	; M/MOD
+            85 
+  2938 12BC			DB	'M/MO'
+            4D 2F 4D 4F 
+            
+  2939 12C0			DB	'D'+80H
+            44 80 
+  2940 12C2			DW	SSLA-5
+            AC12 
+  2941 12C4		MSMOD	DW	DOCOL
+            4306 
+  2942 12C6			DW	TOR
+            8E04 
+  2943 12C8			DW	ZERO
+            C606 
+  2944 12CA			DW	RR
+            BA04 
+  2945 12CC			DW	USLAS
+            8103 
+  2946 12CE			DW	FROMR
+            A504 
+  2947 12D0			DW	SWAP
+            7005 
+  2948 12D2			DW	TOR
+            8E04 
+  2949 12D4			DW	USLAS
+            8103 
+  2950 12D6			DW	FROMR
+            A504 
+  2951 12D8			DW	SEMIS
+            6104 
+  2952 			;
+  2953 			;	BLOCK MOVED DOWN 2 PAGES
+  2954 			;
+  2955 			;
+  2956 12DA			DB	86H	; (LINE)
+            86 
+  2957 12DB			DB	'(LINE'
+            28 4C 49 4E 
+            45 
+  2958 12E0			DB	')'+80H
+            29 80 
+  2959 12E2			DW	MSMOD-8
+            BC12 
+  2960 12E4		PLINE	DW	DOCOL
+            4306 
+  2961 12E6			DW	TOR
+            8E04 
+  2962 12E8			DW	LIT
+            5701 
+  2963 12EA			DW	40H
+            4000 
+  2964 12EC			DW	BBUF
+            1D07 
+  2965 12EE			DW	SSMOD
+            9F12 
+  2966 12F0			DW	FROMR
+            A504 
+  2967 12F2			DW	BSCR
+            2A07 
+  2968 12F4			DW	STAR
+            5C12 
+  2969 12F6			DW	PLUS
+            EA04 
+  2970 12F8			DW	BLOCK
+            E314 
+  2971 12FA			DW	PLUS
+            EA04 
+  2972 12FC			DW	LIT
+            5701 
+  2973 12FE			DW	40H
+            4000 
+  2974 1300			DW	SEMIS
+            6104 
+  2975 			;
+  2976 1302			DB	85H	; .LINE
+            85 
+  2977 1303			DB	'.LIN'
+            2E 4C 49 4E 
+            
+  2978 1307			DB	'E'+80H
+            45 80 
+  2979 1309			DW	PLINE-9
+            DB12 
+  2980 130B		DLINE	DW	DOCOL
+            4306 
+  2981 130D			DW	PLINE
+            E412 
+  2982 130F			DW	DTRAI
+            A70B 
+  2983 1311			DW	TYPE
+            780B 
+  2984 1313			DW	SEMIS
+            6104 
+  2985 			;
+  2986 1315			DB	87H	; MESSAGE
+            87 
+  2987 1316			DB	'MESSAG'
+            4D 45 53 53 
+            41 47 
+  2988 131C			DB	'E'+80H
+            45 80 
+  2989 131E			DW	DLINE-8
+            0313 
+  2990 1320		MESS	DW	DOCOL
+            4306 
+  2991 1322			DW	WARN
+            7807 
+  2992 1324			DW	AT
+            C305 
+  2993 1326			DW	ZBRAN	; IF
+            9601 
+  2994 1328			DW	MESS1-$
+            1E00 
+  2995 132A			DW	DDUP
+            3509 
+  2996 132C			DW	ZBRAN	; IF
+            9601 
+  2997 132E			DW	MESS2-$
+            1400 
+  2998 1330			DW	LIT
+            5701 
+  2999 1332			DW	4
+            0400 
+  3000 1334			DW	OFSET
+            D107 
+  3001 1336			DW	AT
+            C305 
+  3002 1338			DW	BSCR
+            2A07 
+  3003 133A			DW	SLASH
+            7D12 
+  3004 133C			DW	SUBB
+            A508 
+  3005 133E			DW	DLINE
+            0B13 
+  3006 1340			DW	SPACE	; ENDIF
+            2509 
+  3007 1342		MESS2	DW	BRAN	; ELSE
+            7D01 
+  3008 1344			DW	MESS3-$
+            0D00 
+  3009 1346		MESS1	DW	PDOTQ
+            DB0B 
+  3010 1348			DB	6
+            06 
+  3011 1349			DB	'MSG # '
+            4D 53 47 20 
+            23 20 
+  3012 134F			DW	DOT	; ENDIF
+            FE19 
+  3013 1351		MESS3	DW	SEMIS
+            6104 
+  3014     			PAGE
+  3015 			;------------------------------------------
+  3016 			;
+  3017 			;	8080 PORT FETCH AND STORE
+  3018 			;	( SELF MODIFYING CODE, NOT REENTRANT )
+  3019 			;
+  3020 1353			DB	82H	; P@ "PORT @"
+            82 
+  3021 1354			DB	'P'
+            50 
+  3022 1355			DB	'@'+80H
+            40 80 
+  3023 1357			DW	MESS-0AH
+            1613 
+  3024 1359		PTAT:	DW	$+2
+            5B13 
+  3025 135B D1			POP	D	;E <- PORT#
+  3026 135C 21 61 13		LXI	H,$+5
+  3027 135F 73			MOV	M,E
+  3028 1360 DB 00		IN	0	;( PORT# MODIFIED )
+  3029 1362 6F			MOV	L,A	;L <- (PORT#)
+  3030 1363 26 00		MVI	H,0
+  3031 1365 C3 44 01		JMP	HPUSH
+  3032 			;
+  3033 1368			DB	82H	; "PORT STORE"
+            82 
+  3034 1369			DB	'P'
+            50 
+  3035 136A			DB	'!'+80H
+            21 80 
+  3036 136C			DW	PTAT-5
+            5413 
+  3037 136E		PTSTO:	DW	$+2
+            7013 
+  3038 1370 D1			POP	D	;E <- PORT#
+  3039 1371 21 78 13		LXI	H,$+7
+  3040 1374 73			MOV	M,E
+  3041 1375 E1			POP	H	;H <- CDATA
+  3042 1376 7D			MOV	A,L
+  3043 1377 D3 00		OUT	0	;( PORT# MODIFIED )
+  3044 1379 C3 45 01		JMP	NEXT
+  3045     			PAGE
+  3046 			;--------------------------------------------------
+  3047 			;	CP/M DISK INTERFACE
+  3048 			;
+  3049 			;	CP/M BIOS CALLS USED
+  3050 			;	( NOTE EQU'S ARE 3 LOWER THAN DOCUMENTED OFFSETS
+  3051 			;	  BECAUSE BASE ADDR IS BIOS+3 )
+  3052 			;
+  3053      00 27	RITSEC	EQU	39
+  3054      00 24	RDSEC	EQU	36
+  3055      00 21	SETDMA	EQU	33
+  3056      00 1E	SETSEC	EQU	30
+  3057      00 1B	SETTRK	EQU	27
+  3058      00 18	SETDSK	EQU	24
+  3059 			;
+  3060 			;	DOUBLE DENSITY 8" FLOPPY CAPACITIES
+  3061      00 34	SPT2	EQU	52	; SECTORS PER TRACK
+  3062      00 4D	TRKS2	EQU	77	; NUMBER OF TRACKS
+  3063      0F A4	SPDRV2	EQU	SPT2*TRKS2	; SECTORS/DRIVE
+  3064 			;	SINGLE DENSITY 8" FLOPPY CAPACITIES
+  3065      00 1A	SPT1	EQU	26	; SECTORS/TRACK
+  3066      00 4D	TRKS1	EQU	77	; # TRACKS
+  3067      07 D2	SPDRV1	EQU	SPT1*TRKS1	; SECTORS/DRIVE
+  3068 			;
+  3069      00 80	BPS	EQU	128	; BYTES PER SECTOR
+  3070      00 02	MXDRV	EQU	2	; MAX # DRIVES
+  3071 			;
+  3072 			;	FORTH VARIABLES AND CONSTANTS USED IN DISK INTERFACE
+  3073 			;
+  3074 137C			DB	85H	; DRIVE ( CURRENT DRIVE # )
+            85 
+  3075 137D			DB	'DRIV'
+            44 52 49 56 
+            
+  3076 1381			DB	'E'+80H
+            45 80 
+  3077 1383			DW	PTSTO-5
+            6913 
+  3078 1385		DRIVE	DW	DOVAR,0
+            A206 0000 
+  3079 			;
+  3080 1389			DB	83H	; SEC	( SECTOR # )
+            83 
+  3081 138A			DB	'SE'
+            53 45 
+  3082 138C			DB	'C'+80H
+            43 80 
+  3083 138E			DW	DRIVE-8
+            7D13 
+  3084 1390		SEC:	DW	DOVAR
+            A206 
+  3085 1392			DW	0
+            0000 
+  3086 			;
+  3087 1394			DB	85H	; TRACK	( TRACK # )
+            85 
+  3088 1395			DB	'TRAC'
+            54 52 41 43 
+            
+  3089 1399			DB	'K'+80H
+            4B 80 
+  3090 139B			DW	SEC-6
+            8A13 
+  3091 139D		TRACK:	DW	DOVAR,0
+            A206 0000 
+  3092 			;
+  3093 13A1			DB	83H	; USE	( ADDR OF NEXT BUFFER TO USE )
+            83 
+  3094 13A2			DB	'US'
+            55 53 
+  3095 13A4			DB	'E'+80H
+            45 80 
+  3096 13A6			DW	TRACK-8
+            9513 
+  3097 13A8		USE:	DW	DOVAR
+            A206 
+  3098 13AA			DW	BUF1
+            E0BB 
+  3099 			;
+  3100 13AC			DB	84H	; PREV
+            84 
+  3101 			;			( ADDR OF PREVIOUSLY USED BUFFER )
+  3102 13AD			DB	'PRE'
+            50 52 45 
+  3103 13B0			DB	'V'+80H
+            56 80 
+  3104 13B2			DW	USE-6
+            A213 
+  3105 13B4		PREV	DW	DOVAR
+            A206 
+  3106 13B6			DW	BUF1
+            E0BB 
+  3107 			;
+  3108 13B8			DB	87H	; SEC/BLK ( # SECTORS/BLOCK )
+            87 
+  3109 13B9			DB	'SEC/BL'
+            53 45 43 2F 
+            42 4C 
+  3110 13BF			DB	'K'+80H
+            4B 80 
+  3111 13C1			DW	PREV-7
+            AD13 
+  3112 13C3		SPBLK	DW	DOCON
+            8706 
+  3113 13C5			DW	KBBUF/BPS
+            0100 
+  3114 			;
+  3115 13C7			DB	85H	; #BUFF  ( NUMBER OF BUFFERS )
+            85 
+  3116 13C8			DB	'#BUF'
+            23 42 55 46 
+            
+  3117 13CC			DB	'F'+80H
+            46 80 
+  3118 13CE			DW	SPBLK-10
+            B913 
+  3119 13D0		NOBUF	DW	DOCON,NBUF
+            8706 0800 
+  3120 			;
+  3121 13D4			DB	87H	; DENSITY ( 0 = SINGLE , 1 = DOUBLE )
+            87 
+  3122 13D5			DB	'DENSIT'
+            44 45 4E 53 
+            49 54 
+  3123 13DB			DB	'Y'+80H
+            59 80 
+  3124 13DD			DW	NOBUF-8
+            C813 
+  3125 13DF		DENSTY	DW	DOVAR
+            A206 
+  3126 13E1			DW	0
+            0000 
+  3127 			;
+  3128 13E3			DB	8AH	; DISK-ERROR  ( DISK ERROR STATUS )
+            8A 
+  3129 13E4			DB	'DISK-ERRO'
+            44 49 53 4B 
+            2D 45 52 52 
+            4F 
+  3130 13ED			DB	'R'+80H
+            52 80 
+  3131 13EF			DW	DENSTY-10
+            D513 
+  3132 13F1		DSKERR	DW	DOVAR,0
+            A206 0000 
+  3133 			;
+  3134 			;	DISK INTERFACE HIGH-LEVEL ROUTINES
+  3135 			;
+  3136 13F5			DB	84H	; +BUF	( ADVANCE BUFFER )
+            84 
+  3137 13F6			DB	'+BU'
+            2B 42 55 
+  3138 13F9			DB	'F'+80H
+            46 80 
+  3139 13FB			DW	DSKERR-13
+            E413 
+  3140 13FD		PBUF	DW	DOCOL
+            4306 
+  3141 13FF			DW	LIT,CO
+            5701 8400 
+  3142 1403			DW	PLUS,DUP
+            EA04 7E05 
+  3143 1407			DW	LIMIT,EQUAL
+            1007 B408 
+  3144 140B			DW	ZBRAN,PBUF1-$
+            9601 0800 
+  3145 140F			DW	DROP,FIRST
+            6205 0307 
+  3146 1413		PBUF1:	DW	DUP,PREV
+            7E05 B413 
+  3147 1417			DW	AT,SUBB
+            C305 A508 
+  3148 141B			DW	SEMIS
+            6104 
+  3149 			;
+  3150 141D			DB	86H	; UPDATE
+            86 
+  3151 141E			DB	'UPDAT'
+            55 50 44 41 
+            54 
+  3152 1423			DB	'E'+80H
+            45 80 
+  3153 1425			DW	PBUF-7
+            F613 
+  3154 1427		UPDAT	DW	DOCOL,PREV
+            4306 B413 
+  3155 142B			DW	AT,AT
+            C305 C305 
+  3156 142F			DW	LIT,8000H
+            5701 0080 
+  3157 1433			DW	ORR
+            E903 
+  3158 1435			DW	PREV,AT
+            B413 C305 
+  3159 1439			DW	STORE,SEMIS
+            FD05 6104 
+  3160 			;
+  3161 143D			DB	8DH	; EMPTY-BUFFERS
+            8D 
+  3162 143E			DB	'EMPTY-BUFFER'
+            45 4D 50 54 
+            59 2D 42 55 
+            46 46 45 52 
+            
+  3163 144A			DB	'S'+80H
+            53 80 
+  3164 144C			DW	UPDAT-9
+            1E14 
+  3165 144E		MTBUF	DW	DOCOL,FIRST
+            4306 0307 
+  3166 1452			DW	LIMIT,OVER
+            1007 5205 
+  3167 1456			DW	SUBB,ERASEE
+            A508 1E0D 
+  3168 145A			DW	SEMIS
+            6104 
+  3169 			;
+  3170 145C			DB	83H	; DR0
+            83 
+  3171 145D			DB	'DR'
+            44 52 
+  3172 145F			DB	'0'+80H
+            30 80 
+  3173 1461			DW	MTBUF-16
+            3E14 
+  3174 1463		DRZER	DW	DOCOL,ZERO
+            4306 C606 
+  3175 1467			DW	OFSET,STORE
+            D107 FD05 
+  3176 146B			DW	SEMIS
+            6104 
+  3177 			;
+  3178 146D			DB	83H	; DR1
+            83 
+  3179 146E			DB	'DR'
+            44 52 
+  3180 1470			DB	'1'+80H
+            31 80 
+  3181 1472			DW	DRZER-6
+            5D14 
+  3182 1474		DRONE	DW	DOCOL
+            4306 
+  3183 1476			DW	DENSTY,AT
+            DF13 C305 
+  3184 147A			DW	ZBRAN,DRON1-$
+            9601 0C00 
+  3185 147E			DW	LIT,SPDRV2
+            5701 A40F 
+  3186 1482			DW	BRAN,DRON2-$
+            7D01 0800 
+  3187 1486		DRON1	DW	LIT,SPDRV1
+            5701 D207 
+  3188 148A		DRON2	DW	OFSET,STORE
+            D107 FD05 
+  3189 148E			DW	SEMIS
+            6104 
+  3190 			;
+  3191 1490			DB	86H	; BUFFER
+            86 
+  3192 1491			DB	'BUFFE'
+            42 55 46 46 
+            45 
+  3193 1496			DB	'R'+80H
+            52 80 
+  3194 1498			DW	DRONE-6
+            6E14 
+  3195 149A		BUFFE:	DW	DOCOL,USE
+            4306 A813 
+  3196 149E			DW	AT,DUP
+            C305 7E05 
+  3197 14A2			DW	TOR
+            8E04 
+  3198 14A4		BUFF1	DW	PBUF		; WON'T WORK IF SINGLE BUFFER
+            FD13 
+  3199 14A6			DW	ZBRAN,BUFF1-$
+            9601 FEFFFFFFFF 
+  3200 14AA			DW	USE,STORE
+            A813 FD05 
+  3201 14AE			DW	RR,AT
+            BA04 C305 
+  3202 14B2			DW	ZLESS
+            D704 
+  3203 14B4			DW	ZBRAN,BUFF2-$
+            9601 1600 
+  3204 14B8			DW	RR,TWOP
+            BA04 4D08 
+  3205 14BC			DW	RR,AT
+            BA04 C305 
+  3206 14C0			DW	LIT,7FFFH
+            5701 FF7F 
+  3207 14C4			DW	ANDD,ZERO
+            D603 C606 
+  3208 14C8			DW	RSLW
+            5016 
+  3209 14CA		BUFF2	DW	RR,STORE
+            BA04 FD05 
+  3210 14CE			DW	RR,PREV
+            BA04 B413 
+  3211 14D2			DW	STORE,FROMR
+            FD05 A504 
+  3212 14D6			DW	TWOP,SEMIS
+            4D08 6104 
+  3213 			;
+  3214 14DA			DB	85H	; BLOCK
+            85 
+  3215 14DB			DB	'BLOC'
+            42 4C 4F 43 
+            
+  3216 14DF			DB	'K'+80H
+            4B 80 
+  3217 14E1			DW	BUFFE-9
+            9114 
+  3218 14E3		BLOCK	DW	DOCOL,OFSET
+            4306 D107 
+  3219 14E7			DW	AT,PLUS
+            C305 EA04 
+  3220 14EB			DW	TOR,PREV
+            8E04 B413 
+  3221 14EF			DW	AT,DUP
+            C305 7E05 
+  3222 14F3			DW	AT,RR
+            C305 BA04 
+  3223 14F7			DW	SUBB
+            A508 
+  3224 14F9			DW	DUP,PLUS
+            7E05 EA04 
+  3225 14FD			DW	ZBRAN,BLOC1-$
+            9601 3600 
+  3226 1501		BLOC2	DW	PBUF,ZEQU
+            FD13 C204 
+  3227 1505			DW	ZBRAN,BLOC3-$
+            9601 1600 
+  3228 1509			DW	DROP,RR
+            6205 BA04 
+  3229 150D			DW	BUFFE,DUP
+            9A14 7E05 
+  3230 1511			DW	RR,ONE
+            BA04 CF06 
+  3231 1515			DW	RSLW
+            5016 
+  3232 1517			DW	TWO,SUBB
+            D806 A508 
+  3233 151B		BLOC3	DW	DUP,AT
+            7E05 C305 
+  3234 151F			DW	RR,SUBB
+            BA04 A508 
+  3235 1523			DW	DUP,PLUS
+            7E05 EA04 
+  3236 1527			DW	ZEQU
+            C204 
+  3237 1529			DW	ZBRAN,BLOC2-$
+            9601 D8FFFFFFFF 
+  3238 152D			DW	DUP,PREV
+            7E05 B413 
+  3239 1531			DW	STORE
+            FD05 
+  3240 1533		BLOC1	DW	FROMR,DROP
+            A504 6205 
+  3241 1537			DW	TWOP,SEMIS
+            4D08 6104 
+  3242 			;
+  3243 			;
+  3244 			;	CP/M INTERFACE ROUTINES
+  3245 			;
+  3246 			;		SERVICE REQUEST
+  3247 			;
+  3248 153B 2A 01 00	IOS	LHLD	1	; (HL) <- BIOS TABLE ADDR+3
+  3249 153E 19			DAD	D	; + SERVICE REQUEST OFFSET
+  3250 153F E9			PCHL		; EXECUTE REQUEST
+  3251 			;	RET FUNCTION PROVIDED BY CP/M
+  3252 			;
+  3253 1540			DB	86H	; SET-IO
+            86 
+  3254 			;			( ASSIGN SECTOR, TRACK FOR BDOS )
+  3255 1541			DB	'SET-I'
+            53 45 54 2D 
+            49 
+  3256 1546			DB	'O'+80H
+            4F 80 
+  3257 1548			DW	BLOCK-8
+            DB14 
+  3258 154A		SETIO:	DW	$+2
+            4C15 
+  3259 154C C5			PUSH	B	; SAVE (IP)
+  3260 154D 2A AA 13		LHLD	USE+2	; (BC) <- ADDR BUFFER
+  3261 1550 44			MOV	B,H
+  3262 1551 4D			MOV	C,L
+  3263 1552 11 21 00		LXI	D,SETDMA ; SEND BUFFER ADDR TO CP/M
+  3264 1555 CD 3B 15		CALL	IOS
+  3265 			;
+  3266 1558 2A 92 13		LHLD	SEC+2	; (BC) <- (SEC) = SECTOR #
+  3267 155B 4D			MOV	C,L
+  3268 155C 11 1E 00		LXI	D,SETSEC	; SEND SECTOR # TO CP/M
+  3269 155F CD 3B 15		CALL	IOS
+  3270 			;
+  3271 1562 2A 9F 13		LHLD	TRACK+2	; (BC) <- (TRACK) = TRACK #
+  3272 1565 44			MOV	B,H
+  3273 1566 4D			MOV	C,L
+  3274 1567 11 1B 00		LXI	D,SETTRK
+  3275 156A CD 3B 15		CALL	IOS
+  3276 			;
+  3277 156D C1			POP	B	; RESTORE (IP)
+  3278 156E C3 45 01		JMP	NEXT
+  3279 			;
+  3280 1571			DB	89H	; SET-DRIVE
+            89 
+  3281 1572			DB	'SET-DRIV'
+            53 45 54 2D 
+            44 52 49 56 
+            
+  3282 157A			DB	'E'+80H
+            45 80 
+  3283 157C			DW	SETIO-9
+            4115 
+  3284 157E		SETDRV:	DW	$+2
+            8015 
+  3285 1580 C5			PUSH	B	; SAVE (IP)
+  3286 1581 3A 87 13		LDA	DRIVE+2	; (C) <- (DRIVE) = DRIVE #
+  3287 1584 4F			MOV	C,A
+  3288 1585 11 18 00		LXI	D,SETDSK	; SEND DRIVE # TO CP/M
+  3289 1588 CD 3B 15		CALL	IOS
+  3290 158B C1			POP	B	; RESTORE (IP)
+  3291 158C C3 45 01		JMP	NEXT
+  3292 			;
+  3293 			;	T&SCALC		( CALCULATES DRIVE#, TRACK#, & SECTOR# )
+  3294 			;	STACK INPUT: SECTOR-DISPLACEMENT = BLK# * SEC/BLK
+  3295 			;	OUTPUT: VARIABLES DRIVE, TRACK, & SEC
+  3296 			;
+  3297 158F			DB	87H	; T&SCALC
+            87 
+  3298 1590			DB	'T&SCAL'
+            54 26 53 43 
+            41 4C 
+  3299 1596			DB	'C'+80H
+            43 80 
+  3300 1598			DW	SETDRV-12
+            7215 
+  3301 159A		TSCALC:	DW	DOCOL,DENSTY
+            4306 DF13 
+  3302 159E			DW	AT
+            C305 
+  3303 15A0			DW	ZBRAN,TSCALS-$
+            9601 3A00 
+  3304 15A4			DW	LIT,SPDRV2
+            5701 A40F 
+  3305 15A8			DW	SLMOD
+            6C12 
+  3306 15AA			DW	LIT,MXDRV
+            5701 0200 
+  3307 15AE			DW	MIN
+            EC11 
+  3308 15B0			DW	DUP,DRIVE
+            7E05 8513 
+  3309 15B4			DW	AT,EQUAL
+            C305 B408 
+  3310 15B8			DW	ZBRAN,TSCAL1-$
+            9601 0A00 
+  3311 15BC			DW	DROP
+            6205 
+  3312 15BE			DW	BRAN,TSCAL2-$
+            7D01 0A00 
+  3313 15C2		TSCAL1	DW	DRIVE,STORE
+            8513 FD05 
+  3314 15C6			DW	SETDRV
+            7E15 
+  3315 15C8		TSCAL2	DW	LIT,SPT2
+            5701 3400 
+  3316 15CC			DW	SLMOD,TRACK
+            6C12 9D13 
+  3317 15D0			DW	STORE,ONEP
+            FD05 3F08 
+  3318 15D4			DW	SEC,STORE
+            9013 FD05 
+  3319 15D8			DW	SEMIS
+            6104 
+  3320 			;	SINGLE DENSITY
+  3321 15DA		TSCALS	DW	LIT,SPDRV1
+            5701 D207 
+  3322 15DE			DW	SLMOD
+            6C12 
+  3323 15E0			DW	LIT,MXDRV
+            5701 0200 
+  3324 15E4			DW	MIN
+            EC11 
+  3325 15E6			DW	DUP,DRIVE
+            7E05 8513 
+  3326 15EA			DW	AT,EQUAL
+            C305 B408 
+  3327 15EE			DW	ZBRAN,TSCAL3-$
+            9601 0A00 
+  3328 15F2			DW	DROP
+            6205 
+  3329 15F4			DW	BRAN,TSCAL4-$
+            7D01 0A00 
+  3330 15F8		TSCAL3	DW	DRIVE,STORE
+            8513 FD05 
+  3331 15FC			DW	SETDRV
+            7E15 
+  3332 15FE		TSCAL4	DW	LIT,SPT1
+            5701 1A00 
+  3333 1602			DW	SLMOD,TRACK
+            6C12 9D13 
+  3334 1606			DW	STORE,ONEP
+            FD05 3F08 
+  3335 160A			DW	SEC,STORE
+            9013 FD05 
+  3336 160E			DW	SEMIS
+            6104 
+  3337 			;
+  3338 			;	SEC-READ
+  3339 			;	( READ A SECTOR SETUP BY 'SET-DRIVE' & 'SETIO' )
+  3340 			;
+  3341 1610			DB	88H	; SEC-READ
+            88 
+  3342 1611			DB	'SEC-REA'
+            53 45 43 2D 
+            52 45 41 
+  3343 1618			DB	'D'+80H
+            44 80 
+  3344 161A			DW	TSCALC-10
+            9015 
+  3345 161C		SECRD	DW	$+2
+            1E16 
+  3346 161E C5			PUSH	B	; SAVE (IP)
+  3347 161F 11 24 00		LXI	D,RDSEC	; ASK CP/M TO READ SECTOR
+  3348 1622 CD 3B 15		CALL	IOS
+  3349 1625 32 F3 13		STA	DSKERR+2	; (DSKERR) <- ERROR STATUS
+  3350 1628 C1			POP	B	; RESTORE (IP)
+  3351 1629 C3 45 01		JMP	NEXT
+  3352 			;
+  3353 			;	SEC-WRITE
+  3354 			;	( WRITE A SECTOR SETUP BY 'SET-DRIVE' & 'SETIO' )
+  3355 			;
+  3356 162C			DB	89H	; SEC-WRITE
+            89 
+  3357 162D			DB	'SEC-WRIT'
+            53 45 43 2D 
+            57 52 49 54 
+            
+  3358 1635			DB	'E'+80H
+            45 80 
+  3359 1637			DW	SECRD-11
+            1116 
+  3360 1639		SECWT	DW	$+2
+            3B16 
+  3361 163B C5			PUSH	B	; SAVE (IP)
+  3362 163C 11 27 00		LXI	D,RITSEC	; ASK CP/M TO WRITE SECTOR
+  3363 163F CD 3B 15		CALL	IOS
+  3364 1642 32 F3 13		STA	DSKERR+2	; (DSKERR) <- ERROR STATUS
+  3365 1645 C1			POP	B	; RESTORE (IP)
+  3366 1646 C3 45 01		JMP	NEXT
+  3367 			;
+  3368 1649			DB	83H	; R/W	( FORTH DISK PRIMATIVE )
+            83 
+  3369 164A			DB	'R/'
+            52 2F 
+  3370 164C			DB	'W'+80H
+            57 80 
+  3371 164E			DW	SECWT-12
+            2D16 
+  3372 1650		RSLW	DW	DOCOL
+            4306 
+  3373 1652			DW	USE,AT
+            A813 C305 
+  3374 1656			DW	TOR
+            8E04 
+  3375 1658			DW	SWAP,SPBLK
+            7005 C313 
+  3376 165C			DW	STAR,ROT
+            5C12 1409 
+  3377 1660			DW	USE,STORE
+            A813 FD05 
+  3378 1664			DW	SPBLK,ZERO
+            C313 C606 
+  3379 1668			DW	XDO
+            F601 
+  3380 166A		RSLW1	DW	OVER,OVER
+            5205 5205 
+  3381 166E			DW	TSCALC,SETIO
+            9A15 4A15 
+  3382 1672			DW	ZBRAN,RSLW2-$
+            9601 0A00 
+  3383 1676			DW	SECRD
+            1C16 
+  3384 1678			DW	BRAN,RSLW3-$
+            7D01 0600 
+  3385 167C		RSLW2	DW	SECWT
+            3916 
+  3386 167E		RSLW3	DW	ONEP
+            3F08 
+  3387 1680			DW	LIT,80H
+            5701 8000 
+  3388 1684			DW	USE,PSTOR
+            A813 9C05 
+  3389 1688			DW	XLOOP,RSLW1-$
+            AD01 E2FFFFFFFF 
+  3390 168C			DW	DROP,DROP
+            6205 6205 
+  3391 1690			DW	FROMR,USE
+            A504 A813 
+  3392 1694			DW	STORE,SEMIS
+            FD05 6104 
+  3393 			;
+  3394 			;--------------------------------------------------------
+  3395 			;
+  3396 			;	ALTERNATIVE R/W FOR NO DISK INTERFACE
+  3397 			;
+  3398 			;RSLW	DW	DOCOL,DROP,DROP,DROP,SEMIS
+  3399 			;
+  3400 			;--------------------------------------------------------
+  3401 			;
+  3402 1698			DB	85H	; FLUSH
+            85 
+  3403 1699			DB	'FLUS'
+            46 4C 55 53 
+            
+  3404 169D			DB	'H'+80H
+            48 80 
+  3405 169F			DW	RSLW-6
+            4A16 
+  3406 16A1		FLUSH	DW	DOCOL
+            4306 
+  3407 16A3			DW	NOBUF,ONEP
+            D013 3F08 
+  3408 16A7			DW	ZERO,XDO
+            C606 F601 
+  3409 16AB		FLUS1	DW	ZERO,BUFFE
+            C606 9A14 
+  3410 16AF			DW	DROP
+            6205 
+  3411 16B1			DW	XLOOP,FLUS1-$
+            AD01 FAFFFFFFFF 
+  3412 16B5			DW	SEMIS
+            6104 
+  3413 			;
+  3414 16B7			DB	84H	; LOAD
+            84 
+  3415 16B8			DB	'LOA'
+            4C 4F 41 
+  3416 16BB			DB	'D'+80H
+            44 80 
+  3417 16BD			DW	FLUSH-8
+            9916 
+  3418 16BF		LOAD	DW	DOCOL,BLK
+            4306 A707 
+  3419 16C3			DW	AT,TOR
+            C305 8E04 
+  3420 16C7			DW	INN,AT
+            B007 C305 
+  3421 16CB			DW	TOR,ZERO
+            8E04 C606 
+  3422 16CF			DW	INN,STORE
+            B007 FD05 
+  3423 16D3			DW	BSCR,STAR
+            2A07 5C12 
+  3424 16D7			DW	BLK,STORE	; BLK <- SCR * B/SCR
+            A707 FD05 
+  3425 16DB			DW	INTER		; INTERPRET FROM OTHER SCREEN
+            EF0F 
+  3426 16DD			DW	FROMR,INN
+            A504 B007 
+  3427 16E1			DW	STORE
+            FD05 
+  3428 16E3			DW	FROMR,BLK
+            A504 A707 
+  3429 16E7			DW	STORE
+            FD05 
+  3430 16E9			DW	SEMIS
+            6104 
+  3431 			;
+  3432 16EB			DB	0C3H	; -->
+            C3 
+  3433 16EC			DB	'--'
+            2D 2D 
+  3434 16EE			DB	'>'+80H
+            3E 80 
+  3435 16F0			DW	LOAD-7
+            B816 
+  3436 16F2		ARROW	DW	DOCOL
+            4306 
+  3437 16F4			DW	QLOAD
+            630A 
+  3438 16F6			DW	ZERO
+            C606 
+  3439 16F8			DW	INN
+            B007 
+  3440 16FA			DW	STORE
+            FD05 
+  3441 16FC			DW	BSCR
+            2A07 
+  3442 16FE			DW	BLK
+            A707 
+  3443 1700			DW	AT
+            C305 
+  3444 1702			DW	OVER
+            5205 
+  3445 1704			DW	MODD
+            8E12 
+  3446 1706			DW	SUBB
+            A508 
+  3447 1708			DW	BLK
+            A707 
+  3448 170A			DW	PSTOR
+            9C05 
+  3449 170C			DW	SEMIS
+            6104 
+  3450 			;
+  3451     			PAGE
+  3452 			;-------------------------------------------------
+  3453 			;
+  3454 			;	CP/M CONSOLE & PRINTER INTERFACE
+  3455 			;
+  3456 			;	CP/M BIOS CALLS USED
+  3457 			;	( NOTE: BELOW OFFSETS ARE 3 LOWER THAN CP/M
+  3458 			;	  DOCUMENTATION SINCE BASE ADDR = BIOS+3 )
+  3459 			;
+  3460      00 03	KCSTAT	EQU	3	; CONSOLE STATUS
+  3461      00 06	KCIN	EQU	6	; CONSOLE INPUT
+  3462      00 09	KCOUT	EQU	9	; CONSOLE OUTPUT
+  3463      00 0C	KPOUT	EQU	0CH	; PRINTER OUTPUT
+  3464 			;
+  3465 170E		EPRINT	DW	0	; ENABLE PRINTER VARIABLE
+            0000 
+  3466 			;			; 0 = DISABLED, 1 = ENABLED
+  3467 			;
+  3468 			;	BELOW BIOS CALLS USE 'IOS' IN DISK INTERFACE
+  3469 			;
+  3470 1710 C5		CSTAT	PUSH	B	; CONSOLE STATUS
+  3471 1711 11 03 00		LXI	D,KCSTAT  ; CHECK IF ANY CHR HAS BEEN TYPED
+  3472 1714 CD 3B 15		CALL	IOS
+  3473 1717 C1			POP	B	; IF CHR TYPED THEN (A) <- 0FFH
+  3474 1718 C9			RET		; ELSE (A) <- 0
+  3475 			;			; CHR IGNORED
+  3476 			;
+  3477 1719 C5		CIN	PUSH	B	; CONSOLE INPUT
+  3478 171A 11 06 00		LXI	D,KCIN	; WAIT FOR CHR TO BE TYPED
+  3479 171D CD 3B 15		CALL	IOS	; (A) <- CHR, (MSB) <- 0
+  3480 1720 C1			POP	B
+  3481 1721 C9			RET
+  3482 			;
+  3483 1722 E5		COUT	PUSH	H	; CONSOLE OUTPUT
+  3484 1723 11 09 00		LXI	D,KCOUT	; WAIT UNTIL READY
+  3485 1726 CD 3B 15		CALL	IOS	; THEN OUTPUT (C)
+  3486 1729 E1			POP	H
+  3487 172A C9			RET
+  3488 			;
+  3489 172B 11 0C 00	POUT	LXI	D,KPOUT	; PRINTER OUTPUT
+  3490 172E CD 3B 15		CALL	IOS	; WAIT UNTIL READY
+  3491 1731 C9			RET		; THEN OUTPUT (C)
+  3492 			;
+  3493 1732 CD 22 17	CPOUT	CALL	COUT	; OUTPUT (C) TO CONSOLE
+  3494 1735 EB			XCHG
+  3495 1736 21 0E 17		LXI	H,EPRINT
+  3496 1739 7E			MOV	A,M	; IF (EPRINT) <> 0
+  3497 173A B7			ORA	A
+  3498 173B CA 42 17		JZ	CPOU1
+  3499 173E 4B			MOV	C,E	; THEN OUTPUT (C) TO PRINTER
+  3500 173F CD 2B 17		CALL	POUT
+  3501 1742 C9		CPOU1	RET
+  3502 			;
+  3503 			;	FORTH TO CP/M SERIAL IO INTERFACE
+  3504 			;
+  3505 1743 CD 10 17	PQTER	CALL	CSTAT	; IF CHR TYPED
+  3506 1746 21 00 00		LXI	H,0
+  3507 1749 B7			ORA	A
+  3508 174A CA 4E 17		JZ	PQTE1
+  3509 174D 2C			INR	L	; THEN (S1) <- TRUE
+  3510 174E C3 44 01	PQTE1	JMP	HPUSH	; ELSE (S1) <- FALSE
+  3511 			;
+  3512 1751 CD 19 17	PKEY	CALL	CIN	; READ CHR FROM CONSOLE
+  3513 1754 FE 10		CPI	DLE	; IF CHR = (^P)
+  3514 1756 5F			MOV	E,A
+  3515 1757 C2 63 17		JNZ	PKEY1
+  3516 175A 21 0E 17		LXI	H,EPRINT  ; THEN TOGGLE (EPRINT)LSB
+  3517 175D 1E 20		MVI	E,ABL	; CHR <- BLANK
+  3518 175F 7E			MOV	A,M
+  3519 1760 EE 01		XRI	1
+  3520 1762 77			MOV	M,A
+  3521 1763 6B		PKEY1	MOV	L,E
+  3522 1764 26 00		MVI	H,0
+  3523 1766 C3 44 01		JMP	HPUSH	; (S1)LB <- CHR
+  3524 			;
+  3525 1769		PEMIT	DW	$+2	; (EMIT)	ORPHAN
+            6B17 
+  3526 176B E1			POP	H	; (L) <- (S1)LB = CHR
+  3527 176C C5			PUSH	B	; SAVE (IP)
+  3528 176D 4D			MOV	C,L
+  3529 176E CD 32 17		CALL	CPOUT	; OUTPUT CHR TO CONSOLE
+  3530 			;			; & MAYBE PRINTER
+  3531 1771 C1			POP	B	; RESTORE (IP)
+  3532 1772 C3 45 01		JMP	NEXT
+  3533 			;
+  3534 1775 C5		PCR	PUSH	B	; SAVE (IP)
+  3535 1776 0E 0D		MVI	C,ACR	; OUTPUT (CR) TO CONSOLE
+  3536 1778 69			MOV	L,C
+  3537 1779 CD 32 17		CALL	CPOUT	; & MAYBE TO PRINTER
+  3538 177C 0E 0A		MVI	C,LF	; OUTPUT (LF) TO CONSOLE
+  3539 177E 69			MOV	L,C
+  3540 177F CD 32 17		CALL	CPOUT	; & MAYBE TO PRINTER
+  3541 1782 C1			POP	B	; RESTORE (IP)
+  3542 1783 C3 45 01		JMP	NEXT
+  3543 			;
+  3544 			;----------------------------------------------------
+  3545     			PAGE
+  3546 			;
+  3547 1786			DB	0C1H	; '	( TICK )
+            C1 
+  3548 1787			DB	0A7H
+            A7 
+  3549 1788			DW	ARROW-6
+            EC16 
+  3550 178A		TICK	DW	DOCOL
+            4306 
+  3551 178C			DW	DFIND
+            640E 
+  3552 178E			DW	ZEQU
+            C204 
+  3553 1790			DW	ZERO
+            C606 
+  3554 1792			DW	QERR
+            E509 
+  3555 1794			DW	DROP
+            6205 
+  3556 1796			DW	LITER
+            840F 
+  3557 1798			DW	SEMIS
+            6104 
+  3558 			;
+  3559 179A			DB	86H	; FORGET
+            86 
+  3560 179B			DB	'FORGE'
+            46 4F 52 47 
+            45 
+  3561 17A0			DB	'T'+80H
+            54 80 
+  3562 17A2			DW	TICK-4
+            8617 
+  3563 17A4		FORG	DW	DOCOL
+            4306 
+  3564 17A6			DW	CURR
+            ED07 
+  3565 17A8			DW	AT
+            C305 
+  3566 17AA			DW	CONT
+            DF07 
+  3567 17AC			DW	AT
+            C305 
+  3568 17AE			DW	SUBB
+            A508 
+  3569 17B0			DW	LIT
+            5701 
+  3570 17B2			DW	18H
+            1800 
+  3571 17B4			DW	QERR
+            E509 
+  3572 17B6			DW	TICK
+            8A17 
+  3573 17B8			DW	DUP
+            7E05 
+  3574 17BA			DW	FENCE
+            8407 
+  3575 17BC			DW	AT
+            C305 
+  3576 17BE			DW	LESS
+            C108 
+  3577 17C0			DW	LIT
+            5701 
+  3578 17C2			DW	15H
+            1500 
+  3579 17C4			DW	QERR
+            E509 
+  3580 17C6			DW	DUP
+            7E05 
+  3581 17C8			DW	NFA
+            A409 
+  3582 17CA			DW	DP
+            8D07 
+  3583 17CC			DW	STORE
+            FD05 
+  3584 17CE			DW	LFA
+            8409 
+  3585 17D0			DW	AT
+            C305 
+  3586 17D2			DW	CONT
+            DF07 
+  3587 17D4			DW	AT
+            C305 
+  3588 17D6			DW	STORE
+            FD05 
+  3589 17D8			DW	SEMIS
+            6104 
+  3590 			;
+  3591 17DA			DB	84H	; BACK
+            84 
+  3592 17DB			DB	'BAC'
+            42 41 43 
+  3593 17DE			DB	'K'+80H
+            4B 80 
+  3594 17E0			DW	FORG-9
+            9B17 
+  3595 17E2		BACK	DW	DOCOL
+            4306 
+  3596 17E4			DW	HERE
+            5D08 
+  3597 17E6			DW	SUBB
+            A508 
+  3598 17E8			DW	COMMA
+            7B08 
+  3599 17EA			DW	SEMIS
+            6104 
+  3600 			;
+  3601 17EC			DB	0C5H	; BEGIN
+            C5 
+  3602 17ED			DB	'BEGI'
+            42 45 47 49 
+            
+  3603 17F1			DB	'N'+80H
+            4E 80 
+  3604 17F3			DW	BACK-7
+            DB17 
+  3605 17F5		BEGIN	DW	DOCOL
+            4306 
+  3606 17F7			DW	QCOMP
+            000A 
+  3607 17F9			DW	HERE
+            5D08 
+  3608 17FB			DW	ONE
+            CF06 
+  3609 17FD			DW	SEMIS
+            6104 
+  3610 			;
+  3611 17FF			DB	0C5H	; ENDIF
+            C5 
+  3612 1800			DB	'ENDI'
+            45 4E 44 49 
+            
+  3613 1804			DB	'F'+80H
+            46 80 
+  3614 1806			DW	BEGIN-8
+            ED17 
+  3615 1808		ENDIFF	DW	DOCOL
+            4306 
+  3616 180A			DW	QCOMP
+            000A 
+  3617 180C			DW	TWO
+            D806 
+  3618 180E			DW	QPAIR
+            310A 
+  3619 1810			DW	HERE
+            5D08 
+  3620 1812			DW	OVER
+            5205 
+  3621 1814			DW	SUBB
+            A508 
+  3622 1816			DW	SWAP
+            7005 
+  3623 1818			DW	STORE
+            FD05 
+  3624 181A			DW	SEMIS
+            6104 
+  3625 			;
+  3626 181C			DB	0C4H	; THEN
+            C4 
+  3627 181D			DB	'THE'
+            54 48 45 
+  3628 1820			DB	'N'+80H
+            4E 80 
+  3629 1822			DW	ENDIFF-8
+            0018 
+  3630 1824		THEN	DW	DOCOL
+            4306 
+  3631 1826			DW	ENDIFF
+            0818 
+  3632 1828			DW	SEMIS
+            6104 
+  3633 			;
+  3634 182A			DB	0C2H	; DO
+            C2 
+  3635 182B			DB	'D'
+            44 
+  3636 182C			DB	'O'+80H
+            4F 80 
+  3637 182E			DW	THEN-7
+            1D18 
+  3638 1830		DO	DW	DOCOL
+            4306 
+  3639 1832			DW	COMP
+            7E0A 
+  3640 1834			DW	XDO
+            F601 
+  3641 1836			DW	HERE
+            5D08 
+  3642 1838			DW	THREE
+            E106 
+  3643 183A			DW	SEMIS
+            6104 
+  3644 			;
+  3645 183C			DB	0C4H	; LOOP
+            C4 
+  3646 183D			DB	'LOO'
+            4C 4F 4F 
+  3647 1840			DB	'P'+80H
+            50 80 
+  3648 1842			DW	DO-5
+            2B18 
+  3649 1844		LOOP	DW	DOCOL
+            4306 
+  3650 1846			DW	THREE
+            E106 
+  3651 1848			DW	QPAIR
+            310A 
+  3652 184A			DW	COMP
+            7E0A 
+  3653 184C			DW	XLOOP
+            AD01 
+  3654 184E			DW	BACK
+            E217 
+  3655 1850			DW	SEMIS
+            6104 
+  3656 			;
+  3657 1852			DB	0C5H	; +LOOP
+            C5 
+  3658 1853			DB	'+LOO'
+            2B 4C 4F 4F 
+            
+  3659 1857			DB	'P'+80H
+            50 80 
+  3660 1859			DW	LOOP-7
+            3D18 
+  3661 185B		PLOOP	DW	DOCOL
+            4306 
+  3662 185D			DW	THREE
+            E106 
+  3663 185F			DW	QPAIR
+            310A 
+  3664 1861			DW	COMP
+            7E0A 
+  3665 1863			DW	XPLOO
+            E801 
+  3666 1865			DW	BACK
+            E217 
+  3667 1867			DW	SEMIS
+            6104 
+  3668 			;
+  3669 1869			DB	0C5H	; UNTIL
+            C5 
+  3670 186A			DB	'UNTI'
+            55 4E 54 49 
+            
+  3671 186E			DB	'L'+80H
+            4C 80 
+  3672 1870			DW	PLOOP-8
+            5318 
+  3673 1872		UNTIL	DW	DOCOL
+            4306 
+  3674 1874			DW	ONE
+            CF06 
+  3675 1876			DW	QPAIR
+            310A 
+  3676 1878			DW	COMP
+            7E0A 
+  3677 187A			DW	ZBRAN
+            9601 
+  3678 187C			DW	BACK
+            E217 
+  3679 187E			DW	SEMIS
+            6104 
+  3680 			;
+  3681 1880			DB	0C3H	; END
+            C3 
+  3682 1881			DB	'EN'
+            45 4E 
+  3683 1883			DB	'D'+80H
+            44 80 
+  3684 1885			DW	UNTIL-8
+            6A18 
+  3685 1887		ENDD	DW	DOCOL
+            4306 
+  3686 1889			DW	UNTIL
+            7218 
+  3687 188B			DW	SEMIS
+            6104 
+  3688 			;
+  3689 188D			DB	0C5H	; AGAIN
+            C5 
+  3690 188E			DB	'AGAI'
+            41 47 41 49 
+            
+  3691 1892			DB	'N'+80H
+            4E 80 
+  3692 1894			DW	ENDD-6
+            8118 
+  3693 1896		AGAIN	DW	DOCOL
+            4306 
+  3694 1898			DW	ONE
+            CF06 
+  3695 189A			DW	QPAIR
+            310A 
+  3696 189C			DW	COMP
+            7E0A 
+  3697 189E			DW	BRAN
+            7D01 
+  3698 18A0			DW	BACK
+            E217 
+  3699 18A2			DW	SEMIS
+            6104 
+  3700 			;
+  3701 18A4			DB	0C6H	; REPEAT
+            C6 
+  3702 18A5			DB	'REPEA'
+            52 45 50 45 
+            41 
+  3703 18AA			DB	'T'+80H
+            54 80 
+  3704 18AC			DW	AGAIN-8
+            8E18 
+  3705 18AE		REPEA	DW	DOCOL
+            4306 
+  3706 18B0			DW	TOR
+            8E04 
+  3707 18B2			DW	TOR
+            8E04 
+  3708 18B4			DW	AGAIN
+            9618 
+  3709 18B6			DW	FROMR
+            A504 
+  3710 18B8			DW	FROMR
+            A504 
+  3711 18BA			DW	TWO
+            D806 
+  3712 18BC			DW	SUBB
+            A508 
+  3713 18BE			DW	ENDIFF
+            0818 
+  3714 18C0			DW	SEMIS
+            6104 
+  3715 			;
+  3716 18C2			DB	0C2H	; IF
+            C2 
+  3717 18C3			DB	'I'
+            49 
+  3718 18C4			DB	'F'+80H
+            46 80 
+  3719 18C6			DW	REPEA-9
+            A518 
+  3720 18C8		IFF	DW	DOCOL
+            4306 
+  3721 18CA			DW	COMP
+            7E0A 
+  3722 18CC			DW	ZBRAN
+            9601 
+  3723 18CE			DW	HERE
+            5D08 
+  3724 18D0			DW	ZERO
+            C606 
+  3725 18D2			DW	COMMA
+            7B08 
+  3726 18D4			DW	TWO
+            D806 
+  3727 18D6			DW	SEMIS
+            6104 
+  3728 			;
+  3729 18D8			DB	0C4H	; ELSE
+            C4 
+  3730 18D9			DB	'ELS'
+            45 4C 53 
+  3731 18DC			DB	'E'+80H
+            45 80 
+  3732 18DE			DW	IFF-5
+            C318 
+  3733 18E0		ELSEE	DW	DOCOL
+            4306 
+  3734 18E2			DW	TWO
+            D806 
+  3735 18E4			DW	QPAIR
+            310A 
+  3736 18E6			DW	COMP
+            7E0A 
+  3737 18E8			DW	BRAN
+            7D01 
+  3738 18EA			DW	HERE
+            5D08 
+  3739 18EC			DW	ZERO
+            C606 
+  3740 18EE			DW	COMMA
+            7B08 
+  3741 18F0			DW	SWAP
+            7005 
+  3742 18F2			DW	TWO
+            D806 
+  3743 18F4			DW	ENDIFF
+            0818 
+  3744 18F6			DW	TWO
+            D806 
+  3745 18F8			DW	SEMIS
+            6104 
+  3746 			;
+  3747 18FA			DB	0C5H	; WHILE
+            C5 
+  3748 18FB			DB	'WHIL'
+            57 48 49 4C 
+            
+  3749 18FF			DB	'E'+80H
+            45 80 
+  3750 1901			DW	ELSEE-7
+            D918 
+  3751 1903		WHILE	DW	DOCOL
+            4306 
+  3752 1905			DW	IFF
+            C818 
+  3753 1907			DW	TWOP
+            4D08 
+  3754 1909			DW	SEMIS
+            6104 
+  3755 			;
+  3756 190B			DB	86H	; SPACES
+            86 
+  3757 190C			DB	'SPACE'
+            53 50 41 43 
+            45 
+  3758 1911			DB	'S'+80H
+            53 80 
+  3759 1913			DW	WHILE-8
+            FB18 
+  3760 1915		SPACS	DW	DOCOL
+            4306 
+  3761 1917			DW	ZERO
+            C606 
+  3762 1919			DW	MAX
+            0312 
+  3763 191B			DW	DDUP
+            3509 
+  3764 191D			DW	ZBRAN	; IF
+            9601 
+  3765 191F			DW	SPAX1-$
+            0C00 
+  3766 1921			DW	ZERO
+            C606 
+  3767 1923			DW	XDO	; DO
+            F601 
+  3768 1925		SPAX2	DW	SPACE
+            2509 
+  3769 1927			DW	XLOOP	; LOOP	ENDIF
+            AD01 
+  3770 1929			DW	SPAX2-$
+            FCFFFFFFFF 
+  3771 192B		SPAX1	DW	SEMIS
+            6104 
+  3772 			;
+  3773 192D			DB	82H	; <#
+            82 
+  3774 192E			DB	'<'
+            3C 
+  3775 192F			DB	'#'+80H
+            23 80 
+  3776 1931			DW	SPACS-9
+            0C19 
+  3777 1933		BDIGS	DW	DOCOL
+            4306 
+  3778 1935			DW	PAD
+            590D 
+  3779 1937			DW	HLD
+            3508 
+  3780 1939			DW	STORE
+            FD05 
+  3781 193B			DW	SEMIS
+            6104 
+  3782 			;
+  3783 193D			DB	82H	; #>
+            82 
+  3784 193E			DB	'#'
+            23 
+  3785 193F			DB	'>'+80H
+            3E 80 
+  3786 1941			DW	BDIGS-5
+            2E19 
+  3787 1943		EDIGS	DW	DOCOL
+            4306 
+  3788 1945			DW	DROP
+            6205 
+  3789 1947			DW	DROP
+            6205 
+  3790 1949			DW	HLD
+            3508 
+  3791 194B			DW	AT
+            C305 
+  3792 194D			DW	PAD
+            590D 
+  3793 194F			DW	OVER
+            5205 
+  3794 1951			DW	SUBB
+            A508 
+  3795 1953			DW	SEMIS
+            6104 
+  3796 			;
+  3797 1955			DB	84H	; SIGN
+            84 
+  3798 1956			DB	'SIG'
+            53 49 47 
+  3799 1959			DB	'N'+80H
+            4E 80 
+  3800 195B			DW	EDIGS-5
+            3E19 
+  3801 195D		SIGN	DW	DOCOL
+            4306 
+  3802 195F			DW	ROT
+            1409 
+  3803 1961			DW	ZLESS
+            D704 
+  3804 1963			DW	ZBRAN	; IF
+            9601 
+  3805 1965			DW	SIGN1-$
+            0800 
+  3806 1967			DW	LIT
+            5701 
+  3807 1969			DW	2DH
+            2D00 
+  3808 196B			DW	HOLD	; ENDIF
+            400D 
+  3809 196D		SIGN1	DW	SEMIS
+            6104 
+  3810 			;
+  3811 196F			DB	81H	; #
+            81 
+  3812 1970			DB	'#'+80H
+            23 80 
+  3813 1972			DW	SIGN-7
+            5619 
+  3814 1974		DIG	DW	DOCOL
+            4306 
+  3815 1976			DW	BASE
+            0408 
+  3816 1978			DW	AT
+            C305 
+  3817 197A			DW	MSMOD
+            C412 
+  3818 197C			DW	ROT
+            1409 
+  3819 197E			DW	LIT
+            5701 
+  3820 1980			DW	9
+            0900 
+  3821 1982			DW	OVER
+            5205 
+  3822 1984			DW	LESS
+            C108 
+  3823 1986			DW	ZBRAN	; IF
+            9601 
+  3824 1988			DW	DIG1-$
+            0800 
+  3825 198A			DW	LIT
+            5701 
+  3826 198C			DW	7
+            0700 
+  3827 198E			DW	PLUS	; ENDIF
+            EA04 
+  3828 1990		DIG1	DW	LIT
+            5701 
+  3829 1992			DW	30H
+            3000 
+  3830 1994			DW	PLUS
+            EA04 
+  3831 1996			DW	HOLD
+            400D 
+  3832 1998			DW	SEMIS
+            6104 
+  3833 			;
+  3834 199A			DB	82H	; #S
+            82 
+  3835 199B			DB	'#'
+            23 
+  3836 199C			DB	'S'+80H
+            53 80 
+  3837 199E			DW	DIG-4
+            7019 
+  3838 19A0		DIGS	DW	DOCOL
+            4306 
+  3839 19A2		DIGS1	DW	DIG	; BEGIN
+            7419 
+  3840 19A4			DW	OVER
+            5205 
+  3841 19A6			DW	OVER
+            5205 
+  3842 19A8			DW	ORR
+            E903 
+  3843 19AA			DW	ZEQU
+            C204 
+  3844 19AC			DW	ZBRAN	; UNTIL
+            9601 
+  3845 19AE			DW	DIGS1-$
+            F4FFFFFFFF 
+  3846 19B0			DW	SEMIS
+            6104 
+  3847 			;
+  3848 19B2			DB	83H	; D.R
+            83 
+  3849 19B3			DB	'D.'
+            44 2E 
+  3850 19B5			DB	'R'+80H
+            52 80 
+  3851 19B7			DW	DIGS-5
+            9B19 
+  3852 19B9		DDOTR	DW	DOCOL
+            4306 
+  3853 19BB			DW	TOR
+            8E04 
+  3854 19BD			DW	SWAP
+            7005 
+  3855 19BF			DW	OVER
+            5205 
+  3856 19C1			DW	DABS
+            DD11 
+  3857 19C3			DW	BDIGS
+            3319 
+  3858 19C5			DW	DIGS
+            A019 
+  3859 19C7			DW	SIGN
+            5D19 
+  3860 19C9			DW	EDIGS
+            4319 
+  3861 19CB			DW	FROMR
+            A504 
+  3862 19CD			DW	OVER
+            5205 
+  3863 19CF			DW	SUBB
+            A508 
+  3864 19D1			DW	SPACS
+            1519 
+  3865 19D3			DW	TYPE
+            780B 
+  3866 19D5			DW	SEMIS
+            6104 
+  3867 			;
+  3868 19D7			DB	82H	; .R
+            82 
+  3869 19D8			DB	'.'
+            2E 
+  3870 19D9			DB	'R'+80H
+            52 80 
+  3871 19DB			DW	DDOTR-6
+            B319 
+  3872 19DD		DOTR	DW	DOCOL
+            4306 
+  3873 19DF			DW	TOR
+            8E04 
+  3874 19E1			DW	STOD
+            9111 
+  3875 19E3			DW	FROMR
+            A504 
+  3876 19E5			DW	DDOTR
+            B919 
+  3877 19E7			DW	SEMIS
+            6104 
+  3878 			;
+  3879 19E9			DB	82H	; D.
+            82 
+  3880 19EA			DB	'D'
+            44 
+  3881 19EB			DB	'.'+80H
+            2E 80 
+  3882 19ED			DW	DOTR-5
+            D819 
+  3883 19EF		DDOT	DW	DOCOL
+            4306 
+  3884 19F1			DW	ZERO
+            C606 
+  3885 19F3			DW	DDOTR
+            B919 
+  3886 19F5			DW	SPACE
+            2509 
+  3887 19F7			DW	SEMIS
+            6104 
+  3888 			;
+  3889 19F9			DB	81H	; .
+            81 
+  3890 19FA			DB	'.'+80H
+            2E 80 
+  3891 19FC			DW	DDOT-5
+            EA19 
+  3892 19FE		DOT	DW	DOCOL
+            4306 
+  3893 1A00			DW	STOD
+            9111 
+  3894 1A02			DW	DDOT
+            EF19 
+  3895 1A04			DW	SEMIS
+            6104 
+  3896 			;
+  3897 1A06			DB	81H	; ?
+            81 
+  3898 1A07			DB	'?'+80H
+            3F 80 
+  3899 1A09			DW	DOT-4
+            FA19 
+  3900 1A0B		QUES	DW	DOCOL
+            4306 
+  3901 1A0D			DW	AT
+            C305 
+  3902 1A0F			DW	DOT
+            FE19 
+  3903 1A11			DW	SEMIS
+            6104 
+  3904 			;
+  3905 1A13			DB	82H	; U.
+            82 
+  3906 1A14			DB	'U'
+            55 
+  3907 1A15			DB	'.'+80H
+            2E 80 
+  3908 1A17			DW	QUES-4
+            071A 
+  3909 1A19		UDOT	DW	DOCOL
+            4306 
+  3910 1A1B			DW	ZERO
+            C606 
+  3911 1A1D			DW	DDOT
+            EF19 
+  3912 1A1F			DW	SEMIS
+            6104 
+  3913 			;
+  3914 1A21			DB	85H	; VLIST
+            85 
+  3915 1A22			DB	'VLIS'
+            56 4C 49 53 
+            
+  3916 1A26			DB	'T'+80H
+            54 80 
+  3917 1A28			DW	UDOT-5
+            141A 
+  3918 1A2A		VLIST	DW	DOCOL
+            4306 
+  3919 1A2C			DW	LIT
+            5701 
+  3920 1A2E			DW	80H
+            8000 
+  3921 1A30			DW	OUTT
+            BA07 
+  3922 1A32			DW	STORE
+            FD05 
+  3923 1A34			DW	CONT
+            DF07 
+  3924 1A36			DW	AT
+            C305 
+  3925 1A38			DW	AT
+            C305 
+  3926 1A3A		VLIS1	DW	OUTT	; BEGIN
+            BA07 
+  3927 1A3C			DW	AT
+            C305 
+  3928 1A3E			DW	CSLL
+            F606 
+  3929 1A40			DW	GREAT
+            0509 
+  3930 1A42			DW	ZBRAN	; IF
+            9601 
+  3931 1A44			DW	VLIS2-$
+            0A00 
+  3932 1A46			DW	CR
+            1F03 
+  3933 1A48			DW	ZERO
+            C606 
+  3934 1A4A			DW	OUTT
+            BA07 
+  3935 1A4C			DW	STORE	; ENDIF
+            FD05 
+  3936 1A4E		VLIS2	DW	DUP
+            7E05 
+  3937 1A50			DW	IDDOT
+            D60E 
+  3938 1A52			DW	SPACE
+            2509 
+  3939 1A54			DW	SPACE
+            2509 
+  3940 1A56			DW	PFA
+            BB09 
+  3941 1A58			DW	LFA
+            8409 
+  3942 1A5A			DW	AT
+            C305 
+  3943 1A5C			DW	DUP
+            7E05 
+  3944 1A5E			DW	ZEQU
+            C204 
+  3945 1A60			DW	QTERM
+            1103 
+  3946 1A62			DW	ORR
+            E903 
+  3947 1A64			DW	ZBRAN	; UNTIL
+            9601 
+  3948 1A66			DW	VLIS1-$
+            D4FFFFFFFF 
+  3949 1A68			DW	DROP
+            6205 
+  3950 1A6A			DW	SEMIS
+            6104 
+  3951 			;
+  3952 			;------ EXIT CP/M  -----------------------
+  3953 			;
+  3954 1A6C			DB	83H	; BYE
+            83 
+  3955 1A6D			DB	'BY'
+            42 59 
+  3956 1A6F			DB	'E'+80H
+            45 80 
+  3957 1A71			DW	VLIST-8
+            221A 
+  3958 1A73		BYE	DW	$+2
+            751A 
+  3959 1A75 C3 00 00		JMP	0
+  3960 			;-----------------------------------------------
+  3961 			;
+  3962 1A78			DB	84H	; LIST
+            84 
+  3963 1A79			DB	'LIS'
+            4C 49 53 
+  3964 1A7C			DB	'T'+80H
+            54 80 
+  3965 1A7E			DW	BYE-6
+            6D1A 
+  3966 1A80		LIST	DW	DOCOL,DEC
+            4306 E40A 
+  3967 1A84			DW	CR,DUP
+            1F03 7E05 
+  3968 1A88			DW	SCR,STORE
+            C407 FD05 
+  3969 1A8C			DW	PDOTQ
+            DB0B 
+  3970 1A8E			DB	6,'SCR # '
+            06 53 43 52 
+            20 23 20 
+  3971 1A95			DW	DOT
+            FE19 
+  3972 1A97			DW	LIT,10H
+            5701 1000 
+  3973 1A9B			DW	ZERO,XDO
+            C606 F601 
+  3974 1A9F		LIST1	DW	CR,IDO
+            1F03 1302 
+  3975 1AA3			DW	LIT,3
+            5701 0300 
+  3976 1AA7			DW	DOTR,SPACE
+            DD19 2509 
+  3977 1AAB			DW	IDO,SCR
+            1302 C407 
+  3978 1AAF			DW	AT,DLINE
+            C305 0B13 
+  3979 1AB3			DW	QTERM		; ?TERMINAL
+            1103 
+  3980 1AB5			DW	ZBRAN,LIST2-$	; IF
+            9601 0600 
+  3981 1AB9			DW	LEAVE		; LEAVE
+            7904 
+  3982 1ABB		LIST2	DW	XLOOP,LIST1-$	; ENDIF
+            AD01 E4FFFFFFFF 
+  3983 1ABF			DW	CR,SEMIS
+            1F03 6104 
+  3984 			;
+  3985 1AC3			DB	85H	; INDEX
+            85 
+  3986 1AC4			DB	'INDE'
+            49 4E 44 45 
+            
+  3987 1AC8			DB	'X'+80H
+            58 80 
+  3988 1ACA			DW	LIST-7
+            791A 
+  3989 1ACC		INDEX	DW	DOCOL
+            4306 
+  3990 1ACE			DW	LIT,FF
+            5701 0C00 
+  3991 1AD2			DW	EMIT,CR
+            EC02 1F03 
+  3992 1AD6			DW	ONEP,SWAP
+            3F08 7005 
+  3993 1ADA			DW	XDO
+            F601 
+  3994 1ADC		INDE1	DW	CR,IDO
+            1F03 1302 
+  3995 1AE0			DW	LIT,3
+            5701 0300 
+  3996 1AE4			DW	DOTR,SPACE
+            DD19 2509 
+  3997 1AE8			DW	ZERO,IDO
+            C606 1302 
+  3998 1AEC			DW	DLINE,QTERM
+            0B13 1103 
+  3999 1AF0			DW	ZBRAN,INDE2-$
+            9601 0600 
+  4000 1AF4			DW	LEAVE
+            7904 
+  4001 1AF6		INDE2	DW	XLOOP,INDE1-$
+            AD01 E6FFFFFFFF 
+  4002 1AFA			DW	SEMIS
+            6104 
+  4003 			;
+  4004 1AFC			DB	85H	; TRIAD
+            85 
+  4005 1AFD			DB	'TRIA'
+            54 52 49 41 
+            
+  4006 1B01			DB	'D'+80H
+            44 80 
+  4007 1B03			DW	INDEX-8
+            C41A 
+  4008 1B05		TRIAD	DW	DOCOL
+            4306 
+  4009 1B07			DW	LIT,FF
+            5701 0C00 
+  4010 1B0B			DW	EMIT
+            EC02 
+  4011 1B0D			DW	LIT,3
+            5701 0300 
+  4012 1B11			DW	SLASH
+            7D12 
+  4013 1B13			DW	LIT,3
+            5701 0300 
+  4014 1B17			DW	STAR
+            5C12 
+  4015 1B19			DW	LIT,3
+            5701 0300 
+  4016 1B1D			DW	OVER,PLUS
+            5205 EA04 
+  4017 1B21			DW	SWAP,XDO
+            7005 F601 
+  4018 1B25		TRIA1	DW	CR,IDO
+            1F03 1302 
+  4019 1B29			DW	LIST
+            801A 
+  4020 1B2B			DW	QTERM		; ?TERMINAL
+            1103 
+  4021 1B2D			DW	ZBRAN,TRIA2-$	; IF
+            9601 0600 
+  4022 1B31			DW	LEAVE		; LEAVE
+            7904 
+  4023 1B33		TRIA2	DW	XLOOP,TRIA1-$	; ENDIF
+            AD01 F2FFFFFFFF 
+  4024 1B37			DW	CR
+            1F03 
+  4025 1B39			DW	LIT,15
+            5701 0F00 
+  4026 1B3D			DW	MESS,CR
+            2013 1F03 
+  4027 1B41			DW	SEMIS
+            6104 
+  4028 			;
+  4029 1B43			DB	84H	; .CPU
+            84 
+  4030 1B44			DB	'.CP'
+            2E 43 50 
+  4031 1B47			DB	'U'+80H
+            55 80 
+  4032 1B49			DW	TRIAD-8
+            FD1A 
+  4033 1B4B		DOTCPU	DW	DOCOL
+            4306 
+  4034 1B4D			DW	BASE,AT
+            0408 C305 
+  4035 1B51			DW	LIT,36
+            5701 2400 
+  4036 1B55			DW	BASE,STORE
+            0408 FD05 
+  4037 1B59			DW	LIT,22H
+            5701 2200 
+  4038 1B5D			DW	PORIG,TAT
+            3907 E205 
+  4039 1B61			DW	DDOT
+            EF19 
+  4040 1B63			DW	BASE,STORE
+            0408 FD05 
+  4041 1B67			DW	SEMIS
+            6104 
+  4042 			;
+  4043 1B69			DB	84H	; TASK
+            84 
+  4044 1B6A			DB	'TAS'
+            54 41 53 
+  4045 1B6D			DB	'K'+80H
+            4B 80 
+  4046 1B6F			DW	DOTCPU-7
+            441B 
+  4047 1B71		TASK	DW	DOCOL
+            4306 
+  4048 1B73			DW	SEMIS
+            6104 
+  4049 			;
+  4050 1B75		INITDP:	DS	EM-$	;CONSUME MEMORY TO LIMIT
+  4051 			;
+  4052     			PAGE
+  4053 			;
+  4054 			;		MEMORY MAP
+  4055 			;	( THE FOLLOWING EQUATES ARE NOT REFERENCED ELSEWHERE )
+  4056 			;
+  4057 			;		LOCATION	CONTENTS
+  4058 			;		--------	--------
+  4059      01 00	MCOLD	EQU 	ORIG		;JMP TO COLD START
+  4060      01 04	MWARM	EQU	ORIG+4		;JMP TO WARM START
+  4061      01 08	MA2	EQU	ORIG+8		;COLD START PARAMETERS
+  4062      01 26	MUP	EQU	UP		;USER VARIABLES' BASE 'REG'
+  4063      01 28	MRP	EQU	RPP		;RETURN STACK 'REGISTER'
+  4064 			;
+  4065      01 2A	MBIP	EQU	BIP		;DEBUG SUPPORT
+  4066      01 43	MDPUSH	EQU	DPUSH		;ADDRESS INTERPRETER
+  4067      01 44	MHPUSH	EQU	HPUSH
+  4068      01 45	MNEXT	EQU	NEXT
+  4069 			;
+  4070      01 50	MDP0	EQU	DP0		;START FORTH DICTIONARY
+  4071      13 85	MDIO	EQU	DRIVE		  ;CP/M DISK INTERFACE
+  4072      17 0E	MCIO	EQU	EPRINT		  ;CONSOLE & PRINTER INTERFACE
+  4073      1B 75	MIDP	EQU	INITDP		;END INITIAL FORTH DICTIONARY
+  4074 			;				  = COLD (DP) VALUE
+  4075 			;				  = COLD (FENCE) VALUE
+  4076 			;				  |  NEW
+  4077 			;				  |  DEFINITIONS
+  4078 			;				  V
+  4079 			;
+  4080 			;				  ^
+  4081 			;				  |  DATA
+  4082 			;				  |  STACK
+  4083      BB 00	MIS0	EQU	INITS0		;  = COLD (SP) VALUE = (S0)
+  4084 			;				   = (TIB)
+  4085 			;				  |  TERMINAL INPUT
+  4086 			;				  |  BUFFER
+  4087 			;				  V
+  4088 			;
+  4089 			;				  ^
+  4090 			;				  |  RETURN
+  4091 			;				  |  STACK
+  4092      BB A0	MIR0	EQU	INITR0		;START USER VARIABLES
+  4093 			;				  = COLD (RP) VALUE = (R0)
+  4094 			;				  = (UP)
+  4095 			;				;END USER VARIABLES
+  4096      BB E0	MFIRST	EQU	BUF1		;START DISK BUFFERS
+  4097 			;				  = FIRST
+  4098      BF FF	MEND	EQU	EM-1		;END DISK BUFFERS
+  4099      C0 00	MLIMIT	EQU	EM		;LAST MEMORY LOC USED + 1
+  4100 			;				  = LIMIT
+  4101 			;
+  4102 			;
+  4103     			END	ORIG
+
+
+*******************************************************************************
+                                 Symbols table
+*******************************************************************************
+
+Names		Types	Values
+-----		-----	------
+FIGREL		EQU	00001h
+FIGREV		EQU	00001h
+USRVER		EQU	00001h
+ABL		EQU	00020h
+ACR		EQU	0000Dh
+ADOT		EQU	0002Eh
+BELL		EQU	00007h
+BSIN		EQU	0007Fh
+BSOUT		EQU	00008h
+DLE		EQU	00010h
+LF		EQU	0000Ah
+FF		EQU	0000Ch
+EM		EQU	0C000h
+NSCR		EQU	00001h
+KBBUF		EQU	00080h
+US		EQU	00040h
+RTS		EQU	000A0h
+CO		EQU	00084h
+NBUF		EQU	00008h
+BUF1		EQU	0BBE0h
+INITR0		EQU	0BBA0h
+INITS0		EQU	0BB00h
+RITSEC		EQU	00027h
+RDSEC		EQU	00024h
+SETDMA		EQU	00021h
+SETSEC		EQU	0001Eh
+SETTRK		EQU	0001Bh
+SETDSK		EQU	00018h
+SPT2		EQU	00034h
+TRKS2		EQU	0004Dh
+SPDRV2		EQU	00FA4h
+SPT1		EQU	0001Ah
+TRKS1		EQU	0004Dh
+SPDRV1		EQU	007D2h
+BPS		EQU	00080h
+MXDRV		EQU	00002h
+KCSTAT		EQU	00003h
+KCIN		EQU	00006h
+KCOUT		EQU	00009h
+KPOUT		EQU	0000Ch
+MCOLD		EQU	00100h
+MWARM		EQU	00104h
+MA2		EQU	00108h
+MUP		EQU	00126h
+MRP		EQU	00128h
+MBIP		EQU	0012Ah
+MDPUSH		EQU	00143h
+MHPUSH		EQU	00144h
+MNEXT		EQU	00145h
+MDP0		EQU	00150h
+MDIO		EQU	01385h
+MCIO		EQU	0170Eh
+MIDP		EQU	01B75h
+MIS0		EQU	0BB00h
+MIR0		EQU	0BBA0h
+MFIRST		EQU	0BBE0h
+MEND		EQU	0BFFFh
+MLIMIT		EQU	0C000h
+ORIG		Label	00100h
+UP		Label	00126h
+RPP		Label	00128h
+BIP		Label	0012Ah
+TNEXT		Label	0012Ch
+BREAK		Label	0013Ah
+TNEXT1		Label	0013Dh
+DPUSH		Label	00143h
+HPUSH		Label	00144h
+NEXT		Label	00145h
+NEXT1		Label	0014Bh
+DP0		Label	00150h
+LIT		Label	00157h
+EXEC		Label	0016Dh
+BRAN		Label	0017Dh
+BRAN1		Label	0017Fh
+ZBRAN		Label	00196h
+XLOOP		Label	001ADh
+XLOO1		Label	001B2h
+XLOO2		Label	001CCh
+XLOO3		Label	001D1h
+XPLOO		Label	001E8h
+XDO		Label	001F6h
+IDO		Label	00213h
+DIGIT		Label	00228h
+DIGI1		Label	0023Eh
+DIGI2		Label	00249h
+PFIND		Label	00257h
+PFIN1		Label	0025Ah
+PFIN2		Label	00263h
+PFIN6		Label	00273h
+PFIN3		Label	00282h
+PFIN4		Label	00285h
+PFIN5		Label	0028Bh
+ENCL		Label	002A7h
+ENCL1		Label	002B1h
+ENCL2		Label	002C9h
+ENCL3		Label	002D5h
+ENCL4		Label	002DCh
+EMIT		Label	002ECh
+KEY		Label	002FFh
+QTERM		Label	00311h
+CR		Label	0031Fh
+CMOVE		Label	0032Dh
+CMOV1		Label	00337h
+CMOV2		Label	0033Ch
+USTAR		Label	0034Bh
+MPYX		Label	00369h
+MPYX1		Label	0036Eh
+MPYX2		Label	00376h
+USLAS		Label	00381h
+USLA1		Label	0039Eh
+USLA2		Label	003A0h
+USLA3		Label	003A9h
+USLA4		Label	003B8h
+USLA5		Label	003C3h
+USLA6		Label	003C4h
+USLA7		Label	003C9h
+ANDD		Label	003D6h
+ORR		Label	003E9h
+XORR		Label	003FDh
+SPAT		Label	00411h
+SPSTO		Label	00421h
+RPAT		Label	00439h
+RPSTO		Label	00448h
+SEMIS		Label	00461h
+LEAVE		Label	00479h
+TOR		Label	0048Eh
+FROMR		Label	004A5h
+RR		Label	004BAh
+ZEQU		Label	004C2h
+ZEQU1		Label	004CEh
+ZLESS		Label	004D7h
+ZLES1		Label	004E2h
+PLUS		Label	004EAh
+DPLUS		Label	004F8h
+MINUS		Label	0051Ch
+DMINU		Label	00533h
+OVER		Label	00552h
+DROP		Label	00562h
+SWAP		Label	00570h
+DUP		Label	0057Eh
+TDUP		Label	0058Dh
+PSTOR		Label	0059Ch
+TOGGL		Label	005B4h
+AT		Label	005C3h
+CAT		Label	005D3h
+TAT		Label	005E2h
+STORE		Label	005FDh
+CSTOR		Label	0060Dh
+TSTOR		Label	0061Bh
+COLON		Label	0062Fh
+DOCOL		Label	00643h
+SEMI		Label	00657h
+NOOP		Label	0066Dh
+CON		Label	0067Dh
+DOCON		Label	00687h
+VAR		Label	0069Ch
+DOVAR		Label	006A2h
+USER		Label	006AFh
+DOUSE		Label	006B5h
+ZERO		Label	006C6h
+ONE		Label	006CFh
+TWO		Label	006D8h
+THREE		Label	006E1h
+BL		Label	006EBh
+CSLL		Label	006F6h
+FIRST		Label	00703h
+LIMIT		Label	00710h
+BBUF		Label	0071Dh
+BSCR		Label	0072Ah
+PORIG		Label	00739h
+SZERO		Label	00749h
+RZERO		Label	00753h
+TIB		Label	0075Eh
+WIDTH		Label	0076Ah
+WARN		Label	00778h
+FENCE		Label	00784h
+DP		Label	0078Dh
+VOCL		Label	0079Ch
+BLK		Label	007A7h
+INN		Label	007B0h
+OUTT		Label	007BAh
+SCR		Label	007C4h
+OFSET		Label	007D1h
+CONT		Label	007DFh
+CURR		Label	007EDh
+STATE		Label	007F9h
+BASE		Label	00804h
+DPL		Label	0080Eh
+FLD		Label	00818h
+CSPP		Label	00822h
+RNUM		Label	0082Bh
+HLD		Label	00835h
+ONEP		Label	0083Fh
+TWOP		Label	0084Dh
+HERE		Label	0085Dh
+ALLOT		Label	0086Eh
+COMMA		Label	0087Bh
+CCOMM		Label	0088Dh
+SSUB		Label	00899h
+SUBB		Label	008A5h
+EQUAL		Label	008B4h
+LESS		Label	008C1h
+LES1		Label	008CDh
+LES2		Label	008D8h
+ULESS		Label	008E4h
+ULES1		Label	008FAh
+ULES2		Label	008FEh
+GREAT		Label	00905h
+ROT		Label	00914h
+SPACE		Label	00925h
+DDUP		Label	00935h
+DDUP1		Label	0093Fh
+TRAV		Label	0094Dh
+TRAV1		Label	00951h
+LATES		Label	00973h
+LFA		Label	00984h
+CFA		Label	00995h
+NFA		Label	009A4h
+PFA		Label	009BBh
+SCSP		Label	009D1h
+QERR		Label	009E5h
+QERR1		Label	009F3h
+QERR2		Label	009F5h
+QCOMP		Label	00A00h
+QEXEC		Label	00A19h
+QPAIR		Label	00A31h
+QCSP		Label	00A45h
+QLOAD		Label	00A63h
+COMP		Label	00A7Eh
+LBRAC		Label	00A95h
+RBRAC		Label	00AA4h
+SMUDG		Label	00ABAh
+HEX		Label	00ACDh
+DEC		Label	00AE4h
+PSCOD		Label	00AFBh
+SEMIC		Label	00B12h
+SEMI1		Label	00B1Ch
+BUILD		Label	00B2Bh
+DOES		Label	00B3Ch
+DODOE		Label	00B48h
+COUNT		Label	00B64h
+TYPE		Label	00B78h
+TYPE2		Label	00B88h
+TYPE1		Label	00B96h
+TYPE3		Label	00B98h
+DTRAI		Label	00BA7h
+DTRA1		Label	00BAFh
+DTRA2		Label	00BC9h
+DTRA3		Label	00BCDh
+PDOTQ		Label	00BDBh
+DOTQ		Label	00BF4h
+DOTQ1		Label	00C14h
+DOTQ2		Label	00C1Ch
+EXPEC		Label	00C28h
+EXPE1		Label	00C32h
+EXPE6		Label	00C64h
+EXPE7		Label	00C68h
+EXPE2		Label	00C6Ch
+EXPE4		Label	00C84h
+EXPE5		Label	00C86h
+EXPE3		Label	00C92h
+QUERY		Label	00CA5h
+NULL		Label	00CBDh
+NULL2		Label	00CEBh
+NULL1		Label	00CEFh
+NULL3		Label	00CF3h
+FILL		Label	00CFDh
+FILL1		Label	00D05h
+FILL2		Label	00D11h
+ERASEE		Label	00D1Eh
+BLANK		Label	00D30h
+HOLD		Label	00D40h
+PAD		Label	00D59h
+WORD		Label	00D6Dh
+WORD1		Label	00D81h
+WORD2		Label	00D85h
+PNUMB		Label	00DBFh
+PNUM1		Label	00DC1h
+PNUM3		Label	00DF7h
+PNUM2		Label	00DFDh
+NUMB		Label	00E0Bh
+NUMB1		Label	00E29h
+NUMB2		Label	00E4Fh
+NUMB3		Label	00E59h
+DFIND		Label	00E64h
+DFIN1		Label	00E84h
+PABOR		Label	00E91h
+ERROR		Label	00EA0h
+ERRO1		Label	00EAEh
+ERRO2		Label	00ECDh
+IDDOT		Label	00ED6h
+CREAT		Label	00F0Eh
+CREA1		Label	00F24h
+BCOMP		Label	00F67h
+LITER		Label	00F84h
+LITE1		Label	00F94h
+DLITE		Label	00FA2h
+DLIT1		Label	00FB2h
+QSTAC		Label	00FBEh
+INTER		Label	00FEFh
+INTE1		Label	00FF1h
+INTE3		Label	01009h
+INTE4		Label	0100Dh
+INTE2		Label	01013h
+INTE6		Label	01027h
+INTE7		Label	0102Bh
+INTE5		Label	0102Dh
+IMMED		Label	0103Eh
+VOCAB		Label	01058h
+DOVOC		Label	01078h
+FORTH		Label	01089h
+DEFIN		Label	010A2h
+PAREN		Label	010B3h
+QUIT		Label	010C5h
+QUIT1		Label	010CFh
+QUIT2		Label	010E6h
+ABORT		Label	010F3h
+WRM		Label	01115h
+WRM1		Label	0111Bh
+WARM		Label	01125h
+CLD		Label	0112Bh
+CLD1		Label	01135h
+COLD		Label	0113Fh
+STOD		Label	01191h
+STOD1		Label	0119Eh
+PM		Label	011A7h
+PM1		Label	011B1h
+DPM		Label	011BAh
+DPM1		Label	011C4h
+ABS		Label	011CDh
+DABS		Label	011DDh
+MIN		Label	011ECh
+MIN1		Label	011F8h
+MAX		Label	01203h
+MAX1		Label	0120Fh
+MSTAR		Label	01219h
+MSLAS		Label	01235h
+STAR		Label	0125Ch
+SLMOD		Label	0126Ch
+SLASH		Label	0127Dh
+MODD		Label	0128Eh
+SSMOD		Label	0129Fh
+SSLA		Label	012B1h
+MSMOD		Label	012C4h
+PLINE		Label	012E4h
+DLINE		Label	0130Bh
+MESS		Label	01320h
+MESS2		Label	01342h
+MESS1		Label	01346h
+MESS3		Label	01351h
+PTAT		Label	01359h
+PTSTO		Label	0136Eh
+DRIVE		Label	01385h
+SEC		Label	01390h
+TRACK		Label	0139Dh
+USE		Label	013A8h
+PREV		Label	013B4h
+SPBLK		Label	013C3h
+NOBUF		Label	013D0h
+DENSTY		Label	013DFh
+DSKERR		Label	013F1h
+PBUF		Label	013FDh
+PBUF1		Label	01413h
+UPDAT		Label	01427h
+MTBUF		Label	0144Eh
+DRZER		Label	01463h
+DRONE		Label	01474h
+DRON1		Label	01486h
+DRON2		Label	0148Ah
+BUFFE		Label	0149Ah
+BUFF1		Label	014A4h
+BUFF2		Label	014CAh
+BLOCK		Label	014E3h
+BLOC2		Label	01501h
+BLOC3		Label	0151Bh
+BLOC1		Label	01533h
+IOS		Label	0153Bh
+SETIO		Label	0154Ah
+SETDRV		Label	0157Eh
+TSCALC		Label	0159Ah
+TSCAL1		Label	015C2h
+TSCAL2		Label	015C8h
+TSCALS		Label	015DAh
+TSCAL3		Label	015F8h
+TSCAL4		Label	015FEh
+SECRD		Label	0161Ch
+SECWT		Label	01639h
+RSLW		Label	01650h
+RSLW1		Label	0166Ah
+RSLW2		Label	0167Ch
+RSLW3		Label	0167Eh
+FLUSH		Label	016A1h
+FLUS1		Label	016ABh
+LOAD		Label	016BFh
+ARROW		Label	016F2h
+EPRINT		Label	0170Eh
+CSTAT		Label	01710h
+CIN		Label	01719h
+COUT		Label	01722h
+POUT		Label	0172Bh
+CPOUT		Label	01732h
+CPOU1		Label	01742h
+PQTER		Label	01743h
+PQTE1		Label	0174Eh
+PKEY		Label	01751h
+PKEY1		Label	01763h
+PEMIT		Label	01769h
+PCR		Label	01775h
+TICK		Label	0178Ah
+FORG		Label	017A4h
+BACK		Label	017E2h
+BEGIN		Label	017F5h
+ENDIFF		Label	01808h
+THEN		Label	01824h
+DO		Label	01830h
+LOOP		Label	01844h
+PLOOP		Label	0185Bh
+UNTIL		Label	01872h
+ENDD		Label	01887h
+AGAIN		Label	01896h
+REPEA		Label	018AEh
+IFF		Label	018C8h
+ELSEE		Label	018E0h
+WHILE		Label	01903h
+SPACS		Label	01915h
+SPAX2		Label	01925h
+SPAX1		Label	0192Bh
+BDIGS		Label	01933h
+EDIGS		Label	01943h
+SIGN		Label	0195Dh
+SIGN1		Label	0196Dh
+DIG		Label	01974h
+DIG1		Label	01990h
+DIGS		Label	019A0h
+DIGS1		Label	019A2h
+DDOTR		Label	019B9h
+DOTR		Label	019DDh
+DDOT		Label	019EFh
+DOT		Label	019FEh
+QUES		Label	01A0Bh
+UDOT		Label	01A19h
+VLIST		Label	01A2Ah
+VLIS1		Label	01A3Ah
+VLIS2		Label	01A4Eh
+BYE		Label	01A73h
+LIST		Label	01A80h
+LIST1		Label	01A9Fh
+LIST2		Label	01ABBh
+INDEX		Label	01ACCh
+INDE1		Label	01ADCh
+INDE2		Label	01AF6h
+TRIAD		Label	01B05h
+TRIA1		Label	01B25h
+TRIA2		Label	01B33h
+DOTCPU		Label	01B4Bh
+TASK		Label	01B71h
+INITDP		Label	01B75h
+
+Statistics
+----------
+"Name"	= 0
+"EQU"	= 58
+"SET"	= 0
+Labels	= 399
+
+
