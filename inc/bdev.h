@@ -128,6 +128,7 @@ typedef struct sBdev {
 
 extern void         bdev_init(Bdev, Cstr name);
 extern void         bdev_set_seek(Bdev, bdev_seek_fn *fn, void *ctx);
+extern void         bdev_invar(Bdev);
 
 #define BDEV_SET_SEEK(d,fn,ctx) bdev_set_seek(d, (bdev_seek_fn *)(fn), (void *)ctx);
 

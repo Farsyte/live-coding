@@ -652,7 +652,7 @@ static unsigned i8080_incdec_flags(unsigned alu, unsigned ac, unsigned old)
     unsigned            cy = old & FLAGS_CY;
     unsigned            p = alu;
     unsigned            s = alu & 0x80;
-    unsigned            z = alu ? 0 : FLAGS_Z;
+    unsigned            z = (alu & 0xFF) ? 0 : FLAGS_Z;
 
     p ^= p >> 4;
     p ^= p >> 2;

@@ -246,17 +246,11 @@ static void bctx_seek(Bctx BCTX)
     Byte                sec = SEC->value;
 
     if ((dsk >= DPC) || (trk >= TPD) || (sec < 1) || (sec > SPT)) {
-//        STUB("%c:%02d.%02d is not a valid location", 'A' + dsk, trk, sec);
         return;
     }
 
     cursor = BCTX->data[dsk][trk][sec - 1];
     cursor_lim = cursor + BPS;
-
-//    STUB("%c:%02d.%02d starts at offset %lu", 'A' + dsk, trk, sec,
-//         cursor - BCTX->data[0][0][0]);
-//    STUB("%c:%02d.%02d   ends at offset %lu", 'A' + dsk, trk, sec,
-//         cursor_lim - BCTX->data[0][0][0]);
 
     if (sec < SPT) {
         data_to(SEC, sec + 1);

@@ -133,13 +133,9 @@ static void dec_memr_rise(Decoder dec)
     pEdge               e = dec->mem_rd[page];
     pEdge               s = dec->shadow;
 
-    if (NULL != s) {
-        if (e == s) {
-            dec->shadow = NULL;
-        } else {
-            e = s;
-        }
-    }
+    // Shadow release was checked during MEMR_FALL
+    if (NULL != s)
+        e = s;
 
     if (NULL == e)
         return;
@@ -156,6 +152,7 @@ static void dec_memr_fall(Decoder dec)
 
     if (NULL != s) {
         if (e == s) {
+            // STUB("releasing SHADOW");
             dec->shadow = NULL;
         } else {
             e = s;

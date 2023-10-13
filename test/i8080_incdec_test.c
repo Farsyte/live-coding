@@ -146,7 +146,7 @@ static void i8080_incdec_bist_inr(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // MVI L, 0xFF
     i8080_one_instruction(cpu, 0);      // INR L
     ASSERT_EQ_integer(0x00, L->value);
-    ASSERT_EQ_integer(0x16, FLAGS->value);      // Ac,P
+    ASSERT_EQ_integer(0x56, FLAGS->value);      // Z,Ac,P
 
     SigPlot             sp;
     sigplot_init(sp, ss, "i8080_bist_alu_inr",
@@ -556,7 +556,7 @@ static void i8080_incdec_post_inr(CpuTestSys ts)
     i8080_one_instruction(cpu, 0);      // MVI L, 0xFF
     i8080_one_instruction(cpu, 0);      // INR L
     ASSERT_EQ_integer(0x00, L->value);
-    ASSERT_EQ_integer(0x16, FLAGS->value);      // Ac,P
+    ASSERT_EQ_integer(0x56, FLAGS->value);      // Z,Ac,P
 
     i8080_one_instruction(cpu, 0);      // NOP
     i8080_one_instruction(cpu, 0);      // NOP

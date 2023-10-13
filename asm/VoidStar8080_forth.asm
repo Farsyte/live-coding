@@ -1,10 +1,7 @@
-	TITLE	'8080 FIG-FORTH 1.1 VERSION A0 17SEP79 for VoidStar8080'
+	TITLE	'8080 FIG-FORTH 1.1.1 (2023-10-12) for VoidStar8080'
+;;; 	based on 8080 FIG-FORTH 1.1 VERSION A0 17SEP79 for CP/M
 ;
 ;	FIG-FORTH  RELEASE 1.1  FOR THE 8080 PROCESSOR
-;
-;	October 2023: Customized for the VoidStar8080
-;	-- customization in progress but not complete
-;	-- conversion to ROM resident not yet started
 ;
 ;	ALL PUBLICATIONS OF THE FORTH INTEREST GROUP
 ;	ARE PUBLIC DOMAIN.  THEY MAY BE FURTHER
@@ -22,6 +19,9 @@
 ;	MODIFIED for CP/M by:
 ;	   	KIM HARRIS
 ;               FIT LIBRARIAN SEPT 1979
+;	MODIFIED for VoidStar8080 by
+;	   	Greg "(void *) Farsyte" Limes
+;               OCTOBER 2023
 ;	ACKNOWLEDGEMENTS:
 ;		GEORGE FLAMMER
 ;		ROBT. D. VILLWOCK
@@ -167,6 +167,19 @@
 ;		CONSOLE & PRINTER INTERFACE
 ;
 	PAGE
+
+;; === === === === === === === === === === === === === === === ===
+;; VoidStar8080 memory configuration
+;; current configuration is 48 kib of ram and 16 kib of rom.
+;; === === === === === === === === === === === === === === === ===
+
+RAMKB   EQU     62
+ROMKB	EQU     2
+
+RAMTOP	EQU     1024*RAMKB
+ROMBASE EQU     1024*(64-ROMKB)
+
+	PAGE
 ;
 ;----------------------------------------------------------
 ;
@@ -190,7 +203,7 @@ FF	EQU	0CH	; FORM FEED (^L)
 ;
 ;	MEMORY ALLOCATION
 ;
-EM	EQU	0C000H	; TOP OF MEMORY + 1 = LIMIT
+EM	EQU	RAMTOP	; TOP OF MEMORY + 1 = LIMIT
 NSCR	EQU	1	; NUMBER OF 1024 BYTE SCREENS
 KBBUF	EQU	128	; DATA BYTES PER DISK BUFFER
 US	EQU	40H	; USER VARIABLES SPACE
@@ -207,10 +220,12 @@ INITS0	EQU	INITR0-RTS	; (S0)
 ;-------------------------------------------------------
 ;
 	ORG	100H
+
 ORIG	NOP
 	JMP	CLD	; VECTOR TO COLD START
 	NOP
 	JMP	WRM	; VECTOR TO WARM START
+
 	DB	FIGREL	; FIG RELEASE #
 	DB	FIGREV	; FIG REVISION #
 	DB	USRVER	; USER VERSION #
@@ -218,6 +233,7 @@ ORIG	NOP
 	DW	TASK-7  ; TOPMOST WORD IN FORTH VOCABULARY
 	DW	BSIN	; BKSPACE CHARACTER
 	DW	INITR0	; INIT (UP)
+
 ;<<<<<< FOLLOWING USED BY COLD;
 ;	MUST BE IN SAME ORDER AS USER VARIABLES
 	DW	INITS0	; INIT (S0)
@@ -229,7 +245,9 @@ ORIG	NOP
 	DW	INITDP		; INIT (DP)
 	DW	FORTH+6		; INIT (VOC-LINK)
 ;<<<<<< END DATA USED BY COLD
+
 	DW	5H,0B320H	; CPU NAME	( HW,LW )
+
 ;				  ( 32 BIT, BASE 36 INTEGER )
 ;
 ;
@@ -3042,32 +3060,33 @@ PTSTO:	DW	$+2
 	MOV	A,L
 	OUT	0	;( PORT# MODIFIED )
 	JMP	NEXT
+
 	PAGE
-;--------------------------------------------------
-;	CP/M DISK INTERFACE
-;
-;	CP/M BIOS CALLS USED
-;	( NOTE EQU'S ARE 3 LOWER THAN DOCUMENTED OFFSETS
-;	  BECAUSE BASE ADDR IS BIOS+3 )
-;
-RITSEC	EQU	39
-RDSEC	EQU	36
-SETDMA	EQU	33
-SETSEC	EQU	30
-SETTRK	EQU	27
-SETDSK	EQU	24
-;
+
+;;; === === === === === === === === === === === === === === === ===
+;;; VoidStar8080 Disk Interface
+;;; === === === === === === === === === === === === === === === ===
+
+BDRES	EQU	10              ;RESET CONTROLLER (DRV 0, TRK 0, SEC 1)
+BDDRV	EQU	11              ;SELECT DRIVE
+BDTRK	EQU	12              ;SELECT TRACK
+BDSEC	EQU	13              ;SELECT SECTOR
+BDDAT	EQU	14              ;READ/WRITE NEXT BYTE
+
 ;	DOUBLE DENSITY 8" FLOPPY CAPACITIES
 SPT2	EQU	52	; SECTORS PER TRACK
 TRKS2	EQU	77	; NUMBER OF TRACKS
 SPDRV2	EQU	SPT2*TRKS2	; SECTORS/DRIVE
+
 ;	SINGLE DENSITY 8" FLOPPY CAPACITIES
 SPT1	EQU	26	; SECTORS/TRACK
 TRKS1	EQU	77	; # TRACKS
 SPDRV1	EQU	SPT1*TRKS1	; SECTORS/DRIVE
-;
+
 BPS	EQU	128	; BYTES PER SECTOR
-MXDRV	EQU	2	; MAX # DRIVES
+MXDRV	EQU	16	; MAX # DRIVES
+
+
 ;
 ;	FORTH VARIABLES AND CONSTANTS USED IN DISK INTERFACE
 ;
@@ -3241,14 +3260,9 @@ BLOC1	DW	FROMR,DROP
 	DW	TWOP,SEMIS
 ;
 ;
-;	CP/M INTERFACE ROUTINES
-;
-;		SERVICE REQUEST
-;
-IOS	LHLD	1	; (HL) <- BIOS TABLE ADDR+3
-	DAD	D	; + SERVICE REQUEST OFFSET
-	PCHL		; EXECUTE REQUEST
-;	RET FUNCTION PROVIDED BY CP/M
+;	VoidStar8080 INTERFACE ROUTINES
+;	modeled on CP/M INTERFACE ROUTINES
+;	intended to run without BIOS or ROM support
 ;
 	DB	86H	; SET-IO
 ;			( ASSIGN SECTOR, TRACK FOR BDOS )
@@ -3256,25 +3270,14 @@ IOS	LHLD	1	; (HL) <- BIOS TABLE ADDR+3
 	DB	'O'+80H
 	DW	BLOCK-8
 SETIO:	DW	$+2
-	PUSH	B	; SAVE (IP)
-	LHLD	USE+2	; (BC) <- ADDR BUFFER
-	MOV	B,H
-	MOV	C,L
-	LXI	D,SETDMA ; SEND BUFFER ADDR TO CP/M
-	CALL	IOS
-;
-	LHLD	SEC+2	; (BC) <- (SEC) = SECTOR #
-	MOV	C,L
-	LXI	D,SETSEC	; SEND SECTOR # TO CP/M
-	CALL	IOS
-;
-	LHLD	TRACK+2	; (BC) <- (TRACK) = TRACK #
-	MOV	B,H
-	MOV	C,L
-	LXI	D,SETTRK
-	CALL	IOS
-;
-	POP	B	; RESTORE (IP)
+
+        ;; === === === === === === === === === === === ===
+        LDA     SEC+2
+        OUT     BDSEC           ;VoidStar8080: set sector number (1..26 or 1..52)
+        LDA     TRACK+2
+        OUT     BDTRK	        ;VoidStar8080: set track number (0..76)
+        ;; === === === === === === === === === === === ===
+
 	JMP	NEXT
 ;
 	DB	89H	; SET-DRIVE
@@ -3282,12 +3285,12 @@ SETIO:	DW	$+2
 	DB	'E'+80H
 	DW	SETIO-9
 SETDRV:	DW	$+2
-	PUSH	B	; SAVE (IP)
-	LDA	DRIVE+2	; (C) <- (DRIVE) = DRIVE #
-	MOV	C,A
-	LXI	D,SETDSK	; SEND DRIVE # TO CP/M
-	CALL	IOS
-	POP	B	; RESTORE (IP)
+
+        ;; === === === === === === === === === === === ===
+	LDA	DRIVE+2	; (A) <- (DRIVE) = DRIVE #
+        OUT     BDDRV	        ;VoidStar8080: set drive number
+        ;; === === === === === === === === === === === ===
+
 	JMP	NEXT
 ;
 ;	T&SCALC		( CALCULATES DRIVE#, TRACK#, & SECTOR# )
@@ -3343,11 +3346,19 @@ TSCAL4	DW	LIT,SPT1
 	DB	'D'+80H
 	DW	TSCALC-10
 SECRD	DW	$+2
-	PUSH	B	; SAVE (IP)
-	LXI	D,RDSEC	; ASK CP/M TO READ SECTOR
-	CALL	IOS
-	STA	DSKERR+2	; (DSKERR) <- ERROR STATUS
-	POP	B	; RESTORE (IP)
+
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 sector READ:
+        ;;   DBDRV, DBTRK, DBSEC ports have been set.
+	LHLD	USE+2	; (HL) <- ADDR BUFFER
+        MVI     E,BPS
+SECRL	IN      BDDAT
+        MOV     M,A
+        INX     HL
+        DCR     E
+        JNZ     SECRL
+        ;; === === === === === === === === === === === ===
+
 	JMP	NEXT
 ;
 ;	SEC-WRITE
@@ -3358,11 +3369,19 @@ SECRD	DW	$+2
 	DB	'E'+80H
 	DW	SECRD-11
 SECWT	DW	$+2
-	PUSH	B	; SAVE (IP)
-	LXI	D,RITSEC	; ASK CP/M TO WRITE SECTOR
-	CALL	IOS
-	STA	DSKERR+2	; (DSKERR) <- ERROR STATUS
-	POP	B	; RESTORE (IP)
+
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 sector write:
+        ;;   DBDRV, DBTRK, DBSEC ports have been set.
+	LHLD	USE+2	; (HL) <- ADDR BUFFER
+        MVI     E,BPS
+SECWL	MOV     A,M
+        INX     HL
+        OUT     BDDAT
+        DCR     E
+        JNZ     SECWL
+        ;; === === === === === === === === === === === ===
+
 	JMP	NEXT
 ;
 	DB	83H	; R/W	( FORTH DISK PRIMATIVE )
@@ -3449,46 +3468,67 @@ ARROW	DW	DOCOL
 	DW	SEMIS
 ;
 	PAGE
-;-------------------------------------------------
-;
-;	CP/M CONSOLE & PRINTER INTERFACE
-;
-;	CP/M BIOS CALLS USED
-;	( NOTE: BELOW OFFSETS ARE 3 LOWER THAN CP/M
-;	  DOCUMENTATION SINCE BASE ADDR = BIOS+3 )
-;
-KCSTAT	EQU	3	; CONSOLE STATUS
-KCIN	EQU	6	; CONSOLE INPUT
-KCOUT	EQU	9	; CONSOLE OUTPUT
-KPOUT	EQU	0CH	; PRINTER OUTPUT
+
+;;; === === === === === === === === === === === === === === === ===
+;;; VoidStar8080 Serial Device Ports
+;;; === === === === === === === === === === === === === === === ===
+
+TTYD	EQU     0               ;READ/WRITE DATA FROM/TO PRINTING CONSOLE
+TTYC	EQU     1               ;PRINTING CONSOLE STATUS/CONTROL PORT
+CRTD	EQU     2               ;READ/WRITE DATA FROM/TO PRINTING CONSOLE
+CRTC	EQU     3               ;PRINTING CONSOLE STATUS/CONTROL PORT
+PPTD	EQU     4               ;READ/WRITE DATA FROM/TO HIGH SPEED PAPER TAPE
+PPTC	EQU     5               ;HIGH SPEED PAPER TAPE STATUS/CONTROL PORT
+LPTD	EQU     6               ;WRITE DATA TO LINE PRINTER
+LPTC	EQU     7               ;LINE PRINTER STATUS/CONTROL PORT
 ;
 EPRINT	DW	0	; ENABLE PRINTER VARIABLE
 ;			; 0 = DISABLED, 1 = ENABLED
 ;
-;	BELOW BIOS CALLS USE 'IOS' IN DISK INTERFACE
+
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 CSTAT: A=FF if char ready on console, else A=00
+        ;; do not modify BC.
+CSTAT	IN      TTYC
+        ANI     01H
+        RZ                      ;RETURN 00 IF NO DATA AVAILABLE
+        MVI     A,0FFH          ;RETURN FF IF DATA IS AVAILABLE
+        RET
+        ;; === === === === === === === === === === === ===
 ;
-CSTAT	PUSH	B	; CONSOLE STATUS
-	LXI	D,KCSTAT  ; CHECK IF ANY CHR HAS BEEN TYPED
-	CALL	IOS
-	POP	B	; IF CHR TYPED THEN (A) <- 0FFH
-	RET		; ELSE (A) <- 0
-;			; CHR IGNORED
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 CIN: A=next char from console
+        ;; if no char available, wait for one
+        ;; do not modify BC
+CIN     IN      TTYC
+        ANI     01H
+        JZ      CIN             ;WAIT FOR DATA AVAILABLE
+        IN      TTYD
+        ANI     7FH             ;STRIP THE PARITY BIT
+        RET                     ;RETURN WITH CHAR IN (A)
+        ;; === === === === === === === === === === === ===
 ;
-CIN	PUSH	B	; CONSOLE INPUT
-	LXI	D,KCIN	; WAIT FOR CHR TO BE TYPED
-	CALL	IOS	; (A) <- CHR, (MSB) <- 0
-	POP	B
-	RET
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 COUT: send (C) to the console outputC
+        ;; if necessary, wait until the channel is available
+COUT	IN      TTYC
+        ANI     02H
+        JZ      COUT
+        MOV     A,C
+        OUT     TTYD
+        RET
+        ;; === === === === === === === === === === === ===
 ;
-COUT	PUSH	H	; CONSOLE OUTPUT
-	LXI	D,KCOUT	; WAIT UNTIL READY
-	CALL	IOS	; THEN OUTPUT (C)
-	POP	H
-	RET
-;
-POUT	LXI	D,KPOUT	; PRINTER OUTPUT
-	CALL	IOS	; WAIT UNTIL READY
-	RET		; THEN OUTPUT (C)
+        ;; === === === === === === === === === === === ===
+        ;; VoidStar8080 POUT: send (C) to the printer output
+        ;; if necessary, wait until the channel is available
+POUT	IN      LPTC
+        ANI     02H
+        JZ      POUT
+        MOV     A,C
+        OUT     LPTD
+        RET
+        ;; === === === === === === === === === === === ===
 ;
 CPOUT	CALL	COUT	; OUTPUT (C) TO CONSOLE
 	XCHG
@@ -3500,7 +3540,7 @@ CPOUT	CALL	COUT	; OUTPUT (C) TO CONSOLE
 	CALL	POUT
 CPOU1	RET
 ;
-;	FORTH TO CP/M SERIAL IO INTERFACE
+;	FORTH TO CP/M-LIKE SERIAL IO INTERFACE
 ;
 PQTER	CALL	CSTAT	; IF CHR TYPED
 	LXI	H,0
@@ -3949,15 +3989,15 @@ VLIS2	DW	DUP
 	DW	DROP
 	DW	SEMIS
 ;
-;------ EXIT CP/M  -----------------------
-;
+        ;; === === === === === === === === === === === ===
+        ;; EXIT to VoidStar8080 Monitor
 	DB	83H	; BYE
 	DB	'BY'
 	DB	'E'+80H
 	DW	VLIST-8
 BYE	DW	$+2
-	JMP	0
-;-----------------------------------------------
+	JMP	ROMBASE
+        ;; === === === === === === === === === === === ===
 ;
 	DB	84H	; LIST
 	DB	'LIS'
@@ -4068,8 +4108,8 @@ MHPUSH	EQU	HPUSH
 MNEXT	EQU	NEXT
 ;
 MDP0	EQU	DP0		;START FORTH DICTIONARY
-MDIO	EQU	DRIVE		  ;CP/M DISK INTERFACE
-MCIO	EQU	EPRINT		  ;CONSOLE & PRINTER INTERFACE
+MDIO	EQU	DRIVE		  ;BDEV INTERFACE
+MCIO	EQU	EPRINT		  ;CDEV INTERFACE
 MIDP	EQU	INITDP		;END INITIAL FORTH DICTIONARY
 ;				  = COLD (DP) VALUE
 ;				  = COLD (FENCE) VALUE

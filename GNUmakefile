@@ -112,6 +112,7 @@ logs:
 
 cycle::
 	$C $(MAKE) logs
+	bin/live-coding VoidStar8080 ROM=VoidStar8080_rom
 	$C $(MAKE) plots
 	$C $(MAKE) bench
 	$C $(MAKE) format

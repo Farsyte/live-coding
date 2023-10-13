@@ -1,6 +1,6 @@
 	TITLE	'Customized CP/M 2.2 Bios for the (void *)8080 Simulated Microcomputer'
 
-msize	equ	48		;cp/m version memory size in kilobytes
+msize	equ	62		;cp/m ram size in kilobytes
 
 ;	"bias" is address offset from 3400h for memory systems larger
 ;	than 20k (referred to as "b" throughout the text)
@@ -10,11 +10,10 @@ ccp	equ	3400h+bias	;base of ccp
 bdos	equ	ccp+806h	;base of bdos
 bios	equ	ccp+1600h	;base of bios
 bioslim	equ     ccp+1900H       ;end of data loaded from disk
-uimem	equ	(msize*1024)-bioslim
 
-; page zero locations
-cdisk	equ	0004h		;current disk number 0=a,... l5=p
+; page zero locations known by BIOS
 iobyte	equ	0003h		;intel i/o byte
+cdisk	equ	0004h		;current disk number 0=a,... l5=p
 ;
 	org	bios		;origin of this program
 nsects	equ	($-ccp)/128	;warm start sector count
@@ -23,12 +22,14 @@ nsects	equ	($-ccp)/128	;warm start sector count
 ;
 	jmp	boot	;cold start
 wboote:	jmp	wboot	;warm start
+
 	jmp	const	;console status
 	jmp	conin	;console character in
 	jmp	conout	;console character out
 	jmp	list	;list character out
 	jmp	punch	;punch character out
 	jmp	reader	;reader character out
+
 	jmp	home	;move head to home position
 	jmp	seldsk	;select disk
 	jmp	settrk	;set track number
@@ -36,32 +37,19 @@ wboote:	jmp	wboot	;warm start
 	jmp	setdma	;set dma address
 	jmp	read	;read disk
 	jmp	write	;write disk
+
 	jmp	listst	;return list status
 	jmp	sectran	;sector translate
 ;
-;	fixed data tables for four-drive standard
-;	ibm-compatible 8-inch disks
+;	fixed data tables for four standard
+;	ibm-compatible 8-inch diskette drives
 ;
-;	disk Parameter header for disk 00
-dpbase:	dw	trans, 0000h
-	dw	0000h, 0000h
-	dw	dirbf, dpblk
-	dw	chk00, all00
-;	disk parameter header for disk 01
-	dw	trans, 0000h
-	dw	0000h, 0000h
-	dw	dirbf, dpblk
-	dw	chk01, all01
-;	disk parameter header for disk 02
-	dw	trans, 0000h
-	dw	0000h, 0000h
-	dw	dirbf, dpblk
-	dw	chk02, all02
-;	disk parameter header for disk 03
-	dw	trans, 0000h
-	dw	0000h, 0000h
-	dw	dirbf, dpblk
-	dw	chk03, all03
+dpbase: 
+	dw	trans, 0000h, 0000h, 0000h, dirbf, dpblk, chk00, all00
+	dw	trans, 0000h, 0000h, 0000h, dirbf, dpblk, chk01, all01
+	dw	trans, 0000h, 0000h, 0000h, dirbf, dpblk, chk02, all02
+	dw	trans, 0000h, 0000h, 0000h, dirbf, dpblk, chk03, all03
+ndisk   equ     $-dpbase/16
 ;
 ;	sector translate vector
 trans:	db	 1,  7, 13, 19	;sectors  1,  2,  3,  4
@@ -169,124 +157,325 @@ gocpm:
 	jmp	ccp		;go to cp/m for further processing
 
 ;;; === === === === === === === === === === === === === === === ===
-;;;	simple i/o handlers (must be filled in by user)
-;;;	in each case, the entry point is provided, with space reserved
-;;;	to insert your own code
+;;; CDEV selection using IOBYTE
 ;;; === === === === === === === === === === === === === === === ===
 
+	;; === === === === === === === === === === === ===
+	;; return ff if a byte is available on con: or 00 if not.
+	;; use i/o byte to determine which device is the console.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; === === === === === === === === === === === ===
+const:
+        lda     iobyte
+        ani     03h
+        jz      ttyrdy
+        cpi     1
+        jz      crtrdy
+        cpi     2
+        jz      pptrdy
+	;; no support for user defined consoles (yet?)
+	;; switch iobyte back to CON=TTY and use TTY.
+        lda     iobyte
+        ani     0FCh
+        sta     iobyte
+        jmp     ttyrdy
+
+	;; === === === === === === === === === === === ===
+	;; get next character from con: into a and clear its parity bit.
+	;; use i/o byte to determine which device is the console.
+	;; if there is no data available, wait for some.
+	;; === === === === === === === === === === === ===
+conin:
+        lda     iobyte
+        ani     03h
+        jz      ttyget
+        cpi     1
+        jz      crtget
+        cpi     2
+        jz      pptget
+	;; no support for user defined consoles (yet?)
+	;; switch iobyte back to pure TTY and use TTY
+        xra     a
+        sta     iobyte
+        jmp     ttyget
+
+	;; === === === === === === === === === === === ===
+	;; put the character in (C) to CON:
+	;; use i/o byte to determine which device is the console.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+conout:
+        lda     iobyte
+        ani     03h
+        jz      ttyput
+        cpi     1
+        jz      crtput
+        cpi     2
+        jz      pptput
+	;; no support for user defined consoles (yet?)
+	;; switch iobyte back to pure TTY and use tty
+        xra     a
+        sta     iobyte
+        jmp     ttyput
+
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to lst: 
+	;; use i/o byte to determine which device is the listing.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+
+list:
+        lda     iobyte
+        ani     0C0h
+        jz      ttyput
+        cpi     040h
+        jz      crtput
+        cpi     080h
+        jz      lptput
+	;; no support for user defined consoles (yet?)
+	;; switch iobyte back to pure TTY and use tty
+        xra     a
+        sta     iobyte
+        jmp     ttyput
+
+	;; === === === === === === === === === === === ===
+	;; return ff if lst: can accept a byte or 00 if not.
+	;; use i/o byte to determine which device is the listing.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; === === === === === === === === === === === ===
+
+listst:
+        lda     iobyte
+        ani     0C0h
+        jz      ttypok
+        cpi     040h
+        jz      crtpok
+        cpi     080h
+        jz      lptpok
+	;; no support for user defined listing devices (yet?)
+	;; switch iobyte back to pure TTY and use tty
+        xra     a
+        sta     iobyte
+        jmp     ttypok
+
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to pun: 
+	;; use i/o byte to determine which device is the listing.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+
+punch:
+        lda     iobyte
+        ani     030h
+        jz      ttyput
+        cpi     010h
+        jz      pptput
+	;; no support for user defined punches (yet?)
+	;; switch iobyte back to pure TTY and use TTY
+        xra     a
+        sta     iobyte
+        jmp     ttyput
+
+	;; === === === === === === === === === === === ===
+	;; get next character from rdr: into a and clear its parity bit.
+	;; use i/o byte to determine which device is the listing.
+        ;; switch i/o byte to "pure TTY" if an invalid device is selected
+	;; if there is no data available, wait for some.
+	;; no i/o byte support yet
+	;; === === === === === === === === === === === ===
+
+reader:
+        lda     iobyte
+        ani     00Ch
+        jz      ttyget
+        cpi     004h
+        jz      pptget
+	;; no support for user defined readers (yet?)
+	;; switch iobyte back to pure TTY and use TTY
+        xra     a
+        sta     iobyte
+        jmp     ttyget
+
 ;;; === === === === === === === === === === === === === === === ===
-;;; serial device i/o ports
+;;; Interaction with CDEV devices
 ;;; === === === === === === === === === === === === === === === ===
 
 ttyd	equ     0               ;read/write data from/to printing console
 ttyc	equ     1               ;printing console status/control port
 
-crtd	equ     2               ;read/write data from/to video console
-crtc	equ     3               ;video console status/control port
-
-lptd	equ     4               ;write data to line printer
-lptc	equ     5               ;line printer status/control port
-
-pptd	equ     6               ;read/write data from/to paper tape
-pptc	equ     7               ;paper tape status/control port
-
-;;; === === === === === === === === === === === === === === === ===
-;;; Return FF if a byte is available on CON: or 00 if not.
-;;; No I/O byte support yet
-;;; === === === === === === === === === === === === === === === ===
-
-const:
+	;; === === === === === === === === === === === ===
+	;; return ff if a byte is available on tty: or 00 if not.
+	;; === === === === === === === === === === === ===
+ttyrdy:
         in      ttyc
         ani     02h
         rz
         mvi     a,0ffh
         ret
 
-;;; === === === === === === === === === === === === === === === ===
-;;; get next character from con: into a and clear its parity bit.
-;;; if there is no data available, wait for some.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
-
-conin:
+	;; === === === === === === === === === === === ===
+	;; return ff if tty: ready to accept data, or 00 if not.
+	;; === === === === === === === === === === === ===
+ttypok:
         in      ttyc
-        ani     01h
-        jz      conin
-        in      ttyd
-        ani     7fh
-        ret
-
-
-;;; === === === === === === === === === === === === === === === ===
-;;; put the the character in c to con: 
-;;; if the device can not accept data, wait until it can.
-;;; modifies the content of register a.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
-
-conout:
-        in      ttyc
-        ani     01h
-        jz      conout
-        mov     a,c
-        out     ttyd
-        ret
-
-;;; === === === === === === === === === === === === === === === ===
-;;; put the the character in c to lst: 
-;;; if the device can not accept data, wait until it can.
-;;; modifies the content of register a.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
-
-list:
-        in      lptc
-        ani     01h
-        jz      list
-        mov     a,c
-        out     lptd
-        ret
-
-;;; === === === === === === === === === === === === === === === ===
-;;; return ff if lst: can accept a byte or 00 if not.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
-
-listst:
-        in      lptc
-        ani     04h
+        ani     02h
         rz
         mvi     a,0ffh
         ret
 
-;;; === === === === === === === === === === === === === === === ===
-;;; put the the character in c to pun: 
-;;; if the device can not accept data, wait until it can.
-;;; modifies the content of register a.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
+	;; === === === === === === === === === === === ===
+        ;; get next character from tty: into a and clear its parity bit.
+        ;; if there is no data available, wait for some.
+	;; === === === === === === === === === === === ===
+ttyget:
+        in      ttyc
+        ani     01h
+        jz      ttyget
+        in      ttyd
+        ani     7fh
+        ret
 
-punch:
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to tty: 
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+ttyput:
+        in      ttyc
+        ani     01h
+        jz      ttyput
+        mov     a,c
+        out     ttyd
+        ret
+
+crtd	equ     2               ;read/write data from/to video console
+crtc	equ     3               ;video console status/control port
+
+	;; === === === === === === === === === === === ===
+	;; return ff if a byte is available on crt: or 00 if not.
+	;; === === === === === === === === === === === ===
+crtrdy:
+        in      crtc
+        ani     02h
+        rz
+        mvi     a,0ffh
+        ret
+
+	;; === === === === === === === === === === === ===
+	;; return ff if crt: ready to accept data, or 00 if not.
+	;; === === === === === === === === === === === ===
+crtpok:
+        in      crtc
+        ani     02h
+        rz
+        mvi     a,0ffh
+        ret
+
+	;; === === === === === === === === === === === ===
+        ;; get next character from crt: into a and clear its parity bit.
+        ;; if there is no data available, wait for some.
+	;; === === === === === === === === === === === ===
+crtget:
+        in      crtc
+        ani     01h
+        jz      crtget
+        in      crtd
+        ani     7fh
+        ret
+
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to crt: 
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+crtput:
+        in      crtc
+        ani     01h
+        jz      crtput
+        mov     a,c
+        out     crtd
+        ret
+
+pptd	equ     4               ;read/write data from/to paper tape
+pptc	equ     5               ;paper tape status/control port
+
+	;; === === === === === === === === === === === ===
+	;; return ff if a byte is available on ppt: or 00 if not.
+	;; === === === === === === === === === === === ===
+pptrdy:
+        in      pptc
+        ani     02h
+        rz
+        mvi     a,0ffh
+        ret
+
+	;; === === === === === === === === === === === ===
+	;; return ff if ppt: ready to accept data, or 00 if not.
+	;; === === === === === === === === === === === ===
+pptpok:
+        in      pptc
+        ani     02h
+        rz
+        mvi     a,0ffh
+        ret
+
+	;; === === === === === === === === === === === ===
+        ;; get next character from ppt: into a and clear its parity bit.
+        ;; if there is no data available, wait for some.
+	;; === === === === === === === === === === === ===
+pptget:
         in      pptc
         ani     01h
-        jz      punch
+        jz      pptget
+        in      pptd
+        ani     7fh
+        ret
+
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to ppt: 
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+pptput:
+        in      pptc
+        ani     01h
+        jz      pptput
         mov     a,c
         out     pptd
         ret
 
-;;; === === === === === === === === === === === === === === === ===
-;;; get next character from rdr: into a and clear its parity bit.
-;;; if there is no data available, wait for some.
-;;; no i/o byte support yet
-;;; === === === === === === === === === === === === === === === ===
+lptd	equ     6               ;write data to line printer
+lptc	equ     7               ;line printer status/control port
 
-reader:
-        in      pptc
+	;; === === === === === === === === === === === ===
+	;; return ff if lpt: ready to accept data, or 00 if not.
+	;; === === === === === === === === === === === ===
+lptpok:
+        in      lptc
+        ani     02h
+        rz
+        mvi     a,0ffh
+        ret
+
+	;; === === === === === === === === === === === ===
+	;; put the the character in c to lpt: 
+	;; if the device can not accept data, wait until it can.
+	;; modifies the content of register a.
+	;; === === === === === === === === === === === ===
+lptput:
+        in      lptc
         ani     01h
-        jz      reader
-        in      pptd
-	ani	7fh		;remember to strip parity bit
-	ret
+        jz      lptput
+        mov     a,c
+        out     lptd
+        ret
+
 
 ;;; === === === === === === === === === === === === === === === ===
 ;;;	i/o drivers for the disk follow
@@ -340,6 +529,7 @@ home:
 ;;;
 ;;; CP/M 2.2: locate and return the DPB for this drive in HL,
 ;;; or set HL to 0000h if the drive is not within our DPB table.
+;;; HOWEVER NOTE: large disk numbers still get sent to BDEV controller.
 ;;; === === === === === === === === === === === === === === === ===
 seldsk:
 	lxi	h, 0000h	;error return code
@@ -347,8 +537,8 @@ seldsk:
         out     bdres           ;reset bdev controller
         out     bddrv           ;select bdev drive number
 
-	cpi	4		;must be between 0 and 3
-	rnc			;no carry if 4, 5,...
+	cpi	ndisk		;check for disk number in table rane
+	rnc			;return with HL=0000 if off end of table
 ;	disk number is in the proper range
 
 ;	compute proper disk Parameter header address
