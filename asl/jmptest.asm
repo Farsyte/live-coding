@@ -1,0 +1,105 @@
+	TITLE	'test for JMP instructions'
+
+	.CPU	8080
+
+	ORG	00000H		;BASE OF MEMORY
+
+	MVI	C,1
+
+	JMP	JMP_OK
+JMP_F:	DB	08H		;fail
+JMP_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,1
+	SUB	C
+	JNZ	JNZ_F1
+	SUB	C
+	JNZ	JNZ_OK
+JNZ_F2:	DB	08H
+JNZ_F1:	DB	08H
+JNZ_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,2
+	SUB	C
+	JZ	JZ_F1
+	SUB	C
+	JZ	JZ_OK
+JZ_F2:	DB	08H
+JZ_F1:	DB	08H
+JZ_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,0
+	SUB	C
+	JNC	JNC_F1
+	SUB	C
+	JNC	JNC_OK
+JNC_F2:	DB	08H
+JNC_F1:	DB	08H
+JNC_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,1
+	SUB	C
+	JC	JC_F1
+	SUB	C
+	JC	JC_OK
+JC_F2:	DB	08H
+JC_F1:	DB	08H
+JC_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,6
+	SUB	C
+	JPO	JPO_F1
+	SUB	C
+	JPO	JPO_OK
+JPO_F2:	DB	08H
+JPO_F1:	DB	08H
+JPO_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,8
+	SUB	C
+	JPE	JPE_F1
+	SUB	C
+	JPE	JPE_OK
+JPE_F2:	DB	08H
+JPE_F1:	DB	08H
+JPE_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,81H
+	SUB	C
+	JP	JP_F1
+	SUB	C
+	JP	JP_OK
+JP_F2:	DB	08H
+JP_F1:	DB	08H
+JP_OK:	NOP
+
+	DB	18H		;next subtest
+
+	MVI	A,01H
+	SUB	C
+	JM	JM_F1
+	SUB	C
+	JM	JM_OK
+JM_F2:	DB	08H
+JM_F1:	DB	08H
+JM_OK:	NOP
+
+	DB	10H		;test complete
+	NOP
+	NOP
+
+	END

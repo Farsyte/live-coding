@@ -27,7 +27,7 @@ P		= $C printf
 
 INCDIR		:= inc/
 SRCDIR		:= src/
-ASMDIR		:= asm/
+ASLDIR		:= asl/
 LSTDIR		:= lst/
 HEXDIR		:= hex/
 TESTDIR		:= test/
@@ -35,6 +35,12 @@ PREDIR		:= pre/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
 COVDIR		:= cov/
+
+ASL		:= asl
+ASLFLAGS	:= -q -L -gnuerrors
+
+P2H		:= p2hex
+P2HFLAGS	:= -q -F Intel
 
 # LIBS            = util                        # add personal libraries
 # SYSLIBS         = pthread ncurses m           # add system libraries
@@ -47,10 +53,9 @@ CSRC            := ${wildcard ${SRCDIR}*.c}
 TSRC            := ${wildcard ${TESTDIR}*.c}
 EXEC		:= ${PROG:%=bin/%}
 
-ASMS            := ${wildcard ${ASMDIR}*.asm}
-LSTS		:= ${ASMS:${ASMDIR}%.asm=${LSTDIR}%.lst}
-BINS		:= ${ASMS:${ASMDIR}%.asm=${HEXDIR}%.bin}
-HEXS		:= ${ASMS:${ASMDIR}%.asm=${HEXDIR}%.hex}
+ASLS            := ${wildcard ${ASLDIR}*.asm}
+AOBS		:= ${ASLS:${ASLDIR}%.asm=${OBJDIR}%.p} ${ASLMORE:%=${OBJDIR}%.p}
+HEXS		+= ${AOBS:${OBJDIR}%.p=${HEXDIR}%.hex}
 
 SRCB		:= ${CSRC:${SRCDIR}%.c=%} \
 		   ${TSRC:${TESTDIR}%.c=%}
@@ -167,11 +172,22 @@ coverage::	${PROG:%=log/run-%.log}
 clean::
 	${RF} ${COVS}
 
-lsts::		${LSTS}
+aobs::		${AOBS}
+hexs::		${HEXS}
 
-${LSTDIR}%.lst:	${ASMDIR}%.asm
-	asm8080 $< -o${HEXDIR}$* -l$@
+${OBJDIR}%.p:	${ASLDIR}%.asm
+	$E 'ASL $*'
+	$Q ${ASL} ${ASLFLAGS} -OLIST ${LSTDIR}$*.lst -o ${OBJDIR}$*.p ${ASLDIR}$*.asm
+
+${HEXDIR}%.hex:		${OBJDIR}%.p
+	$E 'P2H $*'
+	$Q ${P2H} $< $@ ${P2HFLAGS}
+
+default::	hexs
 
 clean::
-	${RF} ${BINS}
+	${RF} ${OBJDIR}*.p
+	${RF} ${HEXDIR}*.hex
+	${RF} ${HEXDIR}*.bin
+	${RF} ${LSTDIR}*.lst
 

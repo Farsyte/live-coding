@@ -37,7 +37,7 @@ static void         VoidStar8080_seek(pBctx bctx);
 static void         rom_load(VoidStar8080, Cstr basename);
 static void         rom_dump(VoidStar8080);
 
-static void         VoidStar8080_reset_to_hlt(VoidStar8080 sys);
+static void         VoidStar8080_RESET_then_run_to_HLT(VoidStar8080 sys);
 
 static int          verbose = 0;
 static int          dryrun = 0;
@@ -110,7 +110,7 @@ int VoidStar8080_main(int argc, char **argv)
         STUB("dryrun! not running the system.");
     } else {
         STUB("start run");
-        VoidStar8080_reset_to_hlt(sys);
+        VoidStar8080_RESET_then_run_to_HLT(sys);
         STUB("end run");
     }
 
@@ -145,9 +145,10 @@ void VoidStar8080_init(VoidStar8080 sys, Cstr name)
     bdev_init(sys->bdev, format("%s:bdev", name));
 
     pBctx               bctx = malloc(sizeof *bctx);
+
     disk_init(bctx->disk[0], "A", 77, 26);
-    disk_init(bctx->disk[1], "B", 77, 52);
-    disk_init(bctx->disk[2], "C", 128, 128);
+    disk_init(bctx->disk[1], "B", 77, 26);
+    disk_init(bctx->disk[2], "C", 256, 255);
     disk_init(bctx->disk[3], "D", 256, 255);
     sys->bctx = bctx;
 
@@ -467,8 +468,9 @@ static void enable_shadow(VoidStar8080 sys)
 
 static unsigned disk_cap(Disk d)
 {
-    return d->ntrk * d->nsec * 120;
+    return d->ntrk * d->nsec * 128;
 }
+
 static Byte        *disk_ptr(pBctx bctx, int dsk, int trk, int sec)
 {
     ASSERT(bctx, "somehow bctx is null");
@@ -539,7 +541,7 @@ static void rom_dump(VoidStar8080 sys)
     rom8316_dump(sys->rom[0]);
 }
 
-static void VoidStar8080_reset_to_hlt(VoidStar8080 sys)
+static void VoidStar8080_RESET_then_run_to_HLT(VoidStar8080 sys)
 {
     p8224               gen = sys->gen;
     p8228               ctl = sys->ctl;
@@ -567,8 +569,16 @@ static void VoidStar8080_reset_to_hlt(VoidStar8080 sys)
         clock_run_one();
     clock_run_until(TAU + 11);
 
-    while (0 == (ctl->status & STATUS_HLTA))
-        clock_run_one();
+    while (0 == (ctl->status & STATUS_HLTA)) {
+
+        // measure ΔRTC for each 10 seconds of simluated time
+        Tau                 rtc0 = rtc_ns();
+        clock_run_until(TAU + 180000000);
+        Tau                 drtc = rtc_ns() - rtc0;
+        double              drtc_ms = drtc / 1000000.0;
+        fprintf(stderr, "<<running at %.1fx real time>>\n", 10000.0 / drtc_ms);
+
+    }
 
     clock_run_until(TAU + 45);
 }

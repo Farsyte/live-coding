@@ -29,6 +29,10 @@ OPT		:= -Ofast
 STD		:= --std=gnu99
 WFLAGS		:= -W -Wall -Wextra -Wpedantic
 
+# Insert additional things we need to assemble
+
+ASLMORE		:= cpm22bdos62k cpm22ccp62k
+
 include GNUmakefile.rules
 
 WAITE		:= modify delete
@@ -54,7 +58,7 @@ clean::
 # usually with a "make await" between iteraions.
 
 loop::
-	$C ${MAKE} lsts
+	$C ${MAKE} hexs
 	$C ${MAKE} cmp
 
 bench::		log/run-${PROG}.log.difference
@@ -75,7 +79,7 @@ wait::
 	$C inotifywait \
 		-q ${WAITE:%=-e %} \
 		GNUmakefile GNUmakefile.rules \
-		${HSRC} ${CSRC} ${TSRC} ${ASMS}
+		${HSRC} ${CSRC} ${TSRC} ${ASLS}
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::
@@ -110,9 +114,11 @@ world::
 logs:
 	$C bin/logs.sh log
 
+voidstar8080:	bin/live-coding ${HEXS}
+	bin/live-coding VoidStar8080 ROM=VoidStar8080_rom
+
 cycle::
 	$C $(MAKE) logs
-	bin/live-coding VoidStar8080 ROM=VoidStar8080_rom
 	$C $(MAKE) plots
 	$C $(MAKE) bench
 	$C $(MAKE) format
@@ -122,3 +128,14 @@ cycle::
 clean::
 	${RF} log/timing/*.txt
 	${RF} log/timing/*/*.log
+
+
+${OBJDIR}cpm22bdos62k.p:	${ASLDIR}cpm22bdos.asm
+	$E 'ASL CP/M 2.2 BDOS for 62 KiB systems'
+	$Q ${ASL} ${ASLFLAGS} -D origin=0e400h -OLIST ${LSTDIR}cpm22bdos62k.lst -o ${OBJDIR}cpm22bdos62k.p ${ASLDIR}cpm22bdos.asm
+
+${OBJDIR}cpm22ccp62k.p: 	${ASLDIR}cpm22ccp.asm
+	$E 'ASL CP/M 2.2 CCP for 62 KiB systems'
+	$Q ${ASL} ${ASLFLAGS} -D origin=0dc00h -OLIST ${LSTDIR}cpm22ccp62k.lst -o ${OBJDIR}cpm22ccp62k.p ${ASLDIR}cpm22ccp.asm
+
+
