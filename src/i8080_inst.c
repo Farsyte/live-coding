@@ -1,4 +1,4 @@
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
 
 static Cstr         i8080_instruction_names[256] = {
     "nop       ", "lxi  BC,##", "stax BC   ", "inx  BC   ",

@@ -1,7 +1,7 @@
-#include "i8228.h"
+#include "chip/i8228.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "i8080_status.h"
-#include "sigtrace.h"
+#include "chip/i8080_status.h"
+#include "common/sigtrace.h"
 
 static void         latch_status(i8228 ctl);
 static void         start_reads(i8228 ctl);

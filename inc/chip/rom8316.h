@@ -1,8 +1,8 @@
 #pragma once
-#include "addr.h"
-#include "data.h"
-#include "edge.h"
-#include "support.h"
+#include "wa16/addr.h"
+#include "common/data.h"
+#include "common/edge.h"
+#include "common/support.h"
 
 // rom8316: 2 KiB read-only memory for 8080-like microcomputer system
 //

@@ -1,15 +1,15 @@
-#include "i8080.h"
+#include "chip/i8080.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <stdlib.h>
-#include "clock.h"
-#include "decoder.h"
-#include "i8080_impl.h"
-#include "i8224.h"
-#include "i8228.h"
-#include "ram8107x8x4.h"
-#include "rom8316.h"
-#include "sigtrace.h"
-#include "target.h"
+#include "chip/decoder.h"
+#include "chip/i8080_impl.h"
+#include "chip/i8224.h"
+#include "chip/i8228.h"
+#include "chip/ram8107x8x4.h"
+#include "chip/rom8316.h"
+#include "common/clock.h"
+#include "common/sigtrace.h"
+#include "wa16/target.h"
 
 static void         i8080_phi1_rise(i8080);
 static void         i8080_phi2_rise(i8080);

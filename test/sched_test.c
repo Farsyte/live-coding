@@ -1,5 +1,5 @@
-#include "sched.h"
-#include "support.h"
+#include "common/sched.h"
+#include "common/support.h"
 
 // sched: a place for things to do in order
 

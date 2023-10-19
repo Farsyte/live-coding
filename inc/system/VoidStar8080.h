@@ -1,13 +1,13 @@
 #pragma once
-#include "bdev.h"
-#include "cdev.h"
-#include "decoder.h"
-#include "i8080.h"
-#include "i8224.h"
-#include "i8228.h"
-#include "ram8107x8x4.h"
-#include "rom8316.h"
-#include "support.h"
+#include "common/bdev.h"
+#include "common/cdev.h"
+#include "chip/decoder.h"
+#include "chip/i8080.h"
+#include "chip/i8224.h"
+#include "chip/i8228.h"
+#include "chip/ram8107x8x4.h"
+#include "chip/rom8316.h"
+#include "common/support.h"
 
 typedef struct sVoidStar8080 {
     Cstr                name;

@@ -1,8 +1,7 @@
 #pragma once
-#include "data.h"
-#include "edge.h"
-#include "support.h"
-#include "target.h"
+#include "common/support.h"
+#include "common/data.h"
+#include "common/edge.h"
 
 // Block Device does the following:
 // - Read a block of data from storage to memory

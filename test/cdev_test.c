@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <unistd.h>
-#include "cdev.h"
+#include "common/cdev.h"
 
 static Data         DATA;
 static Cdev         d;

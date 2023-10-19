@@ -1,4 +1,4 @@
-#include "ram8107x8x4.h"
+#include "chip/ram8107x8x4.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <string.h>     // String handling
 

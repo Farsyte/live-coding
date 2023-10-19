@@ -1,8 +1,8 @@
 #pragma once
-#include "data.h"
-#include "edge.h"
-#include "support.h"
-#include "target.h"
+#include "common/data.h"
+#include "common/edge.h"
+#include "common/support.h"
+#include "wa16/target.h"
 
 // i8228: System Controller and Bus Driver 8080A CPU
 //

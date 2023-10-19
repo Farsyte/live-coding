@@ -1,5 +1,5 @@
-#include "clock.h"
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
+#include "common/clock.h"
 
 // i8080_mvi: manage most MVI instructions
 

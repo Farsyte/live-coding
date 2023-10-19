@@ -1,8 +1,8 @@
-#include "i8224.h"
+#include "chip/i8224.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "clock.h"
-#include "sigtrace.h"
-#include "support.h"
+#include "common/clock.h"
+#include "common/sigtrace.h"
+#include "common/support.h"
 
 static void         i8224_on_osc_rise(i8224 gen);
 static void         i8224_on_reset_rise(i8224 gen);

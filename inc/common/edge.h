@@ -1,7 +1,6 @@
 #pragma once
-#include "subs.h"
-#include "support.h"
-#include "target.h"
+#include "common/subs.h"
+#include "common/support.h"
 
 // edge: a signal with callbacks for rising and falling edges
 //

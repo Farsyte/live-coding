@@ -1,7 +1,7 @@
-#include "clock.h"
+#include "common/clock.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "edge.h"
-#include "support.h"
+#include "common/edge.h"
+#include "common/support.h"
 
 // The CLOCK signal itself. Make use of the clock by attaching a
 // subsciber to the rise or fall list of this Edge.

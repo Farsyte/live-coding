@@ -1,4 +1,4 @@
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
 
 // i8080_2bops: provide support for fetching 2nd byte of multibyte instructions
 // T1 drives PC to IDAL to address, STATUS_MREAD to data, and SYNC high.

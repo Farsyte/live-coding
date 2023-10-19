@@ -1,6 +1,6 @@
 #pragma once
-#include "step.h"
-#include "support.h"
+#include "common/step.h"
+#include "common/support.h"
 
 // fifo: a place for things to do next
 

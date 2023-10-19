@@ -1,4 +1,4 @@
-#include "i8080_test.h"
+#include "chip/i8080_test.h"
 
 // i8080_movm: test the MOV M,Rs and MOV Rd,M instructions
 //

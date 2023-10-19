@@ -1,4 +1,4 @@
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
 
 // i8080_fetch: manage the STATUS_FETCH machine cycle
 // T1 drives PC to IDAL to address, STATUS_FETCH to data, and SYNC high.

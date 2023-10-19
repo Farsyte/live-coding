@@ -1,5 +1,5 @@
-#include "stepat.h"
-#include "support.h"
+#include "common/stepat.h"
+#include "common/support.h"
 
 // stepat: a function to call, a pointer to pass it, and a Tau.
 

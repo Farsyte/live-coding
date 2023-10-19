@@ -1,4 +1,4 @@
-#include "i8080_test.h"
+#include "chip/i8080_test.h"
 
 // i8080_call: test the CALL and Conditional Call instructions.
 //

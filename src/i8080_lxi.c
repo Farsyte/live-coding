@@ -1,4 +1,4 @@
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
 
 // i8080_lxi: manage LXI instructions
 

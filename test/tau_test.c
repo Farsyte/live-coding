@@ -1,5 +1,5 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "support.h"
+#include "common/support.h"
 
 void tau_post()
 {

@@ -1,5 +1,5 @@
-#include "hex.h"
-#include "rom8316.h"
+#include "chip/rom8316.h"
+#include "common/hex.h"
 
 // === === === === === === === === === === === === === === === ===
 //                           TEST SUPPORT

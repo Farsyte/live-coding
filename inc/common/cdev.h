@@ -1,9 +1,8 @@
 #pragma once
-#include "bring.h"
-#include "data.h"
-#include "edge.h"
-#include "support.h"
-#include "target.h"
+#include "common/bring.h"
+#include "common/support.h"
+#include "common/data.h"
+#include "common/edge.h"
 
 #define CDEV_SILO_CAP		BRING_CAP
 

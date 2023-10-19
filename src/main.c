@@ -1,8 +1,8 @@
-#include "main.h"
+#include "common/main.h"
 #include <string.h>     // String handling
-#include "VoidStar8080.h"
-#include "cdev.h"
-#include "support.h"
+#include "common/cdev.h"
+#include "common/support.h"
+#include "system/VoidStar8080.h"
 
 int main(int argc, char **argv)
 {

@@ -1,5 +1,5 @@
-#include "i8080_flags.h"
-#include "i8080_impl.h"
+#include "chip/i8080_flags.h"
+#include "chip/i8080_impl.h"
 
 // i8080_misc: manage misc instructions
 

@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "chip/decoder.h"
 
 // decoder: efficient enables for mem pages and i/o ports
 //

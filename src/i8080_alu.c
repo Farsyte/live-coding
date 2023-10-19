@@ -1,6 +1,6 @@
-#include "i8080_flags.h"
-#include "i8080_impl.h"
-#include "support.h"
+#include "chip/i8080_flags.h"
+#include "chip/i8080_impl.h"
+#include "common/support.h"
 
 // i8080_alu: manage many ALU instructions
 

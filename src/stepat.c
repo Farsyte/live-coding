@@ -1,6 +1,6 @@
-#include "stepat.h"
+#include "common/stepat.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "support.h"
+#include "common/support.h"
 
 // stepat: a function to call, a pointer to pass it, and a Tau.
 

@@ -1,7 +1,6 @@
 #pragma once
-#include "subs.h"
-#include "support.h"
-#include "target.h"
+#include "common/subs.h"
+#include "common/support.h"
 
 // data: a signal bus with callbacks for changes in state.
 //

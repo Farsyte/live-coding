@@ -1,9 +1,9 @@
 #pragma once
-#include "i8080.h"
-#include "i8080_flags.h"
-#include "i8080_opcodes.h"
-#include "i8080_phases.h"
-#include "i8080_status.h"
+#include "chip/i8080.h"
+#include "chip/i8080_flags.h"
+#include "chip/i8080_opcodes.h"
+#include "chip/i8080_phases.h"
+#include "chip/i8080_status.h"
 
 // i8080_impl: shared between parts of the 8080 implementation
 //

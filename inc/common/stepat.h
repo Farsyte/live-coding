@@ -1,6 +1,6 @@
 #pragma once
-#include "step.h"
-#include "support.h"
+#include "common/support.h"
+#include "common/step.h"
 
 // stepat: a function to call, a pointer to pass it, and a Tau.
 

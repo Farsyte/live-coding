@@ -1,7 +1,7 @@
 #include <stdlib.h>     // General utilities
-#include "edge.h"
-#include "stepat.h"
-#include "support.h"
+#include "common/edge.h"
+#include "common/stepat.h"
+#include "common/support.h"
 
 // edge: a signal with callbacks for rising and falling edges
 //

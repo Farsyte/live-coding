@@ -15,8 +15,10 @@ do
 
     (
         (
-            [ ! -e "$top/inc/$b.h" ] ||
-                printf '#include "%s.h"\n' "$b"
+            cd "$top"
+            find inc -iname "$b.h" -print |
+                sed 's:^inc/:#include ":' |
+                sed 's:$:":'
             grep '#include <' < $c | sort
             grep '#include "' < $c | sort
             ) | uniq.awk

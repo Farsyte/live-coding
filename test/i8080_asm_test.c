@@ -1,5 +1,5 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "i8080_test.h"
+#include "chip/i8080_test.h"
 
 // i8080_asm_test: run an ASM test program
 

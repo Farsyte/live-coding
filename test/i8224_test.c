@@ -1,8 +1,10 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "clock.h"
-#include "i8224.h"
-#include "sigtrace.h"
-#include "support.h"
+#include "chip/i8224.h"
+#include "common/clock.h"
+#include "common/sigtrace.h"
+#include "common/sigtrace_data.h"
+#include "common/sigtrace_edge.h"
+#include "common/support.h"
 
 static i8224        gen;
 
@@ -212,25 +214,25 @@ void i8224_bist()
 
     SigSess             ss;
 
-    SigTrace            trace_PHI1;
-    SigTrace            trace_PHI2;
-    SigTrace            trace_SYNC;
-    SigTrace            trace_STSTB;
-    SigTrace            trace_RESIN;
-    SigTrace            trace_RESET;
-    SigTrace            trace_RDYIN;
-    SigTrace            trace_READY;
+    SigTraceEdge        trace_PHI1;
+    SigTraceEdge        trace_PHI2;
+    SigTraceEdge        trace_SYNC;
+    SigTraceEdge        trace_STSTB;
+    SigTraceEdge        trace_RESIN;
+    SigTraceEdge        trace_RESET;
+    SigTraceEdge        trace_RDYIN;
+    SigTraceEdge        trace_READY;
 
     sigsess_init(ss, "i8224_bist");
 
-    sigtrace_init_edge(trace_PHI1, ss, PHI1);
-    sigtrace_init_edge(trace_PHI2, ss, PHI2);
-    sigtrace_init_edge(trace_SYNC, ss, SYNC);
-    sigtrace_init_edge(trace_STSTB, ss, STSTB_);
-    sigtrace_init_edge(trace_RESIN, ss, RESIN_);
-    sigtrace_init_edge(trace_RESET, ss, RESET);
-    sigtrace_init_edge(trace_RDYIN, ss, RDYIN);
-    sigtrace_init_edge(trace_READY, ss, READY);
+    sigtrace_edge_init(trace_PHI1, ss, PHI1);
+    sigtrace_edge_init(trace_PHI2, ss, PHI2);
+    sigtrace_edge_init(trace_SYNC, ss, SYNC);
+    sigtrace_edge_init(trace_STSTB, ss, STSTB_);
+    sigtrace_edge_init(trace_RESIN, ss, RESIN_);
+    sigtrace_edge_init(trace_RESET, ss, RESET);
+    sigtrace_edge_init(trace_RDYIN, ss, RDYIN);
+    sigtrace_edge_init(trace_READY, ss, READY);
 
     // set t0 to the value of TAU that will be present
     // when we expect run the first rising edge of PHI1.
@@ -279,47 +281,47 @@ void i8224_bist()
     ASSERT_EQ_integer(13, *count_ststb_rise);
     ASSERT_EQ_integer(12, *count_ststb_fall);
 
-    sigtrace_fini(trace_PHI1);
-    sigtrace_fini(trace_PHI2);
-    sigtrace_fini(trace_SYNC);
-    sigtrace_fini(trace_STSTB);
-    sigtrace_fini(trace_RESIN);
-    sigtrace_fini(trace_RESET);
-    sigtrace_fini(trace_RDYIN);
-    sigtrace_fini(trace_READY);
+    sigtrace_fini(trace_PHI1->base);
+    sigtrace_fini(trace_PHI2->base);
+    sigtrace_fini(trace_SYNC->base);
+    sigtrace_fini(trace_STSTB->base);
+    sigtrace_fini(trace_RESIN->base);
+    sigtrace_fini(trace_RESET->base);
+    sigtrace_fini(trace_RDYIN->base);
+    sigtrace_fini(trace_READY->base);
 
     SigPlot             p1;
     sigplot_init(p1, ss, "i8224_bist_reset",
                  "Intel 8224 Clock Generator and Driver for 8080A CPU",
                  "Coming out of RESET in BIST context", t0, 72);
-    sigplot_sig(p1, trace_PHI1);
-    sigplot_sig(p1, trace_PHI2);
-    sigplot_sig(p1, trace_SYNC);
-    sigplot_sig(p1, trace_STSTB);
-    sigplot_sig(p1, trace_RESIN);
-    sigplot_sig(p1, trace_RESET);
+    sigtrace_plot(trace_PHI1->base, p1);
+    sigtrace_plot(trace_PHI2->base, p1);
+    sigtrace_plot(trace_SYNC->base, p1);
+    sigtrace_plot(trace_STSTB->base, p1);
+    sigtrace_plot(trace_RESIN->base, p1);
+    sigtrace_plot(trace_RESET->base, p1);
     sigplot_fini(p1);
 
     SigPlot             p2;
     sigplot_init(p2, ss, "i8224_bist_ready",
                  "Intel 8224 Clock Generator and Driver for 8080A CPU",
                  "Initial rise of READY in BIST context", t0 + 72, 72);
-    sigplot_sig(p2, trace_PHI1);
-    sigplot_sig(p2, trace_PHI2);
-    sigplot_sig(p2, trace_SYNC);
-    sigplot_sig(p2, trace_STSTB);
-    sigplot_sig(p2, trace_RDYIN);
-    sigplot_sig(p2, trace_READY);
+    sigtrace_plot(trace_PHI1->base, p2);
+    sigtrace_plot(trace_PHI2->base, p2);
+    sigtrace_plot(trace_SYNC->base, p2);
+    sigtrace_plot(trace_STSTB->base, p2);
+    sigtrace_plot(trace_RDYIN->base, p2);
+    sigtrace_plot(trace_READY->base, p2);
     sigplot_fini(p2);
 
     SigPlot             p3;
     sigplot_init(p3, ss, "i8224_bist_steady",
                  "Intel 8224 Clock Generator and Driver for 8080A CPU",
                  "Steady state operation in BIST context", t0 + 288, 72);
-    sigplot_sig(p3, trace_PHI1);
-    sigplot_sig(p3, trace_PHI2);
-    sigplot_sig(p3, trace_SYNC);
-    sigplot_sig(p3, trace_STSTB);
+    sigtrace_plot(trace_PHI1->base, p3);
+    sigtrace_plot(trace_PHI2->base, p3);
+    sigtrace_plot(trace_SYNC->base, p3);
+    sigtrace_plot(trace_STSTB->base, p3);
     sigplot_fini(p3);
 
     sigsess_fini(ss);

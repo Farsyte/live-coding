@@ -1,6 +1,6 @@
 #pragma once
-#include "support.h"
-#include "target.h"
+#include "common/support.h"
+#include "wa16/target.h"
 
 #define BRING_CAP	255
 

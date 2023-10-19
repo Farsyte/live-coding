@@ -1,6 +1,6 @@
-#include "clock.h"
-#include "i8080_impl.h"
-#include "sigtrace.h"
+#include "chip/i8080_impl.h"
+#include "common/clock.h"
+#include "common/sigtrace.h"
 
 // i8080_reset: manage the RESET machine cycles When RESET is active,
 // the cpu jumps into a hole and pulls the hole in behind it. When

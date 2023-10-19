@@ -1,6 +1,7 @@
 #pragma once
 #include <errno.h>
 #include <limits.h>     // Ranges of integer types
+#include <stdint.h>     // Fixed-width integer types
 #include <stdio.h>      // Input/output
 #include <stdlib.h>
 #include <string.h>     // String handling
@@ -19,6 +20,14 @@
 // === === === === === === === === === === === === === === === ===
 //                        UTILITY DATA TYPES
 // === === === === === === === === === === === === === === === ===
+
+// Bit: storage for a single bit of data.
+// type definition is the same for all simulated items.
+typedef uint8_t    *pBit, Bit;
+
+// Byte: storage for a single byte of data (8 bits).
+// type definition is the same for all simulated items.
+typedef uint8_t    *pByte, Byte;
 
 // C string -- immutable, with ACII NUL ('\0') at end.
 typedef const char *Cstr;

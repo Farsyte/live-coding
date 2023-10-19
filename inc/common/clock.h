@@ -1,5 +1,5 @@
 #pragma once
-#include "edge.h"
+#include "common/edge.h"
 
 // clock: provide an Edge that oscillates
 //

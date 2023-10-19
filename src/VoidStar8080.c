@@ -1,6 +1,6 @@
-#include "VoidStar8080.h"
-#include "clock.h"
-#include "i8080_status.h"
+#include "system/VoidStar8080.h"
+#include "chip/i8080_status.h"
+#include "common/clock.h"
 
 // VoidStar8080 boots with four drives connected.
 //

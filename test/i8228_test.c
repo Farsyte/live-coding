@@ -1,7 +1,9 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "i8080_test.h"
-#include "i8228.h"
-#include "sigtrace.h"
+#include "chip/i8080_test.h"
+#include "chip/i8228.h"
+#include "common/sigtrace.h"
+#include "common/sigtrace_data.h"
+#include "common/sigtrace_edge.h"
 
 // === === === === === === === === === === === === === === === ===
 //                           TEST SUPPORT
@@ -98,16 +100,16 @@ void i8228_post()
 void i8228_bist()
 {
     SigSess             ss;
-    SigTrace            trace_DATA;
-    SigTrace            trace_STSTB_;
-    SigTrace            trace_DBIN;
-    SigTrace            trace_WR_;
-    SigTrace            trace_HLDA;
-    SigTrace            trace_MEMR_;
-    SigTrace            trace_MEMW_;
-    SigTrace            trace_IOR_;
-    SigTrace            trace_IOW_;
-    SigTrace            trace_INTA_;
+    SigTraceData        trace_DATA;
+    SigTraceEdge        trace_STSTB_;
+    SigTraceEdge        trace_DBIN;
+    SigTraceEdge        trace_WR_;
+    SigTraceEdge        trace_HLDA;
+    SigTraceEdge        trace_MEMR_;
+    SigTraceEdge        trace_MEMW_;
+    SigTraceEdge        trace_IOR_;
+    SigTraceEdge        trace_IOW_;
+    SigTraceEdge        trace_INTA_;
     SigPlot             pl;
     Tau                 tau_min;
 
@@ -120,16 +122,16 @@ void i8228_bist()
     pEdge               INTA_ = ctl->INTA_;
 
     sigsess_init(ss, "i8228_bist");
-    sigtrace_init_data(trace_DATA, ss, DATA);
-    sigtrace_init_edge(trace_STSTB_, ss, STSTB_);
-    sigtrace_init_edge(trace_DBIN, ss, DBIN);
-    sigtrace_init_edge(trace_WR_, ss, WR_);
-    sigtrace_init_edge(trace_HLDA, ss, HLDA);
-    sigtrace_init_edge(trace_MEMR_, ss, MEMR_);
-    sigtrace_init_edge(trace_MEMW_, ss, MEMW_);
-    sigtrace_init_edge(trace_IOR_, ss, IOR_);
-    sigtrace_init_edge(trace_IOW_, ss, IOW_);
-    sigtrace_init_edge(trace_INTA_, ss, INTA_);
+    sigtrace_data_init(trace_DATA, ss, DATA);
+    sigtrace_edge_init(trace_STSTB_, ss, STSTB_);
+    sigtrace_edge_init(trace_DBIN, ss, DBIN);
+    sigtrace_edge_init(trace_WR_, ss, WR_);
+    sigtrace_edge_init(trace_HLDA, ss, HLDA);
+    sigtrace_edge_init(trace_MEMR_, ss, MEMR_);
+    sigtrace_edge_init(trace_MEMW_, ss, MEMW_);
+    sigtrace_edge_init(trace_IOR_, ss, IOR_);
+    sigtrace_edge_init(trace_IOW_, ss, IOW_);
+    sigtrace_edge_init(trace_INTA_, ss, INTA_);
 
     // initially, NONE of our control outputs are active.
     check_outputs(0);
@@ -151,10 +153,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_fetch",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical FETCH cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -162,11 +164,11 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_fetch_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a FETCH ended by HOLD", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -174,10 +176,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mread",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MREAD cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -185,11 +187,11 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mread_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a MREAD ended by HOLD", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -197,10 +199,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_mwrite",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MWRITE cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_WR_);
-    sigplot_sig(pl, trace_MEMW_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_WR_->base, pl);
+    sigtrace_plot(trace_MEMW_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -208,10 +210,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_sread",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MREAD cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -219,11 +221,11 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_sread_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a MREAD ended by HOLD", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_MEMR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_MEMR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -231,10 +233,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_swrite",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical MWRITE cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_WR_);
-    sigplot_sig(pl, trace_MEMW_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_WR_->base, pl);
+    sigtrace_plot(trace_MEMW_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -242,10 +244,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_inputrd",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INPUTRD cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_IOR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_IOR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -253,11 +255,11 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_inputrd_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INPUTRD cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_IOR_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_IOR_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -265,10 +267,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_outputwr",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical OUTPUTWR cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_WR_);
-    sigplot_sig(pl, trace_IOW_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_WR_->base, pl);
+    sigtrace_plot(trace_IOW_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -276,10 +278,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intack",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INTACK cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_INTA_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_INTA_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -287,11 +289,11 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intack_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during an INTACK ended by HOLD", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_INTA_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_INTA_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -299,10 +301,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_haltack",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical HALTACK cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_INTA_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_INTA_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -310,10 +312,10 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intackw",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during a typical INTACKW cycle", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_INTA_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_INTA_->base, pl);
     sigplot_fini(pl);
 
     tau_min = TAU;
@@ -321,23 +323,23 @@ void i8228_bist()
     sigplot_init(pl, ss, "i8228_bist_intackw_with_hold",
                  "Intel 8228 System Controller and Bus Driver 8080A CPU",
                  "Behavior during an INTACKW ended by HOLD", tau_min, TAU - tau_min);
-    sigplot_sig(pl, trace_DATA);
-    sigplot_sig(pl, trace_STSTB_);
-    sigplot_sig(pl, trace_DBIN);
-    sigplot_sig(pl, trace_HLDA);
-    sigplot_sig(pl, trace_INTA_);
+    sigtrace_plot(trace_DATA->base, pl);
+    sigtrace_plot(trace_STSTB_->base, pl);
+    sigtrace_plot(trace_DBIN->base, pl);
+    sigtrace_plot(trace_HLDA->base, pl);
+    sigtrace_plot(trace_INTA_->base, pl);
     sigplot_fini(pl);
 
-    sigtrace_fini(trace_DATA);
-    sigtrace_fini(trace_STSTB_);
-    sigtrace_fini(trace_DBIN);
-    sigtrace_fini(trace_WR_);
-    sigtrace_fini(trace_HLDA);
-    sigtrace_fini(trace_MEMR_);
-    sigtrace_fini(trace_MEMW_);
-    sigtrace_fini(trace_IOR_);
-    sigtrace_fini(trace_IOW_);
-    sigtrace_fini(trace_INTA_);
+    sigtrace_fini(trace_DATA->base);
+    sigtrace_fini(trace_STSTB_->base);
+    sigtrace_fini(trace_DBIN->base);
+    sigtrace_fini(trace_WR_->base);
+    sigtrace_fini(trace_HLDA->base);
+    sigtrace_fini(trace_MEMR_->base);
+    sigtrace_fini(trace_MEMW_->base);
+    sigtrace_fini(trace_IOR_->base);
+    sigtrace_fini(trace_IOW_->base);
+    sigtrace_fini(trace_INTA_->base);
 }
 
 // === === === === === === === === === === === === === === === ===

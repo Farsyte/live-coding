@@ -1,4 +1,4 @@
-#include "i8080_test.h"
+#include "chip/i8080_test.h"
 
 // === === === === === === === === === === === === === === === ===
 //                    POWER-ON SELF TEST SUPPORT

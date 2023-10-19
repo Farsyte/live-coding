@@ -1,7 +1,7 @@
-#include "sched.h"
+#include "common/sched.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <stdlib.h>     // General utilities
-#include "support.h"
+#include "common/support.h"
 
 // sched: a place for things to do in order
 

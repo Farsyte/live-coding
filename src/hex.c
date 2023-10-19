@@ -1,4 +1,4 @@
-#include "hex.h"
+#include "common/hex.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <stdlib.h>     // General utilities
 

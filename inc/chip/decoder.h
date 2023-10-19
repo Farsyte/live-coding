@@ -1,7 +1,7 @@
 #pragma once
-#include "addr.h"
-#include "edge.h"
-#include "support.h"
+#include "wa16/addr.h"
+#include "common/edge.h"
+#include "common/support.h"
 
 // decoder: Address Space Decoder for 8080-like microcomputer system
 //

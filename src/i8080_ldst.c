@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "i8080_impl.h"
+#include "chip/i8080_impl.h"
 
 #define NAME_LDAX_M1T4(RH,RL)	i8080_state_ldax_M1T4_##RH##RL
 #define	DEFN_LDAX_M1T4(RH,RL)	static f8080State NAME_LDAX_M1T4(RH,RL)

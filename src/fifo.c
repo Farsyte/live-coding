@@ -1,8 +1,8 @@
-#include "fifo.h"
+#include "common/fifo.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <stdlib.h>     // General utilities
 #include <string.h>     // String handling
-#include "support.h"
+#include "common/support.h"
 
 static void         fifo_double(Fifo);
 

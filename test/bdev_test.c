@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <unistd.h>
-#include "bdev.h"
+#include "common/bdev.h"
 
 // capacity numbers selected to match IBM format 8" diskette,
 // which is quoted 2.0 megabits per diskette.

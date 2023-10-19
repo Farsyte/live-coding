@@ -1,4 +1,4 @@
-#include "hex.h"
+#include "common/hex.h"
 
 // hex: parse the content of a hex file.
 

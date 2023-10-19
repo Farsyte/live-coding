@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "chip/decoder.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 
 // decoder: efficient enables for mem pages and i/o ports
