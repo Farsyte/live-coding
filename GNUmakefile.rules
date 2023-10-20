@@ -15,7 +15,6 @@ C               = $Q $I
 RF              = $C /bin/rm -f
 RD              = $C /bin/rm -fr
 
-
 MAKEFLAGS	:= --no-print-directory
 
 # Allow me to override certain items from the command line:
@@ -25,6 +24,7 @@ ECHO		= echo
 E               = $C ${ECHO}
 P		= $C printf
 
+BINDIR		:= bin/
 INCDIR		:= inc/
 SRCDIR		:= src/
 ASLDIR		:= asl/
@@ -35,6 +35,7 @@ PREDIR		:= pre/
 OBJDIR		:= obj/
 DEPDIR		:= dep/
 COVDIR		:= cov/
+UTLDIR		:= utl/
 
 ASL		:= asl
 ASLFLAGS	:= -q -L -gnuerrors
@@ -51,7 +52,10 @@ ALLLIBS         = $(LIBS) $(SYSLIBS)
 HSRC            := ${wildcard ${INCDIR}*.h}
 CSRC            := ${wildcard ${SRCDIR}*.c}
 TSRC            := ${wildcard ${TESTDIR}*.c}
-EXEC		:= ${PROG:%=bin/%}
+EXEC		:= ${PROG:%=${BINDIR}%}
+
+USRC		:= ${wildcard ${UTLDIR}*.c}
+UTIL		:= ${USRC:${UTLDIR}%.c=${BINDIR}%}
 
 ASLS            := ${wildcard ${ASLDIR}*.asm}
 AOBS		:= ${ASLS:${ASLDIR}%.asm=${OBJDIR}%.p} ${ASLMORE:%=${OBJDIR}%.p}
@@ -61,6 +65,7 @@ SRCB		:= ${CSRC:${SRCDIR}%.c=%} \
 		   ${TSRC:${TESTDIR}%.c=%}
 OBJS		:= ${SRCB:%=${OBJDIR}%.o}
 DEPS		:= ${SRCB:%=${DEPDIR}%.d}
+DEPS		+= ${USRC:${UTLDIR}%.c=${DEPDIR}%.d}
 
 # coverage only notices sources in ${SRCDIR}, not ${TESTDIR}.
 GCNOS		:= ${CSRC:${SRCDIR}%.c=${OBJDIR}%.gcno}
@@ -115,6 +120,11 @@ default::	exec
 clean::
 	${RF} ${EXEC}
 
+util::		${UTIL}
+default::	util
+clean::
+	${RF}	${UTIL}
+
 # Modified compile rule
 # - generate a breadcrumb output line
 # - do not echo the (potentially very long) command lines
@@ -143,6 +153,11 @@ ${EXEC}:	${OBJS}
 	$E 'link ${PROG} ...'
 	$Q ${LINK.c} ${OBJS} ${LOADLIBES} ${LDLIBS} -o '$@'
 
+${BINDIR}%: ${UTLDIR}%.c
+	$E 'cc $* ... [util]'
+	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
+	$Q $(CC) $(CFLAGS) $< ${LOADLIBES} ${LDLIBS} -o $@ 2>log/cc-$*.stderr
+
 clean::
 	${RF} *.err *.log
 	${RF} ${EXEC}
@@ -150,9 +165,9 @@ clean::
 	${RF} log/cc-*.stderr
 	${RF} ${DEPDIR}*.d
 
-# doc/img/%.png:	log/timing/%.txt bin/timing.py
-doc/img/%.png:		bin/timing.py
-	$C bin/timing.py $*
+# doc/img/%.png:	log/timing/%.txt ${BINDIR}timing.py
+doc/img/%.png:		${BINDIR}timing.py
+	$C ${BINDIR}timing.py $*
 
 plots::		${PPNG}
 
@@ -163,7 +178,7 @@ ${COVDIR}%.gcov:	${OBJDIR}%.gcno
 	$C gcov $< -t > $@
 
 covs::		${COVS}
-	$C bin/recov.py ${COVS}
+	$C ${BINDIR}recov.py ${COVS}
 
 coverage::	${PROG:%=log/run-%.log}
 	$C ${MAKE} covs

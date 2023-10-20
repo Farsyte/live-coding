@@ -58,6 +58,7 @@ clean::
 # usually with a "make await" between iteraions.
 
 loop::
+	$C ${MAKE} util
 	$C ${MAKE} hexs
 	$C ${MAKE} cmp
 
@@ -79,7 +80,7 @@ wait::
 	$C inotifywait \
 		-q ${WAITE:%=-e %} \
 		GNUmakefile GNUmakefile.rules \
-		${HSRC} ${CSRC} ${TSRC} ${ASLS}
+		${HSRC} ${CSRC} ${TSRC} ${ASLS} ${USRC}
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::
@@ -100,11 +101,11 @@ gdb::		${EXEC}
 
 format::	${EXEC}
 	$E 'fix c headers ...'
-	$C bin/fix-c-includes.sh ${CSRC} ${TSRC}
+	$C bin/fix-c-includes.sh ${CSRC} ${TSRC} ${USRC}
 	$E 'fix h headers ...'
 	$C bin/fix-h-includes.sh ${HSRC}
 	$E 'indent ...'
-	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC}
+	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC} ${USRC}
 
 
 world::
