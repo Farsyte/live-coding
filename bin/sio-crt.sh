@@ -12,6 +12,6 @@ fg="#00FF00" # green
 xterm \
      -title 'Video Terminal' \
      -fn "$font" -fg "$fg" -bg "$bg" \
-     -geometry 64x16+3440-813 \
+     -geometry 64x16+3440-833 \
      +sb \
      -e "$bin/sio-loop.sh" 2502

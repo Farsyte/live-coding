@@ -1,0 +1,16 @@
+* BDEV Mass Storage Area
+
+This directory houses the files used to persist BDEV drive contents
+from run to run, with one drive per file.
+
+Data from the first sector of the first track is stored at the
+beginning of the file, followed immediately by the data for the other
+sectors on the track in ascending sector number; this is followed by
+the second and following tracks in the same way.
+
+The files may or may not be padded out so that their length is a
+multiple of the host system page size.
+
+If code accessing this data knows about the disk geometry (number of
+bytes per sector, sectors per track, and tracks total) then all such
+code needs to agree on these values via some external mechanism.

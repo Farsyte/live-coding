@@ -64,3 +64,4 @@
 -TStepAt
 
 -Tbdev_seek_fn
+-THexStoreFn

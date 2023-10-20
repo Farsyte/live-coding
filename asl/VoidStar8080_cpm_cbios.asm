@@ -2,7 +2,7 @@
 
 	.cpu	8080
 
-msize	equ	20		;cp/m ram size in kilobytes
+msize	equ	62		;cp/m ram size in kilobytes
 
 ;	"bias" is address offset from 3400h for memory systems larger
 ;	than 20k (referred to as "b" throughout the text)
@@ -42,106 +42,6 @@ wboote:	jmp	wboot	;warm start
 
 	jmp	listst	;return list status
 	jmp	sectran	;sector translate
-
-        NEWPAGE
-
-;;; === === === === === === === === === === === === === === === ===
-;;; FIXED TABLES
-;;; === === === === === === === === === === === === === === === ===
-
-	;;; === === === === === === === === === === === ===
-	;;; Disk Parameter Table for 4 Drives
-	;;; === === === === === === === === === === === ===
-
-
-ndisks	set	4		;for later reference
-dpbase	equ	$		;base of disk parameter blocks
-
-dpe0:	dw	xlt0,0000h	;translate table
-	dw	0000h,0000h	;scratch area
-	dw	dirbuf,dpb0	;dir buff,parm block
-	dw	csv0,alv0	;check, alloc vectors
-
-dpe1:	dw	xlt1,0000h	;translate table
-	dw	0000h,0000h	;scratch area
-	dw	dirbuf,dpb1	;dir buff,parm block
-	dw	csv1,alv1	;check, alloc vectors
-
-dpe2:	dw	xlt2,0000h	;translate table
-	dw	0000h,0000h	;scratch area
-	dw	dirbuf,dpb2	;dir buff,parm block
-	dw	csv2,alv2	;check, alloc vectors
-
-dpe3:	dw	xlt3,0000h	;translate table
-	dw	0000h,0000h	;scratch area
-	dw	dirbuf,dpb3	;dir buff,parm block
-	dw	csv3,alv3	;check, alloc vectors
-
-	;;; === === === === === === === === === === === ===
-	;;; 	Drive A: IBM Single Density 8-inch diskette
-	;;; 	DISKDEF	[1, 26, 6, 1024, 243, 64, 64, 2]
-	;;; === === === === === === === === === === === ===
-
-als0	set	31		;size of allocation vector
-css0	set	16		;number of checksum elements
-
-dpb0	equ	$		;disk parm block
-	dw	26		;sec per track
-	db	3		;block shift
-	db	7		;block mask
-	db	0		;extnt mask
-	dw	242		;disk size-1
-	dw	63		;directory max
-	db	192		;alloc0
-	db	0		;alloc1
-	dw	16		;check size
-	dw	2		;offset
-
-xlt0	equ	$		;skew factor 6
-	db	1,7,13,19,25,5,11,17,23,3,9,15,21
-	db	2,8,14,20,26,6,12,18,24,4,10,16,22
-
-	;; === === === === === === === === === === === ===
-	;; 	Drive B is the same as Drive A
-
-dpb1	equ	dpb0	;equivalent parameters
-als1	equ	als0	;same allocation vector size
-css1	equ	css0	;same checksum vector size
-xlt1	equ	xlt0	;same translate table
-
-	;;; === === === === === === === === === === === ===
-	;;; 	Drive C: Hypothetical Maximum Size Hard Drive
-	;;; 	DISKDEF	[1, 255, 0, 8192, 1016, 1024, 0, 1]
-	;;; === === === === === === === === === === === ===
-
-als2	set	127		;size of allocation vector
-css2	set	0		;number of checksum elements
-
-dpb2	equ	$		;disk parm block
-	dw	255		;sec per track
-	db	6		;block shift
-	db	63		;block mask
-	db	3		;extnt mask
-	dw	1015		;disk size-1
-	dw	1023		;directory max
-	db	240		;alloc0
-	db	0		;alloc1
-	dw	0		;check size
-	dw	1		;offset
-
-xlt2	equ	0		;no xlate table
-
-	;; === === === === === === === === === === === ===
-	;; 	Drive D is the same as Drive C
-
-dpb3	equ	dpb2	;equivalent parameters
-als3	equ	als2	;same allocation vector size
-css3	equ	css2	;same checksum vector size
-xlt3	equ	xlt2	;same translate table
-
-;;; === === === === === === === === === === === === === === === ===
-;;; END OF FIXED TABLES
-;;; === === === === === === === === === === === === === === === ===
 
         NEWPAGE
 
@@ -746,6 +646,114 @@ writel:
 	jnz	writel
 	xra	a
 	ret
+
+endtext	equ     $
+
+        NEWPAGE
+
+;;; === === === === === === === === === === === === === === === ===
+;;; FIXED TABLES
+;;; === === === === === === === === === === === === === === === ===
+
+	;;; === === === === === === === === === === === ===
+	;;; Disk Parameter Table for 4 Drives
+	;;; === === === === === === === === === === === ===
+
+
+ndisks	set	4		;for later reference
+dpbase	equ	$		;base of disk parameter blocks
+
+dpe0:	dw	xlt0,0000h	;translate table
+	dw	0000h,0000h	;scratch area
+	dw	dirbuf,dpb0	;dir buff,parm block
+	dw	csv0,alv0	;check, alloc vectors
+
+dpe1:	dw	xlt1,0000h	;translate table
+	dw	0000h,0000h	;scratch area
+	dw	dirbuf,dpb1	;dir buff,parm block
+	dw	csv1,alv1	;check, alloc vectors
+
+dpe2:	dw	xlt2,0000h	;translate table
+	dw	0000h,0000h	;scratch area
+	dw	dirbuf,dpb2	;dir buff,parm block
+	dw	csv2,alv2	;check, alloc vectors
+
+dpe3:	dw	xlt3,0000h	;translate table
+	dw	0000h,0000h	;scratch area
+	dw	dirbuf,dpb3	;dir buff,parm block
+	dw	csv3,alv3	;check, alloc vectors
+
+	;;; === === === === === === === === === === === ===
+	;;; 	Drive A: IBM Single Density 8-inch diskette
+	;;; 	DISKDEF	[1, 26, 6, 1024, 243, 64, 64, 2]
+	;;; === === === === === === === === === === === ===
+
+als0	set	31		;size of allocation vector
+css0	set	16		;number of checksum elements
+
+dpb0	equ	$		;disk parm block
+	dw	26		;sec per track
+	db	3		;block shift
+	db	7		;block mask
+	db	0		;extnt mask
+	dw	242		;disk size-1
+	dw	63		;directory max
+	db	192		;alloc0
+	db	0		;alloc1
+	dw	16		;check size
+	dw	2		;offset
+
+xlt0	equ	$		;skew factor 6
+	db	1,7,13,19,25,5,11,17,23,3,9,15,21
+	db	2,8,14,20,26,6,12,18,24,4,10,16,22
+
+	;; === === === === === === === === === === === ===
+	;; 	Drive B is the same as Drive A
+
+dpb1	equ	dpb0	;equivalent parameters
+als1	equ	als0	;same allocation vector size
+css1	equ	css0	;same checksum vector size
+xlt1	equ	xlt0	;same translate table
+
+	;;; === === === === === === === === === === === ===
+	;;; 	Drive C: Hypothetical Maximum Size Hard Drive
+	;;; 	DISKDEF	[1, 255, 0, 8192, 1016, 1024, 0, 1]
+	;;; === === === === === === === === === === === ===
+
+als2	set	127		;size of allocation vector
+css2	set	0		;number of checksum elements
+
+dpb2	equ	$		;disk parm block
+	dw	255		;sec per track
+	db	6		;block shift
+	db	63		;block mask
+	db	3		;extnt mask
+	dw	1015		;disk size-1
+	dw	1023		;directory max
+	db	240		;alloc0
+	db	0		;alloc1
+	dw	0		;check size
+	dw	1		;offset
+
+xlt2	equ	0		;no xlate table
+
+	;; === === === === === === === === === === === ===
+	;; 	Drive D is the same as Drive C
+
+dpb3	equ	dpb2	;equivalent parameters
+als3	equ	als2	;same allocation vector size
+css3	equ	css2	;same checksum vector size
+xlt3	equ	xlt2	;same translate table
+
+;;; === === === === === === === === === === === === === === === ===
+;;; END OF FIXED TABLES
+;;; === === === === === === === === === === === === === === === ===
+
+enddata	equ	$
+
+;;; === === === === === === === === === === === === === === === ===
+;;; MAXIMUM EXTENT OF DISK IMAGE
+;;; === === === === === === === === === === === === === === === ===
 
 endbios	equ	$
 
