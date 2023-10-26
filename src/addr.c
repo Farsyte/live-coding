@@ -1,7 +1,7 @@
 #include "wa16/addr.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "common/stepat.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // addr: a signal bus with callbacks for changes in state.
 //

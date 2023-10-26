@@ -1,8 +1,8 @@
 #pragma once
-#include "wa16/addr.h"
 #include "common/data.h"
 #include "common/edge.h"
-#include "common/support.h"
+#include "simext/support.h"
+#include "wa16/addr.h"
 
 // ram8107x8x4: 16 KiB memory for 8080-like microcomputer system
 //

@@ -5,37 +5,40 @@
 # Allow me to use "make Q=" to expose the commands
 # being executed, but normally have them hidden.
 
-Q               = @
-I               = -
-C               = $Q $I
+Q		:= @
+I		:= -
+C		:= $Q $I
 
 # RF and RD exist because some versions of this file
 # were tuned to deal with operating systems where these
 # operations did not involve typing "/bin/rm ..."
-RF              = $C /bin/rm -f
-RD              = $C /bin/rm -fr
+RF		:= $C /bin/rm -f
+RD		:= $C /bin/rm -fr
 
 MAKEFLAGS	:= --no-print-directory
 
 # Allow me to override certain items from the command line:
 # use ECHO=true to turn off echo. Yes, confusing. Deal with it.
-ECHO		= echo
+ECHO		:= echo
 
-E               = $C ${ECHO}
-P		= $C printf
+E		:= $C ${ECHO}
+P		:= $C printf
 
-BINDIR		:= bin/
-INCDIR		:= inc/
-SRCDIR		:= src/
 ASLDIR		:= asl/
-LSTDIR		:= lst/
-HEXDIR		:= hex/
-TESTDIR		:= test/
-PREDIR		:= pre/
-OBJDIR		:= obj/
-DEPDIR		:= dep/
+BINDIR		:= bin/
 COVDIR		:= cov/
+DEPDIR		:= dep/
+HEXDIR		:= hex/
+INCDIR		:= inc/
+LIBDIR		:= lib/
+LSTDIR		:= lst/
+OBJDIR		:= obj/
+PREDIR		:= pre/
+SRCDIR		:= src/
+TESTDIR		:= test/
 UTLDIR		:= utl/
+
+EXTDIR		:= ${SRCDIR}simext/
 
 ASL		:= asl
 ASLFLAGS	:= -q -L -gnuerrors
@@ -43,21 +46,34 @@ ASLFLAGS	:= -q -L -gnuerrors
 P2H		:= p2hex
 P2HFLAGS	:= -q -F Intel
 
-# LIBS            = util                        # add personal libraries
-# SYSLIBS         = pthread ncurses m           # add system libraries
-SYSLIBS         = ncurses m     # add system libraries
+# LIBS		  = util			# add personal libraries
+# SYSLIBS	  = pthread ncurses m		# add system libraries
+SYSLIBS		:= ncurses m	 # add system libraries
 
-ALLLIBS         = $(LIBS) $(SYSLIBS)
+ALLLIBS		:= $(LIBS) $(SYSLIBS)
+ALLLIBA		:= 
 
-HSRC            := ${wildcard ${INCDIR}*.h}
-CSRC            := ${wildcard ${SRCDIR}*.c}
-TSRC            := ${wildcard ${TESTDIR}*.c}
+ARFLAGS		:= cq
+
+HSRC		:= ${wildcard ${INCDIR}*.h}
+HSRC		+= ${wildcard ${INCDIR}*/*.h}
+CSRC		:= ${wildcard ${SRCDIR}*.c}
+LSRC		:= ${wildcard ${SRCDIR}/*/*.c}
+TSRC		:= ${wildcard ${TESTDIR}*.c}
 EXEC		:= ${PROG:%=${BINDIR}%}
+
+EXTSRC		:= ${wildcard ${EXTDIR}*.c}
+EXTOBJ		:= ${EXTSRC:${EXTDIR}%.c=${OBJDIR}%.o}
+EXTLIB		:= simext
+EXTLIBA		:= ${EXTLIB:%=${LIBDIR}lib%.a}
+
+ALLLIBS		:= ${EXTLIB}
+ALLLIBA		:= ${EXTLIBA}
 
 USRC		:= ${wildcard ${UTLDIR}*.c}
 UTIL		:= ${USRC:${UTLDIR}%.c=${BINDIR}%}
 
-ASLS            := ${wildcard ${ASLDIR}*.asm}
+ASLS		:= ${wildcard ${ASLDIR}*.asm}
 AOBS		:= ${ASLS:${ASLDIR}%.asm=${OBJDIR}%.p} ${ASLMORE:%=${OBJDIR}%.p}
 HEXS		+= ${AOBS:${OBJDIR}%.p=${HEXDIR}%.hex}
 
@@ -83,16 +99,16 @@ DBGOPT		:= $(DBG) $(PRO) $(OPT) $(COV)
 
 CFLAGS		:= ${STD} ${IFLAGS} ${DBGOPT} ${WFLAGS}
 
-LDFLAGS		:= ${PRO} ${COV}
+LDFLAGS		:= ${PRO} ${COV} ${LIBDIR:%=-L%}
 LDLIBS		:= ${ALLLIBS:%=-l%}
 
 LINK.c		:= $(CC) $(CFLAGS) $(LDFLAGS)
 
 # Start building up the "make" targets that I like to always have.
 
-default::               		; ${NOOP}
-all::			default         ; ${NOOP}
-clean::                                 ; ${NOOP}
+default::				; ${NOOP}
+all::			default		; ${NOOP}
+clean::					; ${NOOP}
 
 # Create a "make world" target that first builds
 # the whole "clean" target, then when it is done
@@ -131,32 +147,41 @@ clean::
 # - maintain a dependency file for each source file
 # 
 
-${OBJDIR}%.o:    ${SRCDIR}%.c
+${OBJDIR}%.o:	 ${SRCDIR}%.c
 	$E 'cc $* ...'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
 
-${OBJDIR}%.o:    ${TESTDIR}%.c
+${OBJDIR}%.o:	 ${TESTDIR}%.c
 	$E 'cc $* ...'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
 
-${PREDIR}%.E:    ${SRCDIR}%.c
+${OBJDIR}%.o:	 ${EXTDIR}%.c
+	$E 'cc $* ...'
+	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
+	$Q $(CC) $(CFLAGS) $< -c -o $@ 2>log/cc-$*.stderr
+
+${PREDIR}%.E:	 ${SRCDIR}%.c
 	$E 'cpp $* ...'
 	$Q $(CC) $(CFLAGS) $< -E | indent -st > $@
 
-${PREDIR}%.E:    ${TESTDIR}%.c
+${PREDIR}%.E:	 ${TESTDIR}%.c
 	$E 'cpp $* ...'
 	$Q $(CC) $(CFLAGS) $< -E | indent -st > $@
 
-${EXEC}:	${OBJS}
+${EXTLIBA}:	${EXTOBJ}
+	${RF} "$@"
+	${AR} ${ARFLAGS} "$@" ${EXTOBJ}
+
+${EXEC}:	${OBJS} ${ALLLIBA}
 	$E 'link ${PROG} ...'
-	$Q ${LINK.c} ${OBJS} ${LOADLIBES} ${LDLIBS} -o '$@'
+	$Q ${LINK.c} ${OBJS} ${LDLIBS} -o '$@'
 
-${BINDIR}%: ${UTLDIR}%.c
+${BINDIR}%: ${UTLDIR}%.c ${ALLLIBA}
 	$E 'cc $* ... [util]'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
-	$Q $(CC) $(CFLAGS) $< ${LOADLIBES} ${LDLIBS} -o $@ 2>log/cc-$*.stderr
+	$Q $(LINK.c) ${UTLDIR}$*.c ${LDLIBS} -o $@ 2>log/cc-$*.stderr
 
 clean::
 	${RF} *.err *.log

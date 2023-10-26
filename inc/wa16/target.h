@@ -1,5 +1,5 @@
 #pragma once
-#include "common/support.h"
+#include "simext/support.h"
 
 // Definitions for data types to use in the current simulation target.
 //

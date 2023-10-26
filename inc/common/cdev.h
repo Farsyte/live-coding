@@ -1,8 +1,8 @@
 #pragma once
 #include "common/bring.h"
-#include "common/support.h"
 #include "common/data.h"
 #include "common/edge.h"
+#include "simext/support.h"
 
 #define CDEV_SILO_CAP		BRING_CAP
 

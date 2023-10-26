@@ -1,7 +1,7 @@
 #include "common/sigplot.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "common/support.h"
+#include "simext/support.h"
 
 void sigplot_init(SigPlot plot, SigSess sess, Cstr name,
                   Cstr title, Cstr caption, Tau tau_min, Tau tau_len)

@@ -1,6 +1,6 @@
 #pragma once
 #include "common/edge.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // i8224: Clock Generator and Driver for 8080A CPU
 //

@@ -1,5 +1,5 @@
 #pragma once
-#include "common/support.h"
+#include "simext/support.h"
 #include "wa16/target.h"
 
 #define BRING_CAP	255

@@ -1,5 +1,5 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
-#include "common/support.h"
+#include "simext/support.h"
 
 // rtc_post: verify RTC is ready to use.
 //

@@ -1,7 +1,7 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include <stdlib.h>     // General utilities
 #include "common/subs.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // subs: a place for things to do
 

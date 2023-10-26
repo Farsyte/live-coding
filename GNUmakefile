@@ -80,7 +80,9 @@ wait::
 	$C inotifywait \
 		-q ${WAITE:%=-e %} \
 		GNUmakefile GNUmakefile.rules \
-		${HSRC} ${CSRC} ${TSRC} ${ASLS} ${USRC}
+		${ASLS} ${HSRC} \
+		${CSRC} ${LSRC} \
+		${TSRC} ${USRC}
 
 # Add a "make cmp" to the bottom of the "make all" list.
 all::
@@ -101,11 +103,11 @@ gdb::		${EXEC}
 
 format::	${EXEC}
 	$E 'fix c headers ...'
-	$C bin/fix-c-includes.sh ${CSRC} ${TSRC} ${USRC}
+	$C bin/fix-c-includes.sh ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
 	$E 'fix h headers ...'
 	$C bin/fix-h-includes.sh ${HSRC}
 	$E 'indent ...'
-	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC} ${USRC}
+	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
 
 
 world::

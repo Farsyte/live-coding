@@ -1,7 +1,7 @@
 #pragma once
-#include "common/support.h"
 #include "common/sigplot.h"
 #include "common/sigsess.h"
+#include "simext/support.h"
 #include <stdio.h>      // Input/output
 
 // sigtrace: record signal trace data

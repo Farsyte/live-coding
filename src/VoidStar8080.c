@@ -1,13 +1,14 @@
 #include "system/VoidStar8080.h"
 #include "chip/i8080_status.h"
 #include "common/clock.h"
+#include "simext/mapdrive.h"
 
 // VoidStar8080 boots with four drives connected.
 //
 //  Dsk   Capacity   Description
-//   A     256,256   IBM Single Density 8-inch diskette
-//   B     512,512   IBM Double Density 8-inch diskette
-//   C   2,109,152   "Two Meg" hard drive
+//   A     256,256   IBM Single Density Single Sided 8-inch diskette
+//   B     256,256   IBM Single Density Single Sided 8-inch diskette
+//   C   8,355,840   Largest drive addressable
 //   D   8,355,840   Largest drive addressable
 //
 // By default, all drives are initialized with each byte
@@ -20,6 +21,7 @@ typedef struct sDisk {
     int                 ntrk;
     int                 nsec;
     pByte               data;
+    pDriveData          drive;
 }                  *pDisk, Disk[1];
 
 typedef struct sBctx {
@@ -31,7 +33,7 @@ static void         VoidStar8080_link(VoidStar8080 sys);
 static void         enable_shadow(VoidStar8080 sys);
 static unsigned     disk_cap(Disk d);
 static Byte        *disk_ptr(pBctx, int dsk, int trk, int sec);
-static void         disk_init(Disk d, Cstr name, int ntrk, int nsec);
+static void         disk_init(Disk d, Cstr name, int drive_number, int ntrk, int nsec);
 static void         VoidStar8080_seek(pBctx bctx);
 
 static void         rom_load(VoidStar8080, Cstr basename);
@@ -146,10 +148,10 @@ void VoidStar8080_init(VoidStar8080 sys, Cstr name)
 
     pBctx               bctx = malloc(sizeof *bctx);
 
-    disk_init(bctx->disk[0], "A", 77, 26);
-    disk_init(bctx->disk[1], "B", 77, 26);
-    disk_init(bctx->disk[2], "C", 256, 255);
-    disk_init(bctx->disk[3], "D", 256, 255);
+    disk_init(bctx->disk[0], "A", 0, 77, 26);
+    disk_init(bctx->disk[1], "B", 1, 77, 26);
+    disk_init(bctx->disk[2], "C", 2, 128, 128);
+    disk_init(bctx->disk[3], "D", 3, 256, 255);
     sys->bctx = bctx;
 
     for (int chip = 0; chip < ROM_CHIPS; ++chip) {
@@ -482,21 +484,27 @@ static Byte        *disk_ptr(pBctx bctx, int dsk, int trk, int sec)
     if ((trk < 0) || (trk >= disk->ntrk))
         return NULL;    /* bad track number */
     ASSERT(disk->data, "somehow disk %s data is null", disk->name);
-
     return disk->data + (trk * disk->nsec + sec - 1) * BPS;
 }
-static void disk_init(Disk d, Cstr name, int ntrk, int nsec)
+static void disk_init(Disk d, Cstr name, int drive_number, int ntrk, int nsec)
 {
+    pDriveData          dd;
+
     d->name = name;
     d->ntrk = ntrk;
     d->nsec = nsec;
 
     size_t              size = disk_cap(d);
-    d->data = malloc(size);
-    ASSERT(d->data, "unable to allocate %lu bytes for drive %s\n", size, name);
-    fprintf(stderr, "Disk %s: %3d tracks, %3d sectors: %7lu bytes formatted capacity\n",
-            name, ntrk, nsec, size);
-    memset(d->data, 0, size);
+
+    dd = map_drive(drive_number);
+    ASSERT(NULL != dd, "unable to open media for drive %s", name);
+    ASSERT((size_t)dd->data_length >= size,
+           "media for drive %s has only %d of the %lu desired byte capacity.",
+           name, dd->data_length, size);
+
+    d->data = (Byte *)dd + dd->data_offset;
+    fprintf(stderr, "Disk %s: %3d tracks, %3d sectors: %7lu bytes formatted capacity%s\n",
+            name, ntrk, nsec, size, dd->write_protect ? " (WRITE PROTECT)" : "");
 }
 
 static void VoidStar8080_seek(pBctx bctx)

@@ -9,6 +9,8 @@ top=$(dirname "$bin")
 dev="$top/bdev"
 hex="$top/hex"
 
+export BDEV_DIR="$dev"
+
 # Drive A: boot CP/M
 #    VoidStar8080_boot_cpm.hex
 #	0080h -> Track 00, Sector 01
@@ -35,7 +37,7 @@ hex="$top/hex"
 # Drive D: mass storage (not bootable) ~8 MiB
 
 "$bin/bdev-format" \
-    "$dev/drive-A.mmap" \
+    0 \
     128 26 77 \
     "$hex/VoidStar8080_boot_cpm.hex" \
     "$hex/cpm22ccp62k.hex" \
@@ -43,15 +45,15 @@ hex="$top/hex"
     "$hex/VoidStar8080_cpm_cbios.hex"
 
 "$bin/bdev-format" \
-    "$dev/drive-B.mmap" \
+    1 \
     128 26 77 \
     "$hex/VoidStar8080_boot_forth.hex" \
     "$hex/VoidStar8080_forth.hex"
 
 "$bin/bdev-format" \
-    "$dev/drive-C.mmap" \
-    128 128 128
+    2 \
+    128 255 256
 
 "$bin/bdev-format" \
-    "$dev/drive-D.mmap" \
+    3 \
     128 255 256

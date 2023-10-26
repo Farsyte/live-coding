@@ -9,7 +9,7 @@ void bring_init(Bring r, Cstr name)
     r->name = name;
     r->prod = 0;
     r->cons = 0;
-    memset((Byte *) r->data, 0, BRING_CAP);
+    memset((Byte *)r->data, 0, BRING_CAP);
 }
 
 void bring_invar(const Bring r)

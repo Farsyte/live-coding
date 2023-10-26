@@ -1,8 +1,8 @@
 #pragma once
-#include "wa16/addr.h"
 #include "common/data.h"
 #include "common/edge.h"
-#include "common/support.h"
+#include "simext/support.h"
+#include "wa16/addr.h"
 
 // i8080: Single Chip 8-bit Microprocessor
 //

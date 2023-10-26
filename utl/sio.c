@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     const int           backlog = 10;
     FIN(rv, listen, server, backlog);
 
-    fprintf(stderr, "tcp-tty: ready to connect on port %d\r\n", port);
+    fprintf(stderr, "sio ready to connect on port %d\r\n", port);
 
     // Accept connection from our client.
     struct sockaddr_in  client_addr;
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
         }
     }
 
-    fprintf(stderr, "\r\n\r\n\r\nsession from port %d terminated\r\n",
+    fprintf(stderr, "\n\r\n\n\nsession from port %d terminated\r\n",
             ntohs(client_addr.sin_port));
 
     close(conn);

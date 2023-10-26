@@ -1,7 +1,7 @@
 #include "common/main.h"
 #include <string.h>     // String handling
 #include "common/cdev.h"
-#include "common/support.h"
+#include "simext/support.h"
 #include "system/VoidStar8080.h"
 
 int main(int argc, char **argv)

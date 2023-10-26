@@ -3,7 +3,7 @@
 #include <ctype.h>      // Functions to determine the type contained in character data
 #include <errno.h>      // Macros reporting error conditions
 #include <string.h>     // String handling
-#include "common/hex.h"
+#include "simext/hex.h"
 
 static void         rom8316_rd(Rom8316);
 static void         rom8316_dz(Rom8316);

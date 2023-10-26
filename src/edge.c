@@ -1,7 +1,7 @@
 #include "common/edge.h"
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "common/stepat.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // edge: a signal with callbacks for rising and falling edges
 //

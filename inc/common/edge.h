@@ -1,6 +1,6 @@
 #pragma once
 #include "common/subs.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // edge: a signal with callbacks for rising and falling edges
 //

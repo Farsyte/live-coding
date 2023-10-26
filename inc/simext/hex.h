@@ -1,5 +1,5 @@
 #pragma once
-#include "common/support.h"
+#include "simext/support.h"
 
 // hex: parse the content of a hex file.
 
@@ -10,7 +10,7 @@
 // segmented or 32-bit linear address spaces), and the byte of data
 // for that location.
 
-typedef void        HexStoreFn(void *ctx, unsigned addr, unsigned data);
+typedef void HexStoreFn (void *ctx, unsigned addr, unsigned data);
 
 // hex_parse: parse a named file in intel HEX format.
 //
@@ -18,4 +18,4 @@ typedef void        HexStoreFn(void *ctx, unsigned addr, unsigned data);
 // Returns -2 if the file ends early.
 // Returns -3 if a character should be a hex digit but is not.
 
-extern int          hex_parse(Cstr filename, HexStoreFn * store, void *ctx);
+extern int          hex_parse(Cstr filename, HexStoreFn *store, void *ctx);

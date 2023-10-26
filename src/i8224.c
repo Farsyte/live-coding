@@ -2,7 +2,7 @@
 #include <assert.h>     // Conditionally compiled macro that compares its argument to zero
 #include "common/clock.h"
 #include "common/sigtrace.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 static void         i8224_on_osc_rise(i8224 gen);
 static void         i8224_on_reset_rise(i8224 gen);

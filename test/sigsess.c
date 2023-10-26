@@ -3,7 +3,7 @@
 #include <errno.h>      // Macros reporting error conditions
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "common/support.h"
+#include "simext/support.h"
 
 void sigsess_init(SigSess sess, Cstr name)
 {

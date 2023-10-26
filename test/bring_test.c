@@ -1,6 +1,6 @@
 #include <assert.h>
 #include "common/bring.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // TODO add comments
 
@@ -16,8 +16,8 @@ void bring_post()
     assert(1 == sizeof(r->cons));
     assert(1 == sizeof(r->data[0]));
     assert(BRING_CAP + 1 == sizeof(r->data));
-    assert(BRING_CAP == (Byte) (sizeof(r->data) - 1));
-    assert(0 == (Byte) sizeof(r->data));
+    assert(BRING_CAP == (Byte)(sizeof(r->data) - 1));
+    assert(0 == (Byte)sizeof(r->data));
 
     bring_init(r, "test_bring");
     ASSERT_EQ_integer(1, bring_empty(r));

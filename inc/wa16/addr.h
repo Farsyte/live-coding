@@ -1,6 +1,6 @@
 #pragma once
 #include "common/subs.h"
-#include "common/support.h"
+#include "simext/support.h"
 #include "wa16/target.h"
 
 // addr: a signal bus with callbacks for changes in state.

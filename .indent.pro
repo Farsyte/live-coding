@@ -50,6 +50,9 @@
 
 -TFILE
 
+-TByte
+-TCstr
+
 -TTau
 
 -TpSubs
@@ -65,3 +68,4 @@
 
 -Tbdev_seek_fn
 -THexStoreFn
+

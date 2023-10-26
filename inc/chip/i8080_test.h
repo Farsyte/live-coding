@@ -1,20 +1,20 @@
 #pragma once
-#include "wa16/addr.h"
-#include "common/clock.h"
-#include "common/data.h"
 #include "chip/decoder.h"
-#include "common/edge.h"
 #include "chip/i8080.h"
 #include "chip/i8080_impl.h"
 #include "chip/i8224.h"
 #include "chip/i8228.h"
 #include "chip/ram8107x8x4.h"
 #include "chip/rom8316.h"
+#include "common/clock.h"
+#include "common/data.h"
+#include "common/edge.h"
 #include "common/sigtrace.h"
-#include "wa16/sigtrace_addr.h"
-#include "common/sigtrace_edge.h"
 #include "common/sigtrace_data.h"
-#include "common/support.h"
+#include "common/sigtrace_edge.h"
+#include "simext/support.h"
+#include "wa16/addr.h"
+#include "wa16/sigtrace_addr.h"
 
 // This file provides definitions used during i8080 testing to
 // construct the test environment.

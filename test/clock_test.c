@@ -1,6 +1,6 @@
 #include "common/clock.h"
 #include "common/edge.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // clock_post: Power-On Self Test for the Clock code
 //

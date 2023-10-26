@@ -1,5 +1,5 @@
 #include "common/fifo.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 // === === === === === === === === === === === === === === === ===
 //                COMMON SUPPORT FOR POST/BIST/BENCH

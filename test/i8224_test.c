@@ -4,7 +4,7 @@
 #include "common/sigtrace.h"
 #include "common/sigtrace_data.h"
 #include "common/sigtrace_edge.h"
-#include "common/support.h"
+#include "simext/support.h"
 
 static i8224        gen;
 

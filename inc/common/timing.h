@@ -1,5 +1,5 @@
 #pragma once
-#include "common/support.h"
+#include "simext/support.h"
 
 // timing: check simulated signal timing
 //
