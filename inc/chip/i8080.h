@@ -16,7 +16,7 @@ struct s8080;
 
 // T-state management functions are given the cpu and the phase.
 
-typedef void        f8080State(struct s8080 *cpu, int phase);
+typedef void        (f8080State) (struct s8080 * cpu, int phase);
 typedef f8080State *p8080State;
 
 typedef struct s8080 {

@@ -5,17 +5,17 @@ This is the project I will use for live-coding.
 ** Project Goal
 
 The goal of this project is to use Old School software engineering
-techniques to build a Discrete Event Simulation of an Old School small
-computer system.
+techniques to build a Discrete Event Simulation Engine intended to be
+used to simulate variouys Old School small computer systems.
 
 This is not a redesign of Verilog or Spice. Huzzah!
 
-For all simulated items, the simuliation will differ from the hardware
-in that signal rise and fall times are fixed at 0 ns (where in real
-life, rise and fall times are several nanoseconds). Additionally, with
-very few exceptions, the rising and falling edges of generated signals
-will be at the same time as the rising edge of the primary CLOCK
-signal within the simualtion.
+The initial simulation is intended to simulate a hypothetical 8080
+based system, representing the signals you might probe with a logic
+analyser, but with the signals quantized in time. If you like, think
+of this as producing snapshots of the state of the system for each
+edge of the primary clock, where the snapshots occur after all of the
+cascading edge triggered effects have settled.
 
 ** Character Set: UTF-8 encoding of UNICODE
 
@@ -33,9 +33,20 @@ your font is sufficient.
 
 ** Programming Language: C99 with GNU extensions.
 
-This project is intended to be Old School Coding; it will be
-written to the ISO/IEC 9899:1999 standard, also known as C99, with
-selected GNU GCC extensions.
+This project is intended to be Old School Coding; it will be written
+to the ISO/IEC 9899:1999 standard, also known as C99, with selected
+GNU GCC extensions.
+
+** Engineering Process
+
+I will be following the process that I was using thirty years ago as a
+senior software engineer and technical lead in the operating system
+kernel porting and debugging domain.
+
+From time to time, it might seem like what I am doing resembles some
+methods that have become formalized (and in some cases, turned into
+purported silver bullets); this is because these techniques had their
+roots in common and in many cases obvious process steps.
 
 ** Testing Philosophy
 
@@ -45,22 +56,43 @@ and must pass for a build to be successful. Some tests run every time
 you run the program. Some tests are run on demand, which take longer
 but perform deeper and more complicated testing.
 
+However, I do not treat this as a silver bullet or strict checkbox,
+especially when automated testing of a design goal is especially
+challenging, or when it is obvious that the code is correct and is
+extremely unlikely to become broken in the future.
+
 ** Build Tools
 
 I use shell scripting to trigger my builds, and GNU Make to do the
 build commands; this gives me a level of build system flexibility
 beyond what I have been able to achieve with other tools.
 
+I am allowing a modern facility -- "inotifywait" -- to push its nose
+under the tent, allowing me to have automated builds triggered as
+files are updated. I think this is a fair improvement over manual
+triggering of builds.
+
 ** Editing Environment
 
 I edit in GNU Emacs, and typically have an Xterm open on the side that
-runs scripts that run the build and test system.
+runs scripts that run the build and test system; within Emacs, I run a
+script to dump the build logs allowing me to jump directly to source
+locations with errors or warnings, or to locations of my debug print
+lines that are properly formatte.
 
 ** Signal Display
 
 A python script "bin/timing.py" handles conversion of logged timing
 data into WaveJSON and rendering it using "schemdraw", giving PNG
 files that can be included in documentation.
+
+These are most useful when building new simulation modules and
+checking the clock to clock interactions. This becomes less useful
+when working at the larger scale where a test may take thousands or
+millions of clocks, making a simple signal display less useful.
+
+However, even for the very long runs, this facility still provides
+timestamped value transition logs.
 
 For more information on WaveJSON, WaveDrom, and schemdraw, see:
 
@@ -148,32 +180,26 @@ code and extends to the next newline.
 - '8': multibyte data, color 8
 - '9': multibyte data, color 9
 
-* PENDING ITEMS
-** TODO add more TODO items here
-* Code Tour from Bottom to Top
+* Quick Code Tour
 
-** headers: include the Standard C headers I expect to need
+** support, including Tau: the rock below our feet
+This started as a small collection of development support code imported
+into this project from elsewhere (some of it quite old), combined with
+some new definitions that I thought were obviously needed
 
-This most but not all of the headers in the C99 standard.
+- Stock definitions of Bit, Byte, and Cstr for convenience.
+- Declaration of "format" function (printf into allocated Cstr).
+- Definition of FIN, STUB, and FAIL macros.
+- Definition of various ASSERT macros, mostly for test support.
+- Definition of the Tau type, and TAU global.
+- Definition of rtc_ns(), rtc_prec_ns(), and rtc_bench()
+- Defintion of RTC_ELAPSED, BENCH_TOP, BENCH_VAL, and BENCH_END
 
-True "Old School" code would only include, in each .c file,
-the exact headers needed by that file; failure to do so would
-have caused build times to grow large.
+** target: additional support, possibly target arch specific
 
-** support and tau: the rock below our feet
-
-This is a "catch all" for support code imported into the project
-before starting on the project itself. This includes typedefs for
-convenience types like "Cstr" and "Tau", declarations for utility
-functions like "format", and the interface to bedrock facilities such
-as "tau" and "rtc", and improved debug macros such as "STUB", "FAIL",
-and "ASSERT".
-
-** rtc: real time clock (host system wall-clock elapsed time)
-
-Provide methods for callers to obtain the advertised precision
-of the elapsed time measurements; and to obtain the elapsed time
-since an arbitrary starting point.
+Currently, this file encapsulates the definition of WORD, as there is
+the potential for simulating targets where the natural word size is
+not 16 bits.
 
 ** step: a function to call, and a pointer to pass it.
 
@@ -235,12 +261,12 @@ on diagrams with a line above their name. The C identifier is the name
 with a single underscore appended; add a "/" to the start to construct
 the display name.
 
-** addr: a signal bus with callbacks for changes in state.
+** data: a signal bus (for data) with callbacks for changes in state.
 
-This facility tracks the value of an address bus in the simulated
-system, and triggers callbacks on change in state. It has built-in
-protection against infinite recursion (where the value of the addr
-is changed during a callback), and detection of some hazards.
+This facility tracks the value of a data bus in the simulated system,
+and triggers callbacks on change in state. It has built-in protection
+against infinite recursion (where the value of the data is changed
+during a callback), and detection of some hazards.
 
 The state of the bus includes an implicit "Z" (high impedence)
 state where a transition to "Z" can be followed by a valid value
@@ -251,11 +277,11 @@ timing of signals. Callbacks on bus valid and bus "Z" can be used
 to record transitions into a trace, but should not be used to drive
 simulation logic.
 
-** data: a signal bus with callbacks for changes in state.
+** addr: a signal bus (for addresses) with callbacks for changes in state.
 
-This facility tracks the value of an dataess bus in the simulated
+This facility tracks the value of an address bus in the simulated
 system, and triggers callbacks on change in state. It has built-in
-protection against infinite recursion (where the value of the data
+protection against infinite recursion (where the value of the addr
 is changed during a callback), and detection of some hazards.
 
 The state of the bus includes an implicit "Z" (high impedence)
@@ -293,12 +319,135 @@ text, to store and transfer blobs of binary data. Each line defines a
 small amount of data, explicitly giving its address, with a checksum
 to protect against transmission errors.
 
+** bring: Byte Ring
+
+This is a simple Ring data structure, intended to be used as a short
+FIFO buffer containing up to 255 bytes. Operation is thread safe and
+lock free for the case where only one thread can produce into it and
+only one thread consumes from it, and the threads use a poll and retry
+mechanism to prevent producing into a full ring or consuming from an
+empty ring.
+
+** mapdrive: allow memory-like access to backing store for a drive
+
+This facility hides all the "mmap" details needed to allow code to use
+simple memory load and store operations to observe and update data on
+a simulated mass storage device.
+
 ** main: program entry point
 
 - Runs POST methods.
 - On request, runs BIST methods.
 - On request, runs BENCH methods.
-  
+
+* Signal Trace related facilities
+
+*** SigSess: Signal Trace Session Control
+
+This small structure carries information about the entire trace
+capture session; currently, this is a name for the session, and
+the path to the directory on the simulation host where the trace
+data is stored.
+
+*** SigPlot: Selection of Data for a single Plot
+
+This data structure is used to collect metadata for a single plot
+being produced -- title, caption, TAU range, and the list of signals
+to be included in the plot. This data is collected into a file; the
+data structure carries the file name, file pointer, and a reference
+to the owning session for locating the data trace recordings.
+
+*** SigTrace: support collection of some signal (of unspecified type)
+
+This data structure contains information needed to collect data about
+any signal, independent of the data type of the signal.
+
+*** SigTraceData, SigTraceEdge, and SigTraceAddr: specializations of SigTrace
+
+These carry the additional information used when recording data from
+Edge, Data, and Addr typed signals for use in a signal trace plot.
+
+* Common Abstract Simulation Components
+
+** bdev: Block Device
+
+This facility simulates a hypothetical block device controller that is
+currently configured to suit the needs of a simulated Diskette Controller,
+allowing access to storage addressed by Disk, Track, and Sector. It is
+conected to the rest of the system via an 8-bit data bus and a collection
+of active-low control signals.
+
+The simulated processor is expected to set the storage address, then
+to read or write bytes at that given address.
+
+Simulations configuring a BDEV will provide an appropriate callback
+that sets the byte transfer cursors. The "mapdrive" facility is
+provided to simplify establishing an efficient relation between
+simulation host storage for persisted data and an address range, but
+simulations (and tests) are free to substitute their own mechanism.
+
+** cdev: Character Device
+
+This facility simulates a hypothetical character device controller
+that transfers a single byte at a time from the CPU to a simulated
+device, or from the simulated device to the CPU; it presents registers
+to the simulated CPU to use to determine if data is available, if data
+can be sent, and if a simulated device is connected; also, a register
+used to send and receive bytes of data.
+
+The implementation establishes a TCP connection to a terminal server,
+and moves data to and from the network, using a BRING (see above) to
+provide modest buffering.
+
+** decoder: Memory and I/O space decoding
+
+This device, when instantiated into a simulation, receives Memroy and
+I/O Read and Write signals, checks an ADDR bus, and forwards the
+selection edge onward to only the appropriate Memory or Device. It has
+the ability to temporarily "shadow" memory reads to an overriding
+device, useful for example in allowing an 8080 to see read-only memory
+at the start of the address space when coming out of RESET.
+
+* Stand-Alone Utility Programs
+
+** bdev-fmt: format a BDEV drive
+
+This program is used to set up persistant storage for one of the block
+device drives, with metadata set appropriately and all persisted data
+cleared from the unit.
+
+This uses the "mapdrive" facility to access and update the storage, and
+thus will coordinate with any simulation that uses "mapdrive" to access
+the persistant storage for a BDEV device.
+
+** bdev-ld and bdev-st: insert and remove a diskette image
+
+The program "bdev-ld" models inserting a diskette into a drive; it
+checks that the data from the image file fits into the existing format
+of the drive, then copies the data in.
+
+The program "bdev-st" models removing a diskette from a drive. This
+catches and gracefully handles any "permission error" but otherwise
+simply writes an image of the drive storage (start of header through
+end of data) to the destination file.
+
+** sio: Serial I/O Device Simulation
+
+This stand-alone program is a TCP server that accepts one connection,
+transfers data from the program standard input to the connection, and
+transfers data from the connection to the program's standard output;
+when the connection is terminated, it terminates.
+
+Normally this program will be called in a loop from a shell script
+that arranges the input and output of the program appropriately; for
+example, by running the script within an Xterm, with the TTY modes set
+to pass each character unedited from keyboard to program, and from
+program to display.
+
+It is also intended to be used for other character oriented I/O
+devices such as a paper tape or magnetic tape device -- reading from
+and writing to disk files designated by the operator.
+
 * Simulated Systems
 
 ** A hypothetical 8080 based microcomputer
@@ -333,14 +482,6 @@ those status bits, the control signals are asserted at the
 correct time (when enabled).
 
 Timing is similar to the 8228 (but quantized).
-
-*** decoder: efficient enables for mem pages and i/o ports
-
-This module monitors the control bus and the address bus,
-triggering edges registered for each page of memory and
-each I/O port, separately for read and write, to avoid the
-performance issues around having every memory and device
-monitoring DBIN and/or /WR.
 
 *** rom8316: 2 KiB read-only memory for 8080-like microcomputer system
 

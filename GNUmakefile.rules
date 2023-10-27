@@ -9,6 +9,8 @@ Q		:= @
 I		:= -
 C		:= $Q $I
 
+MACH		:= $(shell uname -m)/
+
 # RF and RD exist because some versions of this file
 # were tuned to deal with operating systems where these
 # operations did not involve typing "/bin/rm ..."
@@ -26,6 +28,7 @@ P		:= $C printf
 
 ASLDIR		:= asl/
 BINDIR		:= bin/
+MACHDIR		:= ${BINDIR}${MACH}
 COVDIR		:= cov/
 DEPDIR		:= dep/
 HEXDIR		:= hex/
@@ -60,7 +63,7 @@ HSRC		+= ${wildcard ${INCDIR}*/*.h}
 CSRC		:= ${wildcard ${SRCDIR}*.c}
 LSRC		:= ${wildcard ${SRCDIR}/*/*.c}
 TSRC		:= ${wildcard ${TESTDIR}*.c}
-EXEC		:= ${PROG:%=${BINDIR}%}
+EXEC		:= ${PROG:%=${MACHDIR}%}
 
 EXTSRC		:= ${wildcard ${EXTDIR}*.c}
 EXTOBJ		:= ${EXTSRC:${EXTDIR}%.c=${OBJDIR}%.o}
@@ -71,7 +74,7 @@ ALLLIBS		:= ${EXTLIB}
 ALLLIBA		:= ${EXTLIBA}
 
 USRC		:= ${wildcard ${UTLDIR}*.c}
-UTIL		:= ${USRC:${UTLDIR}%.c=${BINDIR}%}
+UTIL		:= ${USRC:${UTLDIR}%.c=${MACHDIR}%}
 
 ASLS		:= ${wildcard ${ASLDIR}*.asm}
 AOBS		:= ${ASLS:${ASLDIR}%.asm=${OBJDIR}%.p} ${ASLMORE:%=${OBJDIR}%.p}
@@ -178,7 +181,7 @@ ${EXEC}:	${OBJS} ${ALLLIBA}
 	$E 'link ${PROG} ...'
 	$Q ${LINK.c} ${OBJS} ${LDLIBS} -o '$@'
 
-${BINDIR}%: ${UTLDIR}%.c ${ALLLIBA}
+${MACHDIR}%: ${UTLDIR}%.c ${ALLLIBA}
 	$E 'cc $* ... [util]'
 	$Q $(CC) $(CFLAGS) $< -MM | sed '1s|^$*\.o: |$@: |' > ${DEPDIR}$*.d
 	$Q $(LINK.c) ${UTLDIR}$*.c ${LDLIBS} -o $@ 2>log/cc-$*.stderr
@@ -190,7 +193,6 @@ clean::
 	${RF} log/cc-*.stderr
 	${RF} ${DEPDIR}*.d
 
-# doc/img/%.png:	log/timing/%.txt ${BINDIR}timing.py
 doc/img/%.png:		${BINDIR}timing.py
 	$C ${BINDIR}timing.py $*
 

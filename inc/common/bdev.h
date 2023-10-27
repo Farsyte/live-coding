@@ -61,7 +61,7 @@
 // the first byte of the sector. Due to this behavior, always set TRK
 // when setting SEC.
 
-typedef void bdev_seek_fn (void *ctx);
+typedef void        (*bdev_seek_fp)(void *ctx);
 
 typedef struct sBdev {
     Cstr                name;
@@ -90,10 +90,12 @@ typedef struct sBdev {
 
     pData               DATA;                   // system data bus
 
-    bdev_seek_fn       *seek;
+    bdev_seek_fp        seek;
     void               *seek_ctx;
     Byte               *cursor;
     Byte               *cursor_lim;
+
+    Bit                 write_protect;          // if set, ignore writes.
 
 }                  *pBdev, Bdev[1];
 
@@ -120,16 +122,17 @@ typedef struct sBdev {
                                                                         \
     BDEV_D(BDEV,DATA);                                                  \
                                                                         \
-    bdev_seek_fn *seek = BDEV->seek; (void) seek;                       \
+    bdev_seek_fp seek = BDEV->seek; (void) seek;                        \
     void *seek_ctx = BDEV->seek_ctx; (void) seek_ctx;                   \
     Byte *cursor = BDEV->cursor; (void) cursor;                         \
-    Byte *cursor_lim = BDEV->cursor_lim; (void) cursor_lim
+    Byte *cursor_lim = BDEV->cursor_lim; (void) cursor_lim;             \
+    Bit write_protect = BDEV->write_protect; (void) write_protect
 
 extern void         bdev_init(Bdev, Cstr name);
-extern void         bdev_set_seek(Bdev, bdev_seek_fn *fn, void *ctx);
+extern void         bdev_set_seek(Bdev, bdev_seek_fp fn, void *ctx);
 extern void         bdev_invar(Bdev);
 
-#define BDEV_SET_SEEK(d,fn,ctx) bdev_set_seek(d, (bdev_seek_fn *)(fn), (void *)ctx);
+#define BDEV_SET_SEEK(d,fn,ctx) bdev_set_seek(d, (bdev_seek_fp)(fn), (void *)ctx);
 
 extern void         bdev_linked(Bdev);
 extern void         bdev_close(Bdev);

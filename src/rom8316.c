@@ -137,7 +137,7 @@ static void rom8316_dz(Rom8316 rom)
 
 static void rom_load_byte(void *ctx, unsigned addr, unsigned data)
 {
-    pRom8316            rom = (pRom8316) ctx;
+    pRom8316            rom = (pRom8316)ctx;
     unsigned            off = addr - rom->rombase;
 
     if (off < ROM8316_SIZE)

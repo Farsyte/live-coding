@@ -15,7 +15,7 @@ static int          fgetb(FILE *fp);
 // Returns -2 if the file is truncated.
 // Returns -3 if a character should be a hex digit but is not.
 
-int hex_parse(Cstr filename, HexStoreFn *store, void *ctx)
+int hex_parse(Cstr filename, HexStoreFp store, void *ctx)
 {
     FILE               *fp;
     int                 ch;

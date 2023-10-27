@@ -6,9 +6,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-typedef void       *pthread_main_fn(void *);
+typedef void       *pthread_fn(void *);
 
-static pthread_main_fn cdev_service;
+static pthread_fn   cdev_service;
 
 static void         cdev_rdd(Cdev d);
 static void         cdev_rdc(Cdev d);
@@ -186,7 +186,7 @@ void cdev_conn(Cdev d, int tcp_port)
     d->port = tcp_port;
     d->conn = conn;     // turn the connection over to the cdev
 
-    FIN(started, pthread_create, &d->thread, NULL, (pthread_main_fn *) cdev_service, (void *)d);
+    FIN(started, pthread_create, &d->thread, NULL, (pthread_fn *) cdev_service, (void *)d);
 }
 
 static void        *cdev_service(void *a)
@@ -197,7 +197,7 @@ static void        *cdev_service(void *a)
     Byte                cb[1];
     int                 conn;
 
-    volatile pCdev      d = (pCdev) a;
+    volatile pCdev      d = (pCdev)a;
 
     for (;;) {
         conn = d->conn;

@@ -105,12 +105,11 @@ int main(int argc, Cstr *argv)
     }
     --argv;
 
-    printf
-      ("\nFormatting drive '%c'\n\twith %d bytes (%.1f KiB, %.1f MiB) of ZERO\n",
-       'A' + drv, sz, sz / 1024.0, sz / (1024.0 * 1024.0));
+    printf("\nFormatting drive '%c'\n"
+           "\twith %d bytes (%.1f KiB, %.1f MiB) of ZERO\n",
+           'A' + drv, sz, sz / 1024.0, sz / (1024.0 * 1024.0));
 
     pDriveData          dd = new_drive(drv, sz);
-
     ASSERT(NULL != dd, "new_drive failed");
 
     free_drive(dd);
@@ -133,7 +132,7 @@ int main(int argc, Cstr *argv)
         ctx->ffb_off = -1;
         ctx->file_hwm = -1;
 
-        hex_parse(argp, (HexStoreFn *)disk_store_from_hex, ctx);
+        hex_parse(argp, (HexStoreFp)disk_store_from_hex, ctx);
 
         {
             unsigned            hwma = ctx->file_hwm;

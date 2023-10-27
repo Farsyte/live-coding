@@ -44,7 +44,7 @@ TEST_OBS	:= ${PROG:%=log/run-%.log}
 TEST_EXP	:= ${PROG:%=log/run-%.log.expected}
 TEST_CMP	:= ${PROG:%=log/run-%.log.difference}
 
-log/run-%.log:	bin/%
+log/run-%.log:	${MACHDIR}%
 	${RF} ${OBJDIR}*.gcda
 	$< bist > $@ 2>log/run-$*.stderr
 

@@ -464,7 +464,6 @@ static void VoidStar8080_link(VoidStar8080 sys)
 
 static void enable_shadow(VoidStar8080 sys)
 {
-    // STUB("asserting SHADOW");
     sys->dec->shadow = sys->rom[0]->RD_;
 }
 
@@ -475,17 +474,32 @@ static unsigned disk_cap(Disk d)
 
 static Byte        *disk_ptr(pBctx bctx, int dsk, int trk, int sec)
 {
+    pDisk               disk;
+    pBdev               bdev;
+    pDriveData          drive;
+
     ASSERT(bctx, "somehow bctx is null");
     if ((dsk < 0) || (dsk >= 4))
         return NULL;    /* bad disk number */
-    pDisk               disk = bctx->disk[dsk];
+    disk = bctx->disk[dsk];
     if ((sec < 1) || (sec > disk->nsec))
         return NULL;    /* bad sector number */
     if ((trk < 0) || (trk >= disk->ntrk))
         return NULL;    /* bad track number */
     ASSERT(disk->data, "somehow disk %s data is null", disk->name);
+
+    bdev = bctx->bdev;
+    drive = disk->drive;
+
+    if (bdev->write_protect != drive->write_protect) {
+        fprintf(stderr, "Drive %c write_protect is now %s\n",
+                'A' + dsk, drive->write_protect ? "ON" : "off");
+        bdev->write_protect = drive->write_protect;
+    }
+
     return disk->data + (trk * disk->nsec + sec - 1) * BPS;
 }
+
 static void disk_init(Disk d, Cstr name, int drive_number, int ntrk, int nsec)
 {
     pDriveData          dd;
@@ -503,6 +517,8 @@ static void disk_init(Disk d, Cstr name, int drive_number, int ntrk, int nsec)
            name, dd->data_length, size);
 
     d->data = (Byte *)dd + dd->data_offset;
+    d->drive = dd;
+
     fprintf(stderr, "Disk %s: %3d tracks, %3d sectors: %7lu bytes formatted capacity%s\n",
             name, ntrk, nsec, size, dd->write_protect ? " (WRITE PROTECT)" : "");
 }

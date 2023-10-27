@@ -37,6 +37,7 @@ void bdev_init(Bdev BDEV, Cstr name)
     BDEV->seek_ctx = NULL;
     BDEV->cursor = NULL;
     BDEV->cursor_lim = NULL;
+    BDEV->write_protect = 0;
 
     BDEV_ALL(BDEV);
 
@@ -59,7 +60,7 @@ void bdev_init(Bdev BDEV, Cstr name)
     edge_init(DAT_WR_, format("%s:/DAT_WR", name), 1);
 }
 
-void bdev_set_seek(Bdev BDEV, bdev_seek_fn *fn, void *ctx)
+void bdev_set_seek(Bdev BDEV, bdev_seek_fp fn, void *ctx)
 {
     BDEV->seek = fn;
     BDEV->seek_ctx = ctx;
@@ -197,6 +198,8 @@ static void bdev_wr_DAT(Bdev BDEV)
         }
     }
 
-    *cursor++ = DATA->value;
-    BDEV->cursor = cursor;
+    if (!write_protect)
+        *cursor = DATA->value;
+
+    BDEV->cursor = cursor + 1;
 }

@@ -65,12 +65,10 @@ extern int          _stub(int fatal, Cstr file, int line, Cstr func, Cstr fmt, .
 
 #define FIN(var, func, ...)                                             \
     int var = func(__VA_ARGS__);                                        \
-    if (var < 0) {                                                      \
-        fprintf(stderr, "error %d from '%s = %s(%s)':\n  %s\n",         \
-                errno, #var, #func, #__VA_ARGS__,                       \
-                strerror(errno));                                       \
-        abort();                                                        \
-    }
+    if (var >= 0) ; else                                                \
+        FAIL("\n\tint %s = %s(%s)\n\tindicates error %d: %s",           \
+             "" #var, #func, #__VA_ARGS__,                              \
+             errno, strerror(errno))
 
 extern int          _fail(Cstr file, int line, Cstr func, Cstr cond, Cstr fmt, ...);
 
@@ -181,7 +179,7 @@ extern Tau          rtc_prec_ns();              // wall time (ns) since epoch
 
 extern void         rtc_bench();                // measure RTC facility performance
 
-typedef void        BenchFn(void *);
+typedef void        (BenchFn) (void *);
 
 extern double       rtc_elapsed(BenchFn *, void *);
 #define RTC_ELAPSED(fn, ap)	(rtc_elapsed((BenchFn *)(fn), (void *)(ap)))
