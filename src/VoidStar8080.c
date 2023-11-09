@@ -1,4 +1,7 @@
 #include "system/VoidStar8080.h"
+#include <assert.h>
+#include "chip/i8080_flags.h"
+#include "chip/i8080_opcodes.h"
 #include "chip/i8080_status.h"
 #include "common/clock.h"
 #include "simext/mapdrive.h"
@@ -6,9 +9,9 @@
 // VoidStar8080 boots with four drives connected.
 //
 //  Dsk   Capacity   Description
-//   A     256,256   IBM Single Density Single Sided 8-inch diskette
+//   A     512,512   IBM Double Density Single Sided 8-inch diskette
 //   B     256,256   IBM Single Density Single Sided 8-inch diskette
-//   C   8,355,840   Largest drive addressable
+//   C   2,097,152   Fixed drive with 128 tracks of 128 sectors
 //   D   8,355,840   Largest drive addressable
 //
 // By default, all drives are initialized with each byte
@@ -148,7 +151,7 @@ void VoidStar8080_init(VoidStar8080 sys, Cstr name)
 
     pBctx               bctx = malloc(sizeof *bctx);
 
-    disk_init(bctx->disk[0], "A", 0, 77, 26);
+    disk_init(bctx->disk[0], "A", 0, 77, 52);
     disk_init(bctx->disk[1], "B", 1, 77, 26);
     disk_init(bctx->disk[2], "C", 2, 128, 128);
     disk_init(bctx->disk[3], "D", 3, 256, 255);
@@ -274,6 +277,7 @@ static void VoidStar8080_link(VoidStar8080 sys)
     pCdev               lpt = sys->lpt;
 
     pBdev               bdev = sys->bdev;
+    pBctx               bctx = sys->bctx;
 
     Rom8316            *rom = sys->rom;
 
@@ -399,7 +403,9 @@ static void VoidStar8080_link(VoidStar8080 sys)
         dec->mem_wr[below - 2] = NULL;
     }
 
-    BDEV_SET_SEEK(bdev, VoidStar8080_seek, sys);
+    bctx->bdev = sys->bdev;
+
+    BDEV_SET_SEEK(bdev, VoidStar8080_seek, bctx);
 
     i8080_linked(cpu);
     i8224_linked(gen);

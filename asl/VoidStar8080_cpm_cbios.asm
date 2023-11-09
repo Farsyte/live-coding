@@ -287,12 +287,16 @@ reader:
 ttyd	equ	0		;read/write data from/to printing console
 ttyc	equ	1		;printing console status/control port
 
+cdev_cn	equ     01h		;cdev status: connected
+cdev_rx	equ     02h		;cdev status: receive data ready
+cdev_tx	equ     04h		;cdev status: ready to transmit
+
 	;; === === === === === === === === === === === ===
 	;; return ff if a byte is available on tty: or 00 if not.
 	;; === === === === === === === === === === === ===
 ttyrdy:
 	in	ttyc
-	ani	02h
+	ani	cdev_rx
 	rz
 	mvi	a,0ffh
 	ret
@@ -302,7 +306,7 @@ ttyrdy:
 	;; === === === === === === === === === === === ===
 ttypok:
 	in	ttyc
-	ani	02h
+	ani	cdev_tx
 	rz
 	mvi	a,0ffh
 	ret
@@ -313,7 +317,7 @@ ttypok:
 	;; === === === === === === === === === === === ===
 ttyget:
 	in	ttyc
-	ani	01h
+	ani	cdev_rx
 	jz	ttyget
 	in	ttyd
 	ani	7fh
@@ -326,7 +330,7 @@ ttyget:
 	;; === === === === === === === === === === === ===
 ttyput:
 	in	ttyc
-	ani	01h
+	ani	cdev_tx
 	jz	ttyput
 	mov	a,c
 	out	ttyd
@@ -340,7 +344,7 @@ crtc	equ	3		;video console status/control port
 	;; === === === === === === === === === === === ===
 crtrdy:
 	in	crtc
-	ani	02h
+	ani     cdev_rx
 	rz
 	mvi	a,0ffh
 	ret
@@ -350,7 +354,7 @@ crtrdy:
 	;; === === === === === === === === === === === ===
 crtpok:
 	in	crtc
-	ani	02h
+	ani	cdev_tx
 	rz
 	mvi	a,0ffh
 	ret
@@ -361,7 +365,7 @@ crtpok:
 	;; === === === === === === === === === === === ===
 crtget:
 	in	crtc
-	ani	01h
+	ani	cdev_rx
 	jz	crtget
 	in	crtd
 	ani	7fh
@@ -374,7 +378,7 @@ crtget:
 	;; === === === === === === === === === === === ===
 crtput:
 	in	crtc
-	ani	01h
+	ani	cdev_tx
 	jz	crtput
 	mov	a,c
 	out	crtd
@@ -388,7 +392,7 @@ pptc	equ	5		;paper tape status/control port
 	;; === === === === === === === === === === === ===
 pptrdy:
 	in	pptc
-	ani	02h
+	ani	cdev_rx
 	rz
 	mvi	a,0ffh
 	ret
@@ -398,7 +402,7 @@ pptrdy:
 	;; === === === === === === === === === === === ===
 pptpok:
 	in	pptc
-	ani	02h
+	ani	cdev_tx
 	rz
 	mvi	a,0ffh
 	ret
@@ -409,7 +413,7 @@ pptpok:
 	;; === === === === === === === === === === === ===
 pptget:
 	in	pptc
-	ani	01h
+	ani	cdev_rx
 	jz	pptget
 	in	pptd
 	ani	7fh
@@ -422,7 +426,7 @@ pptget:
 	;; === === === === === === === === === === === ===
 pptput:
 	in	pptc
-	ani	01h
+	ani	cdev_tx
 	jz	pptput
 	mov	a,c
 	out	pptd
@@ -436,7 +440,7 @@ lptc	equ	7		;line printer status/control port
 	;; === === === === === === === === === === === ===
 lptpok:
 	in	lptc
-	ani	02h
+	ani	cdev_tx
 	rz
 	mvi	a,0ffh
 	ret
@@ -448,7 +452,7 @@ lptpok:
 	;; === === === === === === === === === === === ===
 lptput:
 	in	lptc
-	ani	01h
+	ani	cdev_tx
 	jz	lptput
 	mov	a,c
 	out	lptd

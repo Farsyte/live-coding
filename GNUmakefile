@@ -49,7 +49,7 @@ log/run-%.log:	${MACHDIR}%
 	$< bist > $@ 2>log/run-$*.stderr
 
 log/run-%.log.difference:	log/run-%.log
-	$Q bin/check.sh log/run-$*.log.expected $< $@
+	$Q ${BINDIR}check.sh log/run-$*.log.expected $< $@
 
 clean::
 	${RF} log/run-*.stderr
@@ -103,11 +103,11 @@ gdb::		${EXEC}
 
 format::	${EXEC}
 	$E 'fix c headers ...'
-	$C bin/fix-c-includes.sh ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
+	$C ${BINDIR}fix-c-includes.sh ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
 	$E 'fix h headers ...'
-	$C bin/fix-h-includes.sh ${HSRC}
+	$C ${BINDIR}fix-h-includes.sh ${HSRC}
 	$E 'indent ...'
-	$C bin/indent.sh ${HSRC} ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
+	$C ${BINDIR}indent.sh ${HSRC} ${CSRC} ${TSRC} ${USRC} ${EXTSRC}
 
 
 world::
@@ -115,10 +115,20 @@ world::
 	$C $(MAKE) cmp
 
 logs:
-	$C bin/logs.sh log
+	$C ${BINDIR}logs.sh log
 
-voidstar8080:	bin/live-coding ${HEXS}
-	bin/live-coding VoidStar8080 ROM=VoidStar8080_rom
+
+DRIVES		:= A B C D
+DISKS		:= boot-cpm boot-forth big-1 big-2
+MMAP_BASES	:= ${DRIVES:%=drive-%} ${DISKS}
+MMAP_FILES	:= ${MMAP_BASES:%=${BDEVDIR}%.mmap}
+
+${MMAP_FILES}:
+	$C ${BINDIR}fmt.sh
+	$C ${BINDIR}scr.sh
+
+voidstar8080:	${MACHDIR}/live-coding ${HEXS} ${MMAP_FILES}
+	${MACHDIR}live-coding VoidStar8080 ROM=VoidStar8080_rom
 
 cycle::
 	$C $(MAKE) logs
@@ -140,5 +150,4 @@ ${OBJDIR}cpm22bdos62k.p:	${ASLDIR}cpm22bdos.asm
 ${OBJDIR}cpm22ccp62k.p: 	${ASLDIR}cpm22ccp.asm
 	$E 'ASL CP/M 2.2 CCP for 62 KiB systems'
 	$Q ${ASL} ${ASLFLAGS} -D origin=0dc00h -OLIST ${LSTDIR}cpm22ccp62k.lst -o ${OBJDIR}cpm22ccp62k.p ${ASLDIR}cpm22ccp.asm
-
 

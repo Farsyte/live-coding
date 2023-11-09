@@ -133,7 +133,6 @@ romfound:
 	push	b
 
 	mov	a,h
-	sta	0100h
 
 	;; divide A by ten,
 	;; leaving quotient in b
@@ -144,7 +143,6 @@ romfound:
 
 	rrc
 	rrc
-	sta	0100h
 
 	;; compute a/10 and a%10
 	;; b := a/10
@@ -154,12 +152,10 @@ romfound:
 
 loop:
 	sub	c
-	sta	0100h
 	inr	b
 	jnc	loop
 out:
 	add	c
-	sta	0100h
 	mov	c,a
 	dcr	b
 
@@ -172,18 +168,14 @@ out:
 
 	push	b
 	mvi	a,'0'
-	sta	0100h
 	add	b
-	sta	0100h
 	mov	c,a
 	call	ttyput
 	pop	b
 
 skiptens:
 	mvi	a,'0'
-	sta	0100h
 	add	c
-	sta	0100h
 	mov	c,a
 	call	ttyput
 	
@@ -313,11 +305,9 @@ dispatch:
 	;; when the user pressed CR, LF, or NAK. Bop down to
 	;; the next display line before doing anything.
 	push	h
-	shld	0100H
 	call	ttyilm
 	db	10,13,'dispatch... command is: ',0
 	pop	h
-	shld	0100H
 
 	mov	c,m		;recover 1st char of command line
 
@@ -327,10 +317,7 @@ dispatch:
 	db	10,13,0
 	pop	h
 
-	shld	0100H
-
 	mov	a,m		;recover 1st char of command line
-	sta	0100H
 
 	push	h		;keep command line ptr safe on stack
 	lxi	h, command_table
@@ -350,33 +337,57 @@ notfound:
 	ret
 
 foundit:
-	shld	0100H
 	inx	h
 	mov	e,m
 	inx	h
 	mov	d,m
 	xchg
-	shld	0100H
 	xthl		    ;dest -> stack, stack -> hl
-	shld	0100H
 	ret
 
 command_table:
-	;; BUG WAS HERE: "db 'A',boot_A" wrote boot_A in 8 bits. oops.
 	db	'A'
-	dw	do_boot_A
+	dw	do_boot
+	db	'B'
+	dw	do_boot
+	db	'C'
+	dw	do_boot
+	db	'D'
+	dw	do_boot
 	db	'H'
 	dw	do_halt
 command_table_len	equ	($-command_table)/3
 
-do_boot_A:
-	call	ttyilm
-	db	"TODO: boot from drive A", 10, 13, 0
+	;; === === === === === === === === === === === ===
+	;; do_boot: boot from the appropriate drive
+	;; === === === === === === === === === === === ===
+ 
+do_boot:
+	;; HL points at the command line.
+	;; determine the boot drive from the command letter.
+	mov	a,m
+	sui	'A'
+	out	bdres
+	out	bddrv
+	lxi	h,0080h		;0080h to 00ffh receives boot sector
+	sphl			;stack is below 0080h
+	push	h		;set up to RET to the loaded data
+do_boot_byte:
+	in	bddat
+	mov	m,a
+	inr	l
+	jnz	do_boot_byte
 	ret
 
+	;; === === === === === === === === === === === ===
+        ;; do_halt: halt the CPU.
+        ;; assures interrupts are enabled.
+        ;; warm start if execution resumes.
+	;; === === === === === === === === === === === ===
 do_halt:
 	call	ttyilm
 	db	"Shutting down ...", 10, 13, 0
+        ei
 	hlt
 	jmp	warm
 

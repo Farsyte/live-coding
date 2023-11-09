@@ -778,7 +778,7 @@ static unsigned i8080_alu_flags(unsigned alu, unsigned ac)
     unsigned            cy = (alu >> 8) & FLAGS_CY;
     unsigned            p = alu;
     unsigned            s = alu & 0x80;
-    unsigned            z = alu ? 0 : FLAGS_Z;
+    unsigned            z = (alu & 0xFF) ? 0 : FLAGS_Z;
 
     // FLAGS_P is set if there are an even number of bits
     // set in the low 8 bits of the result.

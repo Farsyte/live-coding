@@ -1,0 +1,111 @@
+
+From Forth Dimensions, Volume 3, Number 6
+March/April 1982
+
+http://forth.org/fd/FD-V03N6.pdf
+
+NOTE: the assembler JJC used in METAFORTH appears to be an earlier
+version; this version drops the conditional jump, call, and return
+instructions in favor of using the structured mechanism, hooks itself
+into the system ;CODE word, and provides CODE C; and LABEL.
+
+** Text of the article
+
+(Page 180)
+Written by John J. Cassady
+
+This 8080 assembler has been available in a slightly different
+form for approxi- mately one and one-half years. It appears to be
+bug-free.
+
+ENDIF's have been replaced by THEN, and AGAIN has been removed in
+conformance with FORTH-79. I have never had occasion to use AGAIN ; I
+doubt if I'll miss it.
+
+I have removed the compiler security. We frequently want
+non-structured control mechanisms at the code level. The ?PAIRS really
+gets in the way.
+
+I have introduced three macros: NEXT PSH1 and PSH2 . They emplace,
+respectively, a jump to NEXT , a jump to the byte before NEXT , and a
+jump to two bytes before NEXT . Literally, PSH1 means push one level
+(HL) and fall into NEXT. I belive this is a more traditional approach
+and the source code has a cleaner appearance.
+
+The actual address of NEXT is stored in (NEXT) . Its value is plucked
+from ;S . This technique was suggested by Patrick Swayne of the Heath
+User's Group. I say "suggested" because Swayne's method is a bit
+different.
+
+I have left out the conditional CALLs. I never used them and they can
+always be " C, "'d in. The conditional jumps are, of course, handled
+automatically by the conditionals: IF WHILE and UNTIL , in conjunction
+with the flag testers: 0 = CS PE 0< and NOT .
+
+I have opted to retain the immediate instructions MVI and LXI as
+opposed to an immediate flag #.
+
+The 1MI 2MI etc stands for "number one machine instruction" etc. The
+first cut of this assembler was written when three letter names were
+the craze.
+
+I have a selfish motive in publishing this assembler. I hope that this
+will flush out assemblers for other processors and that there will be
+a "rush to publish." There is a good reason to do this besides vanity.
+If someone else publishes the assembler for the "xyz" chip that you
+use, and it becomes established, it means that you will have to change
+your code to confoirm to the quirks of the "established" version. It
+pays to get there first.
+
+** Screen 48 30H
+
+#+begin_src text
+  ( FIGFORTH 8080 ASSEMBLER 1             81AUG17   JJC 80MAR04 )
+  HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
+  ' ASSEMBLER CFA ' ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS )
+  : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
+  : C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
+  : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
+      !CSP ; IMMEDIATE    ASSEMBLER DEFINITIONS
+  4 CONSTANT H    5 CONSTANT L    7 CONSTANT A   6 CONSTANT PSW
+  2 CONSTANT D    3 CONSTANT E    0 CONSTANT B   1 CONSTANT C
+  6 CONSTANT M    6 CONSTANT SP    ' ;S 0B + @ CONSTANT (NEXT)
+  : 1MI <BUILDS C, DOES> C@ C, ; : 2MI <BUILDS C, DOES> C@ + C, ;
+  : 3MI <BUILDS C, DOES> C@ SWAP 8* + C, ;
+  : 4MI <BUILDS C, DOES> C@ C, C, ;
+  : 5MI <BUILDS C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
+  : PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;
+#+end_src
+
+** Screen 49 31H
+
+#+begin_src text
+  ( FIGFORTH 8080 ASSEMBLER 2             81MAR22   JJC 80MAR04 )
+  00 1MI NOP      76 1MI HLT      F3 1MI DI       FB 1MI EI
+  07 1MI RLC      0F 1MI RRC      17 1MI RAL      1F 1MI RAR
+  E9 1MI PCHL     F9 1MI SPHL     E3 1MI XTHL     EB 1MI XCHG
+  27 1MI DAA      2F 1MI CMA      37 1MI STC      3F 1MI CMC
+  80 2MI ADD      88 2MI ADC      90 2MI SUB      98 2MI SBB
+  A0 2MI ANA      A8 2MI XRA      B0 2MI ORA      B8 2MI CMP
+  09 3MI DAD      C1 3MI POP      C5 3MI PUSH     02 3MI STAX
+  0A 3MI LDAX     04 3MI INR      05 3MI DCR      03 3MI INX
+  0B 3MI DCX      C7 3MI RST      D3 4MI OUT      DB 4MI IN
+  C6 4MI ADI      CE 4MI ACI      D6 4MI SUI      DE 4MI SBI
+  E6 4MI ANI      EE 4MI XRI      F6 4MI ORI      FE 4MI CPI
+  22 5MI SHLD     2A 5MI LHLD     32 5MI STA      3A 5MI LDA
+  CD 5MI CALL     ;S
+#+end_src
+
+** Screen 50 32H
+
+#+begin_src text
+  ( FIGFORTH 8080 ASSEMBLER 3             81AUG17   JJC 80MAR04 )
+  C9 1MI RET      C3 5MI JMP      C2 CONSTANT 0=  D2 CONSTANT CS
+  E2 CONSTANT PE  F2 CONSTANT 0<     : NOT 8 + ;
+  : MOV 8* 40 + + C, ;  : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
+  : THEN HERE SWAP ! ;            : IF C, HERE 0 , ;
+  : ELSE C3 IF SWAP THEN ;        : BEGIN HERE ;
+  : UNTIL C, , ;                  : WHILE IF ;
+  : REPEAT SWAP C3 C, , THEN ;
+  ;S
+#+end_src

@@ -1,0 +1,49 @@
+3
+**********************  fig-FORTH  MODEL  **********************
+                                
+                    Through the courtesy of
+                                
+                      FORTH INTEREST GROUP
+                         P. O. BOX 1105
+                     SAN CARLOS, CA. 94070
+                                
+                                
+                           RELEASE 1
+                     WITH COMPILER SECURITY
+                              AND
+                     VARIABLE LENGTH NAMES
+                                
+                                
+      Further distribution must include the above notice.
+(  SCREEN 4: MESSAGES 1..15  )                   1 WARNING ! ;S
+EMPTY STACK
+DICTIONARY FULL
+HAS INCORRECT ADDRESS MODE
+ISN'T UNIQUE
+MSG 5: TBD ...
+DISC RANGE ?
+FULL STACK
+DISC ERROR !
+MSG 9: TBD ...
+MSG 10: TBD ...
+MSG 11: TBD ...
+MSG 12: TBD ...
+MSG 13: TBD ...
+MSG 14: TBD ...
+FORTH INTEREST GROUP                                 MAY 1, 1979
+(  SCREEN 5: MESSAGES 17..31  )                  1 WARNING ! ;S
+COMPILATION ONLY, USE IN DEFINITION
+EXECUTION ONLY
+CONDITIONALS NOT PAIRED
+DEFINITION NOT FINISHED
+IN PROTECTED DICTIONARY
+USE ONLY WHEN LOADING
+OFF CURRENT EDITING SCREEN
+DECLARE VOCABULARY
+MSG 25: TBD ...
+MSG 26: TBD ...
+MSG 27: TBD ...
+MSG 28: TBD ...
+MSG 29: TBD ...
+MSG 30: TBD ...
+MSG 31: TBD ...

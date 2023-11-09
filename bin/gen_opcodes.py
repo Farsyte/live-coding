@@ -195,3 +195,65 @@ print('Cstr i8080_instruction_name(Byte op) {');
 print('    return i8080_instruction_names[op];')
 print('}')
 print()
+print('static Cstr i8080_instruction_lens[256] = {', end='');
+for op in range(256):
+    prt = ops[op]
+    hct = 1 + len([1 for c in prt if c == '#'])
+    if 0 == op % 16:
+        print()
+        print('   ', end='')
+    print(f' {hct},', end='');
+print()
+print('}')
+print('Cstr i8080_instruction_len(Byte op) {');
+print('    return i8080_instruction_lens[op];')
+print('}')
+print()
+
+rpmap = dict()
+rpmap["BC"] = "B"
+rpmap["DE"] = "D"
+rpmap["HL"] = "H"
+
+def rpfix(rp):
+    return rpmap[rp] if rp in rpmap else rp
+
+print()
+print('static Cstr i8080_instruction_4asms[256] = {', end='');
+for oi in range(256):
+    if 0 == oi % 8:
+        print()
+        print('   ', end='')
+
+    prt = ops[oi]
+    spl = [x for x in prt.split(" ") if x != '']
+    op = spl[0].upper()
+    pa = " ".join(spl[1:])
+
+    if op == '----':
+        op = 'C'
+        pa = f'0x{oi:02X}'
+    
+    op = f'{op},'
+
+    pl = [rpfix(x) for x in pa.split(",") if x != '']
+    if len(pl) < 1:
+        pl = ''
+    else:
+        pl.reverse();
+        if pl[0] == '#':
+            pj = " ".join(pl[1:])
+            pl = f'0x##{pj:>5}'
+        elif pl[0] == '##':
+            pj = " ".join(pl[1:])
+            pl = f'0x####{pj:>3}'
+        else:
+            pl = " ".join(pl);
+    prt = f'{pl:>9} {op:5}'
+    print(f' "{prt:10}",', end='');
+
+print()
+print('}')
+print('Cstr i8080_instruction_4asm(Byte op) {');
+print('    return i8080_instruction_4asms[op];')
+print('}')

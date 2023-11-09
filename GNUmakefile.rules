@@ -28,6 +28,7 @@ P		:= $C printf
 
 ASLDIR		:= asl/
 BINDIR		:= bin/
+BDEVDIR		:= bdev/
 MACHDIR		:= ${BINDIR}${MACH}
 COVDIR		:= cov/
 DEPDIR		:= dep/

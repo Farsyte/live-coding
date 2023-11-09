@@ -111,4 +111,3 @@ extern void         i8080_one_instruction(i8080 cpu, unsigned plus_TAU);
 extern void         i8080_plot_sigs();
 
 extern unsigned     i8080_unimp_ops(i8080);
-extern Cstr         i8080_instruction_name(Byte);

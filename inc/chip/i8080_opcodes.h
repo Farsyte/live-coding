@@ -1,5 +1,9 @@
 #pragma once
 
+extern Cstr         i8080_instruction_name(Byte);
+extern Word         i8080_instruction_len(Byte);
+extern Cstr         i8080_instruction_4asm(Byte);
+
 // === === === === === === === === === === === === === === === ===
 // 8080 op codes
 // === === === === === === === === === === === === === === === ===

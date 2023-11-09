@@ -71,3 +71,99 @@ Cstr i8080_instruction_name(Byte op)
 {
     return i8080_instruction_names[op];
 }
+
+static Word         i8080_instruction_lens[256] = {
+    1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+    1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+    1, 3, 3, 1, 1, 1, 2, 1, 1, 1, 3, 1, 1, 1, 2, 1,
+    1, 3, 3, 1, 1, 1, 2, 1, 1, 1, 3, 1, 1, 1, 2, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 3, 3, 3, 1, 2, 1, 1, 1, 3, 1, 3, 3, 2, 1,
+    1, 1, 3, 2, 3, 1, 2, 1, 1, 1, 3, 2, 3, 1, 2, 1,
+    1, 1, 3, 1, 3, 1, 2, 1, 1, 1, 3, 1, 3, 1, 2, 1,
+    1, 1, 3, 1, 3, 1, 2, 1, 1, 1, 3, 1, 3, 1, 2, 1,
+};
+
+Word i8080_instruction_len(Byte op)
+{
+    return i8080_instruction_lens[op];
+}
+
+static Cstr         i8080_instruction_4asms[256] = {
+    "          NOP, ", "0x####  B LXI, ", "        B STAX,", "        B INX, ",
+    "        B INR, ", "        B DCR, ", "0x##    B MVI, ", "          RLC, ",
+    "     0x08 C,   ", "        B DAD, ", "        B LDAX,", "        B DCX, ",
+    "        C INR, ", "        C DCR, ", "0x##    C MVI, ", "          RRC, ",
+    "     0x10 C,   ", "0x####  D LXI, ", "        D STAX,", "        D INX, ",
+    "        D INR, ", "        D DCR, ", "0x##    D MVI, ", "          RAL, ",
+    "     0x18 C,   ", "        D DAD, ", "        D LDAX,", "        D DCX, ",
+    "        E INR, ", "        E DCR, ", "0x##    E MVI, ", "          RAR, ",
+    "     0x20 C,   ", "0x####  H LXI, ", "0x####    SHLD,", "        H INX, ",
+    "        H INR, ", "        H DCR, ", "0x##    H MVI, ", "          DAA, ",
+    "     0x28 C,   ", "        H DAD, ", "0x####    LHLD,", "        H DCX, ",
+    "        L INR, ", "        L DCR, ", "0x##    L MVI, ", "          CMA, ",
+    "     0x30 C,   ", "0x#### SP LXI, ", "0x####    STA, ", "       SP INX, ",
+    "        M INR, ", "        M DCR, ", "0x##    M MVI, ", "          STC, ",
+    "     0x38 C,   ", "       SP DAD, ", "0x####    LDA, ", "       SP DCX, ",
+    "        A INR, ", "        A DCR, ", "0x##    A MVI, ", "          CMC, ",
+    "      B B MOV, ", "      C B MOV, ", "      D B MOV, ", "      E B MOV, ",
+    "      H B MOV, ", "      L B MOV, ", "      M B MOV, ", "      A B MOV, ",
+    "      B C MOV, ", "      C C MOV, ", "      D C MOV, ", "      E C MOV, ",
+    "      H C MOV, ", "      L C MOV, ", "      M C MOV, ", "      A C MOV, ",
+    "      B D MOV, ", "      C D MOV, ", "      D D MOV, ", "      E D MOV, ",
+    "      H D MOV, ", "      L D MOV, ", "      M D MOV, ", "      A D MOV, ",
+    "      B E MOV, ", "      C E MOV, ", "      D E MOV, ", "      E E MOV, ",
+    "      H E MOV, ", "      L E MOV, ", "      M E MOV, ", "      A E MOV, ",
+    "      B H MOV, ", "      C H MOV, ", "      D H MOV, ", "      E H MOV, ",
+    "      H H MOV, ", "      L H MOV, ", "      M H MOV, ", "      A H MOV, ",
+    "      B L MOV, ", "      C L MOV, ", "      D L MOV, ", "      E L MOV, ",
+    "      H L MOV, ", "      L L MOV, ", "      M L MOV, ", "      A L MOV, ",
+    "      B M MOV, ", "      C M MOV, ", "      D M MOV, ", "      E M MOV, ",
+    "      H M MOV, ", "      L M MOV, ", "          HLT, ", "      A M MOV, ",
+    "      B A MOV, ", "      C A MOV, ", "      D A MOV, ", "      E A MOV, ",
+    "      H A MOV, ", "      L A MOV, ", "      M A MOV, ", "      A A MOV, ",
+    "        B ADD, ", "        C ADD, ", "        D ADD, ", "        E ADD, ",
+    "        H ADD, ", "        L ADD, ", "        M ADD, ", "        A ADD, ",
+    "        B ADC, ", "        C ADC, ", "        D ADC, ", "        E ADC, ",
+    "        H ADC, ", "        L ADC, ", "        M ADC, ", "        A ADC, ",
+    "        B SUB, ", "        C SUB, ", "        D SUB, ", "        E SUB, ",
+    "        H SUB, ", "        L SUB, ", "        M SUB, ", "        A SUB, ",
+    "        B SBB, ", "        C SBB, ", "        D SBB, ", "        E SBB, ",
+    "        H SBB, ", "        L SBB, ", "        M SBB, ", "        A SBB, ",
+    "        B ANA, ", "        C ANA, ", "        D ANA, ", "        E ANA, ",
+    "        H ANA, ", "        L ANA, ", "        M ANA, ", "        A ANA, ",
+    "        B XRA, ", "        C XRA, ", "        D XRA, ", "        E XRA, ",
+    "        H XRA, ", "        L XRA, ", "        M XRA, ", "        A XRA, ",
+    "        B ORA, ", "        C ORA, ", "        D ORA, ", "        E ORA, ",
+    "        H ORA, ", "        L ORA, ", "        M ORA, ", "        A ORA, ",
+    "        B CMP, ", "        C CMP, ", "        D CMP, ", "        E CMP, ",
+    "        H CMP, ", "        L CMP, ", "        M CMP, ", "        A CMP, ",
+    "          RNZ, ", "        B POP, ", "0x####    JNZ, ", "0x####    JMP, ",
+    "0x####    CNZ, ", "        B PUSH,", "0x##      ADI, ", "        0 RST, ",
+    "          RZ,  ", "          RET, ", "0x####    JZ,  ", "     0xCB C,   ",
+    "0x####    CZ,  ", "0x####    CALL,", "0x##      ACI, ", "        1 RST, ",
+    "          RNC, ", "        D POP, ", "0x####    JNC, ", "0x##      OUT, ",
+    "0x####    CNC, ", "        D PUSH,", "0x##      SUI, ", "        2 RST, ",
+    "          RC,  ", "     0xD9 C,   ", "0x####    JC,  ", "0x##      IN,  ",
+    "0x####    CC,  ", "     0xDD C,   ", "0x##      SBI, ", "        3 RST, ",
+    "          RPO, ", "        H POP, ", "0x####    JPO, ", "          XTHL,",
+    "0x####    CPO, ", "        H PUSH,", "0x##      ANI, ", "        4 RST, ",
+    "          RPE, ", "          PCHL,", "0x####    JPE, ", "          XCHG,",
+    "0x####    CPE, ", "     0xED C,   ", "0x##      XRI, ", "        5 RST, ",
+    "          RP,  ", "      PSW POP, ", "0x####    JP,  ", "          DI,  ",
+    "0x####    CP,  ", "      PSW PUSH,", "0x##      ORI, ", "        6 RST, ",
+    "          RM,  ", "          SPHL,", "0x####    JM,  ", "          EI,  ",
+    "0x####    CM,  ", "     0xFD C,   ", "0x##      CPI, ", "        7 RST, ",
+};
+
+Cstr i8080_instruction_4asm(Byte op)
+{
+    return i8080_instruction_4asms[op];
+}

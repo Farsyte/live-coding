@@ -1,5 +1,5 @@
 	TITLE	'8080 FIG-FORTH 1.1.1 (2023-10-12) for VoidStar8080'
-
+        PAGE    0,0
 	.CPU	8080
 
 ;;;	based on 8080 FIG-FORTH 1.1 VERSION A0 17SEP79 for CP/M
@@ -558,6 +558,73 @@ DIGI1	CMP	L	; IF < BASE VALUE
 ;			; ELSE INVALID DIGIT CHR
 DIGI2	MOV	L,H	; (HL) <- FALSE
 	JMP	HPUSH	; (S1) <- FALSE
+
+        NEWPAGE
+        ;;    ##   #######   ###   #     # ######    ##
+        ;;   #     #          #    ##    # #     #     #
+        ;;  #      #          #    # #   # #     #      #
+        ;;  #      #####      #    #  #  # #     #      #
+        ;;  #      #          #    #   # # #     #      #
+        ;;   #     #          #    #    ## #     #     #
+        ;;    ##   #         ###   #     # ######    ##
+        ;; 
+        ;;     (FIND)                   addr1 addr2 -- pfa b tf (ok)
+        ;;                              addr1 addr2 -- ff (bad)
+        ;;          
+        ;;          Searches the dictionary starting at the name field
+        ;;          address addr2, matching to the text at addr1.
+        ;;          Returns parameter field address, length byt4e of
+        ;;          name field and boolean true for a good match. If
+        ;;          no match is found, only a boolean false is left.
+        ;;
+        ;;         CODE (FIND)
+        ;;                   D POP,             ( pop addr2 into HL )
+        ;;                                      ( stack now has only addr1 )
+        ;;          ( compare word at DE to word at (SP) )
+        ;; (L1)              H POP, H PUSH,     ( copy addr1 into HL )
+        ;;          ( check input len with NF len and smudge bit )
+        ;;                   D LDAX, M XRA, 0x3F ANI, (L5) JNZ,
+        ;;
+        ;;          ( length byte matches )
+        ;; (L2)              H INX, D INX,      ( look at 1st byte of each )
+        ;;          ( check next input byte ignoring MS bit )
+        ;;                   D LDAX, M XRA, A ADD, (L4) JNZ,
+        ;;          ( match so far, keep checking )
+        ;;           (L2)     JNC,
+        ;;          
+        ;;          ( ** success ** )
+        ;;          
+        ;;          ( string matches. advance to accepted candidate PFA. )
+        ;;                 5 H LXI, D DAD, 
+        ;;          
+        ;;          ( replace addr1 from stack with PFA from HL )
+        ;;                     XTHL,
+        ;;          
+        ;;          ( scan D backwards to the NFA, to pick up first byte )
+        ;; (L3)              D DCX, D LDAX, A ORA, (L3) JP,
+        ;;
+        ;;          ( set up to push NF length byte and TRUE as we NEXT. )
+        ;;                 A E MOV, 0x00 D MVI, 1 H LXI, DPUSH JMP,
+        ;;
+        ;;          ( branch here if data does not match )
+        ;;          ( if carry set, mismatch was in last byte of NF )
+        ;; (L4)      (L6)     JC,
+        ;;
+        ;;          ( branch here if length does not match )
+        ;;          ( scan DE forward until we see MSBit set )
+        ;; (L5)              D INX, D LDAX, A ORA, (L5) JP,
+        ;;
+        ;; (L6)
+        ;;          ( advance DE to failed candidate LFA, put it in HL )
+        ;;                   D INX, XCHG,
+        ;;          ( follow link to next candidate NFA )
+        ;;                 M E MOV, H INX, M D MOV,
+        ;;          ( if nonzero, loop back to check the new word )
+        ;;                 D A MOV, E ORA, (L1) JNZ,
+        ;;
+        ;;          ( discard addr1, and do NEXT pushing a 0 )
+        ;;                   H POP, 0 H LXI, HPUSH JMP,
+
 ;
 	DB	86H	; (FIND)  (2-1)FAILURE
 	DB	'(FIND'	; (2-3)SUCCESS
@@ -1230,6 +1297,46 @@ TSTOR	DW	$+2
 	INX	H
 	MOV	M,D
 	JMP	NEXT
+
+        NEWPAGE
+        ;;    #               ##                                             ##
+        ;;   # #             #       ####    ####   #        ####   #    #     #
+        ;;    #             #       #    #  #    #  #       #    #  ##   #      #
+        ;;                  #       #       #    #  #       #    #  # #  #      #
+        ;;    #             #       #       #    #  #       #    #  #  # #      #
+        ;;   # #             #      #    #  #    #  #       #    #  #   ##     #
+        ;;    #               ##     ####    ####   ######   ####   #    #   ##
+        ;;
+        ;;     :                                            116            "colon"
+        ;;          A defining word executed in the form:
+        ;;               :  <name>  ...  ;
+        ;;          Select  the  CONTEXT  vocabulary to be identical  to  CURRENT.
+        ;;          Create  a  dictionary entry for <name>  in  CURRENT,  and  set
+        ;;          compile   mode.    Words  thus  defined  are  called   'colon-
+        ;;          definitions'.   The  compilation addresses of subsequent words
+        ;;          from the input stream which are not immediate words are stored
+        ;;          in  the  dictionary  to  be  executed  when  <name>  is  later
+        ;;          executed.  IMMEDIATE words are executed as encountered.
+        ;;
+        ;;          If a word is not found after a search of the CONTEXT and FORTH
+        ;;          vocabularies,  conversion and compilation of a literal  number
+        ;;          is attempted,  with regard to the current BASE;  that failing,
+        ;;          an error condition exists.
+        ;;
+        ;;      NOTE: requires 0x0128 CONSTANT RP
+        ;;      NOTE: requires 0x0145 CONSTANT NEXT
+        ;;
+        ;;      : :                  ( CREATE NEW COLON-DEFINITION UNTIL ';' *)
+        ;;        ?EXEC !CSP
+        ;;        CURRENT @ CONTEXT !
+        ;;        CREATE
+        ;;        ]
+        ;;
+        ;;      ;CODE
+        ;;        RPP LHLD, H DCX, B M MOV, H DCX, C M MOV, RPP SHLD,
+        ;;        D INX, E C MOV, D B MOV, 0x0145 JMP,
+        ;;
+        ;;      IMMEDIATE
 ;
 	DB	0C1H	; :
 	DB	':'+80H
@@ -1254,6 +1361,35 @@ DOCOL	LHLD	RPP
 	MOV	C,E	; (IP) <- (DE) = (W)
 	MOV	B,D
 	JMP	NEXT
+
+        NEWPAGE
+        ;;   ###              ##                                     ##
+        ;;   ###             #       ####   ######  #    #     #       #
+        ;;                  #       #       #       ##  ##     #        #
+        ;;   ###            #        ####   #####   # ## #     #        #
+        ;;   ###            #            #  #       #    #     #        #
+        ;;    #              #      #    #  #       #    #     #       #
+        ;;   #                ##     ####   ######  #    #     #     ##
+        ;;
+        ;;
+        ;;
+        ;;
+        ;;     ;                                            I,C,196   "semi-colon"
+        ;;          Terminate  a  colon  definition  and  stop  compilation.    If
+        ;;          compiling  from mass storage and the input stream is exhausted
+        ;;          before encountering ; an error condition exists.
+        ;;
+        ;;      IMPL NOTES:
+        ;;          This implementation includes compiler security: it
+        ;;          verifies that the data stack pointer matches where
+        ;;          it was when the definition was started. This
+        ;;          detects unmatched conditional and looping constructs.
+        ;;
+        ;;      : ;                             ( TERMINATE COLON-DEFINITION *)
+        ;;        ?CSP
+        ;;        COMPILE ;S
+        ;;        SMUDGE [ ;
+        ;;      IMMEDIATE
 ;
 	DB	0C1H	; ;
 	DB	0BBH ; asm8080 thinks ';'+80H contains a comment start
@@ -1272,7 +1408,34 @@ SEMI	DW	DOCOL
 	DW	SEMI-4
 NOOP	DW	DOCOL
 	DW	SEMIS
- ;
+
+        NEWPAGE
+        ;;   ####    ####   #    #   ####    #####    ##    #    #   #####
+        ;;  #    #  #    #  ##   #  #          #     #  #   ##   #     #
+        ;;  #       #    #  # #  #   ####      #    #    #  # #  #     #
+        ;;  #       #    #  #  # #       #     #    ######  #  # #     #
+        ;;  #    #  #    #  #   ##  #    #     #    #    #  #   ##     #
+        ;;   ####    ####   #    #   ####      #    #    #  #    #     #
+        ;;
+        ;;     CONSTANT       n --                          185
+        ;;          A defining word used in the form:
+        ;;               n CONSTANT <name>
+        ;;          to  create  a dictionary entry for <name>,  leaving n  in  its
+        ;;          parameter  field.   When <name> is later executed,  n will  be
+        ;;          left on the stack.
+        ;;
+        ;;      IMPL NOTES:
+        ;;          At runtime, the constructed word finds its PFA and
+        ;;          pushes its content onto the data stack.
+        ;;
+        ;;      : CONSTANT              ( word which later creates constants *)
+        ;;        CREATE SMUDGE ,
+        ;;
+        ;;      ;CODE
+        ;;        D INX, XCHG,
+        ;;        M E MOV, H INX, M D MOV,
+        ;;        D PUSH, NEXT JMP,
+;
 	DB	88H	; CONSTANT
 	DB	'CONSTAN'
 	DB	'T'+80H
@@ -1289,6 +1452,31 @@ DOCON	INX	D	; (DE) <- PFA
 	MOV	D,M
 	PUSH	D	; (S1) <- (PFA)
 	JMP	NEXT
+
+        ;;  #    #    ##    #####      #      ##    #####   #       ######
+        ;;  #    #   #  #   #    #     #     #  #   #    #  #       #
+        ;;  #    #  #    #  #    #     #    #    #  #####   #       #####
+        ;;  #    #  ######  #####      #    ######  #    #  #       #
+        ;;   #  #   #    #  #   #      #    #    #  #    #  #       #
+        ;;    ##    #    #  #    #     #    #    #  #####   ######  ######
+        ;;
+        ;;     VARIABLE                                     227
+        ;;          A defining word executed in the form:
+        ;;               VARIABLE  <name>
+        ;;          to  create a dictionary entry for <name> and allot  two  bytes
+        ;;          for  storage  in the parameter field.   The  application  must
+        ;;          initialize  the stored value.   When <name> is later executed,
+        ;;          it will place the storage address on the stack.
+        ;;
+        ;;      IMPL NOTES:
+        ;;          At runtime, the constructed word finds its PFA and
+        ;;          pushes it onto the data stack.
+        ;;
+        ;;      : VARIABLE
+        ;;          CONSTANT
+        ;;
+        ;;      ;CODE
+        ;;        D INX, D PUSH, NEXT JMP,
 ;
 	DB	88H	; VARIABLE
 	DB	'VARIABL'
@@ -1300,7 +1488,62 @@ VAR	DW	DOCOL
 DOVAR	INX	D	; (DE) <- PFA
 	PUSH	D	; (S1) <- PFA
 	JMP	NEXT
+
+        NEWPAGE
+        ;;  #    #   ####   ######  #####
+        ;;  #    #  #       #       #    #
+        ;;  #    #   ####   #####   #    #
+        ;;  #    #       #  #       #####
+        ;;  #    #  #    #  #       #   #
+        ;;   ####    ####   ######  #    #
+        ;;
+        ;;     USER           n --
+        ;;          A defining word used in the form:
+        ;;               n  USER  <name>
+        ;;          which  creates a user variable <name>.   n is the cell  offset
+        ;;          within  the  user area where the value for <name>  is  stored.
+        ;;          Execution  of  <name> leaves its absolute  user  area  storage
+        ;;          address.
+        ;;
+        ;;      IMPL NOTES:
+        ;;          AT RUNTIME, THE CONSTRUCTED WORD ADDS "N" FROM ITS
+        ;;          PARAMETER FIELD TO THE USER POINTER (AT 0X126) AND
+        ;;          PUSHES THE SUM ONTO THE DATA STACK.
+        ;;
+        ;;      NOTE: requires 0x0126 CONSTANT UP
+        ;;      NOTE: requires 0x0144 CONSTANT HPUSH
+        ;;
+        ;;      : USER                                ( CREATE USER VARIABLE *)
+        ;;        CONSTANT
+        ;;
+        ;;      ;CODE
+        ;;           D INX, XCHG, M E MOV, 0x00 D MVI,
+        ;;           UP LHLD, D DAD, HPUSH JMP,
 ;
+        ;; current collection of user variables:
+        ;; 0x06 USER S0
+        ;; 0x08 USER R0
+        ;; 0x0A USER TIB
+        ;; 0x0C USER WIDTH
+        ;; 0x0E USER WARNING
+        ;; 0x10 USER FENCE
+        ;; 0x12 USER DP
+        ;; 0x14 USER VOC-LINK
+        ;; 0x16 USER BLK
+        ;; 0x18 USER IN
+        ;; 0x1A USER OUT
+        ;; 0x1C USER SCR
+        ;; 0x1E USER OFFSET
+        ;; 0x20 USER CONTEXT
+        ;; 0x22 USER CURRENT
+        ;; 0x24 USER STATE
+        ;; 0x26 USER BASE
+        ;; 0x28 USER DPL
+        ;; 0x2A USER FLD
+        ;; 0x2C USER CSP
+        ;; 0x2E USER R#
+        ;; 0x30 USER HLD
+
 	DB	84H	; USER
 	DB	'USE'
 	DB	'R'+80H
@@ -1658,10 +1901,12 @@ LES2	LXI	H,1	; ELSE X < Y
 	DW	LESS-4
 ULESS	DW	DOCOL,TDUP
 	DW	XORR,ZLESS
-	DW	ZBRAN,ULES1-$	; IF
+        DW      ZBRAN           ; IF
+        DW      ULES1-$
 	DW	DROP,ZLESS
 	DW	ZEQU
-	DW	BRAN,ULES2-$
+        DW      BRAN
+        DW      ULES2-$
 ULES1	DW	SUBB,ZLESS	; ELSE
 ULES2	DW	SEMIS		; ENDIF
 ;
@@ -2065,7 +2310,7 @@ PDOTQ	DW	DOCOL
 ;
 	DB	0C2H	; ."
 	DB	'.'
-	DB	82H	;asm8080 thinks '"' in a string starts a comment.
+        DB      0A2H    ;asm8080 thinks '"' in a string starts a comment.
 	DW	PDOTQ-7
 DOTQ	DW	DOCOL
 	DW	LIT
@@ -2088,6 +2333,42 @@ DOTQ1	DW	WORD
 	DW	COUNT
 	DW	TYPE	; ENDIF
 DOTQ2	DW	SEMIS
+
+        NEWPAGE
+        ;;  ######  #    #  #####   ######   ####    #####
+        ;;  #        #  #   #    #  #       #    #     #
+        ;;  #####     ##    #    #  #####   #          #
+        ;;  #         ##    #####   #       #          #
+        ;;  #        #  #   #       #       #    #     #
+        ;;  ######  #    #  #       ######   ####      #
+        ;;
+        ;;     EXPECT         addr n --                     189 ;
+        ;;
+        ;;          Transfer  characters  from  the terminal  beginning  at  addr,
+        ;;          upward,  until a "return" or the count of n has been received.
+        ;;          Take  no action for n less than or equal to zero.   One or two
+        ;;          nulls are added at the end of text.
+        ;;
+        ;;      : EXPECT
+        ;;        OVER + OVER DO
+        ;;          KEY
+        ;;          DUP 0x000E +ORIGIN @ = IF
+        ;;            DROP
+        ;;            DUP I =
+        ;;            DUP R> 2 - + >R
+        ;;            IF 7 ELSE 8 ENDIF
+        ;;          ELSE
+        ;;            DUP 0x000D = IF
+        ;;              LEAVE DROP BL 0
+        ;;            ELSE
+        ;;              DUP
+        ;;            ENDIF
+        ;;            I C!
+        ;;            0 I 1+ !
+        ;;          ENDIF
+        ;;          EMIT
+        ;;        LOOP
+        ;;        DROP ;
 ;
 	DB	86H	; EXPECT
 	DB	'EXPEC'
@@ -2151,6 +2432,24 @@ EXPE3	DW	EMIT
 	DW	EXPE1-$
 	DW	DROP
 	DW	SEMIS
+
+        NEWPAGE
+        ;;   ####   #    #  ######  #####    #   #
+        ;;  #    #  #    #  #       #    #    # #
+        ;;  #    #  #    #  #####   #    #     #
+        ;;  #  # #  #    #  #       #####      #
+        ;;  #   #   #    #  #       #   #      #
+        ;;   ### #   ####   ######  #    #     #
+        ;;
+        ;;     QUERY                                        235
+        ;;          Accept input of up to 80 characters (or until a 'return') from
+        ;;          the operator's terminal, into the terminal input buffer.  WORD
+        ;;          may  be  used  to accept text from this buffer  as  the  input
+        ;;          stream, by setting >IN and BLK to zero.
+        ;;
+        ;; : QUERY
+        ;;   TIB @ 0x0050 EXPECT
+        ;;   0 IN ! ;
 ;
 	DB	85H	; QUERY
 	DB	'QUER'
@@ -2166,6 +2465,33 @@ QUERY	DW	DOCOL
 	DW	INN
 	DW	STORE
 	DW	SEMIS
+
+        NEWPAGE
+        ;; #         ###              ##                                     ##
+        ;;  #       #   #            #      #    #  #    #  #       #          #
+        ;;   #     # #   #          #       ##   #  #    #  #       #           #
+        ;;    #    #  #  #          #       # #  #  #    #  #       #           #
+        ;;     #   #   # #          #       #  # #  #    #  #       #           #
+        ;;      #   #   #            #      #   ##  #    #  #       #          #
+        ;;       #   ###              ##    #    #   ####   ######  ######   ##
+        ;;
+        ;;
+        ;;     \0 (null)
+        ;;          NOTE: this word is literally the word whose name is
+        ;;          the single NUL byte, and is executed at the end
+        ;;          of the input.
+        ;;
+        ;; 8081 HERE            ( prepare to replace NF with 0x81 0x80 )
+        ;; : X
+        ;;   BLK @ IF                           ( DISC? )
+        ;;     1 BLK +!
+        ;;     0 IN !
+        ;;     BLK @ B/SCR 1 - AND 0=           ( SCR END? )
+        ;;     IF ?EXEC R> DROP ENDIF
+        ;;   ELSE                               ( TERMINAL )
+        ;;     R> DROP
+        ;;   ENDIF
+        ;;   ; ! IMMEDIATE        ( finish defining "X", overwite the name, then make it immediate. )
 ;
 	DB	0C1H	; 0 (NULL)
 	DB	80H
@@ -2263,6 +2589,37 @@ PAD	DW	DOCOL
 	DW	44H
 	DW	PLUS
 	DW	SEMIS
+
+        NEWPAGE
+        ;;  #    #   ####   #####   #####
+        ;;  #    #  #    #  #    #  #    #
+        ;;  #    #  #    #  #    #  #    #
+        ;;  # ## #  #    #  #####   #    #
+        ;;  ##  ##  #    #  #   #   #    #
+        ;;  #    #   ####   #    #  #####
+        ;;
+        ;;     WORD           char -- addr                  181
+        ;;          Receive  characters  from the input stream until the  non-zero
+        ;;          delimiting  character  is encountered or the input  stream  is
+        ;;          exhausted,  ignoring leading delimiters.   The characters  are
+        ;;          stored  as  a  packed string with the character count  in  the
+        ;;          first  character position.   The actual delimiter  encountered
+        ;;          (char  or  null)  is stored at the end of  the  text  but  not
+        ;;          included  in the count.   If the input stream was exhausted as
+        ;;          WORD is called,  then a zero length will result.   The address
+        ;;          of the beginning of this packed string is left on the stack.
+        ;;
+        ;;     ................................................( tos ... bos )
+        ;;     : WORD                                            ( delimiter )
+        ;;       BLK @ IF BLK @ BLOCK ELSE TIB @ ENDIF      ( base delimiter )
+        ;;       IN @ + SWAP                                ( delimiter addr )
+        ;;       ENCLOSE                        ( count end-ix start-ix addr )
+        ;;       HERE 0x22 BLANKS       ( prepare 34 blanks at DP )
+        ;;       IN +!          ( take this word )    ( end-ix start-ix addr )
+        ;;       OVER - >R      ( save char count )          ( start-ix addr )
+        ;;       R HERE C!      ( store length first )       ( start-ix addr )
+        ;;       + HERE 1+ R>                        ( count dp+1 start-addr )
+        ;;       CMOVE ;
 ;
 	DB	84H	; WORD
 	DB	'WOR'
@@ -2386,6 +2743,40 @@ NUMB2	DW	DROP
 	DW	NUMB3-$
 	DW	DMINU	; ENDIF
 NUMB3	DW	SEMIS
+
+        NEWPAGE
+        ;;          ######     #    #    #  #####
+        ;;          #          #    ##   #  #    #
+        ;;  #####   #####      #    # #  #  #    #
+        ;;          #          #    #  # #  #    #
+        ;;          #          #    #   ##  #    #
+        ;;          #          #    #    #  #####
+        ;;
+        ;;     FIND
+        ;;         Accepts the next text word (delimited
+        ;;         by blanks) in the input screen to
+        ;;         HERE, and searches the CONTEXT and
+        ;;         then CURRENT vocabularies for a
+        ;;         matching entry. If found, the
+        ;;         dictionary entry's parameter field
+        ;;         address, its length byte, and a
+        ;;         boolean true is left. Otherwise,
+        ;;         only a boolean false is left.
+        ;;
+        ;; ................................................( tos ... eos )
+        ;; : -FIND                                                 ( --- )
+        ;;   BL WORD                                               ( --- )
+        ;;   HERE                                                  ( eow )
+        ;;   CONTEXT @ @                                       ( sow eow )
+        ;;   (FIND)
+        ;;   DUP 0= IF
+        ;;     DROP
+        ;;     HERE
+        ;;     LATEST
+        ;;     (FIND)
+        ;;   ENDIF
+        ;;   ;
+        ;;
 ;
 	DB	85H	; -FIND	(0-3) SUCCESS
 	DB	'-FIN'	; (0-1) FAILURE
@@ -2440,7 +2831,8 @@ ERRO1	DW	HERE
 ;	DW	INN,AT,BLK,AT
 	DW	BLK,AT
 	DW	DDUP
-	DW	ZBRAN,ERRO2-$	; IF
+        DW      ZBRAN           ; IF
+        DW      ERRO2-$
 	DW	INN,AT
 	DW	SWAP		; ENDIF
 ERRO2	DW	QUIT
@@ -2580,6 +2972,28 @@ QSTAC	DW	DOCOL
 	DW	7
 	DW	QERR
 	DW	SEMIS
+
+        NEWPAGE
+        ;;     #    #    #   #####  ######  #####   #####   #####   ######   #####
+        ;;     #    ##   #     #    #       #    #  #    #  #    #  #          #
+        ;;     #    # #  #     #    #####   #    #  #    #  #    #  #####      #
+        ;;     #    #  # #     #    #       #####   #####   #####   #          #
+        ;;     #    #   ##     #    #       #   #   #       #   #   #          #
+        ;;     #    #    #     #    ######  #    #  #       #    #  ######     #
+        ;;
+        ;;   : INTERPRET
+        ;;     BEGIN
+        ;;       -FIND IF
+        ;;         STATE @ < IF
+        ;;           CFA , ELSE CFA EXECUTE ENDIF
+        ;;         ?STACK
+        ;;       ELSE
+        ;;         HERE NUMBER DPL @ 1+ IF
+        ;;           DLITERAL ELSE DROP LITERAL ENDIF
+        ;;         ?STACK
+        ;;       ENDIF
+        ;;     AGAIN
+        ;;   ] ( -- THERE IS NO ;S AT THE END OF INTERPRET -- )
 ;
 	DB	89H	; INTERPRET
 	DB	'INTERPRE'
@@ -2710,6 +3124,29 @@ QUIT1	DW	RPSTO	; BEGIN
 	DB	'OK'	; ENDIF
 QUIT2	DW	BRAN	; AGAIN
 	DW	QUIT1-$
+
+        NEWPAGE
+        ;;    ##    #####    ####   #####    #####
+        ;;   #  #   #    #  #    #  #    #     #
+        ;;  #    #  #####   #    #  #    #     #
+        ;;  ######  #    #  #    #  #####      #
+        ;;  #    #  #    #  #    #  #   #      #
+        ;;  #    #  #####    ####   #    #     #
+        ;;
+        ;; ABORT
+        ;;        Get back to a known useful state:
+        ;;        - clear the data stack
+        ;;        - set BASE back to decimal
+        ;;        - print the initial greeting (8080 fig-FORTH 1.1)
+        ;;        - select FORTH vocabulary for search and extension
+        ;;
+        ;;      : ABORT
+        ;;        SP! DECIMAL ?STACK
+        ;;        CR .CPU ." fig-FORTH 1.1"
+        ;;        FORTH DEFINITIONS
+        ;;        QUIT
+        ;;
+        ;;      [ ( -- stop compiling, no ";S" after QUIT -- )
 ;
 	DB	85H	; ABORT
 	DB	'ABOR'
@@ -2746,6 +3183,37 @@ CLD	LXI	B,CLD1
 	SPHL
 	JMP	NEXT
 CLD1	DW	COLD
+
+        NEWPAGE
+        ;;   ####    ####   #       #####
+        ;;  #    #  #    #  #       #    #
+        ;;  #       #    #  #       #    #
+        ;;  #       #    #  #       #    #
+        ;;  #    #  #    #  #       #    #
+        ;;   ####    ####   ######  #####
+        ;;
+        ;; uses various constants not defined elsewhere:
+        ;;   0xF3E0 CONSTANT BUF1
+        ;;   0x1625 CONSTANT EPRINT
+        ;;   0x0112 CONSTANT USER-INIT
+        ;;   0x0126 CONSTANT USER-PTR
+        ;;   FORTH 6 + CONSTANT FORTH-DICT
+        ;;   ' TASK NFA CONSTANT TOP-WORD
+        ;;
+        ;; NOTE: VoidStar8080 defaults to DOUBLE DENSITY disks.
+        ;;
+        ;; : COLD
+        ;;   EMPTY-BUFFERS
+        ;;   1 DENSITY !
+        ;;   BUF1 USE !
+        ;;   BUF1 PREV !
+        ;;   DR0
+        ;;   0 EPRINT !
+        ;;   USER-INIT USER-PTR @ 6 + 0x10 CMOVE
+        ;;   TOP-WORD @ FORTH-DICT !
+        ;;   ABORT
+        ;;
+        ;; [ ( -- stop compiling, no ";S" after ABORT -- )
 ;
 	DB	84H	; COLD
 	DB	'COL'
@@ -2753,7 +3221,7 @@ CLD1	DW	COLD
 	DW	WARM-7
 COLD	DW	DOCOL
 	DW	MTBUF
-	DW	ZERO,DENSTY
+        DW      ONE,DENSTY
 	DW	STORE
 	DW	LIT,BUF1
 	DW	USE,STORE
@@ -2973,6 +3441,32 @@ MSMOD	DW	DOCOL
 ;
 ;	BLOCK MOVED DOWN 2 PAGES
 ;
+
+        NEWPAGE
+        ;;    ##   #         ###   #     # #######   ##
+        ;;   #     #          #    ##    # #           #
+        ;;  #      #          #    # #   # #            #
+        ;;  #      #          #    #  #  # #####        #
+        ;;  #      #          #    #   # # #            #
+        ;;   #     #          #    #    ## #           #
+        ;;    ##   #######   ###   #     # #######   ##
+        ;;
+        ;;     (LINE)                   n1 n2 -- addr count
+        ;;          Convert the line number n1 and the screen n2 to
+        ;;          the disc buffer address containing the data. A
+        ;;          count of 64 indicates the full line text length.
+        ;;          
+        ;; : (LINE)
+        ;;   >R                                 ( save screen on R stack )
+        ;;                  ( a screen is a bunch of B/BUF-byte buffers. )
+        ;;                  ( compute number of buffers into the screen, )
+        ;;                        ( and number of bytes into the buffer. )
+        ;;             ( presumes that a line does not straddle buffers. )
+        ;;   0x40 B/BUF */MOD                            ( scrbuf bufchr )
+        ;;   R>                                      ( scr scrbuf bufchr )
+        ;;   B/SCR * +                                   ( absbuf bufchr )
+        ;;   BLOCK                                      ( bufaddr bufchr )
+        ;;   + 0x40 ;                                         ( len addr )
 ;
 	DB	86H	; (LINE)
 	DB	'(LINE'
@@ -2993,6 +3487,22 @@ PLINE	DW	DOCOL
 	DW	LIT
 	DW	40H
 	DW	SEMIS
+
+        NEWPAGE
+        ;;          #          #    #    #  ######
+        ;;          #          #    ##   #  #
+        ;;          #          #    # #  #  #####
+        ;;   ###    #          #    #  # #  #
+        ;;   ###    #          #    #   ##  #
+        ;;   ###    ######     #    #    #  ######
+        ;; 
+        ;;     .LINE          n1 n2 --
+        ;;          Print on the terminal device, a line of text from
+        ;;          the disc by its line and screen number. Trailing
+        ;;          blanks are suppressed.
+        ;; 
+        ;; : .LINE
+        ;;   (LINE) -TRAILING TYPE CR ;
 ;
 	DB	85H	; .LINE
 	DB	'.LIN'
@@ -3003,6 +3513,40 @@ DLINE	DW	DOCOL
 	DW	DTRAI
 	DW	TYPE
 	DW	SEMIS
+        NEWPAGE
+
+        ;; #     # #######  #####   #####     #     #####  #######
+        ;; ##   ## #       #     # #     #   # #   #     # #
+        ;; # # # # #       #       #        #   #  #       #
+        ;; #  #  # #####    #####   #####  #     # #  #### #####
+        ;; #     # #             #       # ####### #     # #
+        ;; #     # #       #     # #     # #     # #     # #
+        ;; #     # #######  #####   #####  #     #  #####  #######
+        ;; 
+        ;;     MESSAGE
+        ;;         Print on the selected output device the text of line n
+        ;;         relative to screen 4 of drive 0. n may be positive or
+        ;;         negative. MESSAGE may be used to print incidental text such as
+        ;;         report headers. If WARNING is zero, the message will simply be
+        ;;         printed as a number (disc un-available).
+        ;; 
+        ;; This is the original code from the 8080 fig-FORTH sources:
+        ;; 
+        ;; : MESSAGE
+        ;;   WARNING @ IF
+        ;;     -DUP IF
+        ;;       0x0004 ( BASE SCREEN NUMBER )
+        ;;       OFFSET @ B/SCR / ( SCREEN OFFSET )
+        ;;       - 
+        ;;       .LINE CR
+        ;;     ENDIF
+        ;;   ELSE
+        ;;     ." MSG # "
+        ;;     .       
+        ;;   ENDIF
+        ;;
+        ;; This code, unfortunately, presumes that we want to
+        ;; access Screen 4 using an OFFSET of 0 blocks.
 ;
 	DB	87H	; MESSAGE
 	DB	'MESSAG'
@@ -3163,7 +3707,8 @@ PBUF	DW	DOCOL
 	DW	LIT,CO
 	DW	PLUS,DUP
 	DW	LIMIT,EQUAL
-	DW	ZBRAN,PBUF1-$
+        DW      ZBRAN
+        DW      PBUF1-$
 	DW	DROP,FIRST
 PBUF1:	DW	DUP,PREV
 	DW	AT,SUBB
@@ -3203,9 +3748,11 @@ DRZER	DW	DOCOL,ZERO
 	DW	DRZER-6
 DRONE	DW	DOCOL
 	DW	DENSTY,AT
-	DW	ZBRAN,DRON1-$
+        DW      ZBRAN
+        DW      DRON1-$
 	DW	LIT,SPDRV2
-	DW	BRAN,DRON2-$
+        DW      BRAN
+        DW      DRON2-$
 DRON1	DW	LIT,SPDRV1
 DRON2	DW	OFSET,STORE
 	DW	SEMIS
@@ -3218,11 +3765,13 @@ BUFFE:	DW	DOCOL,USE
 	DW	AT,DUP
 	DW	TOR
 BUFF1	DW	PBUF		; WON'T WORK IF SINGLE BUFFER
-	DW	ZBRAN,BUFF1-$
+        DW      ZBRAN
+        DW      BUFF1-$
 	DW	USE,STORE
 	DW	RR,AT
 	DW	ZLESS
-	DW	ZBRAN,BUFF2-$
+        DW      ZBRAN
+        DW      BUFF2-$
 	DW	RR,TWOP
 	DW	RR,AT
 	DW	LIT,7FFFH
@@ -3232,6 +3781,41 @@ BUFF2	DW	RR,STORE
 	DW	RR,PREV
 	DW	STORE,FROMR
 	DW	TWOP,SEMIS
+
+        NEWPAGE
+        ;;  #####   #        ####    ####   #    #
+        ;;  #    #  #       #    #  #    #  #   #
+        ;;  #####   #       #    #  #       ####
+        ;;  #    #  #       #    #  #       #  #
+        ;;  #    #  #       #    #  #    #  #   #
+        ;;  #####   ######   ####    ####   #    #
+        ;; 
+        ;;     BLOCK          n -- addr                     191 
+        ;;          Leave the address of the first byte in block n.   If the block 
+        ;;          is not already in memory,  it is transferred from mass storage 
+        ;;          into whichever memory buffer has been least recently accessed. 
+        ;;          If  the  block occupying that buffer has  been  UPDATEd  (i.e. 
+        ;;          modified), it is rewritten onto mass storage before block n is 
+        ;;          read  into the buffer.   n is an unsigned number.   If correct 
+        ;;          mass storage read or write is not possible, an error condition 
+        ;;          exists.  Only data within the latest block referenced by BLOCK 
+        ;;          is valid by byte address, due to sharing of the block buffers. 
+        ;; 
+        ;; : BLOCK
+        ;;   OFFSET @ + >R
+        ;;   PREV @ DUP @ R - DUP + IF
+        ;;     BEGIN
+        ;;       +BUF 0= IF
+        ;;         DROP 
+        ;;         R BUFFER 
+        ;;         DUP R 1 R/W 
+        ;;         2 -
+        ;;       ENDIF
+        ;;       DUP @ R - DUP + 0=
+        ;;     UNTIL
+        ;;     DUP PREV !
+        ;;   ENDIF
+        ;;   R> DROP 2+ ;S
 ;
 	DB	85H	; BLOCK
 	DB	'BLOC'
@@ -3244,9 +3828,11 @@ BLOCK	DW	DOCOL,OFSET
 	DW	AT,RR
 	DW	SUBB
 	DW	DUP,PLUS
-	DW	ZBRAN,BLOC1-$
+        DW      ZBRAN
+        DW      BLOC1-$
 BLOC2	DW	PBUF,ZEQU
-	DW	ZBRAN,BLOC3-$
+        DW      ZBRAN
+        DW      BLOC3-$
 	DW	DROP,RR
 	DW	BUFFE,DUP
 	DW	RR,ONE
@@ -3256,7 +3842,8 @@ BLOC3	DW	DUP,AT
 	DW	RR,SUBB
 	DW	DUP,PLUS
 	DW	ZEQU
-	DW	ZBRAN,BLOC2-$
+        DW      ZBRAN
+        DW      BLOC2-$
 	DW	DUP,PREV
 	DW	STORE
 BLOC1	DW	FROMR,DROP
@@ -3278,6 +3865,7 @@ SETIO:	DW	$+2
 	LDA	SEC+2
 	OUT	BDSEC		;VoidStar8080: set sector number (1..26 or 1..52)
 	LDA	TRACK+2
+        INR     A              ;FORTH does not access Track Zero.
 	OUT	BDTRK		;VoidStar8080: set track number (0..76)
 	;; === === === === === === === === === === === ===
 
@@ -3295,6 +3883,61 @@ SETDRV:	DW	$+2
 	;; === === === === === === === === === === === ===
 
 	JMP	NEXT
+
+        NEWPAGE
+        ;; #######   ##     #####   #####     #    #        #####
+        ;;    #     #  #   #     # #     #   # #   #       #     #
+        ;;    #      ##    #       #        #   #  #       #
+        ;;    #     ###     #####  #       #     # #       #
+        ;;    #    #   # #       # #       ####### #       #
+        ;;    #    #    #  #     # #     # #     # #       #     #
+        ;;    #     #### #  #####   #####  #     # #######  #####
+        ;; 
+        ;; T&SCALC         ( CALCULATES DRIVE#, TRACK#, & SECTOR# )
+        ;; STACK INPUT: SECTOR-DISPLACEMENT = BLK# * SEC/BLK
+        ;; OUTPUT: VARIABLES DRIVE, TRACK, & SEC
+        ;;
+        ;; The boot image of forth uses 128 bytes for the boot sector
+        ;; plus another 6526 bytes for FORTH, totaling 6654 bytes.
+        ;; This is two bytes short of filling one double density
+        ;; track or two single density tracks.
+        ;; 
+        ;; hard coded stuff:
+        ;; - 4004 (0x0FA4) BLOCKS PER DRIVE FOR DOUBLE DENSITY
+        ;; - 52 (0x34) BLOCKS PER TRACK FOR DOUBLE DENSITY
+        ;; - 2002 (0x7D2) BLOCKS PER DRIVE FOR SINGLE DENSITY
+        ;; - 26 (0x1A) BLOCKS PER TRACK FOR SINGLE DENSITY
+        ;; 
+        ;; If I remember correctly, there was a proposal to round down
+        ;; blocks per drive to 4000 and 2000, to avoid splitting a
+        ;; screen across drives.
+        ;;
+        ;; Use ‹DR0› to access screens on the first drive.
+        ;; Use ‹DR1› to access screens on the second drive.
+        ;;
+        ;; Rewrite T&SCALC for more complicated systems.
+        ;; 
+        ;; : T&SCALC
+        ;;   DENSITY @ IF
+        ;;     0x0FA4 /MOD 0x10 MIN 
+        ;;     DUP DRIVE @ = IF
+        ;;       DROP
+        ;;     ELSE
+        ;;       DRIVE ! SET-DRIVE
+        ;;     ENDIF
+        ;;     0x34 /MOD TRACK ! 1+ SEC !
+        ;;   ELSE
+        ;;     0x07D2 /MOD 0x10 MIN 
+        ;;     DUP DRIVE @ = IF
+        ;;       DROP
+        ;;     ELSE
+        ;;       DRIVE ! SET-DRIVE
+        ;;     ENDIF
+        ;;     0x1A /MOD TRACK ! 1+ SEC !
+        ;;   ENDIF ;
+        ;; 
+        ;; NOTE: in reality, a ;S is placed at the ELSE
+        ;; for density, not a BRANCH to the ENDIF.
 ;
 ;	T&SCALC		( CALCULATES DRIVE#, TRACK#, & SECTOR# )
 ;	STACK INPUT: SECTOR-DISPLACEMENT = BLK# * SEC/BLK
@@ -3306,16 +3949,19 @@ SETDRV:	DW	$+2
 	DW	SETDRV-12
 TSCALC:	DW	DOCOL,DENSTY
 	DW	AT
-	DW	ZBRAN,TSCALS-$
+        DW      ZBRAN
+        DW      TSCALS-$
 	DW	LIT,SPDRV2
 	DW	SLMOD
 	DW	LIT,MXDRV
 	DW	MIN
 	DW	DUP,DRIVE
 	DW	AT,EQUAL
-	DW	ZBRAN,TSCAL1-$
+        DW      ZBRAN
+        DW      TSCAL1-$
 	DW	DROP
-	DW	BRAN,TSCAL2-$
+        DW      BRAN
+        DW      TSCAL2-$
 TSCAL1	DW	DRIVE,STORE
 	DW	SETDRV
 TSCAL2	DW	LIT,SPT2
@@ -3330,9 +3976,11 @@ TSCALS	DW	LIT,SPDRV1
 	DW	MIN
 	DW	DUP,DRIVE
 	DW	AT,EQUAL
-	DW	ZBRAN,TSCAL3-$
+        DW      ZBRAN
+        DW      TSCAL3-$
 	DW	DROP
-	DW	BRAN,TSCAL4-$
+        DW      BRAN
+        DW      TSCAL4-$
 TSCAL3	DW	DRIVE,STORE
 	DW	SETDRV
 TSCAL4	DW	LIT,SPT1
@@ -3386,6 +4034,33 @@ SECWL	MOV	A,M
 	;; === === === === === === === === === === === ===
 
 	JMP	NEXT
+
+        NEWPAGE
+        ;; ######        # #     #
+        ;; #     #      #  #  #  #
+        ;; #     #     #   #  #  #
+        ;; ######     #    #  #  #
+        ;; #   #     #     #  #  #
+        ;; #    #   #      #  #  #
+        ;; #     # #        ## ##
+        ;; 
+        ;;     R/W                 addr blk f ---
+        ;;         The fig-FORTH standard disc read-write linkage. addr specifies
+        ;;         the source or destination block buffer. blk is the sequential
+        ;;         number of the referenced block; and f is a flag for f=0 write
+        ;;         and f=1 read. R/W determines the location on mass storage,
+        ;;         performs the read-write and performs any error checking.
+        ;; 
+        ;; : R/W
+        ;;   USE @ >R 
+        ;;   SWAP SEC/BLK * ROT USE !
+        ;;   SEC/BLK 0 DO
+        ;;     OVER OVER T&SCALC SET-IO 
+        ;;     IF SEC-READ ELSE SEC-WRITE ENDIF
+        ;;     1+ 0x80 USE +! 
+        ;;   LOOP
+        ;;   DROP DROP
+        ;;   R> USE ! ;
 ;
 	DB	83H	; R/W	( FORTH DISK PRIMATIVE )
 	DB	'R/'
@@ -3401,14 +4076,17 @@ RSLW	DW	DOCOL
 	DW	XDO
 RSLW1	DW	OVER,OVER
 	DW	TSCALC,SETIO
-	DW	ZBRAN,RSLW2-$
+        DW      ZBRAN
+        DW      RSLW2-$
 	DW	SECRD
-	DW	BRAN,RSLW3-$
+        DW      BRAN
+        DW      RSLW3-$
 RSLW2	DW	SECWT
 RSLW3	DW	ONEP
 	DW	LIT,80H
 	DW	USE,PSTOR
-	DW	XLOOP,RSLW1-$
+        DW      XLOOP
+        DW      RSLW1-$
 	DW	DROP,DROP
 	DW	FROMR,USE
 	DW	STORE,SEMIS
@@ -3430,7 +4108,8 @@ FLUSH	DW	DOCOL
 	DW	ZERO,XDO
 FLUS1	DW	ZERO,BUFFE
 	DW	DROP
-	DW	XLOOP,FLUS1-$
+        DW      XLOOP
+        DW      FLUS1-$
 	DW	SEMIS
 ;
 	DB	84H	; LOAD
@@ -3485,6 +4164,11 @@ PPTC	EQU	5		;HIGH SPEED PAPER TAPE STATUS/CONTROL PORT
 LPTD	EQU	6		;WRITE DATA TO LINE PRINTER
 LPTC	EQU	7		;LINE PRINTER STATUS/CONTROL PORT
 ;
+CDEV_CN EQU     01h             ;CDEV status: connected
+CDEV_RX EQU     02h             ;CDEV status: receive data ready
+CDEV_TX EQU     04h             ;CDEV status: ready to transmit
+
+;
 EPRINT	DW	0	; ENABLE PRINTER VARIABLE
 ;			; 0 = DISABLED, 1 = ENABLED
 ;
@@ -3493,7 +4177,7 @@ EPRINT	DW	0	; ENABLE PRINTER VARIABLE
 	;; VoidStar8080 CSTAT: A=FF if char ready on console, else A=00
 	;; do not modify BC.
 CSTAT	IN	TTYC
-	ANI	01H
+        ANI     CDEV_RX
 	RZ			;RETURN 00 IF NO DATA AVAILABLE
 	MVI	A,0FFH		;RETURN FF IF DATA IS AVAILABLE
 	RET
@@ -3504,7 +4188,7 @@ CSTAT	IN	TTYC
 	;; if no char available, wait for one
 	;; do not modify BC
 CIN	IN	TTYC
-	ANI	01H
+        ANI     CDEV_RX
 	JZ	CIN		;WAIT FOR DATA AVAILABLE
 	IN	TTYD
 	ANI	7FH		;STRIP THE PARITY BIT
@@ -3515,9 +4199,10 @@ CIN	IN	TTYC
 	;; VoidStar8080 COUT: send (C) to the console outputC
 	;; if necessary, wait until the channel is available
 COUT	IN	TTYC
-	ANI	02H
+        ANI     CDEV_TX
 	JZ	COUT
 	MOV	A,C
+        ANI     7Fh
 	OUT	TTYD
 	RET
 	;; === === === === === === === === === === === ===
@@ -3526,7 +4211,7 @@ COUT	IN	TTYC
 	;; VoidStar8080 POUT: send (C) to the printer output
 	;; if necessary, wait until the channel is available
 POUT	IN	LPTC
-	ANI	02H
+        ANI     CDEV_TX
 	JZ	POUT
 	MOV	A,C
 	OUT	LPTD
@@ -3564,8 +4249,34 @@ PKEY	CALL	CIN	; READ CHR FROM CONSOLE
 PKEY1	MOV	L,E
 	MVI	H,0
 	JMP	HPUSH	; (S1)LB <- CHR
+
+        NEWPAGE
+        ;;    ##   ####### #     #   ###   #######   ##
+        ;;   #     #       ##   ##    #       #        #
+        ;;  #      #       # # # #    #       #         #
+        ;;  #      #####   #  #  #    #       #         #
+        ;;  #      #       #     #    #       #         #
+        ;;   #     #       #     #    #       #        #
+        ;;    ##   ####### #     #   ###      #      ##
+        ;;
+        ;;     (EMIT)         ch --
+        ;;          Send the character on the data stack to the console output.
+        ;;
+        ;;      IMPL NOTES:
+        ;;          In stock FIG-FORTH this is an orphan word (lacking
+        ;;          name and link fields). This implementation makes
+        ;;          this word searchable by adding a name field and a
+        ;;          link field, and inserting it into the dictionary
+        ;;          before ARROW (above) and after TICK (below).
+        ;;
+        ;;      CODE (EMIT)
+        ;;        H POP, B PUSH, L C MOV, CPOUT CALL, B POP, NEXT JMP,
 ;
-PEMIT	DW	$+2	; (EMIT)	ORPHAN
+        DB      86h             ; (EMIT)
+        DB      '(EMIT'
+        DB      ')'+80H
+        DW      ARROW-6
+PEMIT   DW      $+2
 	POP	H	; (L) <- (S1)LB = CHR
 	PUSH	B	; SAVE (IP)
 	MOV	C,L
@@ -3589,7 +4300,7 @@ PCR	PUSH	B	; SAVE (IP)
 ;
 	DB	0C1H	; '	( TICK )
 	DB	0A7H
-	DW	ARROW-6
+        DW      PEMIT-9
 TICK	DW	DOCOL
 	DW	DFIND
 	DW	ZEQU
@@ -4001,6 +4712,36 @@ VLIS2	DW	DUP
 BYE	DW	$+2
 	JMP	ROMBASE
 	;; === === === === === === === === === === === ===
+        ;;          
+
+        NEWPAGE
+        ;;  #          #     ####    #####
+        ;;  #          #    #          #
+        ;;  #          #     ####      #
+        ;;  #          #         #     #
+        ;;  #          #    #    #     #
+        ;;  ######     #     ####      #
+        ;; 
+        ;;     LIST           n --                          109 
+        ;;          List  the ASCII symbolic contents of screen n on  the  current 
+        ;;          output device, setting SCR to contain n.  n is unsigned. 
+        ;;          
+        ;;     IMPL NOTE:
+        ;;          Screen numbers above 32767 are displayed as negative.
+        ;;          This is not an issue as we do not anticipate
+        ;;          having 32 MiB of mass storage. If we did, we would
+        ;;          certainly want a better file system than just a
+        ;;          linear sequence of numbered screens.
+        ;; 
+        ;; : LIST
+        ;;   DECIMAL CR DUP SCR !
+        ;;   ." SCR # " .
+        ;;   0x10 0 DO
+        ;;     CR I 3 .R SPACE
+        ;;     I SCR @ .LINE
+        ;;     ?TERMINAL IF LEAVE THEN
+        ;;   LOOP
+        ;;   CR ;
 ;
 	DB	84H	; LIST
 	DB	'LIS'
@@ -4020,9 +4761,11 @@ LIST1	DW	CR,IDO
 	DW	IDO,SCR
 	DW	AT,DLINE
 	DW	QTERM		; ?TERMINAL
-	DW	ZBRAN,LIST2-$	; IF
+        DW      ZBRAN           ; IF
+        DW      LIST2-$
 	DW	LEAVE		; LEAVE
-LIST2	DW	XLOOP,LIST1-$	; ENDIF
+LIST2   DW      XLOOP           ; ENDIF
+        DW      LIST1-$
 	DW	CR,SEMIS
 ;
 	DB	85H	; INDEX
@@ -4039,9 +4782,11 @@ INDE1	DW	CR,IDO
 	DW	DOTR,SPACE
 	DW	ZERO,IDO
 	DW	DLINE,QTERM
-	DW	ZBRAN,INDE2-$
+        DW      ZBRAN
+        DW      INDE2-$
 	DW	LEAVE
-INDE2	DW	XLOOP,INDE1-$
+INDE2   DW      XLOOP
+        DW      INDE1-$
 	DW	SEMIS
 ;
 	DB	85H	; TRIAD
@@ -4061,9 +4806,11 @@ TRIAD	DW	DOCOL
 TRIA1	DW	CR,IDO
 	DW	LIST
 	DW	QTERM		; ?TERMINAL
-	DW	ZBRAN,TRIA2-$	; IF
+        DW      ZBRAN           ; IF
+        DW      TRIA2-$
 	DW	LEAVE		; LEAVE
-TRIA2	DW	XLOOP,TRIA1-$	; ENDIF
+TRIA2   DW      XLOOP           ; ENDIF
+        DW      TRIA1-$
 	DW	CR
 	DW	LIT,15
 	DW	MESS,CR
@@ -4142,5 +4889,13 @@ MEND	EQU	EM-1		;END DISK BUFFERS
 MLIMIT	EQU	EM		;LAST MEMORY LOC USED + 1
 ;				  = LIMIT
 ;
-;
+; The bootable image is 128 bytes of boot sector,
+; followed by the forth image.
+BSIZE	EQU     128+INITDP-ORIG
+BSECT	EQU     (BSIZE+127)/128
+BSRU	EQU     BSECT*128
+BSPAD	EQU     BSRU-BSIZE
+BKIB	EQU     (BSIZE+1023)/1024
+BKRU    EQU     BKIB*1024
+BKPAD	EQU     BKRU-BSIZE
 	END	ORIG
