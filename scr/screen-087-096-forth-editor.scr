@@ -1,4 +1,4 @@
-87
+87
 (  TEXT,  LINE                                     WFR-79MAY01 )
 
 FORTH DEFINITIONS HEX
@@ -8,7 +8,8 @@ FORTH DEFINITIONS HEX
 
 : LINE               ( RELATIVE TO SCR, LEAVE ADDRESS OF LINE *)
   DUP FFF0 AND 17 ?ERROR                 ( KEEP ON THIS SCREEN )
-  SCR @ (LINE) DROP ;                                      -->
+  SCR @ (LINE) DROP ;                                         ;S
+88
 (  LINE EDITOR                                     WFR-79MAY03 )
 VOCABULARY EDITOR IMMEDIATE HEX
 : WHERE                   ( PRINT SCREEN # AND IMAGE OF ERROR *)
@@ -24,9 +25,10 @@ EDITOR DEFINITIONS
 : #LAG               ( CURSOR ADDRESS-2, COUNT-1 AFTER CURSOR *)
   #LEAD DUP >R + C/L R> - ;
 : -MOVE         ( MOVE IN BLOCK BUFFER ADDR FROM-2, LINE TO-1 *)
-  LINE C/L CMOVE UPDATE ;                                  -->
+  LINE C/L CMOVE UPDATE ;                                     ;S
+89
 (  LINE EDITING COMMANDS: H E S D                  WFR-79MAY03 )
-
+HEX
 : H                               ( HOLD NUMBERED LINE AT PAD *)
   LINE PAD 1+ C/L DUP PAD C! CMOVE ;
 
@@ -39,9 +41,10 @@ EDITOR DEFINITIONS
 
 : D                          ( DELETE LINE-1, BUT HOLD IN PAD *)
   DUP H 0F DUP ROT
-  DO I 1+ LINE I -MOVE LOOP E ;                            -->
+  DO I 1+ LINE I -MOVE LOOP E ;                               ;S
+90
 (  LINE EDITING COMMANDS: M T L                    WFR-79MAY03 )
-
+HEX
 : M          ( MOVE CURSOR BY SIGNED AMOUNT-1, PRINT ITS LINE *)
   R# +! CR SPACE #LEAD TYPE 5F EMIT
                  #LAG  TYPE #LOCATE . DROP ;
@@ -50,9 +53,10 @@ EDITOR DEFINITIONS
   DUP C/L * R# ! DUP H 0 M ;
 
 : L                                          ( RE-LIST SCREEN *)
-  SCR @ LIST 0 M ;                                         -->
+  SCR @ LIST 0 M ;                                            ;S
+91
 (  LINE EDITING COMMANDS: R P I TOP                WFR-79MAY03 )
-
+HEX
 : R                           ( REPLACE ON LINE #-1, FROM PAD *)
   PAD 1+ SWAP -MOVE ;
 
@@ -63,9 +67,10 @@ EDITOR DEFINITIONS
   DUP S R ;
 
 : TOP                     ( HOME CURSOR TO TOP LEFT OF SCREEN *)
-  0 R# ! ;                                                 -->
+  0 R# ! ;                                                    ;S
+92
 (  SCREEN EDITING COMMANDS: CLEAR FLUSH COPY       WFR-79MAY03 )
-
+HEX
 : CLEAR                            ( CLEAR SCREEN BY NUMBER-1 *)
   SCR ! 10 0 DO FORTH I EDITOR E LOOP ;
 
@@ -76,7 +81,8 @@ EDITOR DEFINITIONS
 : COPY                     ( DUPLICATE SCREEN-2 ONTO SCREEN-1 *)
   B/SCR * OFFSET @ + SWAP B/SCR * B/SCR OVER + SWAP
   DO DUP FORTH I BLOCK 2 - ! 1+ UPDATE LOOP
-  DROP FLUSH ;                                             -->
+  DROP FLUSH ;                                                ;S
+93
 (  DOUBLE NUMBER SUPPORT: 2DROP 2DUP 2SWAP         WFR-80APR24 )
 (  OPERATES ON 32 BIT DOUBLE NUMBERS    OR TWO 16-BIT INTEGERS )
 FORTH DEFINITIONS
@@ -90,7 +96,8 @@ FORTH DEFINITIONS
 : 2SWAP                             ( SWAP TWO DOUBLE NUMBERS *)
   ROT >R ROT R> ;
 
-EDITOR DEFINITIONS                                         -->
+EDITOR DEFINITIONS                                            ;S
+94
 (  STRING MATCH FOR EDITOR: -TEXT MATCH         PM-WFR-80APR25 )
 : -TEXT                      ( ADDRESS-3 COUNT-2 ADDRESS-1 --- )
   SWAP -DUP IF      ( LEAVE BOOLEAN MATCHED=NONZERO, NOPE=ZERO )
@@ -105,12 +112,13 @@ EDITOR DEFINITIONS                                         -->
     IF >R 2DROP R> - I SWAP - 0 SWAP 0 0 LEAVE
                  ( CADDR BLEFT $ADDR $LEN OR ELSE 0 OFFSET 0 0 )
     THEN LOOP 2DROP         ( CADDR-2 BLEFT-1 OR 0-2, OFFSET-1 )
-  SWAP 0= SWAP ;                                           -->
+  SWAP 0= SWAP ;                                              ;S
+95
 (  STRING EDITING COMMANDS: 1LINE FIND DELETE      WFR-79MAR24 )
 : 1LINE        ( SCAN LINE WITH CURSOR FOR MATCH TO PAD TEXT, *)
                               ( UPDATE CURSOR, RETURN BOOLEAN *)
   #LAG PAD COUNT MATCH R# +! ;
-
+HEX
 : FIND     ( STRING AT PAD OVER FULL SCREEN RANGE, ELSE ERROR *)
   BEGIN 3FF R# @ <
     IF TOP PAD HERE C/L 1+ CMOVE 0 ERROR ENDIF
@@ -121,7 +129,8 @@ EDITOR DEFINITIONS                                         -->
   #LAG R MINUS R# +!                           ( BACKUP CURSOR )
   #LEAD + SWAP CMOVE
   R> BLANKS UPDATE ;                   ( FILL FROM END OF TEXT )
-                                                           -->
+                                                              ;S
+96
 (  STRING EDITOR COMMANDS: N F B X TILL            WFR-79MAR24 )
 : C         ( SPREAD AT CURSOR AND COPY IN THE FOLLOWING TEXT *)
   1 TEXT PAD COUNT
@@ -132,13 +141,5 @@ EDITOR DEFINITIONS                                         -->
   HERE #LEAD + R> CMOVE              ( HERE TO CURSOR LOCATION )
   R> CMOVE UPDATE                          ( PAD TO OLD CURSOR )
   0 M ;                                     ( LOOK AT NEW LINE )
-(  NOTE: FOR NOW, DO NOT AUTOMATICALLY BACKPATCH INIT DATA     )
-;S 
-(  UPDATE INITIALIZER DATA                                     )
-
-FORTH DEFINITIONS DECIMAL
-  LATEST 12 +ORIGIN !                                ( TOP NFA )
-  HERE   28 +ORIGIN !                                  ( FENCE )
-  HERE   30 +ORIGIN !                                     ( DP )
-  ' EDITOR 6 + 32 +ORIGIN !                         ( VOC-LINK )
-  HERE FENCE !
+                                                              ;S 
+97

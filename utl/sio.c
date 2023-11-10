@@ -134,6 +134,20 @@ int main(int argc, char **argv)
             if (wsz < 1)
                 break;
             conn_to_stdout_pend = 0;
+
+            // if we just sent a backspace,
+            // send a blank and another backspace
+            // to erase what was on the screen.
+
+            if (conn_to_stdout[0] == '\b') {
+                FIN(ws1, write, 1, " ", 1);
+                if (ws1 < 1)
+                    break;
+                FIN(ws2, write, 1, conn_to_stdout, 1);
+                if (ws2 < 1)
+                    break;
+            }
+
         }
 
         if ((sel > 0) && FD_ISSET(conn, writefds)) {

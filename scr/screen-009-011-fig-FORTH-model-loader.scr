@@ -1,0 +1,21 @@
+9
+(  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
+DECIMAL 1 WARNING !
+: LOADI BASE @ DECIMAL OVER . BASE !    LOAD ;
+: LOADR 1 + SWAP DO I LOADI LOOP DECIMAL ;
+: LOADS 1 - OVER + LOADR ;
+: OBJECT ; ( USED ON SCREEN 12 )
+: MEM    ; ( USED ON SCREEN 12 )
+                                                             -->
+10
+(  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
+
+                                                             -->
+11
+(  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
+  DECIMAL  201     LOAD ." PERSONAL stuff loaded." CR
+  DECIMAL  120 125 LOADR ." Symbol Table loaded." CR
+  DECIMAL    6   8 LOADR ." Assembler loaded." CR
+  DECIMAL  251 252 LOADR ." Assembler examples loaded." CR 
+  DECIMAL   12  80 LOADR ." fig-FORTH MODEL loaded." CR 
+                                                              ;S

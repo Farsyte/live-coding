@@ -171,16 +171,18 @@
 ;
 	NEWPAGE
 
-;; === === === === === === === === === === === === === === === ===
-;; VoidStar8080 memory configuration
-;; current configuration is 48 kib of ram and 16 kib of rom.
-;; === === === === === === === === === === === === === === === ===
+        ;; === === === === === === === === === === === === === === === ===
+        ;; VoidStar8080 memory configuration
+        ;; current configuration is 48 KiB of ram and 16 KiB of rom.
+        ;; === === === === === === === === === === === === === === === ===
 
 RAMKB	EQU	62
 ROMKB	EQU	2
 
 RAMTOP	EQU	1024*RAMKB
 ROMBASE EQU	1024*(64-ROMKB)
+
+DPORT   EQU     240	        ; "OUT DPORT" triggers debug assist
 
 	NEWPAGE
 ;
@@ -373,6 +375,7 @@ NEXT1:	MOV	E,M	;(PC) <- ((W))
 	INX	H
 	MOV	D,M
 	XCHG
+        OUT     DPORT
 	PCHL		; NOTE: (DE) = CFA+1
 ;
 	NEWPAGE
@@ -2864,6 +2867,31 @@ IDDOT	DW	DOCOL
 	DW	TYPE
 	DW	SPACE
 	DW	SEMIS
+
+        NEWPAGE
+
+        ;;   ####   #####   ######    ##     #####  ######
+        ;;  #    #  #    #  #        #  #      #    #
+        ;;  #       #    #  #####   #    #     #    #####
+        ;;  #       #####   #       ######     #    #
+        ;;  #    #  #   #   #       #    #     #    #
+        ;;   ####   #    #  ######  #    #     #    ######
+        ;; 
+        ;;     CREATE                                       239 
+        ;;          A defining word used in the form: 
+        ;;               CREATE  <name> 
+        ;;          to  create a dictionary entry for <name>,  without  allocating 
+        ;;          any  parameter  field memory.   When  <name>  is  subsequently 
+        ;;          executed,  the address of the first byte of <name>'s parameter 
+        ;;          field is left on the stack. 
+        ;; 
+        ;; / E78	: CREATE
+        ;; / E83	  -FIND IF DROP NFA ID. 0x0004 MESSAGE SPACE ENDIF
+        ;;                HERE DUP C@ WIDTH @ MIN 1+ ALLOT 
+        ;;                DUP 0xA0 TOGGLE 
+        ;;                HERE 1 - 0x80 TOGGLE 
+        ;;                LATEST , CURRENT @ ! 
+        ;;                HERE 2+ , ;
 ;
 	DB	86H	; CREATE
 	DB	'CREAT'
@@ -3621,14 +3649,23 @@ BDSEC	EQU	13		;SELECT SECTOR
 BDDAT	EQU	14		;READ/WRITE NEXT BYTE
 
 ;	DOUBLE DENSITY 8" FLOPPY CAPACITIES
+        ;; VoidStar8080: FORTH block zero is at the start of the
+        ;; second track, so FORTH only sees 76 tracks.
+        ;; FOR REASONS, I want the SPDRV to be a multiple of 3 KiB.
 SPT2	EQU	52	; SECTORS PER TRACK
-TRKS2	EQU	77	; NUMBER OF TRACKS
-SPDRV2	EQU	SPT2*TRKS2	; SECTORS/DRIVE
+TRKS2	EQU	76	; NUMBER OF TRACKS
+SPDRV2a	EQU	SPT2*TRKS2      ;raw SECTORS/DRIVE
+SPDRV2s	EQU	(SPDRV2a+23)/24	;rounded-up TRIADS/DRIVE
+SPDRV2	EQU	SPDRV2s*24      ;rounded up SECTORS/DRIVE
 
 ;	SINGLE DENSITY 8" FLOPPY CAPACITIES
+        ;; VoidStar8080: FORTH block zero is at the start of the
+        ;; second track, so FORTH only sees 76 tracks.
 SPT1	EQU	26	; SECTORS/TRACK
-TRKS1	EQU	77	; # TRACKS
-SPDRV1	EQU	SPT1*TRKS1	; SECTORS/DRIVE
+TRKS1	EQU	76	; # TRACKS
+SPDRV1a	EQU	SPT1*TRKS1      ;raw SECTORS/DRIVE
+SPDRV1s	EQU	(SPDRV1a+23)/24	;rounded-up TRIADS/DRIVE
+SPDRV1	EQU	SPDRV1s*24       ;rounded up SECTORS/DRIVE
 
 BPS	EQU	128	; BYTES PER SECTOR
 MXDRV	EQU	16	; MAX # DRIVES
@@ -3898,19 +3935,13 @@ SETDRV:	DW	$+2
         ;; OUTPUT: VARIABLES DRIVE, TRACK, & SEC
         ;;
         ;; The boot image of forth uses 128 bytes for the boot sector
-        ;; plus another 6526 bytes for FORTH, totaling 6654 bytes.
-        ;; This is two bytes short of filling one double density
-        ;; track or two single density tracks.
-        ;; 
-        ;; hard coded stuff:
-        ;; - 4004 (0x0FA4) BLOCKS PER DRIVE FOR DOUBLE DENSITY
-        ;; - 52 (0x34) BLOCKS PER TRACK FOR DOUBLE DENSITY
-        ;; - 2002 (0x7D2) BLOCKS PER DRIVE FOR SINGLE DENSITY
-        ;; - 26 (0x1A) BLOCKS PER TRACK FOR SINGLE DENSITY
-        ;; 
-        ;; If I remember correctly, there was a proposal to round down
-        ;; blocks per drive to 4000 and 2000, to avoid splitting a
-        ;; screen across drives.
+        ;; plus the current image size of FORTH, which adds up to just
+        ;; a few bytes short of filling the first track of a DOUBLE
+        ;; density disk.
+        ;;
+        ;; The normal disk access primative for VoidStar8080
+        ;; increments the track number, so Track 0 is reserved,
+        ;; placing Screen 0 at the start of the second track.
         ;;
         ;; Use ‹DR0› to access screens on the first drive.
         ;; Use ‹DR1› to access screens on the second drive.
@@ -3919,7 +3950,7 @@ SETDRV:	DW	$+2
         ;; 
         ;; : T&SCALC
         ;;   DENSITY @ IF
-        ;;     0x0FA4 /MOD 0x10 MIN 
+        ;;     SPDRV2 /MOD 0x10 MIN
         ;;     DUP DRIVE @ = IF
         ;;       DROP
         ;;     ELSE
@@ -3927,15 +3958,14 @@ SETDRV:	DW	$+2
         ;;     ENDIF
         ;;     0x34 /MOD TRACK ! 1+ SEC !
         ;;   ELSE
-        ;;     0x07D2 /MOD 0x10 MIN 
+        ;;     SPDRV1 /MOD 0x10 MIN 
         ;;     DUP DRIVE @ = IF
         ;;       DROP
         ;;     ELSE
         ;;       DRIVE ! SET-DRIVE
         ;;     ENDIF
         ;;     0x1A /MOD TRACK ! 1+ SEC !
-        ;;   ENDIF ;
-        ;; 
+        ;;   ENDIF ;        ;; 
         ;; NOTE: in reality, a ;S is placed at the ELSE
         ;; for density, not a BRANCH to the ENDIF.
 ;

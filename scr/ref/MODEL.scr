@@ -1,0 +1,762 @@
+3
+**********************  fig-FORTH  MODEL  **********************
+
+                    Through the courtesy of
+
+                      FORTH INTEREST GROUP
+                         P. O. BOX 1105
+                     SAN CARLOS, CA. 94070
+
+
+                           RELEASE 1
+                     WITH COMPILER SECURITY
+                              AND
+                     VARIABLE LENGTH NAMES
+
+
+      Further distribution must include the above notice.
+4
+(  ERROR MESSAGES 1..15 )
+EMPTY STACK
+DICTIONARY FULL
+HAS INCORRECT ADDRESS MODE
+ISN'T UNIQUE
+
+DISC RANGE ?
+FULL STACK
+DISC ERROR !
+
+
+
+
+
+
+FORTH INTEREST GROUP                                 MAY 1, 1979
+5
+(  ERROR MESSAGES 17..31 )
+COMPILATION ONLY, USE IN DEFINITION
+EXECUTION ONLY
+CONDITIONALS NOT PAIRED
+DEFINITION NOT FINISHED
+IN PROTECTED DICTIONARY
+USE ONLY WHEN LOADING
+OFF CURRENT EDITING SCREEN
+DECLARE VOCABULARY
+6
+( I/O, TIM      EMIT KEY CR ?TERMINAL )
+CODE EMIT       ...
+CODE KEY        ...
+CODE CR         ...
+CODE ?TERMINAL  ...
+7
+( I/O, APPLE    HOME SCROLL KEY EMIT CR ?TERMINAL )
+CODE HOME       ...
+CODE SCROLL     ...
+HERE ' KEY 2 - !
+                ...
+HERE ' EMIT 2 - !
+                ...
+HERE ' CR 2 - !
+                ...
+HERE ' ?TERMINAL 2 - !
+                ...
+8
+( I/O, SYM-1    KEY EMIT CR ?TERMINAL )
+HEX
+CODE KEY        ...
+CODE EMIT       ...
+CODE CR         ...
+CODE ?TERMINAL  ...
+12
+( ENTRY POINTS, INITIAL USER DATA )
+ASSEMBLER OBJECT MEM HEX
+NOP, HERE JMP,            ( WORD-ALIGNED VECTOR TO COLD START *)
+NOP, HERE JMP,            ( WORD-ALIGNED VECTOR TO WARM START *)
+0000 ,  0001 ,                          ( IMPLDEP CPU AND REV *)
+0000 ,                           ( IMPLDEP TOP OF FORTH VOCAB *)
+  7F ,                               ( IMPLDEP BACKSPACE CHAR *)
+3BA0 ,                               ( IMPLDEP INIT USER AREA *)
+009E ,                               ( IMPLDEP TOP OF D STACK *)
+01FF ,                               ( IMPLDEP TOP OF R STACK *)
+0100 ,                                 ( IMPLDEP START OF TIB *)
+001F ,                             ( IMPLDEP NAME FIELD WIDTH *)
+0001 ,                         ( IMPLDEP INITIAL WARNING FLAG *)
+0200 ,                                ( IMPLDEP INITIAL FENCE *)
+0000 ,                      ( IMPLDEP COLD START VALUE FOR DP *)
+0000 ,                ( IMPLDEP COLD START VALUE FOR VOC-LINK *)
+13
+( LIT PUSH PUT NEXT )
+CODE LIT        ...           ( PUSH NEXT WORD AT IP TO STACK *)
+LABEL PUSH      ...               ( PUSH RESULT TO DATA STACK *)
+LABEL PUT       ...              ( STORE RESULT TO DATA STACK *)
+LABEL NEXT      ...                    ( RUN NEXT THING AT IP *)
+14
+( SETUP EXECUTE )
+LABEL SETUP     ...
+CODE EXECUTE    ...       ( CFA -- EXECUTE WORD WITH THIS CFA *)
+15
+( BRANCH 0BRANCH )
+CODE BRANCH     ...                                 ( IP+=*IP *)
+CODE 0BRANCH    ...                      ( BRANCH IF TOS IS 0 *)
+16
+( {LOOP} {+LOOP} )
+CODE (LOOP)     ...          ( INC INDEX, LOOP UNTIL => LIMIT *)
+CODE (+LOOP)    ...          ( ABOVE WITH SPECIFIED INCREMENT *)
+17
+( {DO} I )
+CODE (DO)       ...                         ( START A DO LOOP *)
+CODE I ...                           ( GET LOOP COUNTER VALUE *)
+18
+( DIGIT )
+CODE DIGIT      ...        ( CONVERT CHAR TO VALUE USING BASE *)
+19
+( {FIND} )
+CODE (FIND)     ...                       ( SEARCH DICTIONARY *)
+20
+( ENCLOSE )
+CODE (ENCLOSE)  ...       ( LOCATE TEXT ENCLOSED BY DELIMITER *)
+21
+( TERMINAL VECTORS: EMIT KEY ?TERMINAL CR )
+CODE EMIT                              ( EMIT CHAR TO CONSOLE *)
+CODE KEY                             ( GET INPUT FROM CONSOLE *)
+CODE ?TERMINAL                       ( DETECT CONSOLE "BREAK" *)
+CODE CR                                ( DO A CARRIAGE RETURN *)
+
+( IT IS INTENDED FOR THE ABOVE TO BE EMPTY CODE WORDS, WHOSE )
+( CODE FIELDS WILL BE FILLED IN LATER WITH POINTERS TO THE )
+( PROPER IMPLEMENTATION. )
+22
+( CMOVE )
+CODE CMOVE      ...               ( MOVE DATA BYTES IN MEMORY *)
+23
+( U* )
+CODE U*         ...                          ( 16b 16b -- 32b *)
+24
+( U/ )
+CODE U/         ...                     ( 31B 16b -- REM QUOT *)
+25
+( AND OR XOR )
+CODE AND        ...                      ( BITWISE 16-BIT AND *)
+CODE OR         ...                       ( BITWISE 16-BIT OR *)
+CODE XOR        ...                      ( BITWISE 16-BIT XOR *)
+26
+( SP@ SP! RP! )
+CODE SP@        ...             ( COPY STACK POINTER TO STACK *)
+LABEL PUSH0A    ...             ( WRITE 00//A TO TOP OF STACK *)
+CODE SP!        ...                   ( INITIALIZE SP FROM S0 *)
+CODE RP!        ...                   ( INITIALIZE RP FROM R0 *)
+CODE ;S         ...                                ( IP=*RP++ *)
+`27
+( LEAVE >R R> R )
+CODE LEAVE      ...       ( LEAVE DO-LOOP: SET INDEX TO LIMIT *)
+CODE >R         ...                 ( POP FROM RP, PUSH TO SP *)
+CODE R>         ...                 ( POP FROM SP, PUSH TO RP *)
+CODE R          ...                 ( PUSH DATA AT RP ONTO SP *)
+28
+( 0= 0< )
+CODE 0=         ...             ( DETECT ZERO ON TOP OF STACK *)
+CODE 0< ...     ...         ( DETECT NEGATIVE ON TOP OF STACK *)
+29
+( + D+ MINUS D- )
+CODE +          ...                      ( ADD TWO 16b VALUES *)
+CODE D+         ...                      ( ADD TWO 32b VALUES *)
+CODE MINUS      ...                        ( NEGATE 16b VALUE *)
+CODE D-         ...                        ( NEGATE 32b VALUE *)
+30
+( OVER DROP SWAP DUP )
+CODE OVER       ...                   ( PUSH COPY OF 2ND ITEM *)
+CODE DROP       ...                        ( DISCARD ONE ITEM *)
+CODE SWAP       ...                  ( EXCHANGE TOP TWO ITEMS *)
+CODE DUP        ...                      ( DUPLICATE TOP ITEM *)
+31
+( +! TOGGLE )
+CODE +!         ...      ( INCREMENT DATA AT ADDRESS BY VALUE *)
+CODE TOGGLE     ...          ( TOGGLE BITS OF DATA AT ADDRESS *)
+32
+( @ C@ ! C! )
+CODE @          ...                   ( FETCH DATA AT ADDRESS *)
+CODE C@         ...                   ( FETCH BYTE AT ADDRESS *)
+CODE !          ...                   ( STORE DATA AT ADDRESS *)
+CODE C!         ...                   ( STORE BYTE AT ADDRESS *)
+33
+(  : ; )
+
+:  :                                 ( CREATE HIGH LEVEL WORD *)
+   ?EXEC !CSP CURRENT @ CONTEXT !
+   CREATE ] ;CODE IMMEDIATE
+                ...     ( TODO PROVIDE ASM TO SUPPORT : WORDS *)
+
+:  ;                         ( STOP COMPILING HIGH LEVEL WORD *)
+   ?CSP COMPILE
+   SMUDGE [ ; IMMEDIATE
+34
+( CONSTANT VARIABLE USER )
+
+: CONSTANT              ( CREATE WORD THAT PUSHES GIVEN VALUE *)
+  CREATE SMUDGE , ;CODE
+                ...              ( TODO ASM IMPL FOR CONSTANT *)
+
+: VARIABLE
+  CONSTANT ;CODE
+                ...              ( TODO ASM IMPL FOR VARIABLE *)
+
+: USER
+  CONSTANT ;CODE
+                ...                 ( TODO ASM IMPL FOR USER  *)
+35
+( 0 1 2 3 BL C/L FIRST LIMIT B/BUF B/SCR +ORIGIN )
+HEX
+00  CONSTANT  0         01  CONSTANT 1
+02  CONSTANT  2         03  CONSTANT 3
+20  CONSTANT  BL
+40  CONSTANT  C/L
+
+3BE0    CONSTANT    FIRST
+4000    CONSTANT    LIMIT
+  80    CONSTANT    B/BUF
+   8    CONSTANT    B/SCR
+
+          00 +ORIGIN
+: +ORIGIN LITERAL + ;
+36
+( SOME USER VARIABLES )
+HEX
+06   USER  S0                       ( TOP OF EMPTY DATA STACK *)
+08   USER  R0                     ( TOP OF EMPTY RETURN STACK *)
+0A   USER  TIB            ( LOCATION OF TERMINAL INPUT BUFFER *)
+0C   USER  WIDTH                   ( MAXIMUM NAME FIELD WIDTH *)
+0E   USER  WARNING                    ( CONTROL WARNING MODES *)
+10   USER  FENCE                     ( BARRIER FOR FORGETTING *)
+12   USER  DP                            ( DICTIONARY POINTER *)
+14   USER  VOC-LINK                    ( TO NEWEST VOCABULARY *)
+16   USER  BLK                         ( INTERPRETATION BLOCK *)
+18   USER  IN                       ( OFFSET INTO SOURCE TEXT *)
+1A   USER  OUT                      ( DISPLAY CURSOR POSITION *)
+1C   USER  SCR                               ( EDITING SCREEN *)
+37
+( MORE USER VARIABLES )
+1E   USER  OFFSET                  ( POSSIBLY TO OTHER DRIVES *)
+20   USER  CONTEXT                ( VOCABULARY FIRST SEARCHED *)
+22   USER  CURRENT              ( SEARCHED 2ND, COMPILED INTO *)
+24   USER  STATE                          ( COMPILATION STATE *)
+26   USER  BASE                    ( FOR NUMERIC INPUT-OUTPUT *)
+28   USER  DPL                       ( DECIMAL POINT LOCATION *)
+2A   USER  FLD                           ( OUTPUT FIELD WIDTH *)
+2C   USER  CSP                         ( CHECK STACK POSITION *)
+2E   USER  R#                       ( EDITING CURSOR POSITION *)
+30   USER  HLD         ( POINTS TO LAST CHARACTER HELD IN PAD *)
+38
+( 1+ 2+ HERE ALLOT , C, - = < > ROT SPACE -DUP )
+: 1+      1    +   ;                       ( INCREMENT BY ONE *)
+: 2+      2    +   ;                       ( INCREMENT BY TWO *)
+: HERE    DP   @   ;        ( FETCH NEXT FREE ADDRESS IN DICT *)
+: ALLOT   DP   +!  ;                ( MOVE DICT POINTER AHEAD *)
+: ,   HERE  ! 2 ALLOT ;          ( ENTER STACK NUMBER TO DICT *)
+: C,  HERE C! 1 ALLOT ;            ( ENTER STACK BYTE TO DICT *)
+: -   MINUS + ;                           ( COMPUTE SEC - BOT *)
+: =   -  0= ;                    ( LEAVE BOOLEAN OF SEC = BOT *)
+: <   -  0< ;                    ( LEAVE BOOLEAN OF SEC < BOT *)
+: >   SWAP < ;                   ( LEAVE BOOLEAN OF SEC > BOT *)
+: ROT   >R SWAP R> SWAP ;               ( ROTATE THIRD TO BOT *)
+: SPACE    BL EMIT ;                ( PRINT BLANK ON TERMINAL *)
+: -DUP     DUP IF DUP ENDIF ;     ( DUPLICATE BOT IF NON-ZERO *)
+39
+( TRAVERSE LATEST LFA CFA NFA PFA )
+: TRAVERSE                           ( MOVE ACROSS NAME FIELD *)
+       SWAP BEGIN OVER + 7F OVER C@ < UNTIL SWAP DROP ;
+
+: LATEST           ( LEAVE NFA OF THE TOPMOST WORD IN CURRENT *)
+    CURRENT @ @ ; 
+
+: LFA    4 - ;                                   ( PFA -> LFA *)
+: CFA    2 - ;                                   ( PFA -> CFA *)
+: NFA    5 - -1 TRAVERSE ;                       ( PFA -> NFA *)
+: PFA    1 TRAVERSE 5 + ;                        ( NFA -> PFA *)
+40
+( !CSP ?ERROR ?COMP ?EXEC ?PAIRS ?CSP ?LOADING )
+: !CSP                    ( SAVE SP IN CSP FOR LATER CHECKING *)
+        SP@ CSP ! ;
+: ?ERROR                           ( MAYBE EMIT ERROR MESSAGE *)
+        SWAP IF ERROR ELSE DROP ENDIF ;
+: ?COMP         ( MAYBE "COMPILATION ONLY, USE IN DEFINITION" *)
+        STATE @ 0= 11 ?ERROR ;
+: ?EXEC                              ( MAYBE "EXECUTION ONLY" *)
+        STATE @ 12 ?ERROR ;
+: ?PAIRS                    ( MAYBE "CONDITIONALS NOT PAIRED" *)
+        - 13 ?ERROR ;
+: ?CSP                      ( MAYBE "DEFINITION NOT FINISHED" *)
+        SP@ CSP @ - 14 ?ERROR ;
+: ?LOADING                    ( MAYBE "USE ONLY WHEN LOADING" *)
+        BLK @ 0= 16 ?ERROR ;
+41
+( COMPILE [ ] SMUDGE HEX DECIMAL )
+: COMPILE                            ( COMPILE WORD INTO DICT *)
+        ?COMP R> DUP 2+ >R @ , ;
+: [                                        ( STOP COMPILATION *)
+        0 STATE ! ; IMMEDIATE
+: ]                                       ( START COMPILATION *)
+        C0 STATE ! ;
+: SMUDGE                   ( TOGGLE SMUDGE BIT ON LATEST WORD *)
+        LATEST 20 TOGGLE ;
+: HEX                               ( SET BASE TO HEXIDECIMAL *)
+        10 BASE ! ;
+: DECIMAL                               ( SET BASE TO DECIMAL *)
+        0A BASE ! ;
+42
+( {;CODE} ;CODE )
+
+: (;CODE)                          ( SET CODE FIELD OF LATEST *)
+        R> LATEST PFA CFA ! ;
+
+: ;CODE              ( END OF DEFINING WORD, PROVODE ASM IMPL *)
+        ?CSP COMPILE (;CODE)
+        [COMPILE] [ SMUDGE ; IMMEDIATE
+43
+( <BUILDS DOES> )
+
+: <BUILDS                      ( CREATE HEADER FOR DOES> WORD *)
+        0 CONSTANT ;
+
+: DOES>              ( PROVIDE HIGH LEVEL IMPL FOR DOES> WORD *)
+        R> LATEST PFA ! ;CODE
+                ...                 ( TODO ASM IMPL FOR DOES> *)
+44
+( COUNT TYPE -TRAILING {."} ." )
+: COUNT DUP 1+ SWAP C@ ;       ( LEAVE TEXT ADDR. CHAR. COUNT *)
+: TYPE                          ( TYPE STRING FROM ADDR COUNT *)
+        -DUP IF OVER + SWAP
+                DO I C@ EMIT LOOP ELSE DROP ENDIF ;
+: -TRAILING              ( REMOVE TRAILING BLANKS FROM STRING *)
+        DUP 0 DO OVER OVER + 1 - C@
+        BL - IF LEAVE ELSE 1 - ENDIF LOOP ;
+: (.")                  ( HELP PRINT INLINE STRING TO CONSOLE *)
+        R COUNT DUP 1! R> + >R TYPE ;
+: ."    22 STATE @           ( PRINT INLINE STRING TO CONSOLE *)
+        IF COMPILE  (.") WORD HERE C@ 1+ ALLOT
+        ELSE WORD HERE COUNT TYPE ENDIF ; IMMEDIATE
+45
+( EXPECT QUERY )
+: EXPECT            ( INPUT TEXT TO MEMORY, PROCESS BS AND CR *)
+        OVER + OVER DO KEY DUP 0E +ORIGIN ( BS ) @ =
+        IF DROP 08 OVER I = DUP R> 2  + >R -
+          ELSE ( NOT BS ) DUP 0D =
+            IF ( RET ) LEAVE DROP BL 0 ELSE DUP ENDIF
+            I C! 0 I 1+ !
+        ENDIF EMIT LOOP DROP ;
+: QUERY TIB @ 50 EXPECT 0 IN ! ;            ( GET LINE TO TIB *)
+8081  HERE
+: X   BLK @                  ( MATCH ASCII NUL AS END-OF-TEXT *)
+      IF ( DISC ) 1 BLK +! 0 IN ! BLK @ 7 AND 0=
+        IF ( SCR END ) ?EXEC R> DROP ENDIF
+      ELSE ( TERMINAL ) R> DROP
+      ENDIF ; ! IMMEDIATE
+46
+( FILL ERASE BLANKS HOLD PAD )
+
+: FILL                          ( FILL MEMORY WTIH GIVEN BYTE *)
+        SWAP >R OVER C! DUP 1+ R> 1 - CMOVE ;
+: ERASE                             ( SET MEMORY TO ASCII NUL *)
+        0 FILL ;
+: BLANKS                             ( SET MEMORY TO ASCII BL *)
+        BL FILL ;
+: HOLD                             ( PUSH BYTE INTO HOLD AREA *)
+        -1 HLD +! HLD @ C! ;
+: PAD   HERE 44 + ;                       ( TEMP CHAR STORAGE *)
+47
+( WORD )
+: WORD                     ( ACCEPT DELIMITED INPUT TO 'HERE' *)
+        BLK @ IF BLK @ BLOCK ELSE TIB @ ENDIF
+        IN @ + SWAP
+        ENCLOSE
+        HERE 22 BLANKS
+        IN +!
+        OVER - >R
+        R HERE C!
+        + HERE 1+
+        R> CMOVE ;
+48
+( {NUMBER} NUMBER -FIND )
+
+: (NUMBER)                ( HELP CONVERT STRING TO 32b NUMBER *)
+        BEGIN 1+ DUP >R C@ BASE @ DIGIT
+        WHILE SWAP BASE @ U* DROP ROT BASE @ U* D+
+        DPL @ 1+ IF 1 DPL +! ENDIF R> REPEAT R> ;
+
+: NUMBER                       ( CONVERT STRING TO 32b NUMBER *)
+        0 0 ROT DUP 1+ C@ 2D = DUP >R + -1
+        BEGIN DPL ! (NUMBER) DUP C@ BL -
+        WHILE DUP C@ 2E - 0 ?ERROR 0 REPEAT
+        DROP R> IF DMINUS ENDIF ;
+
+: -FIND               ( SEARCH DICTS FOR NEXT WORD FROM INPUT *)
+        BL WORD HERE CONTEXT @ @ (FIND)
+        DUP 0= IF DROP HERE LATEST (FIND) ENDIF ;
+49
+( {ABORT} ERROR ID. )
+
+: (ABORT) ABORT ;                ( USER ALTERABLE ERROR ABORT *)
+
+: ERROR                ( EMIT WARNING MESSAGE, RETURN TO REPL *)
+        WARNING @ 0<
+        IF (ABORT) ENDIF HERE COUNT TYPE ."   ? "
+        MESSAGE SP! IN @ BLK @ QUIT ;
+
+: ID.                 ( PRINT NAME FIELD GIVEN HEADER ADDRESS *)
+        PAD 020 5F FILL DUP PFA LFA OVER -
+        PAD SWAP CMOVE PAD COUNT 01F AND TYPE SPACE ;
+50
+( CREATE )
+
+: CREATE          ( CREATE WORD FROM INPUT, WARN IF DUPLICATE *)
+
+        TIB HERE 0A0 + < 2 ?ERROR
+        -FIND
+        IF ( WARN USER ) DROP NFA ID. 4 MESSAGE SPACE ENDIF
+        HERE DUP C@ WIDTH @ MIN 1+ ALLOT
+        DUP C@ 0FD = ALLOT
+        DUP A0 TOGGLE HERE 1 - 80 TOGGLE
+        LATEST , CURRENT @ !
+        HERE 2+ , ;
+51
+( [COMPILE] LITERAL DLITERAL )
+
+: [COMPILE]           ( FORCE COMPILATION OF AN IMMEDIATE WOD *)
+        -FIND 0= 0 ?ERROR DROP CFA , ; IMMEDIATE
+: LITERAL                  ( IF COMPILING, CREATE 16b LITERAL *)
+        STATE @ IF COMPILE LIT , ENDIF ; IMMEDIATE
+: DLITERAL                 ( IF COMPILING, CREATE 32b LITERAL *)
+        STATE @ IF SWAP [COMPILE] LITERAL
+                        [COMPILE] LITERAL ENDIF ; IMMEDIATE
+: ?STACK   ( IMPLDEP QUESTION UPON OVER OR UNDERFLOW OF STACK *)
+        09E SP@ < 1 ?ERROR SP@ 020 < 7 ?ERROR ;
+52
+( INTERPRET )
+
+: INTERPRET    ( INTERPRET OR COMPILE SOURCE TEXT INPUT WORDS *)
+        BEGIN -FIND
+          IF ( FOUND ) STATE @ <
+            IF CFA , ELSE CFA EXECUTE ENDIF ?STACK
+          ELSE
+            HERE NUMBER DPL @ 1+
+            IF [COMPILE] DLITERAL
+            ELSE DROP [COMPILE] LITERAL
+            ENDIF ?STACK
+          ENDIF
+        AGAIN ;
+53
+( IMMEDIATE VOCABULARY )
+
+: IMMEDIATE                  ( TOGGLE PREC BIT OF LATEST WORD *)
+        LATEST 40 TOGGLE ;
+
+: VOCABULARY                        ( CREATE A NEW VOCABULARY *)
+        <BUILDS A081 , CURRENT @ CFA ,
+         HERE  VOC-LINK @ , VOC-LINK !
+         DOES> 2+ CONTEXT ! ;
+VOCABULARY FORTH IMMEDIATE          ( CREATE FORTH VOCABULARY *)
+
+: DEFINITIONS                        ( SET CURRENT TO CONTEXT *)
+        CONTEXT @ CURRENT ! ;
+
+: (                 ( DISCARD SRC TEXT UNTIL NEXT CLOSE-PAREN *)
+        29 WORD ; IMMEDIATE
+54
+( QUIT ABORT )
+
+: QUIT                         ( RETURN TO REPL FROM TERMINAL *)
+        0 BLK ! [COMPILE] ]
+        BEGIN RP! CR QUERY INTERPRET
+          STATE @ 0= IF ."  OK" ENDIF AGAIN ;
+
+: ABORT                   ( WARM RESTART, INCLUDING REGISTERS *)
+        SP! DECIMAL
+        CR ." FORTH-65 V 4.0" ( IMPLDEP )
+        [COMPILE] FORTH DEFINITIONS QUIT ;
+55
+( COLD )
+
+CODE COLD       ...                 ( IMPLDEP COLD START CODE *)
+  ( IMPLDEP AT COMPILE TIME, PATCH DATA AT ORIGIN )
+  ( IMPLDEP AT RUN TIME, INIT USER VARIABLES )
+  ( IMPLDEP AT RUN TIME, INIT FORTH REGISTERS )
+  ( IMPLDEP AT RUN TIME, START AT "ABORT" )
+
+56
+( S->D +- D+- ABS DABS MIN MAX )
+CODE S->D       ...                       ( EXTEND 16b TO 32b *)
+: +-    0< IF MINUS ENDIF ;          ( APPLY SIGN TO 16b DATA *)
+: D+-                                ( APPLY SIGN TO 32b DATA *)
+        0< IF DMINUS ENDIF ;
+: ABS   DUP +- ;                ( NEGATE 16b DATA IF NEGATIVE *)
+: DABS  DUP D+- ;               ( NEGATE 32b DATA IF NEGATIVE *)
+: MIN                        ( KEEP MINIMUM OF TWO 16b VALUES *)
+        OVER OVER > IF SWAP ENDIF DROP ;
+: MAX                        ( KEEP MAXIMUM OF TWO 16b VALUES *)
+        OVER OVER < IF SWAP ENDIF DROP ;
+57
+( M* M/ *  /MOD / MOD */MOD /* M/MOD )
+: M*                                         ( n1 n2 -- dprod *)
+        OVER OVER XOR >R ABS SWAP ABS U* R> D+- ;
+: M/                                       ( d n1 -- rem quot *)
+        OVER >R >R DABS R ABS U/
+        R> R XOR +- SWAP R> +- SWAP ;
+: *     U* DROP ;                      ( n1*n2: n1 n2 -- prod *)
+: /MOD  >R S->D R> M/ ;            ( n1/n2: n1 n2 -- rem quot *)
+: /     /MOD SWAP DROP ;               ( n1/n2: n1 n2 -- quot *)
+: MOD   /MOD DROP ;                     ( n1/n2: n1 n2 -- rem *)
+: */MOD >R M* R> M/ ;       ( n1*n2/n3: n2 n2 n3 --  quot rem *)
+: */    */MOD SWAP DROP ;       ( n1*n2/n3: n2 n2 n3 --  quot *)
+: M/MOD                        ( ud1/ud2: ud1 u2 -- rem dquot *)
+        >R 0 R U/ R> SWAP >R U/ R> ;
+58
+( USE PREV +BUF UPDATE EMPTY-BUFFERS DR0 DR1 )
+FIRST  VARIABLE  USE
+FIRST  VARIABLE  PREV
+
+: +BUF                          ( ADVANCE DISC BUFFER ADDRESS *)
+        84 ( I.E. B/BUF+4 ) + DUP LIMIT =
+        IF DROP FIRST ENDIF DUP PREV @ - ;
+
+: UPDATE                        ( MARK PREV BUFFER AS ALTERED *)
+        PREV @ @ 8000 OR PREV @ ! ;
+
+: EMPTY-BUFFERS   ( CLEAR BLOCK BUFFERS, DO NOT WRITE TO DISC *)
+        FIRST LIMIT OVER - ERASE ;
+
+: DR0     0 OFFSET ! ;              ( IMPLDEP SELECT DRIVE #0 *)
+: DR1  07D0 OFFSET ! ;              ( IMPLDEP SELECT DRIVE #1 *)
+59
+ ( BUFFER )
+: BUFFER             ( ASSIGN BUFFER TO BLOCK #N, RETURN ADDR *)
+   USE @ DUP >R
+   BEGIN +BUF UNTIL ( AVOID PREV ) USE !
+   R @ 0<
+   IF
+      R 2+
+      R @ 7FFF AND
+      0 R/W
+   ENDIF
+   R !
+   R PREV !
+   R> 2+ ;
+60
+( BLOCK )
+: BLOCK              ( GET ADDR OF BUFFER CONTAINING BLOCK #N *)
+   OFFSET @ + >R
+   PREV @ DUP @ R - DUP +
+   IF
+      BEGIN +BUF 0=
+         IF DROP R BUFFER
+            DUP R ! R/W
+            2 -
+         ENDIF
+         DUP @ R - DUP + 0=
+      UNTIL
+      DUP PREV !
+   ENDIF
+   R> DROP 2+ ;
+61
+( {LINE} .LINE MESAGE )
+
+: (LINE)         ( FIND SCREEN LINE: LINE# SCR# -- ADDR COUNT *)
+        >R C/L B/BUF */MOD R> B/SCR * +
+        BLOCK + C/L ;
+
+: .LINE                    ( PRINT SCREEN LINE: LINE# SCR# -- *)
+        (LINE) -TRAILING TYPE ;
+
+: MESSAGE            ( PRINT MESSAGE FROM SCREEN 4/5: MSG# -- *)
+        WARNING @ IF
+          -DUP IF 4 OFFSET @ B/SCR / - .LINE ENDIF
+        ELSE ." MSG # " . ( PATCHED BY SCREEN 76 )
+	ENDIF ;
+62
+( LOAD --> )
+
+: LOAD         ( INTERPRET STARTING AT GIVEN SCREEN: SCR# --- *)
+    BLK @ >R IN @ >R 0 IN ! B/SCR * BLK !
+    INTERPRET R> IN ! R> BLK ! ;
+
+: -->                     ( INTERPRET STARTING AT NEXT SCREEN *)
+    ?LOADING 0 IN ! B/SCR BLK @ OVER
+    MOD - BLK +! ; IMMEDIATE              ( EVEN IF COMPILING! )
+63
+( EMIT KEY )
+
+( EMIT )
+  HERE -2 BYTE.IN EMIT !
+                ...         ( IMPLDEP EMIT ASSEMBLY CODE HERE *)
+
+( KEY )
+  HERE -2 BYTE.IN KEY !
+                ...          ( IMPLDEP KEY ASSEMBLY CODE HERE *)
+64
+( ... )
+
+( ?TERMINAL )
+  HERE -2 BYTE.IN ?TERMINAL !
+                ...    ( IMPLDEP ?TERMINAL ASSEMBLY CODE HERE *)
+
+
+( CR )
+  HERE -2 BYTE.IN CR !
+                ...           ( IMPLDEP CR ASSEMBLY CODE HERE *)
+
+65
+( DATA STATUS #HL )
+6900 CONSTANT DATA                  ( IMPLDEP CONTROLLER PORT *)
+6901 CONSTANT STATUS                ( IMPLDEP CONTROLLER PORT *)
+: #HL     ( IMPLDEP CONVERT DECIMAL DIGIT FOR DISC CONTROLLER *)
+    0 0A U/ SWAP 30 + HOLD ;
+66
+( D/CHAR ?DISC )
+CODE /CHAR        ( TEST CHAR-1. EXIT TEST BOOL-2, NEW CHAR-1 *)
+                ...        ( IMPLDEP /CHAR ASSEMBLY CODE HERE *)
+: ?DISC  ( IMPLDEP UPON NAK SHOW ERR MESG, QUIT. ABSORBS TILL *)
+    1 D/CHAR >R 0=                      ( EOT, EXCEPT FOR SOH *)
+    IF R 15 =                                        ( NOT SOH )
+       IF CR                                             ( NAK )
+          BEGIN 4 D/CHAR EMIT
+          UNTIL QUIT                   ( PRINT ERR MSG TIL EOT )
+       ENDIF                                    ( FOR ENQ, ACK )
+       BEGIN 4 D/CHAR DROP UNTIL                      ( AT EOT )
+    ENDIF R> DROP ;
+67
+( BLOCK-WRITE )
+
+CODE BLOCK-WRITE  ( IMPLDEP SEND TO DISC FROM ADDR-2, COUNT-1 *)
+                                            ( WITH EOT AT END *)
+                ...  ( IMPLDEP BLOCK-WRITE ASSEMBLY CODE HERE *)
+68
+( BLOCK-READ )
+
+CODE BLOCK-READ     ( BUF.ADDR-1. EXIT AT 128 CHAR OR CONTROL *)
+                ...   ( IMPLDEP BLOCK-READ ASSEMBLY CODE HERE *)
+
+69
+( R/W )
+
+CODE R/W                              ( READ/WRITE DISC BLOCK *)
+                ...        ( IMPLDEP R/W HIGH LEVEL CODE HERE *)
+
+70
+( FORWARD REFERENCES )
+               ( IMPLDEP CAREFUL FORWARD REFERENCE RESOLUTION *)
+71
+( FORWARD REFERENCES )
+               ( IMPLDEP CAREFUL FORWARD REFERENCE RESOLUTION *)
+72
+( ' FORGET )
+HEX
+
+: '            ( FIND PFA OF NEXT WORD FROM SRC, OR ERROR OUT *)
+  -FIND 0= 0 ? ERROR DROP [COMPILE] LITERAL ; IMMEDIATE
+
+: FORGET                      ( DAVE KILBRIDGE'S SMART FORGET *)
+  [COMPILE] ' NFA DUP FENCE @ U< 15 ?ERROR
+  >R VOC-LINK @
+  BEGIN R OVER U< WHILE [COMPILE] FORTH DEFINITIONS
+     @ DUP VOC-LINK ! REPEAT
+  BEGIN DUP 4 -
+    BEGIN PFA LFA @ DUP R U< UNTIL
+    OVER 2 - ! @ -DUP 0= UNTIL
+  R> DP ! ;
+73
+( BACK BEGIN ENDIF THEN DO LOOP +LOOP UNTIL )
+: BACK  HERE - , ;                  ( RESOLVE BACKWARD BRANCH *)
+: BEGIN                                ( BEGIN ... cond UNTIL *)
+    ?COMP HERE 1 ;                                     IMMEDIATE
+: ENDIF                                   ( cond IF ... ENDIF *)
+    ?COMP 2 ?PAIRS HERE OVER - SWAP ! ;                IMMEDIATE
+: THEN [COMPILE] ENDIF ;                               IMMEDIATE
+: DO                                  ( lim first DO ... LOOP *)
+    COMPILE (DO) HERE 3 ;                              IMMEDIATE
+: LOOP                                ( lim first DO ... LOOP *)
+    3 ?PAIRS COMPILE (LOOP) BACK ;                     IMMEDIATE
+: +LOOP                        ( lim first DO ...  incr +LOOP *)
+    3 ?PAIRS COMPILE (+LOOP) BACK ;                    IMMEDIATE
+: UNTIL                                ( BEGIN ... cond UNTIL *)
+    1 ?PAIRS COMPILE 0BRANCH BACK ;                    IMMEDIATE
+74
+( END AGAIN REPEAT IF ELSE WHILE )
+: END   [COMPILE] UNTIL ;                              IMMEDIATE
+: AGAIN                                     ( BEGIN ... AGAIN *)
+    1 ?PAIRS COMPILE BRANCH BACK ;                     IMMEDIATE
+: REPEAT                    ( BEGIN ... cond WHILE ... REPEAT *)
+    >R >R [COMPILE] AGAIN R> R> 2 - [COMPILE] ENDIF ;  IMMEDIATE
+: IF                                      ( cond IF ... ENDIF *)
+    COMPILE 0BRANCH HERE 0 , 2 ;                       IMMEDIATE
+: ELSE                           ( cond IF ... ELSE ... ENDIF *)
+    2 ?PAIRS COMPILE BRANCH HERE 0 ,
+           SWAP 2 [COMPILE] ENDIF 2 ;                  IMMEDIATE
+: WHILE                     ( BEGIN ... cond WHILE ... REPEAT *)
+    [COMPILE] IF 2+ ;                                  IMMEDIATE
+75
+( SPACES <# #> SIGN # #S )
+HEX
+: SPACES                                      ( EMIT N BLANKS *)
+    0 MAX -DUP IF 0 DO SPACE LOOP ENDIF ;
+: <#                        ( start converting double to text *)
+    PAD HLD ! ;
+: #>                       ( finish converting double to text *)
+    DROP DROP HLD @ PAD OVER - ;
+: SIGN                        ( add sign into conversion area *)
+    ROT 0< IF 2D HOLD ENDIF ;
+: #                            ( add digit to conversion area *)
+    BASE @ M/MOD ROT 9 OVER < IF 7 + ENDIF 30 + HOLD ;
+: #S                                  ( add digits until zero *)
+    BEGIN # OVER OVER + 0= UNTIL ;
+76
+( D.R D. .R . ? )
+HEX
+: D.R                  ( PRINT #D RIGHT ALIGNED IN #N COLUMNS *)
+       >R SWAP OVER DABS <# #S SIGN #>
+       R> OVER - SPACES TYPE ;
+: D.                                   ( PRINT #D AND A SPACE *)
+   0 D.R SPACE ;
+: .R                   ( PRINT #N RIGHT ALIGNED IN #N COLUMNS *)
+   >R S->D R> D.R ;
+: .                                    ( PRINT #N AND A SPACE *)
+   S->D D. ;
+: ?                         ( FETCH DATA AT ADDR AND PRINT IT *)
+   @ . ;
+         ( PATCH MESSAGE ON SCREEN 61 TO USE . FROM SCREEN 76 *)
+  ' . CFA ' MESSAGE 2A + !
+77
+( LIST INDEX TRIAD )
+HEX
+: LIST                              ( DISPLAY CONTENTS OF SCR# )
+    DECIMAL CR DUP SCR !
+    ." SCR # " . 10 0 DO R I 3 .R SPACE
+    I SCR @ .LINE LOOP CR ;
+: INDEX      ( DISPLAY FIRST LINES FROM SCR#LO THROUGH SCR#HI *)
+    0C EMIT ( FORM FEED ) CR 1+ SWAP
+    DO CR I 3 .R SPACE
+       0 I .LINE
+       ?TERMINAL IF LEAVE ENDIF LOOP ;
+: TRIAD                ( DISPLAY SCREEN TRIAD CONTAINING SCR# *)
+    0C EMIT ( FF ) 3 / 3 * 3 OVER + SWAP
+    DO CR I LIST LOOP CR
+    0F MESSAGE CR ; DECIMAL
+78
+( VLIST )
+HEX
+: VLIST   ( DISPLAY CONTEXT VOCABULARY WORDS WITH LINE BREAKS *)
+    80 OUT ! CONTEXT @ @
+    BEGIN OUT @ C/L > IF CR 0 OUT ! ENDIF
+          DUP ID. SPACE SPACE PFA LFA @
+          DUP 0= ?TERMINAL OR UNTIL DROP ;
+79
+( MON AND SET COLD START DATA )
+HEX
+
+CREATE MON
+                ...          ( IMPLDEP MON ASSEMBLY CODE HERE *)
+
+DECIMAL
+  HERE        FENCE !                         ( CURRENT FENCE *)
+  HERE   28 +ORIGIN !                   ( FENCE AT COLD START *)
+  HERE   30 +ORIGIN !                      ( DP AT COLD START *)
+  LATEST 12 +ORIGIN !                          ( TOPMOST WORD *)
+  ' FORTH 6 + 32 +ORIGIN !           ( VOC-LINK AT COLD START *)
+80

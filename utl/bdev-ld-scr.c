@@ -12,13 +12,13 @@
 #include "simext/hex.h"
 #include "simext/mapdrive.h"
 
-// bdev-sld: load a text file as FORTH screens
+// bdev-ld-str: load a text file as FORTH screens
 //
 // USAGE:
-//      bdev-sld DRV
+//      bdev-ld-str DRV < $scrfile
 //
 // DESCRIPTION:
-//      The bdev-sld command reads newline-delimited text from
+//      The bdev-ld-str command reads newline-delimited text from
 //      standard input and converts it to FORTH SCREEN data.
 //
 //      FORTH divides the drive up into fixed size screens, each
@@ -67,7 +67,9 @@ int main(int argc, Cstr *argv)
     int                 doff;
     int                 dlen;
     int                 escr;
+    int                 targ;
     int                 wrto;
+    int                 last;
     pByte               wbase;
     char                pch;
     char                ch;
@@ -88,6 +90,7 @@ int main(int argc, Cstr *argv)
            "Unable to access media in drive %c\n"
            "map_drive indicates error %d: %s\n", 'A' + drv, errno, strerror(errno));
 
+    // screen zero is at the start of the SECOND track.
     doff = drive->data_offset + TRK_BYTES;
     dlen = drive->data_length - TRK_BYTES;
     wbase = (pByte)drive + doff;
@@ -102,15 +105,38 @@ int main(int argc, Cstr *argv)
         ASSERT(ch != EOF, "EOF while reading screen number");
         if (ch == '\n')
             break;
+        if ((scr == 0) && (ch == '\f'))
+            continue;
         ASSERT(('0' <= ch) && (ch <= '9'), "first line must have only the screen number");
         scr = scr * 10 + ch - '0';
     }
-    ASSERT(0 != scr, "file must start with a positive screen number.");
     ASSERT(scr < escr, "screen number %d invalid: drive capacity is %d screens", scr, escr);
     wrto = scr * SCR_BYTES;
+    scr = 0;
 
     pch = -1;
+    last = 0;
     while (EOF != (ch = getchar())) {
+
+        if (pch == '\f') {
+            if (ch == '\n') {
+                if (scr != 0) {
+                    targ = scr * SCR_BYTES;
+                    ASSERT(last <= targ,
+                           "oops, trying to seek backwards by %d bytes to screen %d",
+                           last - targ, scr);
+                    wrto = targ;
+                }
+                pch = ch;
+                scr = 0;
+                continue;
+            }
+            if (('0' <= ch) && (ch <= '9')) {
+                scr = scr * 10 + ch - '0';
+                continue;
+            }
+        }
+
         switch (ch) {
 
           case '\t':
@@ -122,9 +148,12 @@ int main(int argc, Cstr *argv)
 
           case '\f':
 
-              // form-feed: move to the next screen.
+              // form-feed: End this screen. may be followed
+              // by a screen number and a newline. If followed
+              // by just a newline, moves to next screen.
 
               wrto = wrto + SCR_BYTES - (wrto % SCR_BYTES);
+              scr = 0;
               break;
 
           case '\n':
@@ -157,8 +186,11 @@ int main(int argc, Cstr *argv)
                   ASSERT(cscr < escr, "Attempting to write screen %d on a %d-screen drive",
                          cscr, escr);
                   memset(wbase + cscr * SCR_BYTES, ' ', SCR_BYTES);
+                  // STUB("precleared screen %d (will write line %d col %d)",
+                  //      cscr, (wrto / 64) % 16, wrto % 64);
               }
 
+              last = wrto;
               wbase[wrto++] = ch;
               break;
         }

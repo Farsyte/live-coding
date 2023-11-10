@@ -1,0 +1,45 @@
+6
+( FIGFORTH 8080 ASSEMBLER 1             81AUG17   JJC 80MAR04 )
+: 1- 1 - ;      : 2- 2 - ;      : 8* DUP + DUP + DUP + ;
+VOCABULARY ASSEMBLER IMMEDIATE HEX 
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ;        IMMEDIATE
+: C;   CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ;        IMMEDIATE
+: LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT
+  [COMPILE] ASSEMBLER !CSP ; ASSEMBLER DEFINITIONS    IMMEDIATE
+C2 CONSTANT 0=  D2 CONSTANT CS  E2 CONSTANT PE  F2 CONSTANT 0<     
+ 0 CONSTANT B    1 CONSTANT C    2 CONSTANT D    3 CONSTANT E
+ 4 CONSTANT H    5 CONSTANT L    
+ 6 CONSTANT M    6 CONSTANT SP   6 CONSTANT PSW  7 CONSTANT A   
+: 1MI <BUILDS C, DOES> C@ ;    : 2MI <BUILDS C, DOES> C@ + C, ;
+: 3MI <BUILDS C, DOES> C@ SWAP 8* + C, ;
+: 4MI <BUILDS C, DOES> C@ C, C, ;
+: 5MI <BUILDS C, DOES> C@ C, , ;                             ;S
+7
+( FIGFORTH 8080 ASSEMBLER 2             81MAR22   JJC 80MAR04 )
+00 1MI NOP      76 1MI HLT      F3 1MI DI       FB 1MI EI
+07 1MI RLC      0F 1MI RRC      17 1MI RAL      1F 1MI RAR
+E9 1MI PCHL     F9 1MI SPHL     E3 1MI XTHL     EB 1MI XCHG
+27 1MI DAA      2F 1MI CMA      37 1MI STC      3F 1MI CMC
+80 2MI ADD      88 2MI ADC      90 2MI SUB      98 2MI SBB
+A0 2MI ANA      A8 2MI XRA      B0 2MI ORA      B8 2MI CMP
+09 3MI DAD      C1 3MI POP      C5 3MI PUSH     02 3MI STAX
+0A 3MI LDAX     04 3MI INR      05 3MI DCR      03 3MI INX
+0B 3MI DCX      C7 3MI RST      D3 4MI OUT      DB 4MI IN
+C6 4MI ADI      CE 4MI ACI      D6 4MI SUI      DE 4MI SBI
+E6 4MI ANI      EE 4MI XRI      F6 4MI ORI      FE 4MI CPI
+22 5MI SHLD     2A 5MI LHLD     32 5MI STA      3A 5MI LDA
+CD 5MI CALL     C9 1MI RET      C3 5MI JMP                   ;S
+8
+( FIGFORTH 8080 ASSEMBLER 3             81AUG17   JJC 80MAR04 )
+: MOV 8* 40 + + C, ;  : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
+: NOT 8 + ;                     : IF C, HERE 0 , ;
+: THEN HERE SWAP ! ;            : ELSE C3 IF SWAP THEN ;
+: BEGIN HERE ;                  : UNTIL C, , ;                  
+: WHILE IF ;                    : REPEAT SWAP C3 C, , THEN ;
+0151 CONSTANT *NEXT*            : NEXT *NEXT*     JMP ;
+: PSH1 *NEXT* JMP ;             : PSH2 *NEXT* 2 - JMP ;
+( --- PATCH THE ;CODE WORD TO ACTIVATE THIS ASSEMBLER -- )  ( *)
+  ' ASSEMBLER CFA ' ;CODE 8 + !                             ( *)
+( --- NEED "HERE {NEXT} !" --- WHEN DEFINING NEXT )         ( *)
+                                                              ;S
+9

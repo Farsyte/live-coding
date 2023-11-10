@@ -1,4 +1,4 @@
-6
+306
 ( FIGFORTH 8080 ASSEMBLER 1             81AUG17   JJC 80MAR04 )
 HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
 ' ASSEMBLER CFA ' ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS )
@@ -13,7 +13,8 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
 : 3MI <BUILDS C, DOES> C@ SWAP 8* + C, ;
 : 4MI <BUILDS C, DOES> C@ C, C, ;
 : 5MI <BUILDS C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
-: PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;  -->
+: PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;     ;S
+
 ( FIGFORTH 8080 ASSEMBLER 2             81MAR22   JJC 80MAR04 )
 00 1MI NOP      76 1MI HLT      F3 1MI DI       FB 1MI EI
 07 1MI RLC      0F 1MI RRC      17 1MI RAL      1F 1MI RAR
@@ -27,7 +28,8 @@ A0 2MI ANA      A8 2MI XRA      B0 2MI ORA      B8 2MI CMP
 C6 4MI ADI      CE 4MI ACI      D6 4MI SUI      DE 4MI SBI
 E6 4MI ANI      EE 4MI XRI      F6 4MI ORI      FE 4MI CPI
 22 5MI SHLD     2A 5MI LHLD     32 5MI STA      3A 5MI LDA
-CD 5MI CALL                                                -->
+CD 5MI CALL                                                   ;S
+
 ( FIGFORTH 8080 ASSEMBLER 3             81AUG17   JJC 80MAR04 )
 C9 1MI RET      C3 5MI JMP      C2 CONSTANT 0=  D2 CONSTANT CS
 E2 CONSTANT PE  F2 CONSTANT 0<     : NOT 8 + ;
@@ -36,3 +38,4 @@ E2 CONSTANT PE  F2 CONSTANT 0<     : NOT 8 + ;
 : ELSE C3 IF SWAP THEN ;        : BEGIN HERE ;
 : UNTIL C, , ;                  : WHILE IF ;
 : REPEAT SWAP C3 C, , THEN ;
+                                                              ;S

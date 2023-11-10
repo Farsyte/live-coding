@@ -1,0 +1,59 @@
+201
+(  LOADER AND MY STARTUP STUFF                  GLL 2023-11-10 )
+DECIMAL 1 WARNING !
+: LOADS 1 + SWAP DO BASE @ DECIMAL I . BASE !
+    I LOAD LOOP DECIMAL ;
+
+  DECIMAL 306 308 LOADS      ( Cassady Assembler from FD-V03N6 )
+( DECIMAL  75  75 LOADS                  ( working <# # #> etc )
+  DECIMAL  87  96 LOADS                         ( FORTH EDITOR )
+  DECIMAL 202 205 LOADS                     ( MY STARTUP WORDS )
+202
+(  %nnD                                         GLL 2023-11-10 )
+FORTH DEFINITIONS HEX
+: .2D S->D <# # # #> TYPE ;       ( V --  PRINT V IN 2 DIGITS *)
+: .3D S->D <# # # # #> TYPE ;     ( V --  PRINT V IN 3 DIGITS *)
+: .4D S->D <# # # # # #> TYPE ;   ( V --  PRINT V IN 4 DIGITS *)
+: .S SP@ S0 @ SWAP DO
+        I @ .4D BL EMIT
+   ( CR I .4D BL EMIT I @ .4D BL EMIT  )
+   ( CR I U. I @ U. )
+       ?TERMINAL IF LEAVE ENDIF 2 +LOOP CR ;
+;S
+203
+(  HD:LINE  HD                                  GLL 2023-11-09 )
+HEX
+: HD:C  7F AND 20 MAX 7E MIN EMIT ;
+: HD:S  DUP 8 + SWAP DO I C@ HD:C LOOP ;
+: HD:B  DUP 8 + SWAP DO I C@ BL EMIT .2D LOOP ;
+: HD:LINE          ( addr-- HEX dump 16 bytes at this address *)
+  BASE @ HEX SWAP CR DUP .4D ."  "
+  DUP HD:B ."  " DUP 8 + HD:B ."  | "
+  DUP HD:S 8 + HD:S           ."  |" BASE ! ;
+: rd16 16 / 16 * ; : ru16 15 + rd16 ;
+: HD                 ( addr size -- dump memory in this range *)
+  OVER + ru16 SWAP rd16 DO I HD:LINE
+    ?TERMINAL IF LEAVE THEN 10 +LOOP CR ;
+: qd HEX SWAP DUP .4D ." : " DO I C@ BL EMIT .2D LOOP CR ;    ;S
+204
+(  DETECT GLOSSARY LINE                         GLL 2023-11-10 )
+HEX
+: GLOSS?                            ( DETECT IF GLOSSARY LINE *)
+  (LINE) -TRAILING 2 MAX +
+  DUP  1 - C@ 29 XOR SWAP 2 - C@ 2A XOR + 0= ;
+205
+(  DISPLAY GLOSSARY LINES                       GLL 2023-11-10 )
+HEX
+: GLOSS.                                ( PRINT GLOSSARY LINE *)
+  CR DUP 3 .R BL EMIT OVER 2 .R BL EMIT .LINE ;
+: GLOSS*                   ( PRINT GLOSSARY LINES FROM SCREEN *)
+  10 0 DO I OVER GLOSS? IF I OVER GLOSS. ENDIF 
+             ?TERMINAL IF LEAVE THEN LOOP ;
+: GLOSS          ( SCR N -- PRINT GLOSSARY LINES FROM SCREENS *)
+  CR ." SCR LN : text ... "
+  OVER + SWAP DO I GLOSS* 
+             ?TERMINAL IF LEAVE THEN LOOP CR ;
+                                                              ;S
+206
+(                                               GLL 2023-11-10 )
+                                                              ;S

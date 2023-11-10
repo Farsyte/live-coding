@@ -1,0 +1,55 @@
+120
+;S ( Symbol with forward references )         ( GLL 2013-11-10 )
+
+Symbol table for assembler allowing forward references
+- knows whether it has been resolved or not
+- if resolved, knows its value
+- if not resolved, knows what needs to be patched
+- each location to be patched links to the previous one
+- zero marks the end of the patch chain
+
+121
+;S ( NOTES ON <BUILDS ... DOES> )             ( GLL 2013-11-10 )
+
+: FOO <BUILDS
+  When FOO cccc is run, <BUILDS places a name field
+  containing cccc, links a link field, allocates a
+  code field and one word of parameter field. The
+  subseqent DOES> will rewrite the code field to
+  point to the common machine code for DOES> words,
+  and set the first word of the parameter field to
+  point to the high level code after DOES (which is
+  not executed when FOO is run).
+
+122
+( SYMBOL                                      ( GLL 2013-11-10 )
+
+: SYMBOL
+  <BUILDS HERE CR ." PLACING DATA AT " U. CR
+    0 , 1 C, DOES>                                        ( &V )
+    DUP @ SWAP DUP 2+ C@                           ( F &V OLDV )
+    IF ( F != 0 )                                    ( &V OLDV )
+      HERE 1 + SWAP ! ( V NOW POINTS TO HERE )          ( OLDV )
+      DUP CR U. ." IS FWD REF LINK " CR
+    ELSE ( F == 0 )                                  ( &V OLDV )
+      SWAP DROP                                         ( OLDV )
+      DUP CR U. ." IS FINAL VALUE " CR
+    ENDIF  ;                               ( not yet debugged. )
+123
+( ::                                          ( GLL 2013-11-10 )
+: :: -FIND IF DROP
+    2 +                                                   ( &V )
+    DUP 2 +                                            ( &F &V )
+    ( ASSERT F IS 1 ? )
+    0 SWAP ! ( F IS NOW 0 )                               ( &V )
+    ( FOLLOW LINKS WRITING HERE )
+    BEGIN                                                ( &L1 )
+      DUP @                                           ( L2 &L1 )
+      ( ASSERT L2 < &L1 ? )
+      HERE ROT !
+      DUP 0=
+    UNTIL
+    DROP
+    CR " :: STACK NOW HAS " .S CR
+  ELSE ." NOT FOUND" CR ENDIF ;            ( not yet debugged. )
+124

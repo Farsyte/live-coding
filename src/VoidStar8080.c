@@ -48,6 +48,42 @@ static int          verbose = 0;
 static int          dryrun = 0;
 static int          debug = 0;
 static int          bus_trace = 0;
+static FILE        *trace = 0;
+static unsigned     debug_limit = ~0;
+
+static void         VoidStar8080_debug(VoidStar8080 sys);
+static int          VoidStar8080_debug_forth_next(VoidStar8080 sys);
+static void         VoidStar8080_debug_forth_first(VoidStar8080 sys);
+static Word         CFA_to_NFA(Ram8107x8x4 *ram, Word CFA);
+static void         de4th_nf(Ram8107x8x4 *ram, Word NFA);
+static Word         de4th_asm(Ram8107x8x4 *ram, Word scan);
+static Word         de4th(Ram8107x8x4 *ram, unsigned *memcat, Word NFA, int print);
+
+#define DEF_NFLFCFPF()                                  \
+    Word                NFA = 0; (void) NFA;            \
+    Word                NF0 = 0; (void) NF0;            \
+    Word                NFL = 0; (void) NFL;            \
+    Word                LFA = 0; (void) LFA;            \
+    Word                CFA = 0; (void) CFA;            \
+    Word                CODE = 0; (void) CODE;          \
+    Word                PFA = 0; (void) PFA;            \
+    char                NFCOPY[34]; (void) NFCOPY;      \
+    Word                NFI = 0; (void) NFI
+
+#define NFLFCFPF()                                                      \
+    NF0 = memrd_byte(ram, NFA); (void) NF0;                             \
+    NFL = NF0 & 0x1F; (void) NFL;                                       \
+    memset(NFCOPY, 0, sizeof (NFCOPY));                                 \
+    for (NFI = 0; NFI <= NFL; ++NFI)                                    \
+        NFCOPY[NFI] = 0x7F & memrd_byte(ram, NFA+NFI);                  \
+    LFA = NFA + 1 + NFL; (void) LFA;                                    \
+    CFA = LFA + 2; (void) CFA;                                          \
+    CODE = memrd_word(ram, CFA); (void) CODE;                           \
+    PFA = CFA + 2; (void) PFA
+
+#define FPRINTNF()                                                      \
+    NFLFCFPF();                                                         \
+    fprintf(trace, "%s", NFCOPY+1)
 
 int VoidStar8080_main(int argc, char **argv)
 {
@@ -168,6 +204,8 @@ void VoidStar8080_init(VoidStar8080 sys, Cstr name)
     edge_init(sys->RESIN_, format("%s:/RESIN", name), 0);
     edge_init(sys->RDYIN, format("%s:RDYIN", name), 0);
 
+    edge_init(sys->DEBUG_, format("%s:/DEBUG", name), 0);
+
     // now set up all the links that are strictly inside VoidStar8080
     VoidStar8080_link(sys);
 
@@ -285,6 +323,8 @@ static void VoidStar8080_link(VoidStar8080 sys)
 
     pEdge               RESIN_ = sys->RESIN_;
     pEdge               RDYIN = sys->RDYIN;
+
+    pEdge               DEBUG_ = sys->DEBUG_;
 
     pAddr               ADDR = cpu->ADDR;
     pData               DATA = cpu->DATA;
@@ -456,6 +496,11 @@ static void VoidStar8080_link(VoidStar8080 sys)
         EDGE_FIRST_ON_RISE(IOW_, saw_iow_rise, sys);
     }
 
+    dec->dev_rd[240] = DEBUG_;
+    dec->dev_wr[240] = DEBUG_;
+
+    EDGE_ON_FALL(DEBUG_, VoidStar8080_debug, sys);
+
     // These signals ought to be hooked up to a front panel,
     // along with some way to hold RSTIN_ and READY low.
 
@@ -606,9 +651,771 @@ static void VoidStar8080_RESET_then_run_to_HLT(VoidStar8080 sys)
         clock_run_until(TAU + 180000000);
         Tau                 drtc = rtc_ns() - rtc0;
         double              drtc_ms = drtc / 1000000.0;
-        fprintf(stderr, "<<running at %.1fx real time>>\n", 10000.0 / drtc_ms);
+        double              ratio = 10000.0 / drtc_ms;
+        if (ratio < 4.0 || ratio > 6.0) {
+            fprintf(stderr, "<<running at %.1fx real time>>\n", 10000.0 / drtc_ms);
+        }
 
     }
 
     clock_run_until(TAU + 45);
+}
+
+static Byte memrd_byte(Ram8107x8x4 *ram, unsigned addr)
+{
+    unsigned            baddr = (addr & 0xFFFF) >> RAM8107x8x4_ADDR_BITS;
+    ASSERT(baddr < RAM_BOARDS, "addr 0x%04X not in ram array", addr);
+    pRam8107x8x4        board = ram[baddr];
+    return board->cells[addr & RAM8107x8x4_MASK];
+}
+
+static Word memrd_word(Ram8107x8x4 *ram, unsigned addr)
+{
+    return memrd_byte(ram, addr) | (memrd_byte(ram, addr + 1) << 8);
+}
+
+static void VoidStar8080_debug(VoidStar8080 sys)
+{
+    if (!debug_limit)
+        return;
+    --debug_limit;
+    if (!debug_limit) {
+        if (trace) {
+            fclose(trace);
+            trace = NULL;
+        }
+        return;
+    }
+    if (!trace) {
+        trace = fopen("trace", "w");
+    }
+
+    p8080               cpu = sys->cpu;
+
+    pAddr               PC = cpu->PC;
+    pAddr               SP = cpu->SP;
+
+    pData               B = cpu->B;
+    pData               C = cpu->C;
+    pData               D = cpu->D;
+    pData               E = cpu->E;
+    pData               H = cpu->H;
+    pData               L = cpu->L;
+
+    pData               A = cpu->A;
+    pData               FLAGS = cpu->FLAGS;
+
+    Byte                op = memrd_byte(sys->ram, PC->value);
+
+    // Special case for OUT DPORT in Forth "NEXT" operation,
+    // which we trigger any time an OUT DPORT happens just
+    // before a PCHL instruction.
+
+    if ((op == 0xE9) && VoidStar8080_debug_forth_next(sys))
+        return;
+
+    Cstr                as = i8080_instruction_4asm(op);
+
+    fprintf(trace, "PC=%04X ", PC->value);
+    fprintf(trace, "%02X ", op);
+
+    if (as[0] == ' ')
+        fprintf(trace, "%s", as);
+    else if (as[4] == ' ')
+        fprintf(trace, "0x%02X%s", memrd_byte(sys->ram, PC->value + 1), as + 4);
+    else
+        fprintf(trace, "0x%04X%s", memrd_word(sys->ram, PC->value + 1), as + 6);
+
+    fprintf(trace, "SP=%04X ", SP->value);
+    fprintf(trace, "BC=%02X%02X ", B->value, C->value);
+    fprintf(trace, "DE=%02X%02X ", D->value, E->value);
+    fprintf(trace, "HL=%02X%02X ", H->value, L->value);
+    fprintf(trace, "A=%02X ", A->value);
+
+    fprintf(trace, "FLAGS=%02X%s%s%s%s%s\n\r",
+            FLAGS->value,
+            FLAGS->value & FLAGS_CY ? " CY" : "",
+            FLAGS->value & FLAGS_P ? " P" : "",
+            FLAGS->value & FLAGS_AC ? " AC" : "",
+            FLAGS->value & FLAGS_Z ? " Z" : "", FLAGS->value & FLAGS_S ? " S" : "");
+    fflush(trace);
+}
+
+static unsigned find_NFA(Ram8107x8x4 *ram, unsigned NFE)
+{
+    unsigned            NFA = NFE;
+    if (!(0x80 & memrd_byte(ram, NFA))) {
+        fprintf(trace, "\r\nfind_NFA: NFE=0x%04X has %02X, MSBit is not set.\n",
+                NFA, memrd_byte(ram, NFA));
+        return ~0;
+    }
+    for (int i = 0; i < 32; ++i)
+        if (0x80 & memrd_byte(ram, --NFA))
+            return NFA;
+    fprintf(trace,
+            "\r\nfind_NFA: NFE=0x%04X has %02X, no MSBits set in prior 32 bytes, back to 0x%04X.\n",
+            NFE, memrd_byte(ram, NFE), NFA);
+    return ~0;
+}
+
+static int          first_forth_debug = 1;
+
+// Dump FORTH return stack:
+// -- top of stack stored at 0x0114
+// -- stack pointer stored at 0x0128
+// Dump the stack, top to bottom, up to 16 entries.
+// return the number of characters printed.
+static int dump_forth_R_stack(VoidStar8080 sys)
+{
+    Word                Rmax = memrd_word(sys->ram, 0x0114);
+    Word                R_SP = memrd_word(sys->ram, 0x0128);
+    Word                Rmin = Rmax - 32;
+
+    // dump R stack but limit the number of entries.
+    Cstr                f1 = format("{R %04X:", R_SP);
+    if (R_SP < Rmin)
+        R_SP = Rmin;
+    for (Word at = Rmax - 2; at >= R_SP; at -= 2) {
+        Cstr                f2 = format("%s %04X", f1, memrd_word(sys->ram, at));
+        free((void *)f1);
+        f1 = f2;
+    }
+    Cstr                f2 = format("%s} ", f1);
+    free((void *)f1);
+    int                 len = strlen(f2);
+    fprintf(trace, "%s", f2);
+    free((void *)f2);
+    return len;
+}
+
+// Dump FORTH data stack:
+// -- top of stack stored at 0x0112
+// -- stack pointer in cpu->reg->SP
+// Dump the stack, top to bottom, up to 16 entries.
+// return the number of characters printed.
+static int dump_forth_D_stack(VoidStar8080 sys)
+{
+    Word                Dmax = memrd_word(sys->ram, 0x0112);
+    Word                D_SP = sys->cpu->SP->value;
+    Word                Dmin = Dmax - 32;
+
+    // dump D stack but limit the number of entries.
+    Cstr                f1 = format("{D %04X:", D_SP);
+    if (D_SP < Dmin)
+        D_SP = Dmin;
+    for (Word at = Dmax - 2; at >= D_SP; at -= 2) {
+        Cstr                f2 = format("%s %04X", f1, memrd_word(sys->ram, at));
+        free((void *)f1);
+        f1 = f2;
+    }
+    Cstr                f2 = format("%s} ", f1);
+    free((void *)f1);
+    int                 len = strlen(f2);
+    fprintf(trace, "%s", f2);
+    free((void *)f2);
+    return len;
+}
+
+static int VoidStar8080_debug_forth_next(VoidStar8080 sys)
+{
+    // This is called when we hit the OUT DPORT in NEXT
+    // just before it does its PCHL.
+    // -- 8080 BC holds the IP
+    // -- 8080 DE holds the W register (PFA minus one)
+    // -- 8080 HL holds the CODE address
+    // -- 8080 SP holds the FORTH data stack pointer
+    DEF_NFLFCFPF();
+
+    if (first_forth_debug) {
+        VoidStar8080_debug_forth_first(sys);
+        first_forth_debug = 0;
+    }
+
+    Ram8107x8x4        *ram = sys->ram;
+
+    p8080               cpu = sys->cpu;
+
+    unsigned            B = cpu->B->value;
+    unsigned            C = cpu->C->value;
+    unsigned            D = cpu->D->value;
+    unsigned            E = cpu->E->value;
+    unsigned            H = cpu->H->value;
+    unsigned            L = cpu->L->value;
+
+    // BC contains the Forth IP register
+    const unsigned      IP = (B << 8) | C;
+
+    // HL points at the code that will run
+    CODE = (H << 8) | L;
+
+    // DE points at 2nd byte of CFA of word about to run
+    const unsigned      DE = ((D << 8) | E);
+
+    // decrement to get CFA of next word
+    CFA = DE - 1;
+
+    // back up by two to get LFA
+    LFA = CFA - 2;
+
+    // back up by one to get last byte of name field.
+    const unsigned      NFE = LFA - 1;
+
+    // Name field is variable length, ends just before LFA.
+    // Name field is a control byte, followed by the name,
+    // with the MSB set in the last byte of the name.
+    // first byte of name field:
+    //   bit 7: always set
+    //   bit 6: "P" bit (precedence)
+    //   bit 5: "S" bit (smuidge
+    //   bit 4..0: length of the name
+
+    if (0x00 == (0x80 & memrd_byte(ram, NFE))) {
+        // fprintf(trace, " oops, last byte of NF (at 0x%04X) is 0x%02X, MSB not set.\n", NFE,
+        //         memrd_byte(ram, NFE));
+        return 0;
+    }
+
+    NFA = find_NFA(ram, NFE);
+    if (NFA >= RAM8107x8x4_SIZE) {
+        // fprintf(trace, " unable to locate start of name field ending at 0x%04X\n", NFE);
+        return 0;
+    }
+
+    NFL = memrd_byte(ram, NFA) & 0x1F;
+    if (NFL < 1) {
+        // fprintf(trace, " name field at 0x%04X has byte 0x%02X, claiming zero length.\n",
+        //         NFA, memrd_byte(ram, NFA));
+        return 0;
+    }
+    if (NFL != NFE - NFA) {
+        // fprintf(trace,
+        //         " name field from 0x%04X to 0x%04X: head byte 0x%02X wants length %d, have length %d\n",
+        //         NFA, NFE, memrd_byte(ram, NFA), NFL, NFE - NFA);
+        return 0;
+    }
+
+    NFLFCFPF();
+
+    int                 rcp = dump_forth_R_stack(sys);
+    fprintf(trace, "  %4X %s", IP - 2, 1 + NFCOPY);
+
+    // add padding so all the stacks line up.
+    // rcp is space used by the R stack, up to 90.
+    // NFL is space used by the name, up to 32.
+    fprintf(trace, "%*s", 122 - rcp - NFL, "");
+    dump_forth_D_stack(sys);
+    fprintf(trace, "\n");
+
+    fflush(trace);
+    return 1;
+}
+
+#define MEMSIZE (1u<<16)
+unsigned            memcat[MEMSIZE];
+#define MEMCAT_UNCAT		0
+#define MEMCAT_NF		1
+#define MEMCAT_LF		2
+#define MEMCAT_CF		3
+
+#define MEMCAT_8080_ENT		5       /* 8080 machine entry point */
+#define MEMCAT_8080_OP		6       /* 8080 opcode after memcat_8080_ent scanned it */
+
+#define MEMCAT_DOCOL		10      /* colon word: parameter field is sequence of CFAs */
+#define MEMCAT_DOVAR		11      /* variable: parameter field contains mutable value */
+#define MEMCAT_DOCON		12      /* constant: parameter field contains immutable value */
+#define MEMCAT_DODOE		13      /* word defined with "<builds"..."does>" */
+#define MEMCAT_DOUSE		14      /* user variable: parameter field contains offset in user variable list */
+#define MEMCAT_DOIDO		15      /* re-uses the code at IDO+2 */
+#define MEMCAT_BTARG		50      /* target of a BRANCH, 0BRANCH, (LOOP), etc. */
+#define MEMCAT_ENTRY		98      /* a CFA somewhere points at this byte. */
+#define MEMCAT_CODE		99      /* this is a "code" word (parameter field is assembly code) */
+
+static void memcat_init()
+{
+    for (unsigned i = 0; i < MEMSIZE; ++i)
+        memcat[i] = MEMCAT_UNCAT;
+}
+
+Word               *estk = 0;
+Word                estk_max = 0;
+Word                estk_ptr = 0;
+
+static void entry_push(Word ent)
+{
+    if ((memcat[ent] == MEMCAT_8080_ENT) || (memcat[ent] == MEMCAT_8080_OP))
+        return;
+    ASSERT((memcat[ent] == MEMCAT_UNCAT),
+           "memcat[0x%04X] is already set to %d", ent, memcat[ent]);
+    memcat[ent] = MEMCAT_8080_ENT;
+
+    if (estk_ptr >= estk_max) {
+        estk_max = (estk_max < 8) ? 8 : (estk_max * 2);
+        estk = reallocarray(estk, estk_max, sizeof *estk);
+    }
+    estk[estk_ptr++] = ent;
+}
+
+static int entry_pend()
+{
+    return estk_ptr > 0;
+}
+
+static Word entry_pop()
+{
+    ASSERT(estk_ptr > 0, "ENTRY stack underflow");
+    return estk[--estk_ptr];
+}
+
+static void mark_opcodes_at(Ram8107x8x4 *ram, Word ent)
+{
+    while (memcat[ent] != MEMCAT_8080_OP) {
+        ASSERT((memcat[ent] == MEMCAT_UNCAT) ||
+               (memcat[ent] == MEMCAT_8080_ENT),
+               "memcat[0x%04X] is already set to %d", ent, memcat[ent]);
+        memcat[ent] = MEMCAT_8080_OP;
+
+        const Byte          op = memrd_byte(ram, ent);
+
+        if ((op == OP_PCHL) || (op == OP_RET))
+            return;
+
+        ent += i8080_instruction_len(op);
+
+        // some instructions have a 16-bit jump target
+
+        switch (op) {
+
+          case OP_JMP:
+              ent = (memrd_byte(ram, ent - 1) << 8) | memrd_byte(ram, ent - 2);
+              break;
+
+          case OP_CALL:
+
+          case OP_CNZ:
+          case OP_CZ:
+          case OP_CNC:
+          case OP_CC:
+          case OP_CPO:
+          case OP_CPE:
+          case OP_CP:
+          case OP_CM:
+
+          case OP_JNZ:
+          case OP_JZ:
+          case OP_JNC:
+          case OP_JC:
+          case OP_JPO:
+          case OP_JPE:
+          case OP_JP:
+          case OP_JM:
+
+              entry_push((memrd_byte(ram, ent - 1) << 8) | memrd_byte(ram, ent - 2));
+              break;
+        }
+    }
+}
+
+static void mark_opcodes(Ram8107x8x4 *ram)
+{
+    while (entry_pend()) {
+        mark_opcodes_at(ram, entry_pop());
+    }
+}
+
+static void de4th_nf(Ram8107x8x4 *ram, Word scan)
+{
+    DEF_NFLFCFPF();
+    NFA = scan;
+
+    FPRINTNF();
+    if (0x40 & memrd_byte(ram, NFA))
+        fprintf(trace, " [IMMEDIATE]");
+    if (0x20 & memrd_byte(ram, NFA))
+        fprintf(trace, " [SMUDGE]");
+}
+
+static Word de4th_asm(Ram8107x8x4 *ram, Word scan)
+{
+    Byte                op = memrd_byte(ram, scan);
+    Cstr                as = i8080_instruction_4asm(op);
+    Word                al = i8080_instruction_len(op);
+
+    fprintf(trace, "/%4X\t  ", scan);
+
+    if (as[0] == ' ')
+        fprintf(trace, "%s", as);
+    else if (as[4] == ' ')
+        fprintf(trace, "0x%02X%s", memrd_byte(ram, scan + 1), as + 4);
+    else
+        fprintf(trace, "0x%04X%s", memrd_word(ram, scan + 1), as + 6);
+
+    fprintf(trace, "\t|");
+
+    for (int i = 0; i < 3; ++i)
+        if (i < al)
+            fprintf(trace, " %02X", memrd_byte(ram, scan + i));
+        else
+            fprintf(trace, "   ");
+    fprintf(trace, "\n");
+    scan += al;
+    return scan - 1;
+}
+
+static void VoidStar8080_debug_forth_first(VoidStar8080 sys)
+{
+    DEF_NFLFCFPF();
+
+    Ram8107x8x4        *ram = sys->ram;
+
+    memcat_init();
+
+    // The NFA of the last word defined is stored in 010Ch.
+
+    NFA = memrd_word(ram, 0x010C);
+
+    while (NFA != 0) {
+        NFLFCFPF();
+        // during initial scan, report NFA and nanes of words found.
+
+        assert(memcat[NFA] == MEMCAT_UNCAT);
+        assert(memcat[LFA] == MEMCAT_UNCAT);
+        assert(memcat[CFA] == MEMCAT_UNCAT);
+
+        memcat[NFA] = MEMCAT_NF;
+        memcat[LFA] = MEMCAT_LF;
+        memcat[CFA] = MEMCAT_CF;
+        if (CODE == PFA)
+            memcat[CFA] = MEMCAT_CODE;
+
+        entry_push(CODE);
+
+        NFA = memrd_word(ram, LFA);
+    }
+
+    entry_push(0x0104); /* warm start */
+    entry_push(0x0100); /* cold start */
+    mark_opcodes(ram);
+
+    // the top of the dictionary is stored in a well-known location.
+
+    const Word          INIT_DP = memrd_word(ram, 0x011C);
+
+    // Scan the dictionary again, re-marking bytes that CODE fields point at.
+
+    NFA = memrd_word(ram, 0x010C);
+    while (NFA != 0) {
+        NFLFCFPF();
+        ASSERT(memcat[NFA] == MEMCAT_NF,
+               "oops, memcat[0x%04X] is %d, not %d (MEMCAT_NF)", NFA, memcat[NFA], MEMCAT_NF);
+
+        if (CODE != PFA) {
+            if ((memcat[CODE] < 128) && (memcat[CODE] != MEMCAT_ENTRY)) {
+                memcat[CODE] = MEMCAT_ENTRY;
+                Word                saved_NFA = NFA;
+                Word                saved_CODE = CODE;
+                Word                scan = CODE;
+                while ((scan > 0) && (memcat[scan] != MEMCAT_NF))
+                    --scan;
+                if (scan) {
+                    NFA = scan;
+                    NFLFCFPF();
+                    // fprintf(trace, "/%4X\t| DO(%s)\n", saved_CODE, NFCOPY + 1);
+                    if (!strcmp(NFCOPY + 1, ":"))
+                        memcat[saved_CODE] = MEMCAT_DOCOL | 128;
+                    if (!strcmp(NFCOPY + 1, "VARIABLE"))
+                        memcat[saved_CODE] = MEMCAT_DOVAR | 128;
+                    if (!strcmp(NFCOPY + 1, "CONSTANT"))
+                        memcat[saved_CODE] = MEMCAT_DOCON | 128;
+                    if (!strcmp(NFCOPY + 1, "DOES>"))
+                        memcat[saved_CODE] = MEMCAT_DODOE | 128;
+                    if (!strcmp(NFCOPY + 1, "USER"))
+                        memcat[saved_CODE] = MEMCAT_DOUSE | 128;
+                    if (!strcmp(NFCOPY + 1, "I"))
+                        memcat[saved_CODE] = MEMCAT_DOIDO | 128;
+                } else {
+                    fprintf(trace, "/%4X\t| entry point associated with no word\n", CODE);
+                }
+                NFA = saved_NFA;
+                NFLFCFPF();
+            }
+
+            assert(memcat[CODE] & 0x80);
+            memcat[CFA] = memcat[CODE] - 0x80;
+
+        }
+        NFA = memrd_word(ram, LFA);
+    }
+
+    NFA = 0;
+
+    for (Word scan = 0x0100; scan < INIT_DP; ++scan) {
+
+        switch (memcat[scan]) {
+
+          case MEMCAT_UNCAT:
+              fprintf(trace, "\n/%4X\tMEMCAT_UNCAT", scan);
+              while (memcat[scan] == MEMCAT_UNCAT)
+                  fprintf(trace, " %02X", memrd_byte(ram, scan++));
+              fprintf(trace, "\n");
+              --scan;
+              break;
+
+          case MEMCAT_NF:
+              NFA = scan;
+              NFLFCFPF();
+              scan += NFL;
+              break;
+
+          case MEMCAT_LF:
+              scan++;
+              break;
+
+          case MEMCAT_CF:
+              fprintf(trace, "\n/%4X\tWORD ", NFA);
+              de4th_nf(ram, NFA);
+              fprintf(trace, "\n/%4X\t|\tCODE ==> 0x%04X [memcat %d]\n",
+                      scan, memrd_word(ram, scan), memcat[memrd_word(ram, scan)]);
+              scan++;
+              break;
+
+          case MEMCAT_DOCOL | 128:
+          case MEMCAT_DOVAR | 128:
+          case MEMCAT_DOCON | 128:
+          case MEMCAT_DODOE | 128:
+          case MEMCAT_DOUSE | 128:
+          case MEMCAT_DOIDO | 128:
+          case MEMCAT_8080_ENT:
+          case MEMCAT_8080_OP:
+              if (memcat[scan] != MEMCAT_8080_OP)
+                  fprintf(trace, "\n");
+              scan = de4th_asm(ram, scan);
+              break;
+
+          case MEMCAT_DOCOL:
+              ASSERT(NFA >= 0x0100, "NFA was set to 0x%04X", NFA);
+              scan = de4th(ram, memcat, NFA, 0);
+              scan = de4th(ram, memcat, NFA, 1);
+              NFA = 0x0000;
+              break;
+
+          case MEMCAT_DOVAR:
+              fprintf(trace, "\n/%4X\tVARIABLE ", NFA);
+              FPRINTNF();
+              fprintf(trace, "\n");
+              fprintf(trace, "/%4X\t|\t", PFA);
+              scan = PFA;
+              while (memcat[scan] == MEMCAT_UNCAT)
+                  fprintf(trace, " %02X", memrd_byte(ram, scan++));
+              fprintf(trace, "\n");
+              NFA = 0x0000;
+              scan--;
+              break;
+
+          case MEMCAT_DOCON:
+              fprintf(trace, "\n/%4X\t0x%04X CONSTANT ", NFA, memrd_word(ram, PFA));
+              FPRINTNF();
+              fprintf(trace, "\n");
+              scan = PFA + 1;
+              NFA = 0x0000;
+              ASSERT(scan >= 0x0100, "SCAN was set to 0x%04X", scan);
+              break;
+
+          case MEMCAT_DODOE:
+              fprintf(trace, "\n/%4X\tDOES> ", NFA);
+              FPRINTNF();
+              fprintf(trace, "\n");
+              NFA = 0x0000;
+              scan++;
+              break;
+
+          case MEMCAT_DOUSE:
+              fprintf(trace, "\n/%4X\t0x%02X USER ", NFA, memrd_byte(ram, PFA));
+              FPRINTNF();
+              fprintf(trace, "\n");
+              NFA = 0x0000;
+              scan = PFA;
+              if (memcat[scan + 1] == MEMCAT_UNCAT)
+                  scan++;       /* some USER words have two byte parameter fields. */
+              break;
+
+          case MEMCAT_DOIDO:
+              fprintf(trace, "\n/%4X\t[DOIDO] ", NFA);
+              FPRINTNF();
+              fprintf(trace, "\n");
+              NFA = 0x0000;
+              scan++;
+              break;
+
+          case MEMCAT_CODE:
+              fprintf(trace, "\n/%4X\tCODE ", NFA);
+              FPRINTNF();
+              fprintf(trace, "\n");
+              NFA = 0x0000;
+              scan++;
+              break;
+
+          case MEMCAT_BTARG:
+          default:
+              fprintf(trace, "\n/%4X\tMEMCAT = %d\n", scan, memcat[scan]);
+              NFA = 0x0000;
+              break;
+        }
+        ASSERT(scan >= 0x0100, "SCAN was set to 0x%04X", scan);
+    }
+}
+
+static Word CFA_to_NFA(Ram8107x8x4 *ram, Word CFA)
+{
+    Word                LFA = CFA - 2;
+    Word                NFL = LFA - 1;
+
+//    Byte                last = memrd_byte(ram, NFL);
+//    if (0x80 != (0x80 & last))
+//        return ~0;
+
+    Word                NFA = NFL - 1;
+    while (0x80 != (0x80 & memrd_byte(ram, NFA)))
+        NFA--;
+    return NFA;
+}
+
+static Word de4th(Ram8107x8x4 *ram, unsigned *memcat, Word scan, int print)
+{
+    ASSERT(scan >= 0x0100, "scan was set to 0x%04X", scan);
+
+    DEF_NFLFCFPF();
+    NFA = scan;
+    ASSERT(NFA >= 0x0100, "NFA was set to 0x%04X", NFA);
+    NFLFCFPF();
+
+    if (print) {
+        fprintf(trace, "\n/%4X\t: ", NFA);
+        de4th_nf(ram, NFA);
+    }
+
+    Word                off;
+    Word                dst;
+    Word                IP = PFA;
+    int                 printip = 1;
+    while ((memcat[IP] == MEMCAT_UNCAT) || (memcat[IP] == MEMCAT_BTARG)) {
+        if (memcat[IP] == MEMCAT_BTARG)
+            printip = 1;
+        ASSERT(IP >= 0x0100, "SCAN was set to 0x%04X", IP);
+        if (print) {
+            if (printip) {
+                fprintf(trace, "\n/%4X\t  ", IP);
+                printip = 0;
+            } else {
+                fprintf(trace, " ");
+            }
+        }
+        CFA = memrd_word(ram, IP);
+        IP += 2;
+        if (memcat[CFA] == MEMCAT_UNCAT) {
+            if (print) {
+                fprintf(trace, "[0x%04X]", CFA);
+            }
+        } else {
+            NFA = CFA_to_NFA(ram, CFA);
+            NFLFCFPF();
+            if (print) {
+                fprintf(trace, "%s", NFCOPY + 1);
+            }
+
+            if (!strcmp(NFCOPY + 1, ";S")) {
+                // what if IP is the target of a branch from above ...?
+                // see ‹T&SCALC› which branches to TSCALS at 14F3.
+                // break;
+                if (memcat[IP] == MEMCAT_UNCAT)
+                    break;
+                printip = 1;
+            } else if (!strcmp(NFCOPY + 1, "COMPILE")) {
+                if (print) {
+                    fprintf(trace, " ");
+                }
+                CFA = memrd_word(ram, IP);
+                if (memcat[CFA] == MEMCAT_UNCAT) {
+                    if (print) {
+                        fprintf(trace, "0x%04X", CFA);
+                    }
+                } else {
+                    NFA = CFA_to_NFA(ram, CFA);
+                    NFLFCFPF();
+                    if (print) {
+                        fprintf(trace, "%s", NFCOPY + 1);
+                    }
+                }
+                IP += 2;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+            } else if (!strcmp(NFCOPY + 1, "LIT")) {
+                if (print) {
+                    fprintf(trace, "[0x%04X]", memrd_word(ram, IP));
+                }
+                IP += 2;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+            } else if (!strcmp(NFCOPY + 1, "0BRANCH")) {
+                off = memrd_word(ram, IP);
+                dst = IP + off;
+                if (print) {
+                    fprintf(trace, "[0x%04X]", dst);
+                }
+                memcat[dst] = MEMCAT_BTARG;
+                IP += 2;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+                printip = 1;
+            } else if (!strcmp(NFCOPY + 1, "BRANCH")) {
+                off = memrd_word(ram, IP);
+                dst = IP + off;
+                if (print) {
+                    fprintf(trace, "[0x%04X]", dst);
+                }
+                memcat[dst] = MEMCAT_BTARG;
+                IP += 2;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+                if (memcat[IP] == MEMCAT_UNCAT)
+                    break;
+                printip = 1;
+            } else if (!strcmp(NFCOPY + 1, "(LOOP)")) {
+                off = memrd_word(ram, IP);
+                dst = IP + off;
+                if (print) {
+                    fprintf(trace, "[0x%04X]", dst);
+                }
+                memcat[dst] = MEMCAT_BTARG;
+                IP += 2;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+                printip = 1;
+            } else if (!strcmp(NFCOPY + 1, "(.\")")) {
+                Byte                len = memrd_byte(ram, IP++);
+                if (print) {
+                    fprintf(trace, "\n/%4X\t  ‹", IP);
+                }
+                for (Byte i = 0; i < len; ++i) {
+                    Byte                ch = memrd_byte(ram, IP + i);
+                    ch &= 0x7F;
+                    if (print) {
+                        if ((ch < ' ') || (ch > '~')) {
+                            fprintf(trace, "…");
+                        } else {
+                            fprintf(trace, "%c", ch);
+                        }
+                    }
+                }
+                if (print) {
+                    fprintf(trace, "›");
+                }
+                IP += len;
+                printip = 1;
+                ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+            }
+            assert(IP != 0);
+            ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+        }
+        ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+    }
+    if (print) {
+        fprintf(trace, "\n");
+    }
+    ASSERT(IP >= 0x0100, "IP was set to 0x%04X", IP);
+    return IP - 1;
 }

@@ -9,21 +9,55 @@ mach="$bin"/$MACH/
 top=$(dirname "$bin")
 dev="$top/bdev"
 hex="$top/hex"
+scr="$top/scr"
 bdev="$top/bdev"
 
 export BDEV_DIR="$dev"
 
 # Use bdev-fmt to create these drives:
 #
-# Drive A: boot FORTH, double density
+#
+#
+# Drive C: mass storage (not bootable) ~2 MiB
+# Drive D: mass storage (not bootable) ~8 MiB
+#
+# Store these images:
+#   store A into boot-forth
+#   store B into boot-cpm
+#   store C into big-1
+#   store D into big-2
+
+function fmt_forth() {
+
+# Boot FORTH, with fig-FORTH model, double density
 #    VoidStar8080_boot_forth.hex
 #	0080h -> Track 00, Sector 01
 #	00FFh -> Track 00, Sector 01
 #    VoidStar8080_forth.hex
 #	0100h -> Track 00, Sector 02
 #	1A6Fh -> Track 01, Sector 26
-#
-# Drive B: boot CP/M, single density
+# Also include $scr/forth/*.scr
+
+    "$mach/bdev-fmt" \
+        "$1" \
+        128 52 77 \
+        "$hex/VoidStar8080_boot_forth.hex" \
+        "$hex/VoidStar8080_forth.hex"
+
+    # For FORTH boot disk, also load up data
+    # from forth screeens in $top/scr/fig-forth/*.scr
+    for sf in "$scr"/*.scr
+    do
+        echo loading "$sf" ...
+        "$mach/bdev-ld-scr" 0 < "$sf"
+    done
+
+    "$mach/bdev-st" "$1" boot-forth
+}
+
+function fmt_cpm() {
+
+# Boot CP/M, single density
 #    VoidStar8080_boot_cpm.hex
 #	0080h -> Track 00, Sector 01
 #	00FFh -> Track 00, Sector 01
@@ -36,27 +70,7 @@ export BDEV_DIR="$dev"
 #    VoidStar8080_cpm_cbios.hex
 #	F200h -> Track 01, Sector 20
 #	F49Fh -> Track 01, Sector 25
-#
-# Drive C: mass storage (not bootable) ~2 MiB
-# Drive D: mass storage (not bootable) ~8 MiB
-#
-# Store these images:
-#   store A into boot-forth
-#   store B into boot-cpm
-#   store C into big-1
-#   store D into big-2
 
-function fmt_forth() {
-    "$mach/bdev-fmt" \
-        "$1" \
-        128 52 77 \
-        "$hex/VoidStar8080_boot_forth.hex" \
-        "$hex/VoidStar8080_forth.hex"
-
-    "$mach/bdev-st" "$1" boot-forth
-}
-
-function fmt_cpm() {
     "$mach/bdev-fmt" \
         "$1" \
         128 26 77 \
@@ -64,7 +78,9 @@ function fmt_cpm() {
         "$hex/cpm22ccp62k.hex" \
         "$hex/cpm22bdos62k.hex" \
         "$hex/VoidStar8080_cpm_cbios.hex"
+
     "$mach/bdev-st" "$1" boot-cpm
+
 }
 
 function fmt_2mb() {

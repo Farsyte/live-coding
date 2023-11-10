@@ -41,6 +41,8 @@ typedef struct sVoidStar8080 {
     Edge                RESIN_;                 // owned by system
     Edge                RDYIN;                  // owned by system
 
+    Edge                DEBUG_;                 // owned by system
+
 }                  *pVoidStar8080, VoidStar8080[1];
 
 extern int          VoidStar8080_main(int argc, char **argv);
