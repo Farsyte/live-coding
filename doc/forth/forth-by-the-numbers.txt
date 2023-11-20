@@ -1,0 +1,233 @@
+100      KEY            -- char                       100
+101      ABORT                                        101
+102      >              n1 n2 -- flag                 102     "greater-than"
+103      IMMEDIATE                                    103
+104      MOD            n1 n2 -- n3                   104
+105      1-             n -- n-1                      105        "one-minus"
+106      U.             un --                         106            "u-dot"
+107      1+             n -- n+1                      107         "one-plus"
+108      ABS            n1 -- n1                      108         "absolute"
+109      LIST           n --                          109
+110      R>             -- n                          C,110         "r-from"
+111      CODE                                         111
+112      !              n addr --                     112            "store"
+113      MOVE           addr1 addr2 n --              113
+115      BASE           -- addr                       U,115
+116      :                                            116            "colon"
+117      EXIT                                         C,117
+118      0>             n -- flag                     118     "zero-greater"
+119      79-STANDARD                                  119
+120      REPEAT         --                            I,C,120
+121      +              n1 n2 -- n3                   121             "plus"
+122      (              --                            I,122          "paren"
+123      DUMP           addr n --                     123
+124      LOOP                                         I,C,124
+125      [                                            I,125   "left-bracket"
+126      ]                                            126    "right-bracket"
+127      MIN            n1 n2 -- n3                   127              "min"
+128      OFFSET         -- addr                       128
+129      2-             n -- n-1                      129        "two-minus"
+129      D-             d1 d2 -- d3                   129          "d-minus"
+129      D.             d --                          129            "d-dot"
+130      BUFFER         n -- addr                     130
+132      BLK            -- addr                       U,132          "b-l-k"
+133      ."                                           I,133      "dot-quote"
+134      -              n1 n2 -- n3                   134            "minus"
+135      2+             n -- n+2                      135         "two-plus"
+136      I              -- n                          C,136
+137      CURRENT        -- addr                       U,137
+138      *              n1 n2 -- n3                   138            "times"
+139      <              n1 n2 -- flag                 139        "less-than"
+140      SIGN           n --                          C,140
+141      +LOOP          n --                          I,C,141    "plus-loop"
+142      DO             n1 n2 --                      I,C,142
+143      ,              n --                          143            "comma"
+144      0<             n -- flag                     144        "zero-less"
+145      EMPTY-BUFFERS                                145
+146      COMPILE                                      C,146
+147      BEGIN                                        I,C,147
+148      -TRAILING      addr n1 -- addr n2            148    "dash-trailing"
+149      WHILE          flag --                       I,C,149
+150      U<             un1 un2 -- flag               150      "u-less-than"
+151      CONTEXT        -- addr                       U,151
+152      BLANKS         addr n --                     152
+153      CMOVE          addr1 addr2 n --              153           "c-move"
+154      ALLOT          n --                          154
+155      DEFINITIONS                                  155
+156      C@             addr -- byte                  156          "c-fetch"
+157      +!             n addr --                     157       "plus-store"
+158      #              ud1 -- ud2                    158            "sharp"
+159      COUNT          addr -- addr+1 n              159
+160      CR                                           160              "c-r"
+161      THEN                                         I,C,161
+162      HEX            --                            162
+163      EXECUTE        addr --                       163
+164      STATE          -- addr                       U,164
+165      NOT            flag1 -- flag2                165
+166      ASSEMBLER                                    I,166
+167      ELSE           --                            I,C,167
+168      DOES>                                        I,C,168         "does"
+169      <#                                           169       "less-sharp"
+170      OVER           n1 n2 -- n1 n2 n1             170
+171      '              -- addr                       I,171           "tick"
+173      =              n1 n2 -- flag                 173           "equals"
+174      XOR            n1 n2 -- n3                   174             "x-or"
+175      HOLD           char --                       175
+176      BL             -- n                          176              "b-l"
+177      NEGATE         n -- -n                       177
+178      /              n1 n2 -- n3                   178           "divide"
+179      [COMPILE]                                I,C,179  "bracket-compile"
+180      0=             n -- flag                     180      "zero-equals"
+181      WORD           char -- addr                  181
+182      ERASE          addr n --                     182
+183      AND            n1 n2 -- n3                   183
+184      ?DUP           n -- n ( n )                  184       "query-dupe"
+185      CONSTANT       n --                          185
+186      FORGET                                       186
+187      FORTH                                        I,187
+188      HERE           -- addr                       188
+189      EXPECT         addr n --                     189
+190      #>             d -- addr n                   190    "sharp-greater"
+191      BLOCK          n -- addr                     191
+192      */MOD          n1 n2 n3 -- n4 n5             192 "times-divide-mod"
+193      .              n --                          193              "dot"
+194      ?              addr --                       194    "question-mark"
+195      CONVERT        d1 addr1 -- d2 addr2          195
+196      ;                                            I,C,196   "semi-colon"
+197      DECIMAL                                      197
+198      /MOD           n1 n2 -- n3 n4                198       "divide-mod"
+199      @              addr -- n                     199            "fetch"
+200      >R             n --                          C,200           "to-r"
+201      >IN            -- addr                       U,201          "to-in"
+202      LOAD           n --                          202
+203      FIND           -- addr                       203
+205      DUP            n -- n n                      205             "dupe"
+206      ;CODE                                    C,I,206  "semi-colon-code"
+207      EMIT           char --                       207
+208      VOCABULARY                                   208
+209      #S             ud -- 0 0                     209          "sharp-s"
+210      IF             flag --                       I,C,210
+211      QUIT                                         211
+212      ROT            n1 n2 n3 -- n2 n3 n1          212             "rote"
+213      LEAVE                                        C,213
+214      SP@            -- addr                       214        "s-p-fetch"
+215      LITERAL        n --                          I,215
+216      U.R            un1 n2 --                     216          "u-dot-r"
+217      SCR            -- addr                       U,217
+218      MAX            n1 n2 -- n3                   218              "max"
+219      C!             n addr --                     219          "c-store"
+220      */             n1 n2 n3 -- n4                220     "times-divide"
+221      SAVE-BUFFERS                                 221
+222      TYPE           addr n --                     222
+223      OR             n1 n2 -- n3                   223
+225      J              -- n                          C,225
+226      PAD            -- addr                       226
+227      VARIABLE                                     227
+228      R@             -- n                          C,228        "r-fetch"
+229      UPDATE                                       229
+230      SWAP           n1 n2 -- n2 n1                230
+231      SPACES         n --                          231
+232      SPACE                                        232
+233      DROP           n --                          233
+234      FILL           addr n byte --                234
+235      QUERY                                        235
+236      ROLL           n --                          236
+237      UNTIL          flag --                       I,C,,237
+238      DEPTH          -- n                          238
+239      CREATE                                       239
+240      PICK           n1 -- n2                      240
+241      D+             d1 d2 --- d3                  241           "d-plus"
+242      U*             un1 un2 -- ud3                242          "u-times"
+243      U/MOD          ud1 un2 -- un3 un4            243     "u-divide-mod"
+244      D<             d1 d2 -- flag                 244      "d-less-than"
+245      DNEGATE        d -- -d                       245         "d-negate"
+
+    !BITS          n1 addr n2 --                           "store-bits"
+    **             n1 n2 -- n3                                  "power"
+    +BLOCK         n1 -- n2                                "plus-block"
+    -'             -- ( addr )  flag                        "dash-tick"
+    -->            I,131     "next-block"
+    -MATCH         addr1 n1 addr2 n2 -- addr3 f            "dash-match"
+    -TEXT          addr1 n1 addr2 -- n2                     "dash-text"
+    .R             n1 n2 --                                     "dot-r"
+    /LOOP          n --                                       "up-loop"
+    1+!            addr --                             "one-plus-store"
+    1-!            addr --                            "one-minus-store"
+    2!             d addr --                                "two-store"
+    2*             n1 -- n2                                 "two-times"
+    2/             n1 -- n2                                "two-divide"
+    2@             addr -- d                                "two-fetch"
+    2CONSTANT      d --                                  "two-constant"
+    2DROP          d --                                      "two-drop"
+    2DUP           d -- d d                                  "two-dupe"
+    2OVER          d1 d2 -- d1 d2 d1                         "two-over"
+    2ROT           d1 d2 d3 -- d2 d3 d1                      "two-rote"
+    2SWAP          d1 d2 -- d2 d1                            "two-swap"
+    2VARIABLE                                            "two-variable"
+    ;:             C   "semi-colon-colon"
+    ;S             "semi-s"
+    <>             n1 n2 -- flag                            "not-equal"
+    <BUILDS        C           "builds"
+    <CMOVE         addr1 addr2 n --                    "reverse-c-move"
+    ><             n1 -- n2                                 "byte-swap"
+    >MOVE<         addr1 addr2 n --                    "byte-swap-move"
+    @BITS          addr n1 -- n2                          "fetch-bits"
+    ABORT"         flag --                       I,C      "abort-quote"
+    AGAIN          I,C,114
+    ASCII          -- char (executing)
+    ASHIFT         n1 n2 -- n3
+    B/BUF          -- 1024                           "bytes-per-buffer"
+    BELL
+    C,             n --                                       "c-comma"
+    CHAIN
+    COM            n1 -- n2
+    CONTINUED      n --
+    CUR            -- addr
+    D.R            d n --                                     "d-dot-r"
+    D0=            d -- flag                            "d-zero-equals"
+    D=             d1 d2 -- flag                              "d-equal"
+    DABS           d1 -- d2                                "d-absolute"
+    DBLOCK         d -- addr                                  "D-block"
+    DMAX           d1 d2 -- d3                                  "d-max"
+    DMIN           d1 d2 -- d3                                  "d-min"
+    DPL            -- addr                                      "d-p-l"
+    DU<            ud1 ud2 -- flag                           "d-u-less"
+    EDITOR         I,172
+    END            I,C,224
+    END-CODE
+    FLD            -- addr                                      "f-l-d"
+    FLUSH
+    H.             n --
+    I'             -- n                          C            "i-prime"
+    IFEND
+    IFTRUE         flag --
+    INDEX          n1 n2 --
+    INTERPRET
+    K              -- n                          C
+    LAST           -- addr
+    LINE           n -- addr
+    LINELOAD       n1 n2 --
+    LOADS          n --
+    MAP0           -- addr
+    MASK           n1 -- n2
+    MS             n --
+    NAND           n1 n2 -- n3
+    NOR            n1 n2 -- n3
+    NUMBER         addr -- n
+    O.             n --
+    OCTAL
+    OTHERWISE
+    PAGE
+    READ-MAP
+    REMEMBER
+    REWIND
+    ROTATE         n1 n2 -- n3
+    S0             -- addr                                     "s-zero"
+    SET            n addr --
+    SHIFT          n1 n2 -- n3
+    TEXT           c --
+    THRU           n1 n2 --
+    USER           n --
+    VLIST
+    WHERE
+    \LOOP          n --                          I,C        "down-loop"

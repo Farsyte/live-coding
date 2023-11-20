@@ -1,0 +1,1525 @@
+/ 100	            NOP, 	| 00      
+/ 101	  0x1091    JMP, 	| C3 91 10
+/ 104	            NOP, 	| 00      
+/ 105	  0x107C    JMP, 	| C3 7C 10
+
+/ 108	MEMCAT_UNCAT 01 01 01 0E 73 1A 7F 00 A0 3B 00 3B A0 3B 00 3B 20 00 00 00 7E 1A 7E 1A FA 0F 05 00 21 B3 A0 3B A0 3B 00 00 21 2A 01 7E B9 C2 3D 01 23 7E B8 C2 3D 01 00 00 00 0A 03 6F C3 48 01
+/ 143	          D PUSH,	| D5      
+/ 144	          H PUSH,	| E5      
+/ 145	          B LDAX,	| 0A      
+/ 146	          B INX, 	| 03      
+/ 147	        A L MOV, 	| 6F      
+/ 148	          B LDAX,	| 0A      
+/ 149	          B INX, 	| 03      
+/ 14A	        A H MOV, 	| 67      
+/ 14B	        M E MOV, 	| 5E      
+/ 14C	          H INX, 	| 23      
+/ 14D	        M D MOV, 	| 56      
+/ 14E	            XCHG,	| EB      
+/ 14F	  0xF0      OUT, 	| D3 F0   
+/ 151	            PCHL,	| E9      
+
+/ 152	CODE LIT
+/ 15A	          B LDAX,	| 0A      
+/ 15B	          B INX, 	| 03      
+/ 15C	        A L MOV, 	| 6F      
+/ 15D	          B LDAX,	| 0A      
+/ 15E	          B INX, 	| 03      
+/ 15F	        A H MOV, 	| 67      
+/ 160	  0x0144    JMP, 	| C3 44 01
+
+/ 163	CODE EXECUTE
+/ 16F	          H POP, 	| E1      
+/ 170	  0x014B    JMP, 	| C3 4B 01
+
+/ 173	CODE BRANCH
+/ 17E	        B H MOV, 	| 60      
+/ 17F	        C L MOV, 	| 69      
+/ 180	        M E MOV, 	| 5E      
+/ 181	          H INX, 	| 23      
+/ 182	        M D MOV, 	| 56      
+/ 183	          H DCX, 	| 2B      
+/ 184	          D DAD, 	| 19      
+/ 185	        L C MOV, 	| 4D      
+/ 186	        H B MOV, 	| 44      
+/ 187	  0x0145    JMP, 	| C3 45 01
+
+/ 18A	CODE 0BRANCH
+/ 196	          H POP, 	| E1      
+/ 197	        L A MOV, 	| 7D      
+/ 198	          H ORA, 	| B4      
+/ 199	  0x017E    JZ,  	| CA 7E 01
+/ 19C	          B INX, 	| 03      
+/ 19D	          B INX, 	| 03      
+/ 19E	  0x0145    JMP, 	| C3 45 01
+
+/ 1A1	CODE (LOOP)
+/ 1AC	  0x0001  D LXI, 	| 11 01 00
+/ 1AF	  0x0128    LHLD,	| 2A 28 01
+/ 1B2	        M A MOV, 	| 7E      
+/ 1B3	          E ADD, 	| 83      
+/ 1B4	        A M MOV, 	| 77      
+/ 1B5	        A E MOV, 	| 5F      
+/ 1B6	          H INX, 	| 23      
+/ 1B7	        M A MOV, 	| 7E      
+/ 1B8	          D ADC, 	| 8A      
+/ 1B9	        A M MOV, 	| 77      
+/ 1BA	          H INX, 	| 23      
+/ 1BB	          D INR, 	| 14      
+/ 1BC	          D DCR, 	| 15      
+/ 1BD	        A D MOV, 	| 57      
+/ 1BE	  0x01C9    JM,  	| FA C9 01
+/ 1C1	        E A MOV, 	| 7B      
+/ 1C2	          M SUB, 	| 96      
+/ 1C3	        D A MOV, 	| 7A      
+/ 1C4	          H INX, 	| 23      
+/ 1C5	          M SBB, 	| 9E      
+/ 1C6	  0x01CE    JMP, 	| C3 CE 01
+/ 1C9	        M A MOV, 	| 7E      
+/ 1CA	          E SUB, 	| 93      
+/ 1CB	          H INX, 	| 23      
+/ 1CC	        M A MOV, 	| 7E      
+/ 1CD	          D SBB, 	| 9A      
+/ 1CE	  0x017E    JM,  	| FA 7E 01
+/ 1D1	          H INX, 	| 23      
+/ 1D2	  0x0128    SHLD,	| 22 28 01
+/ 1D5	          B INX, 	| 03      
+/ 1D6	          B INX, 	| 03      
+/ 1D7	  0x0145    JMP, 	| C3 45 01
+
+/ 1DA	CODE (+LOOP)
+/ 1E6	          D POP, 	| D1      
+/ 1E7	  0x01AF    JMP, 	| C3 AF 01
+
+/ 1EA	CODE (DO)
+/ 1F3	  0x0128    LHLD,	| 2A 28 01
+/ 1F6	          H DCX, 	| 2B      
+/ 1F7	          H DCX, 	| 2B      
+/ 1F8	          H DCX, 	| 2B      
+/ 1F9	          H DCX, 	| 2B      
+/ 1FA	  0x0128    SHLD,	| 22 28 01
+/ 1FD	          D POP, 	| D1      
+/ 1FE	        E M MOV, 	| 73      
+/ 1FF	          H INX, 	| 23      
+/ 200	        D M MOV, 	| 72      
+/ 201	          D POP, 	| D1      
+/ 202	          H INX, 	| 23      
+/ 203	        E M MOV, 	| 73      
+/ 204	          H INX, 	| 23      
+/ 205	        D M MOV, 	| 72      
+/ 206	  0x0145    JMP, 	| C3 45 01
+
+/ 209	CODE I
+
+/ 20F	  0x0128    LHLD,	| 2A 28 01
+/ 212	        M E MOV, 	| 5E      
+/ 213	          H INX, 	| 23      
+/ 214	        M D MOV, 	| 56      
+/ 215	          D PUSH,	| D5      
+/ 216	  0x0145    JMP, 	| C3 45 01
+
+/ 219	CODE DIGIT
+/ 223	          H POP, 	| E1      
+/ 224	          D POP, 	| D1      
+/ 225	        E A MOV, 	| 7B      
+/ 226	  0x30      SUI, 	| D6 30   
+/ 228	  0x0242    JM,  	| FA 42 02
+/ 22B	  0x0A      CPI, 	| FE 0A   
+/ 22D	  0x0237    JM,  	| FA 37 02
+/ 230	  0x07      SUI, 	| D6 07   
+/ 232	  0x0A      CPI, 	| FE 0A   
+/ 234	  0x0242    JM,  	| FA 42 02
+/ 237	          L CMP, 	| BD      
+/ 238	  0x0242    JP,  	| F2 42 02
+/ 23B	        A E MOV, 	| 5F      
+/ 23C	  0x0001  H LXI, 	| 21 01 00
+/ 23F	  0x0143    JMP, 	| C3 43 01
+/ 242	        H L MOV, 	| 6C      
+/ 243	  0x0144    JMP, 	| C3 44 01
+
+/ 246	CODE (FIND)
+/ 251	          D POP, 	| D1      
+/ 252	          H POP, 	| E1      
+/ 253	          H PUSH,	| E5      
+/ 254	          D LDAX,	| 1A      
+/ 255	          M XRA, 	| AE      
+/ 256	  0x3F      ANI, 	| E6 3F   
+/ 258	  0x027D    JNZ, 	| C2 7D 02
+/ 25B	          H INX, 	| 23      
+/ 25C	          D INX, 	| 13      
+/ 25D	          D LDAX,	| 1A      
+/ 25E	          M XRA, 	| AE      
+/ 25F	          A ADD, 	| 87      
+/ 260	  0x027A    JNZ, 	| C2 7A 02
+/ 263	  0x025B    JNC, 	| D2 5B 02
+/ 266	  0x0005  H LXI, 	| 21 05 00
+/ 269	          D DAD, 	| 19      
+/ 26A	            XTHL,	| E3      
+/ 26B	          D DCX, 	| 1B      
+/ 26C	          D LDAX,	| 1A      
+/ 26D	          A ORA, 	| B7      
+/ 26E	  0x026B    JP,  	| F2 6B 02
+/ 271	        A E MOV, 	| 5F      
+/ 272	  0x00    D MVI, 	| 16 00   
+/ 274	  0x0001  H LXI, 	| 21 01 00
+/ 277	  0x0143    JMP, 	| C3 43 01
+/ 27A	  0x0283    JC,  	| DA 83 02
+/ 27D	          D INX, 	| 13      
+/ 27E	          D LDAX,	| 1A      
+/ 27F	          A ORA, 	| B7      
+/ 280	  0x027D    JP,  	| F2 7D 02
+/ 283	          D INX, 	| 13      
+/ 284	            XCHG,	| EB      
+/ 285	        M E MOV, 	| 5E      
+/ 286	          H INX, 	| 23      
+/ 287	        M D MOV, 	| 56      
+/ 288	        D A MOV, 	| 7A      
+/ 289	          E ORA, 	| B3      
+/ 28A	  0x0252    JNZ, 	| C2 52 02
+/ 28D	          H POP, 	| E1      
+/ 28E	  0x0000  H LXI, 	| 21 00 00
+/ 291	  0x0144    JMP, 	| C3 44 01
+
+/ 294	CODE ENCLOSE
+/ 2A0	          D POP, 	| D1      
+/ 2A1	          H POP, 	| E1      
+/ 2A2	          H PUSH,	| E5      
+/ 2A3	        E A MOV, 	| 7B      
+/ 2A4	        A D MOV, 	| 57      
+/ 2A5	  0xFF    E MVI, 	| 1E FF   
+/ 2A7	          H DCX, 	| 2B      
+/ 2A8	          H INX, 	| 23      
+/ 2A9	          E INR, 	| 1C      
+/ 2AA	          M CMP, 	| BE      
+/ 2AB	  0x02A8    JZ,  	| CA A8 02
+/ 2AE	  0x00    D MVI, 	| 16 00   
+/ 2B0	          D PUSH,	| D5      
+/ 2B1	        A D MOV, 	| 57      
+/ 2B2	        M A MOV, 	| 7E      
+/ 2B3	          A ANA, 	| A7      
+/ 2B4	  0x02C0    JNZ, 	| C2 C0 02
+/ 2B7	  0x00    D MVI, 	| 16 00   
+/ 2B9	          E INR, 	| 1C      
+/ 2BA	          D PUSH,	| D5      
+/ 2BB	          E DCR, 	| 1D      
+/ 2BC	          D PUSH,	| D5      
+/ 2BD	  0x0145    JMP, 	| C3 45 01
+/ 2C0	        D A MOV, 	| 7A      
+/ 2C1	          H INX, 	| 23      
+/ 2C2	          E INR, 	| 1C      
+/ 2C3	          M CMP, 	| BE      
+/ 2C4	  0x02D3    JZ,  	| CA D3 02
+/ 2C7	        M A MOV, 	| 7E      
+/ 2C8	          A ANA, 	| A7      
+/ 2C9	  0x02C0    JNZ, 	| C2 C0 02
+/ 2CC	  0x00    D MVI, 	| 16 00   
+/ 2CE	          D PUSH,	| D5      
+/ 2CF	          D PUSH,	| D5      
+/ 2D0	  0x0145    JMP, 	| C3 45 01
+/ 2D3	  0x00    D MVI, 	| 16 00   
+/ 2D5	          D PUSH,	| D5      
+/ 2D6	          E INR, 	| 1C      
+/ 2D7	          D PUSH,	| D5      
+/ 2D8	  0x0145    JMP, 	| C3 45 01
+
+/ 2DB	: EMIT
+/ 2E4	  (EMIT) 1 OUT +! ;S
+
+/ 2EE	CODE KEY
+/ 2F6	  0x1673    JMP, 	| C3 73 16
+
+/ 2F9	CODE ?TERMINAL
+/ 307	  0x0000  H LXI, 	| 21 00 00
+/ 30A	  0x1665    JMP, 	| C3 65 16
+
+/ 30D	CODE CR
+/ 314	  0x16A0    JMP, 	| C3 A0 16
+
+/ 317	CODE CMOVE
+/ 321	        C L MOV, 	| 69      
+/ 322	        B H MOV, 	| 60      
+/ 323	          B POP, 	| C1      
+/ 324	          D POP, 	| D1      
+/ 325	            XTHL,	| E3      
+/ 326	  0x032E    JMP, 	| C3 2E 03
+/ 329	        M A MOV, 	| 7E      
+/ 32A	          H INX, 	| 23      
+/ 32B	          D STAX,	| 12      
+/ 32C	          D INX, 	| 13      
+/ 32D	          B DCX, 	| 0B      
+/ 32E	        B A MOV, 	| 78      
+/ 32F	          C ORA, 	| B1      
+/ 330	  0x0329    JNZ, 	| C2 29 03
+/ 333	          B POP, 	| C1      
+/ 334	  0x0145    JMP, 	| C3 45 01
+
+/ 337	CODE U*
+/ 33E	          D POP, 	| D1      
+/ 33F	          H POP, 	| E1      
+/ 340	          B PUSH,	| C5      
+/ 341	        H B MOV, 	| 44      
+/ 342	        L A MOV, 	| 7D      
+/ 343	  0x035A    CALL,	| CD 5A 03
+/ 346	          H PUSH,	| E5      
+/ 347	        A H MOV, 	| 67      
+/ 348	        B A MOV, 	| 78      
+/ 349	        H B MOV, 	| 44      
+/ 34A	  0x035A    CALL,	| CD 5A 03
+/ 34D	          D POP, 	| D1      
+/ 34E	        D C MOV, 	| 4A      
+/ 34F	          B DAD, 	| 09      
+/ 350	  0x00      ACI, 	| CE 00   
+/ 352	        L D MOV, 	| 55      
+/ 353	        H L MOV, 	| 6C      
+/ 354	        A H MOV, 	| 67      
+/ 355	          B POP, 	| C1      
+/ 356	          D PUSH,	| D5      
+/ 357	  0x0144    JMP, 	| C3 44 01
+/ 35A	  0x0000  H LXI, 	| 21 00 00
+/ 35D	  0x08    C MVI, 	| 0E 08   
+/ 35F	          H DAD, 	| 29      
+/ 360	            RAL, 	| 17      
+/ 361	  0x0367    JNC, 	| D2 67 03
+/ 364	          D DAD, 	| 19      
+/ 365	  0x00      ACI, 	| CE 00   
+/ 367	          C DCR, 	| 0D      
+/ 368	  0x035F    JNZ, 	| C2 5F 03
+/ 36B	            RET, 	| C9      
+
+/ 36C	CODE U/
+/ 373	  0x0004  H LXI, 	| 21 04 00
+/ 376	         SP DAD, 	| 39      
+/ 377	        M E MOV, 	| 5E      
+/ 378	        C M MOV, 	| 71      
+/ 379	          H INX, 	| 23      
+/ 37A	        M D MOV, 	| 56      
+/ 37B	        B M MOV, 	| 70      
+/ 37C	          B POP, 	| C1      
+/ 37D	          H POP, 	| E1      
+/ 37E	        L A MOV, 	| 7D      
+/ 37F	          C SUB, 	| 91      
+/ 380	        H A MOV, 	| 7C      
+/ 381	          B SBB, 	| 98      
+/ 382	  0x038E    JC,  	| DA 8E 03
+/ 385	  0xFFFF  H LXI, 	| 21 FF FF
+/ 388	  0xFFFF  D LXI, 	| 11 FF FF
+/ 38B	  0x03B9    JMP, 	| C3 B9 03
+/ 38E	  0x10    A MVI, 	| 3E 10   
+/ 390	          H DAD, 	| 29      
+/ 391	            RAL, 	| 17      
+/ 392	            XCHG,	| EB      
+/ 393	          H DAD, 	| 29      
+/ 394	  0x0399    JNC, 	| D2 99 03
+/ 397	          D INX, 	| 13      
+/ 398	          A ANA, 	| A7      
+/ 399	            XCHG,	| EB      
+/ 39A	            RAR, 	| 1F      
+/ 39B	        PSW PUSH,	| F5      
+/ 39C	  0x03A8    JNC, 	| D2 A8 03
+/ 39F	        L A MOV, 	| 7D      
+/ 3A0	          C SUB, 	| 91      
+/ 3A1	        A L MOV, 	| 6F      
+/ 3A2	        H A MOV, 	| 7C      
+/ 3A3	          B SBB, 	| 98      
+/ 3A4	        A H MOV, 	| 67      
+/ 3A5	  0x03B3    JMP, 	| C3 B3 03
+/ 3A8	        L A MOV, 	| 7D      
+/ 3A9	          C SUB, 	| 91      
+/ 3AA	        A L MOV, 	| 6F      
+/ 3AB	        H A MOV, 	| 7C      
+/ 3AC	          B SBB, 	| 98      
+/ 3AD	        A H MOV, 	| 67      
+/ 3AE	  0x03B3    JNC, 	| D2 B3 03
+/ 3B1	          B DAD, 	| 09      
+/ 3B2	          D DCX, 	| 1B      
+/ 3B3	          D INX, 	| 13      
+/ 3B4	        PSW POP, 	| F1      
+/ 3B5	          A DCR, 	| 3D      
+/ 3B6	  0x0390    JNZ, 	| C2 90 03
+/ 3B9	          B POP, 	| C1      
+/ 3BA	          H PUSH,	| E5      
+/ 3BB	          D PUSH,	| D5      
+/ 3BC	  0x0145    JMP, 	| C3 45 01
+
+/ 3BF	CODE AND
+/ 3C7	          D POP, 	| D1      
+/ 3C8	          H POP, 	| E1      
+/ 3C9	        E A MOV, 	| 7B      
+/ 3CA	          L ANA, 	| A5      
+/ 3CB	        A L MOV, 	| 6F      
+/ 3CC	        D A MOV, 	| 7A      
+/ 3CD	          H ANA, 	| A4      
+/ 3CE	        A H MOV, 	| 67      
+/ 3CF	  0x0144    JMP, 	| C3 44 01
+
+/ 3D2	CODE OV
+/ 3D9	          D POP, 	| D1      
+/ 3DA	          H POP, 	| E1      
+/ 3DB	        E A MOV, 	| 7B      
+/ 3DC	          L ORA, 	| B5      
+/ 3DD	        A L MOV, 	| 6F      
+/ 3DE	        D A MOV, 	| 7A      
+/ 3DF	          H ORA, 	| B4      
+/ 3E0	        A H MOV, 	| 67      
+/ 3E1	  0x0144    JMP, 	| C3 44 01
+
+/ 3E4	CODE XOR
+/ 3EC	          D POP, 	| D1      
+/ 3ED	          H POP, 	| E1      
+/ 3EE	        E A MOV, 	| 7B      
+/ 3EF	          L XRA, 	| AD      
+/ 3F0	        A L MOV, 	| 6F      
+/ 3F1	        D A MOV, 	| 7A      
+/ 3F2	          H XRA, 	| AC      
+/ 3F3	        A H MOV, 	| 67      
+/ 3F4	  0x0144    JMP, 	| C3 44 01
+
+/ 3F7	CODE SP@
+/ 3FF	  0x0000  H LXI, 	| 21 00 00
+/ 402	         SP DAD, 	| 39      
+/ 403	  0x0144    JMP, 	| C3 44 01
+
+/ 406	CODE SP!
+/ 40E	  0x0126    LHLD,	| 2A 26 01
+/ 411	  0x0006  D LXI, 	| 11 06 00
+/ 414	          D DAD, 	| 19      
+/ 415	        M E MOV, 	| 5E      
+/ 416	          H INX, 	| 23      
+/ 417	        M D MOV, 	| 56      
+/ 418	            XCHG,	| EB      
+/ 419	            SPHL,	| F9      
+/ 41A	  0x0145    JMP, 	| C3 45 01
+
+/ 41D	CODE RP@
+/ 425	  0x0128    LHLD,	| 2A 28 01
+/ 428	  0x0144    JMP, 	| C3 44 01
+
+/ 42B	CODE RP!
+/ 433	  0x0126    LHLD,	| 2A 26 01
+/ 436	  0x0008  D LXI, 	| 11 08 00
+/ 439	          D DAD, 	| 19      
+/ 43A	        M E MOV, 	| 5E      
+/ 43B	          H INX, 	| 23      
+/ 43C	        M D MOV, 	| 56      
+/ 43D	            XCHG,	| EB      
+/ 43E	  0x0128    SHLD,	| 22 28 01
+/ 441	  0x0145    JMP, 	| C3 45 01
+
+/ 444	CODE ;S
+/ 44B	  0x0128    LHLD,	| 2A 28 01
+/ 44E	        M C MOV, 	| 4E      
+/ 44F	          H INX, 	| 23      
+/ 450	        M B MOV, 	| 46      
+/ 451	          H INX, 	| 23      
+/ 452	  0x0128    SHLD,	| 22 28 01
+/ 455	  0x0145    JMP, 	| C3 45 01
+
+/ 458	CODE LEAVE
+/ 462	  0x0128    LHLD,	| 2A 28 01
+/ 465	        M E MOV, 	| 5E      
+/ 466	          H INX, 	| 23      
+/ 467	        M D MOV, 	| 56      
+/ 468	          H INX, 	| 23      
+/ 469	        E M MOV, 	| 73      
+/ 46A	          H INX, 	| 23      
+/ 46B	        D M MOV, 	| 72      
+/ 46C	  0x0145    JMP, 	| C3 45 01
+
+/ 46F	CODE >R
+/ 476	          D POP, 	| D1      
+/ 477	  0x0128    LHLD,	| 2A 28 01
+/ 47A	          H DCX, 	| 2B      
+/ 47B	          H DCX, 	| 2B      
+/ 47C	  0x0128    SHLD,	| 22 28 01
+/ 47F	        E M MOV, 	| 73      
+/ 480	          H INX, 	| 23      
+/ 481	        D M MOV, 	| 72      
+/ 482	  0x0145    JMP, 	| C3 45 01
+
+/ 485	CODE R>
+/ 48C	  0x0128    LHLD,	| 2A 28 01
+/ 48F	        M E MOV, 	| 5E      
+/ 490	          H INX, 	| 23      
+/ 491	        M D MOV, 	| 56      
+/ 492	          H INX, 	| 23      
+/ 493	  0x0128    SHLD,	| 22 28 01
+/ 496	          D PUSH,	| D5      
+/ 497	  0x0145    JMP, 	| C3 45 01
+
+/ 49A	[DOIDO] R
+
+/ 4A0	CODE 0=
+/ 4A7	          H POP, 	| E1      
+/ 4A8	        L A MOV, 	| 7D      
+/ 4A9	          H ORA, 	| B4      
+/ 4AA	  0x0000  H LXI, 	| 21 00 00
+/ 4AD	  0x04B1    JNZ, 	| C2 B1 04
+/ 4B0	          H INX, 	| 23      
+/ 4B1	  0x0144    JMP, 	| C3 44 01
+
+/ 4B4	CODE 0<
+/ 4BB	          H POP, 	| E1      
+/ 4BC	          H DAD, 	| 29      
+/ 4BD	  0x0000  H LXI, 	| 21 00 00
+/ 4C0	  0x04C4    JNC, 	| D2 C4 04
+/ 4C3	          H INX, 	| 23      
+/ 4C4	  0x0144    JMP, 	| C3 44 01
+
+/ 4C7	CODE +
+/ 4CD	          D POP, 	| D1      
+/ 4CE	          H POP, 	| E1      
+/ 4CF	          D DAD, 	| 19      
+/ 4D0	  0x0144    JMP, 	| C3 44 01
+
+/ 4D3	CODE D+
+/ 4DA	  0x0006  H LXI, 	| 21 06 00
+/ 4DD	         SP DAD, 	| 39      
+/ 4DE	        M E MOV, 	| 5E      
+/ 4DF	        C M MOV, 	| 71      
+/ 4E0	          H INX, 	| 23      
+/ 4E1	        M D MOV, 	| 56      
+/ 4E2	        B M MOV, 	| 70      
+/ 4E3	          B POP, 	| C1      
+/ 4E4	          H POP, 	| E1      
+/ 4E5	          D DAD, 	| 19      
+/ 4E6	            XCHG,	| EB      
+/ 4E7	          H POP, 	| E1      
+/ 4E8	        L A MOV, 	| 7D      
+/ 4E9	          C ADC, 	| 89      
+/ 4EA	        A L MOV, 	| 6F      
+/ 4EB	        H A MOV, 	| 7C      
+/ 4EC	          B ADC, 	| 88      
+/ 4ED	        A H MOV, 	| 67      
+/ 4EE	          B POP, 	| C1      
+/ 4EF	          D PUSH,	| D5      
+/ 4F0	  0x0144    JMP, 	| C3 44 01
+
+/ 4F3	CODE MINUS
+/ 4FD	          H POP, 	| E1      
+/ 4FE	        L A MOV, 	| 7D      
+/ 4FF	            CMA, 	| 2F      
+/ 500	        A L MOV, 	| 6F      
+/ 501	        H A MOV, 	| 7C      
+/ 502	            CMA, 	| 2F      
+/ 503	        A H MOV, 	| 67      
+/ 504	          H INX, 	| 23      
+/ 505	  0x0144    JMP, 	| C3 44 01
+
+/ 508	CODE DMINUS
+/ 513	          H POP, 	| E1      
+/ 514	          D POP, 	| D1      
+/ 515	          A SUB, 	| 97      
+/ 516	          E SUB, 	| 93      
+/ 517	        A E MOV, 	| 5F      
+/ 518	  0x00    A MVI, 	| 3E 00   
+/ 51A	          D SBB, 	| 9A      
+/ 51B	        A D MOV, 	| 57      
+/ 51C	  0x00    A MVI, 	| 3E 00   
+/ 51E	          L SBB, 	| 9D      
+/ 51F	        A L MOV, 	| 6F      
+/ 520	  0x00    A MVI, 	| 3E 00   
+/ 522	          H SBB, 	| 9C      
+/ 523	        A H MOV, 	| 67      
+/ 524	          D PUSH,	| D5      
+/ 525	  0x0144    JMP, 	| C3 44 01
+
+/ 528	CODE OVER
+/ 531	          D POP, 	| D1      
+/ 532	          H POP, 	| E1      
+/ 533	          H PUSH,	| E5      
+/ 534	  0x0143    JMP, 	| C3 43 01
+
+/ 537	CODE DROP
+/ 540	          H POP, 	| E1      
+/ 541	  0x0145    JMP, 	| C3 45 01
+
+/ 544	CODE SWAP
+/ 54D	          H POP, 	| E1      
+/ 54E	            XTHL,	| E3      
+/ 54F	  0x0144    JMP, 	| C3 44 01
+
+/ 552	CODE DUP
+/ 55A	          H POP, 	| E1      
+/ 55B	          H PUSH,	| E5      
+/ 55C	  0x0144    JMP, 	| C3 44 01
+
+/ 55F	CODE 2DUP
+/ 568	          H POP, 	| E1      
+/ 569	          D POP, 	| D1      
+/ 56A	          D PUSH,	| D5      
+/ 56B	          H PUSH,	| E5      
+/ 56C	  0x0143    JMP, 	| C3 43 01
+
+/ 56F	CODE +!
+/ 576	          H POP, 	| E1      
+/ 577	          D POP, 	| D1      
+/ 578	        M A MOV, 	| 7E      
+/ 579	          E ADD, 	| 83      
+/ 57A	        A M MOV, 	| 77      
+/ 57B	          H INX, 	| 23      
+/ 57C	        M A MOV, 	| 7E      
+/ 57D	          D ADC, 	| 8A      
+/ 57E	        A M MOV, 	| 77      
+/ 57F	  0x0145    JMP, 	| C3 45 01
+
+/ 582	CODE TOGGLE
+/ 58D	          D POP, 	| D1      
+/ 58E	          H POP, 	| E1      
+/ 58F	        M A MOV, 	| 7E      
+/ 590	          E XRA, 	| AB      
+/ 591	        A M MOV, 	| 77      
+/ 592	  0x0145    JMP, 	| C3 45 01
+
+/ 595	CODE @
+/ 59B	          H POP, 	| E1      
+/ 59C	        M E MOV, 	| 5E      
+/ 59D	          H INX, 	| 23      
+/ 59E	        M D MOV, 	| 56      
+/ 59F	          D PUSH,	| D5      
+/ 5A0	  0x0145    JMP, 	| C3 45 01
+
+/ 5A3	CODE C@
+/ 5AA	          H POP, 	| E1      
+/ 5AB	        M L MOV, 	| 6E      
+/ 5AC	  0x00    H MVI, 	| 26 00   
+/ 5AE	  0x0144    JMP, 	| C3 44 01
+
+/ 5B1	CODE 2@
+/ 5B8	          H POP, 	| E1      
+/ 5B9	  0x0002  D LXI, 	| 11 02 00
+/ 5BC	          D DAD, 	| 19      
+/ 5BD	        M E MOV, 	| 5E      
+/ 5BE	          H INX, 	| 23      
+/ 5BF	        M D MOV, 	| 56      
+/ 5C0	          D PUSH,	| D5      
+/ 5C1	  0xFFFD  D LXI, 	| 11 FD FF
+/ 5C4	          D DAD, 	| 19      
+/ 5C5	        M E MOV, 	| 5E      
+/ 5C6	          H INX, 	| 23      
+/ 5C7	        M D MOV, 	| 56      
+/ 5C8	          D PUSH,	| D5      
+/ 5C9	  0x0145    JMP, 	| C3 45 01
+
+/ 5CC	CODE !
+/ 5D2	          H POP, 	| E1      
+/ 5D3	          D POP, 	| D1      
+/ 5D4	        E M MOV, 	| 73      
+/ 5D5	          H INX, 	| 23      
+/ 5D6	        D M MOV, 	| 72      
+/ 5D7	  0x0145    JMP, 	| C3 45 01
+
+/ 5DA	CODE C!
+/ 5E1	          H POP, 	| E1      
+/ 5E2	          D POP, 	| D1      
+/ 5E3	        E M MOV, 	| 73      
+/ 5E4	  0x0145    JMP, 	| C3 45 01
+
+/ 5E7	CODE 2!
+/ 5EE	          H POP, 	| E1      
+/ 5EF	          D POP, 	| D1      
+/ 5F0	        E M MOV, 	| 73      
+/ 5F1	          H INX, 	| 23      
+/ 5F2	        D M MOV, 	| 72      
+/ 5F3	          H INX, 	| 23      
+/ 5F4	          D POP, 	| D1      
+/ 5F5	        E M MOV, 	| 73      
+/ 5F6	          H INX, 	| 23      
+/ 5F7	        D M MOV, 	| 72      
+/ 5F8	  0x0145    JMP, 	| C3 45 01
+
+/ 5FB	: : [IMMEDIATE]
+/ 601	  ?EXEC !CSP CURRENT @ CONTEXT ! CREATE ] (;CODE)
+
+/ 613	  0x0128    LHLD,	| 2A 28 01
+/ 616	          H DCX, 	| 2B      
+/ 617	        B M MOV, 	| 70      
+/ 618	          H DCX, 	| 2B      
+/ 619	        C M MOV, 	| 71      
+/ 61A	  0x0128    SHLD,	| 22 28 01
+/ 61D	          D INX, 	| 13      
+/ 61E	        E C MOV, 	| 4B      
+/ 61F	        D B MOV, 	| 42      
+/ 620	  0x0145    JMP, 	| C3 45 01
+
+/ 623	: ; [IMMEDIATE]
+/ 629	  ?CSP COMPILE ;S SMUDGE [ ;S
+
+/ 635	: NOOP
+/ 63E	  ;S
+
+/ 640	: CONSTANT
+/ 64D	  CREATE SMUDGE , (;CODE)
+
+/ 655	          D INX, 	| 13      
+/ 656	            XCHG,	| EB      
+/ 657	        M E MOV, 	| 5E      
+/ 658	          H INX, 	| 23      
+/ 659	        M D MOV, 	| 56      
+/ 65A	          D PUSH,	| D5      
+/ 65B	  0x0145    JMP, 	| C3 45 01
+
+/ 65E	: VARIABLE
+/ 66B	  CONSTANT (;CODE)
+
+/ 66F	          D INX, 	| 13      
+/ 670	          D PUSH,	| D5      
+/ 671	  0x0145    JMP, 	| C3 45 01
+
+/ 674	: USER
+/ 67D	  CONSTANT (;CODE)
+
+/ 681	          D INX, 	| 13      
+/ 682	            XCHG,	| EB      
+/ 683	        M E MOV, 	| 5E      
+/ 684	  0x00    D MVI, 	| 16 00   
+/ 686	  0x0126    LHLD,	| 2A 26 01
+/ 689	          D DAD, 	| 19      
+/ 68A	  0x0144    JMP, 	| C3 44 01
+
+/ 68D	0x0000 CONSTANT 0
+
+/ 695	0x0001 CONSTANT 1
+
+/ 69D	0x0002 CONSTANT 2
+
+/ 6A5	0x0003 CONSTANT 3
+
+/ 6AD	0x0020 CONSTANT BL
+
+/ 6B6	0x0040 CONSTANT C/L
+
+/ 6C0	0x3BE0 CONSTANT FIRST
+
+/ 6CC	0x4000 CONSTANT LIMIT
+
+/ 6D8	0x0080 CONSTANT B/BUF
+
+/ 6E4	0x0008 CONSTANT B/SCR
+
+/ 6F0	: +ORIGIN
+/ 6FC	  LIT[0x0100] + ;S
+
+/ 704	0x06 USER S0
+
+/ 70D	0x08 USER R0
+
+/ 716	0x0A USER TIB
+
+/ 71F	0x0C USER WIDTH
+
+/ 72A	0x0E USER WARNING
+
+/ 737	0x10 USER FENCE
+
+/ 742	0x12 USER DP
+
+/ 74A	0x14 USER VOC-LINK
+
+/ 759	0x16 USER BLK
+
+/ 762	0x18 USER IN
+
+/ 76A	0x1A USER OUT
+
+/ 773	0x1C USER SCR
+
+/ 77C	0x1E USER OFFSET
+
+/ 788	0x20 USER CONTEXT
+
+/ 795	0x22 USER CURRENT
+
+/ 7A2	0x24 USER STATE
+
+/ 7AD	0x26 USER BASE
+
+/ 7B7	0x28 USER DPL
+
+/ 7C0	0x2A USER FLD
+
+/ 7C9	0x2C USER CSP
+
+/ 7D2	0x2E USER R#
+
+/ 7DA	0x30 USER HLD
+
+/ 7E4	: 1+
+/ 7EB	  1 + ;S
+
+/ 7F1	: 2+
+/ 7F8	  2 + ;S
+
+/ 7FE	: HERE
+/ 807	  DP @ ;S
+
+/ 80D	: ALLOT
+/ 817	  DP +! ;S
+
+/ 81D	: ,
+/ 823	  HERE ! 2 ALLOT ;S
+
+/ 82D	: C,
+/ 834	  HERE C! 1 ALLOT ;S
+/ 83E	        L A MOV, 	| 7D      
+/ 83F	          E SUB, 	| 93      
+/ 840	        A L MOV, 	| 6F      
+/ 841	        H A MOV, 	| 7C      
+/ 842	          D SBB, 	| 9A      
+/ 843	        A H MOV, 	| 67      
+/ 844	            RET, 	| C9      
+
+/ 845	CODE -
+/ 84B	          D POP, 	| D1      
+/ 84C	          H POP, 	| E1      
+/ 84D	  0x083E    CALL,	| CD 3E 08
+/ 850	  0x0144    JMP, 	| C3 44 01
+
+/ 853	: =
+/ 859	  - 0= ;S
+
+/ 85F	CODE <
+/ 865	          D POP, 	| D1      
+/ 866	          H POP, 	| E1      
+/ 867	        D A MOV, 	| 7A      
+/ 868	          H XRA, 	| AC      
+/ 869	  0x086F    JM,  	| FA 6F 08
+/ 86C	  0x083E    CALL,	| CD 3E 08
+/ 86F	          H INR, 	| 24      
+/ 870	          H DCR, 	| 25      
+/ 871	  0x087A    JM,  	| FA 7A 08
+/ 874	  0x0000  H LXI, 	| 21 00 00
+/ 877	  0x0144    JMP, 	| C3 44 01
+/ 87A	  0x0001  H LXI, 	| 21 01 00
+/ 87D	  0x0144    JMP, 	| C3 44 01
+
+/ 880	: U<
+/ 887	  2DUP XOR 0< 0BRANCH[0x089B]
+/ 891	  DROP 0< 0= BRANCH[0x089F]
+/ 89B	  - 0<
+/ 89F	  ;S
+
+/ 8A1	: >
+/ 8A7	  SWAP < ;S
+
+/ 8AD	CODE ROT
+/ 8B5	          D POP, 	| D1      
+/ 8B6	          H POP, 	| E1      
+/ 8B7	            XTHL,	| E3      
+/ 8B8	  0x0143    JMP, 	| C3 43 01
+
+/ 8BB	: SPACE
+/ 8C5	  BL EMIT ;S
+
+/ 8CB	: -DUP
+/ 8D4	  DUP 0BRANCH[0x08DC]
+/ 8DA	  DUP
+/ 8DC	  ;S
+
+/ 8DE	: TRAVERSE
+/ 8EB	  SWAP
+/ 8ED	  OVER + LIT[0x007F] OVER C@ < 0BRANCH[0x08ED]
+/ 8FF	  SWAP DROP ;S
+
+/ 905	: LATEST
+/ 910	  CURRENT @ @ ;S
+
+/ 918	: LFA
+/ 920	  LIT[0x0004] - ;S
+
+/ 928	: CFA
+/ 930	  2 - ;S
+
+/ 936	: NFA
+/ 93E	  LIT[0x0005] - LIT[0xFFFF] TRAVERSE ;S
+
+/ 94C	: PFA
+/ 954	  1 TRAVERSE LIT[0x0005] + ;S
+
+/ 960	: !CSP
+/ 969	  SP@ CSP ! ;S
+
+/ 971	: ?ERROR
+/ 97C	  SWAP 0BRANCH[0x0988]
+/ 982	  ERROR BRANCH[0x098A]
+/ 988	  DROP
+/ 98A	  ;S
+
+/ 98C	: ?COMP
+/ 996	  STATE @ 0= LIT[0x0011] ?ERROR ;S
+
+/ 9A4	: ?EXEC
+/ 9AE	  STATE @ LIT[0x0012] ?ERROR ;S
+
+/ 9BA	: ?PAIRS
+/ 9C5	  - LIT[0x0013] ?ERROR ;S
+
+/ 9CF	: ?CSP
+/ 9D8	  SP@ CSP @ - LIT[0x0014] ?ERROR ;S
+
+/ 9E8	: ?LOADING
+/ 9F5	  BLK @ 0= LIT[0x0016] ?ERROR ;S
+
+/ A03	: COMPILE
+/ A0F	  ?COMP R> DUP 2+ >R @ , ;S
+
+/ A1F	: [ [IMMEDIATE]
+/ A25	  0 STATE ! ;S
+
+/ A2D	: ]
+/ A33	  LIT[0x00C0] STATE ! ;S
+
+/ A3D	: SMUDGE
+/ A48	  LATEST LIT[0x0020] TOGGLE ;S
+
+/ A52	: HEX
+/ A5A	  LIT[0x0010] BASE ! ;S
+
+/ A64	: DECIMAL
+/ A70	  LIT[0x000A] BASE ! ;S
+
+/ A7A	: (;CODE)
+/ A86	  R> LATEST PFA CFA ! ;S
+
+/ A92	: ;CODE [IMMEDIATE]
+/ A9C	  ?CSP COMPILE (;CODE) [ NOOP ;S
+
+/ AA8	: <BUILDS
+/ AB4	  0 CONSTANT ;S
+
+/ ABA	: DOES>
+/ AC4	  R> LATEST PFA ! (;CODE)
+
+/ ACE	  0x0128    LHLD,	| 2A 28 01
+/ AD1	          H DCX, 	| 2B      
+/ AD2	        B M MOV, 	| 70      
+/ AD3	          H DCX, 	| 2B      
+/ AD4	        C M MOV, 	| 71      
+/ AD5	  0x0128    SHLD,	| 22 28 01
+/ AD8	          D INX, 	| 13      
+/ AD9	            XCHG,	| EB      
+/ ADA	        M C MOV, 	| 4E      
+/ ADB	          H INX, 	| 23      
+/ ADC	        M B MOV, 	| 46      
+/ ADD	          H INX, 	| 23      
+/ ADE	  0x0144    JMP, 	| C3 44 01
+
+/ AE1	: COUNT
+/ AEB	  DUP 1+ SWAP C@ ;S
+
+/ AF5	: TYPE
+/ AFE	  -DUP 0BRANCH[0x0B1A]
+/ B04	  OVER + SWAP (DO)
+/ B0C	  I C@ EMIT (LOOP)[0x0B0C]
+/ B16	  BRANCH[0x0B1C]
+/ B1A	  DROP
+/ B1C	  ;S
+
+/ B1E	: -TRAILING
+/ B2C	  DUP 0 (DO)
+/ B32	  OVER OVER + 1 - C@ BL - 0BRANCH[0x0B4C]
+/ B46	  LEAVE BRANCH[0x0B50]
+/ B4C	  1 -
+/ B50	  (LOOP)[0x0B32]
+/ B54	  ;S
+
+/ B56	: (.")
+/ B5F	  R COUNT DUP 1+ R> + >R TYPE ;S
+
+/ B71	: ." [IMMEDIATE]
+/ B78	  LIT[0x0022] STATE @ 0BRANCH[0x0B96]
+/ B84	  COMPILE (.") WORD HERE C@ 1+ ALLOT BRANCH[0x0B9E]
+/ B96	  WORD HERE COUNT TYPE
+/ B9E	  ;S
+
+/ BA0	: EXPECT
+/ BAB	  OVER + OVER (DO)
+/ BB3	  KEY DUP LIT[0x000E] +ORIGIN @ = 0BRANCH[0x0BED]
+/ BC5	  DROP DUP I = DUP R> 2 - + >R 0BRANCH[0x0BE5]
+/ BDD	  LIT[0x0007] BRANCH[0x0BE9]
+/ BE5	  LIT[0x0008]
+/ BE9	  BRANCH[0x0C13]
+/ BED	  DUP LIT[0x000D] = 0BRANCH[0x0C05]
+/ BF9	  LEAVE DROP BL 0 BRANCH[0x0C07]
+/ C05	  DUP
+/ C07	  I C! 0 I 1+ !
+/ C13	  EMIT (LOOP)[0x0BB3]
+/ C19	  DROP ;S
+
+/ C1D	: QUERY
+/ C27	  TIB @ LIT[0x0050] EXPECT 0 IN ! ;S
+
+/ C39	:  [IMMEDIATE]
+/ C3F	  BLK @ 0BRANCH[0x0C6F]
+/ C47	  1 BLK +! 0 IN ! BLK @ B/SCR 1 - AND 0= 0BRANCH[0x0C6B]
+/ C65	  ?EXEC R> DROP
+/ C6B	  BRANCH[0x0C73]
+/ C6F	  R> DROP
+/ C73	  ;S
+
+/ C75	CODE FILL
+/ C7E	        C L MOV, 	| 69      
+/ C7F	        B H MOV, 	| 60      
+/ C80	          D POP, 	| D1      
+/ C81	          B POP, 	| C1      
+/ C82	            XTHL,	| E3      
+/ C83	            XCHG,	| EB      
+/ C84	        B A MOV, 	| 78      
+/ C85	          C ORA, 	| B1      
+/ C86	  0x0C90    JZ,  	| CA 90 0C
+/ C89	        L A MOV, 	| 7D      
+/ C8A	          D STAX,	| 12      
+/ C8B	          D INX, 	| 13      
+/ C8C	          B DCX, 	| 0B      
+/ C8D	  0x0C84    JMP, 	| C3 84 0C
+/ C90	          B POP, 	| C1      
+/ C91	  0x0145    JMP, 	| C3 45 01
+
+/ C94	: ERASE
+/ C9E	  0 FILL ;S
+
+/ CA4	: BLANKS
+/ CAF	  BL FILL ;S
+
+/ CB5	: HOLD
+/ CBE	  LIT[0xFFFF] HLD +! HLD @ C! ;S
+
+/ CCE	: PAD
+/ CD6	  HERE LIT[0x0044] + ;S
+
+/ CE0	: WORD
+/ CE9	  BLK @ 0BRANCH[0x0CFB]
+/ CF1	  BLK @ BLOCK BRANCH[0x0CFF]
+/ CFB	  TIB @
+/ CFF	  IN @ + SWAP ENCLOSE HERE LIT[0x0022] BLANKS IN +! OVER - >R R HERE C! + HERE 1+ R> CMOVE ;S
+
+/ D2D	: (NUMBER)
+/ D3A	  1+ DUP >R C@ BASE @ DIGIT 0BRANCH[0x0D76]
+/ D4C	  SWAP BASE @ U* DROP ROT BASE @ U* D+ DPL @ 1+ 0BRANCH[0x0D70]
+/ D6A	  1 DPL +!
+/ D70	  R> BRANCH[0x0D3A]
+/ D76	  R> ;S
+
+/ D7A	: NUMBER
+/ D85	  0 0 ROT DUP 1+ C@ LIT[0x002D] = DUP >R + LIT[0xFFFF]
+/ DA1	  DPL ! (NUMBER) DUP C@ BL - 0BRANCH[0x0DC7]
+/ DB3	  DUP C@ LIT[0x002E] - 0 ?ERROR 0 BRANCH[0x0DA1]
+/ DC7	  DROP R> 0BRANCH[0x0DD1]
+/ DCF	  DMINUS
+/ DD1	  ;S
+
+/ DD3	: -FIND
+/ DDD	  BL WORD HERE CONTEXT @ @ (FIND) DUP 0= 0BRANCH[0x0DFB]
+/ DF3	  DROP HERE LATEST (FIND)
+/ DFB	  ;S
+
+/ DFD	: (ABORT)
+/ E09	  ABORT ;S
+
+/ E0D	: ERROR
+/ E17	  WARNING @ 0< 0BRANCH[0x0E23]
+/ E21	  (ABORT)
+/ E23	  HERE COUNT TYPE (.")
+/ E2C	  ‹? ›
+/ E2E	  MESSAGE SP! BLK @ -DUP 0BRANCH[0x0E42]
+/ E3C	  IN @ SWAP
+/ E42	  QUIT
+
+/ E44	: ID.
+/ E4C	  PAD LIT[0x0020] LIT[0x005F] FILL DUP PFA LFA OVER - PAD SWAP CMOVE PAD COUNT LIT[0x001F] AND TYPE SPACE ;S
+
+/ E78	: CREATE
+/ E83	  -FIND 0BRANCH[0x0E97]
+/ E89	  DROP NFA ID. LIT[0x0004] MESSAGE SPACE
+/ E97	  HERE DUP C@ WIDTH @ MIN 1+ ALLOT DUP LIT[0x00A0] TOGGLE HERE 1 - LIT[0x0080] TOGGLE LATEST , CURRENT @ ! HERE 2+ , ;S
+
+/ ECD	: [COMPILE] [IMMEDIATE]
+/ EDB	  -FIND 0= 0 ?ERROR DROP CFA , ;S
+
+/ EEB	: LITERAL [IMMEDIATE]
+/ EF7	  STATE @ 0BRANCH[0x0F05]
+/ EFF	  COMPILE LIT ,
+/ F05	  ;S
+
+/ F07	: DLITERAL [IMMEDIATE]
+/ F14	  STATE @ 0BRANCH[0x0F22]
+/ F1C	  SWAP LITERAL LITERAL
+/ F22	  ;S
+
+/ F24	: ?STACK
+/ F2F	  SP@ S0 @ SWAP U< 1 ?ERROR SP@ HERE LIT[0x0080] + U< LIT[0x0007] ?ERROR ;S
+
+/ F51	: INTERPRET
+/ F5F	  -FIND 0BRANCH[0x0F81]
+/ F65	  STATE @ < 0BRANCH[0x0F77]
+/ F6F	  CFA , BRANCH[0x0F7B]
+/ F77	  CFA EXECUTE
+/ F7B	  ?STACK BRANCH[0x0F9B]
+/ F81	  HERE NUMBER DPL @ 1+ 0BRANCH[0x0F95]
+/ F8F	  DLITERAL BRANCH[0x0F99]
+/ F95	  DROP LITERAL
+/ F99	  ?STACK
+/ F9B	  BRANCH[0x0F5F]
+
+/ F9F	: IMMEDIATE
+/ FAD	  LATEST LIT[0x0040] TOGGLE ;S
+
+/ FB7	: VOCABULARY
+/ FC6	  <BUILDS LIT[0xA081] , CURRENT @ CFA , HERE VOC-LINK @ , VOC-LINK ! DOES> 2+ CONTEXT ! ;S
+
+/ FEC	DOES> FORTH
+
+/ FF6	MEMCAT_UNCAT E4 0F 81 A0 73 1A 00 00
+
+/ FFE	: DEFINITIONS
+/100E	  CONTEXT @ CURRENT ! ;S
+
+/1018	: ( [IMMEDIATE]
+/101E	  LIT[0x0029] WORD ;S
+
+/1026	: QUIT
+/102F	  0 BLK ! [
+/1037	  RP! CR QUERY INTERPRET STATE @ 0= 0BRANCH[0x104E]
+/1049	  (.")
+/104C	  ‹OK›
+/104E	  BRANCH[0x1037]
+
+/1052	: ABORT
+/105C	  SP! DECIMAL ?STACK CR .CPU (.")
+/1069	  ‹fig-FORTH 1.1›
+/1076	  FORTH DEFINITIONS QUIT
+/107C	  0x1082  B LXI, 	| 01 82 10
+/107F	  0x0145    JMP, 	| C3 45 01
+
+/1082	MEMCAT_UNCAT 8B 10
+
+/1084	: WARM
+/108D	  EMPTY-BUFFERS ABORT
+/1091	  0x109B  B LXI, 	| 01 9B 10
+/1094	  0x0112    LHLD,	| 2A 12 01
+/1097	            SPHL,	| F9      
+/1098	  0x0145    JMP, 	| C3 45 01
+
+/109B	MEMCAT_UNCAT A4 10
+
+/109D	: COLD
+/10A6	  EMPTY-BUFFERS 1 DENSITY ! LIT[0x3BE0] USE ! LIT[0x3BE0] PREV ! DR0 LIT[0x0000] LIT[0x1626] ! LIT[0x0112] LIT[0x0126] @ LIT[0x0006] + LIT[0x0010] CMOVE LIT[0x010C] @ LIT[0x0FFA] ! ABORT
+
+/10EE	CODE S->D
+/10F7	          D POP, 	| D1      
+/10F8	  0x0000  H LXI, 	| 21 00 00
+/10FB	        D A MOV, 	| 7A      
+/10FC	  0x80      ANI, 	| E6 80   
+/10FE	  0x1102    JZ,  	| CA 02 11
+/1101	          H DCX, 	| 2B      
+/1102	  0x0143    JMP, 	| C3 43 01
+
+/1105	: +-
+/110C	  0< 0BRANCH[0x1114]
+/1112	  MINUS
+/1114	  ;S
+
+/1116	: D+-
+/111E	  0< 0BRANCH[0x1126]
+/1124	  DMINUS
+/1126	  ;S
+
+/1128	: ABS
+/1130	  DUP +- ;S
+
+/1136	: DABS
+/113F	  DUP D+- ;S
+
+/1145	: MIN
+/114D	  2DUP > 0BRANCH[0x1157]
+/1155	  SWAP
+/1157	  DROP ;S
+
+/115B	: MAX
+/1163	  2DUP < 0BRANCH[0x116D]
+/116B	  SWAP
+/116D	  DROP ;S
+
+/1171	: M*
+/1178	  2DUP XOR >R ABS SWAP ABS U* R> D+- ;S
+
+/118C	: M/
+/1193	  OVER >R >R DABS R ABS U/ R> R XOR +- SWAP R> +- SWAP ;S
+
+/11B3	: *
+/11B9	  M* DROP ;S
+
+/11BF	: /MOD
+/11C8	  >R S->D R> M/ ;S
+
+/11D2	: /
+/11D8	  /MOD SWAP DROP ;S
+
+/11E0	: MOD
+/11E8	  /MOD DROP ;S
+
+/11EE	: */MOD
+/11F8	  >R M* R> M/ ;S
+
+/1202	: */
+/1209	  */MOD SWAP DROP ;S
+
+/1211	: M/MOD
+/121B	  >R 0 R U/ R> SWAP >R U/ R> ;S
+
+/122F	: (LINE)
+/123A	  >R LIT[0x0040] B/BUF */MOD R> B/SCR * + BLOCK + LIT[0x0040] ;S
+
+/1256	: .LINE
+/1260	  (LINE) -TRAILING TYPE ;S
+
+/1268	: MESSAGE
+/1274	  WARNING @ 0BRANCH[0x1298]
+/127C	  -DUP 0BRANCH[0x1294]
+/1282	  LIT[0x0004] OFFSET @ B/SCR / - .LINE SPACE
+/1294	  BRANCH[0x12A3]
+/1298	  (.")
+/129B	  ‹MSG # ›
+/12A1	  .
+/12A3	  ;S
+
+/12A5	CODE P@
+/12AC	          D POP, 	| D1      
+/12AD	  0x12B2  H LXI, 	| 21 B2 12
+/12B0	        E M MOV, 	| 73      
+/12B1	  0x00      IN,  	| DB 00   
+/12B3	        A L MOV, 	| 6F      
+/12B4	  0x00    H MVI, 	| 26 00   
+/12B6	  0x0144    JMP, 	| C3 44 01
+
+/12B9	CODE P!
+/12C0	          D POP, 	| D1      
+/12C1	  0x12C8  H LXI, 	| 21 C8 12
+/12C4	        E M MOV, 	| 73      
+/12C5	          H POP, 	| E1      
+/12C6	        L A MOV, 	| 7D      
+/12C7	  0x00      OUT, 	| D3 00   
+/12C9	  0x0145    JMP, 	| C3 45 01
+
+/12CC	VARIABLE DRIVE
+/12D6	|	 00 00
+
+/12D8	VARIABLE SEC
+/12E0	|	 00 00
+
+/12E2	VARIABLE TRACK
+/12EC	|	 00 00
+
+/12EE	VARIABLE USE
+/12F6	|	 E0 3B
+
+/12F8	VARIABLE PREV
+/1301	|	 E0 3B
+
+/1303	0x0001 CONSTANT SEC/BLK
+
+/1311	0x0008 CONSTANT #BUFF
+
+/131D	VARIABLE DENSITY
+/1329	|	 00 00
+
+/132B	VARIABLE DISK-ERROR
+/133A	|	 00 00
+
+/133C	: +BUF
+/1345	  LIT[0x0084] + DUP LIMIT = 0BRANCH[0x1359]
+/1355	  DROP FIRST
+/1359	  DUP PREV @ - ;S
+
+/1363	: UPDATE
+/136E	  PREV @ @ LIT[0x8000] OV PREV @ ! ;S
+
+/1382	: EMPTY-BUFFERS
+/1394	  FIRST LIMIT OVER - ERASE ;S
+
+/13A0	: DR0
+/13A8	  0 OFFSET ! ;S
+
+/13B0	: DR1
+/13B8	  DENSITY @ 0BRANCH[0x13C8]
+/13C0	  LIT[0x0F78] BRANCH[0x13CC]
+/13C8	  LIT[0x07C8]
+/13CC	  OFFSET ! ;S
+
+/13D2	: BUFFER
+/13DD	  USE @ DUP >R
+/13E5	  +BUF 0BRANCH[0x13E5]
+/13EB	  USE ! R @ 0< 0BRANCH[0x140B]
+/13F9	  R 2+ R @ LIT[0x7FFF] AND 0 R/W
+/140B	  R ! R PREV ! R> 2+ ;S
+
+/141B	: BLOCK
+/1425	  OFFSET @ + >R PREV @ DUP @ R - DUP + 0BRANCH[0x1473]
+/1441	  +BUF 0= 0BRANCH[0x145B]
+/1449	  DROP R BUFFER DUP R 1 R/W 2 -
+/145B	  DUP @ R - DUP + 0= 0BRANCH[0x1441]
+/146D	  DUP PREV !
+/1473	  R> DROP 2+ ;S
+
+/147B	CODE SET-IO
+/1486	  0x12E0    LDA, 	| 3A E0 12
+/1489	  0x0D      OUT, 	| D3 0D   
+/148B	  0x12EC    LDA, 	| 3A EC 12
+/148E	          A INR, 	| 3C      
+/148F	  0x0C      OUT, 	| D3 0C   
+/1491	  0x0145    JMP, 	| C3 45 01
+
+/1494	CODE SET-DRIVE
+/14A2	  0x12D6    LDA, 	| 3A D6 12
+/14A5	  0x0B      OUT, 	| D3 0B   
+/14A7	  0x0145    JMP, 	| C3 45 01
+
+/14AA	: T&SCALC
+/14B6	  DENSITY @ 0BRANCH[0x14F4]
+/14BE	  LIT[0x0F78] /MOD LIT[0x0010] MIN DUP DRIVE @ = 0BRANCH[0x14DC]
+/14D6	  DROP BRANCH[0x14E2]
+/14DC	  DRIVE ! SET-DRIVE
+/14E2	  LIT[0x0034] /MOD TRACK ! 1+ SEC ! ;S
+/14F4	  LIT[0x07C8] /MOD LIT[0x0010] MIN DUP DRIVE @ = 0BRANCH[0x1512]
+/150C	  DROP BRANCH[0x1518]
+/1512	  DRIVE ! SET-DRIVE
+/1518	  LIT[0x001A] /MOD TRACK ! 1+ SEC ! ;S
+
+/152A	CODE SEC-READ
+/1537	  0x12F6    LHLD,	| 2A F6 12
+/153A	  0x80    E MVI, 	| 1E 80   
+/153C	  0x0E      IN,  	| DB 0E   
+/153E	        A M MOV, 	| 77      
+/153F	          H INX, 	| 23      
+/1540	          E DCR, 	| 1D      
+/1541	  0x153C    JNZ, 	| C2 3C 15
+/1544	  0x0145    JMP, 	| C3 45 01
+
+/1547	CODE SEC-WRITE
+/1555	  0x12F6    LHLD,	| 2A F6 12
+/1558	  0x80    E MVI, 	| 1E 80   
+/155A	        M A MOV, 	| 7E      
+/155B	          H INX, 	| 23      
+/155C	  0x0E      OUT, 	| D3 0E   
+/155E	          E DCR, 	| 1D      
+/155F	  0x155A    JNZ, 	| C2 5A 15
+/1562	  0x0145    JMP, 	| C3 45 01
+
+/1565	: R/W
+/156D	  USE @ >R SWAP SEC/BLK * ROT USE ! SEC/BLK 0 (DO)
+/1585	  OVER OVER T&SCALC SET-IO 0BRANCH[0x1597]
+/1591	  SEC-READ BRANCH[0x1599]
+/1597	  SEC-WRITE
+/1599	  1+ LIT[0x0080] USE +! (LOOP)[0x1585]
+/15A7	  DROP DROP R> USE ! ;S
+
+/15B3	: FLUSH
+/15BD	  #BUFF 1+ 0 (DO)
+/15C5	  0 BUFFER DROP (LOOP)[0x15C5]
+/15CF	  ;S
+
+/15D1	: LOAD
+/15DA	  BLK @ >R IN @ >R 0 IN ! B/SCR * BLK ! INTERPRET R> IN ! R> BLK ! ;S
+
+/1604	: --> [IMMEDIATE]
+/160C	  ?LOADING 0 IN ! B/SCR BLK @ OVER MOD - BLK +! ;S
+
+/1626	MEMCAT_UNCAT 00 00
+/1628	  0x01      IN,  	| DB 01   
+/162A	  0x02      ANI, 	| E6 02   
+/162C	            RZ,  	| C8      
+/162D	  0xFF    A MVI, 	| 3E FF   
+/162F	            RET, 	| C9      
+/1630	  0x01      IN,  	| DB 01   
+/1632	  0x02      ANI, 	| E6 02   
+/1634	  0x1630    JZ,  	| CA 30 16
+/1637	  0x00      IN,  	| DB 00   
+/1639	  0x7F      ANI, 	| E6 7F   
+/163B	            RET, 	| C9      
+/163C	  0x01      IN,  	| DB 01   
+/163E	  0x04      ANI, 	| E6 04   
+/1640	  0x163C    JZ,  	| CA 3C 16
+/1643	        C A MOV, 	| 79      
+/1644	  0x7F      ANI, 	| E6 7F   
+/1646	  0x00      OUT, 	| D3 00   
+/1648	            RET, 	| C9      
+/1649	  0x07      IN,  	| DB 07   
+/164B	  0x04      ANI, 	| E6 04   
+/164D	  0x1649    JZ,  	| CA 49 16
+/1650	        C A MOV, 	| 79      
+/1651	  0x06      OUT, 	| D3 06   
+/1653	            RET, 	| C9      
+/1654	  0x163C    CALL,	| CD 3C 16
+/1657	            XCHG,	| EB      
+/1658	  0x1626  H LXI, 	| 21 26 16
+/165B	        M A MOV, 	| 7E      
+/165C	          A ORA, 	| B7      
+/165D	  0x1664    JZ,  	| CA 64 16
+/1660	        E C MOV, 	| 4B      
+/1661	  0x1649    CALL,	| CD 49 16
+/1664	            RET, 	| C9      
+/1665	  0x1628    CALL,	| CD 28 16
+/1668	  0x0000  H LXI, 	| 21 00 00
+/166B	          A ORA, 	| B7      
+/166C	  0x1670    JZ,  	| CA 70 16
+/166F	          L INR, 	| 2C      
+/1670	  0x0144    JMP, 	| C3 44 01
+/1673	  0x1630    CALL,	| CD 30 16
+/1676	  0x10      CPI, 	| FE 10   
+/1678	        A E MOV, 	| 5F      
+/1679	  0x1685    JNZ, 	| C2 85 16
+/167C	  0x1626  H LXI, 	| 21 26 16
+/167F	  0x20    E MVI, 	| 1E 20   
+/1681	        M A MOV, 	| 7E      
+/1682	  0x01      XRI, 	| EE 01   
+/1684	        A M MOV, 	| 77      
+/1685	        E L MOV, 	| 6B      
+/1686	  0x00    H MVI, 	| 26 00   
+/1688	  0x0144    JMP, 	| C3 44 01
+
+/168B	CODE (EMIT)
+/1696	          H POP, 	| E1      
+/1697	          B PUSH,	| C5      
+/1698	        L C MOV, 	| 4D      
+/1699	  0x1654    CALL,	| CD 54 16
+/169C	          B POP, 	| C1      
+/169D	  0x0145    JMP, 	| C3 45 01
+/16A0	          B PUSH,	| C5      
+/16A1	  0x0D    C MVI, 	| 0E 0D   
+/16A3	        C L MOV, 	| 69      
+/16A4	  0x1654    CALL,	| CD 54 16
+/16A7	  0x0A    C MVI, 	| 0E 0A   
+/16A9	        C L MOV, 	| 69      
+/16AA	  0x1654    CALL,	| CD 54 16
+/16AD	          B POP, 	| C1      
+/16AE	  0x0145    JMP, 	| C3 45 01
+
+/16B1	: ' [IMMEDIATE]
+/16B7	  -FIND 0= 0 ?ERROR DROP LITERAL ;S
+
+/16C5	: FORGET
+/16D0	  CURRENT @ CONTEXT @ - LIT[0x0018] ?ERROR ' DUP FENCE @ < LIT[0x0015] ?ERROR DUP NFA DP ! LFA @ CONTEXT @ ! ;S
+
+/1704	: BACK
+/170D	  HERE - , ;S
+
+/1715	: BEGIN [IMMEDIATE]
+/171F	  ?COMP HERE 1 ;S
+
+/1727	: ENDIF [IMMEDIATE]
+/1731	  ?COMP 2 ?PAIRS HERE OVER - SWAP ! ;S
+
+/1743	: THEN [IMMEDIATE]
+/174C	  ENDIF ;S
+
+/1750	: DO [IMMEDIATE]
+/1757	  COMPILE (DO) HERE 3 ;S
+
+/1761	: LOOP [IMMEDIATE]
+/176A	  3 ?PAIRS COMPILE (LOOP) BACK ;S
+
+/1776	: +LOOP [IMMEDIATE]
+/1780	  3 ?PAIRS COMPILE (+LOOP) BACK ;S
+
+/178C	: UNTIL [IMMEDIATE]
+/1796	  1 ?PAIRS COMPILE 0BRANCH BACK ;S
+
+/17A2	: END [IMMEDIATE]
+/17AA	  UNTIL ;S
+
+/17AE	: AGAIN [IMMEDIATE]
+/17B8	  1 ?PAIRS COMPILE BRANCH BACK ;S
+
+/17C4	: REPEAT [IMMEDIATE]
+/17CF	  >R >R AGAIN R> R> 2 - ENDIF ;S
+
+/17E1	: IF [IMMEDIATE]
+/17E8	  COMPILE 0BRANCH HERE 0 , 2 ;S
+
+/17F6	: ELSE [IMMEDIATE]
+/17FF	  2 ?PAIRS COMPILE BRANCH HERE 0 , SWAP 2 ENDIF 2 ;S
+
+/1817	: WHILE [IMMEDIATE]
+/1821	  IF 2+ ;S
+
+/1827	: SPACES
+/1832	  0 MAX -DUP 0BRANCH[0x1846]
+/183C	  0 (DO)
+/1840	  SPACE (LOOP)[0x1840]
+/1846	  ;S
+
+/1848	: <#
+/184F	  PAD HLD ! ;S
+
+/1857	: #>
+/185E	  DROP DROP HLD @ PAD OVER - ;S
+
+/186E	: SIGN
+/1877	  ROT 0< 0BRANCH[0x1885]
+/187F	  LIT[0x002D] HOLD
+/1885	  ;S
+
+/1887	: #
+/188D	  BASE @ M/MOD ROT LIT[0x0009] OVER < 0BRANCH[0x18A7]
+/18A1	  LIT[0x0007] +
+/18A7	  LIT[0x0030] + HOLD ;S
+
+/18B1	: #S
+/18B8	  # OVER OVER OV 0= 0BRANCH[0x18B8]
+/18C6	  ;S
+
+/18C8	: D.R
+/18D0	  >R SWAP OVER DABS <# #S SIGN #> R> OVER - SPACES TYPE ;S
+
+/18EC	: .R
+/18F3	  >R S->D R> D.R ;S
+
+/18FD	: D.
+/1904	  0 D.R SPACE ;S
+
+/190C	: .
+/1912	  S->D D. ;S
+
+/1918	: ?
+/191E	  @ . ;S
+
+/1924	: U.
+/192B	  0 D. ;S
+
+/1931	: VLIST
+/193B	  LIT[0x0080] OUT ! CONTEXT @ @
+/1949	  OUT @ C/L > 0BRANCH[0x195D]
+/1955	  CR 0 OUT !
+/195D	  DUP ID. SPACE SPACE PFA LFA @ DUP 0= ?TERMINAL OV 0BRANCH[0x1949]
+/1977	  DROP ;S
+
+/197B	CODE BYE
+/1983	  0xF800    JMP, 	| C3 00 F8
+
+/1986	: LIST
+/198F	  DECIMAL CR DUP SCR ! (.")
+/199C	  ‹SCR # ›
+/19A2	  . LIT[0x0010] 0 (DO)
+/19AC	  CR I LIT[0x0003] .R SPACE I SCR @ .LINE ?TERMINAL 0BRANCH[0x19C8]
+/19C6	  LEAVE
+/19C8	  (LOOP)[0x19AC]
+/19CC	  CR ;S
+
+/19D0	: INDEX
+/19DA	  LIT[0x000C] EMIT CR 1+ SWAP (DO)
+/19E8	  CR I LIT[0x0003] .R SPACE 0 I .LINE ?TERMINAL 0BRANCH[0x1A02]
+/1A00	  LEAVE
+/1A02	  (LOOP)[0x19E8]
+/1A06	  ;S
+
+/1A08	: TRIAD
+/1A12	  LIT[0x000C] EMIT LIT[0x0003] / LIT[0x0003] * LIT[0x0003] OVER + SWAP (DO)
+/1A30	  CR I LIST ?TERMINAL 0BRANCH[0x1A3E]
+/1A3C	  LEAVE
+/1A3E	  (LOOP)[0x1A30]
+/1A42	  CR LIT[0x000F] MESSAGE CR ;S
+
+/1A4E	: .CPU
+/1A57	  BASE @ LIT[0x0024] BASE ! LIT[0x0022] +ORIGIN 2@ D. BASE ! ;S
+
+/1A73	: TASK
+/1A7C	  ;S
