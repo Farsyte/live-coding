@@ -209,6 +209,8 @@ NAK	equ	15h
 DEL	equ	7Fh
 
 getline:
+        xra     a
+        out     ttyc
 	lxi	h,kbbuf
 
 getline_clear:	
@@ -420,9 +422,9 @@ ttystr:
 	;; ttyout: put the character in (C) to the TTY.
 	;; === === === === === === === === === === === ===
 ttyput:
-	in	ttyc
-	ani	04h
-	jz	ttyput
+;;	in	ttyc
+;;	ani	04h
+;;	jz	ttyput
 	mov	a,c
 	out	ttyd
 	ret
@@ -432,10 +434,11 @@ ttyput:
 	;; wait until one is available.
 	;; === === === === === === === === === === === ===
 ttyget:
-	in	ttyc
-	ani	02h
-	jz	ttyget
+;;	in	ttyc
+;;	ani	02h
+;;	jz	ttyget
 	in	ttyd
 	ani	07Fh
 	ret
 
+b

@@ -1,0 +1,287 @@
+9
+( TOP SCREEN: Build FORTH at 8100h to run at 4100h             )
+// right margin for non-// stuff is here --------------------->|
+// Note that a character at the right margin is SOMETIMES
+// adjacent to the first character on the next line ...
+
+HEX 1 WARNING ! ( Allow MESSAGE to use Screen 4 and 5 text ) 
+FORTH DEFINITIONS
+
+// S{ -- my custom "start of screen" progress marker
+// When encountered, logs the screen number and the text
+// up to the closing } to the console.
+//
+: S{ CR DECIMAL BLK @ 8 / ." SCR " 3 .R HEX
+  ."  --- " 7D WORD HERE COUNT -TRAILING TYPE ."  --- " CR
+  ; IMMEDIATE
+
+: LOADS               ( Load screens n1 through n2 ( n1 n2 -- *)
+  1 + SWAP DO I LOAD LOOP DECIMAL ;
+
+-->
+
+S{ OUTPUT FORMATTING HELPERS                                   }
+
+// Pring numbers in 2, 3, or 4 digits with leading zeros.
+//
+: .D02 S->D     <# # # #> TYPE ;  ( V --  PRINT V IN 2 DIGITS *)
+: .D03 S->D   <# # # # #> TYPE ;  ( V --  PRINT V IN 3 DIGITS *)
+: .D04 S->D <# # # # # #> TYPE ;  ( V --  PRINT V IN 4 DIGITS *)
+-->
+
+S{ MEMORY DUMP UTILITY                                         }
+
+: HD:C            ( print char, clamped to ' '..'~' ( char -- *)
+  7F AND 20 MAX 7E MIN EMIT ;
+: HD:S          ( print 8 chars at addr using HD:C ( addr --  *)
+  DUP 8 + SWAP DO I C@ HD:C LOOP ;
+: HD:B           ( print 8 bytes at addr using .D02 ( addr -- *)
+  DUP 8 + SWAP DO I C@ BL EMIT .D02 LOOP ;
+: RD16 DUP 0F AND - ;           : RU16 0F + RD16 ;
+-->
+
+S{ HEX DUMP LINE AND RANGE                                     }
+
+: HD:LINE                    ( one line of hex dump ( addr -- *)
+  BASE @ HEX SWAP CR DUP .D04   ."  "
+  DUP HD:B ."  " DUP 8 + HD:B   ."  | "
+  DUP HD:S 8 + HD:S             ."  |" BASE ! ;
+
+: HD                 ( addr size -- dump memory in this range *)
+  OVER + RU16 SWAP RD16 DO I HD:LINE
+    ?TERMINAL IF LEAVE THEN 10 +LOOP CR ;
+-->
+
+S{ MEMORY INIT UTILITY                                         }
+
+: BZERO-RANGE            ( clear memory range ( base limit -- *)
+  SWAP 2DUP > IF DO 0 I C! LOOP ENDIF ;
+
+: BZERO                 ( clear sized memory ( start bytes -- *)
+  OVER + BZERO-RANGE ;
+
+HEX HERE 100 +
+SP@ 100 -
+2DUP SWAP ." CLEAR FROM " .D04 ."  TO " .D04 CR             ( *)
+BZERO-RANGE
+
+-->
+
+S{ CONFIGURE THE META-COMPILATION                              }
+
+
+E000 CONSTANT EM             ( END OF MEMORY FOR TARGET FORTH *)
+8100 CONSTANT COMPILE-ADDR         ( WHERE TO WRITE THE IMAGE *)
+4100 CONSTANT BASE-ADDR            ( WHERE THE IMAGE WILL RUN *)
+COMPILE-ADDR BASE-ADDR - CONSTANT DELTA         ( caddr-raddr *)
+
+
+-->
+
+S{ NEWFORTH VOCABULARY MANAGEMENT                              }
+
+VOCABULARY NEWFORTH IMMEDIATE
+
+: OF/NF              ( SEARCH FORTH BUT ADD WORDS TO NEWFORTH *)
+  [COMPILE] NEWFORTH DEFINITIONS [COMPILE] FORTH ;
+-->
+
+S{ STATE STORAGE FOR OLD VS NEW DICT MEM                       }
+
+0000            VARIABLE DP*OLD*    ( SAVE OLD DP WHEN IN NEW *)
+COMPILE-ADDR    VARIABLE DP*NEW*    ( SAVE NEW DP WHEN IN OLD *)
+0000            VARIABLE O/N              ( 0=IN OLD 1=IN NEW *)
+DELTA           VARIABLE LAST      ( MEM ADDR OF TOP NEW DICT *)
+-->
+
+S{ DICTIONARY SWITCHERS -- RUNNING VS TARGET                   }
+: SETOLD                        ( POINT DP AT OLD DICT MEMORY *)
+  O/N @    IF   0 O/N !
+                HERE DP*NEW* !
+                DP*OLD* @ DP !  ENDIF ;
+: SETNEW                        ( POINT DP AT NEW DICT MEMORY *)
+  O/N @ 0= IF   1 O/N !
+                HERE DP*OLD* !
+                DP*NEW* @ DP !  ENDIF ;
+-->
+
+S{ INTERCEPT THE C, AND , OPERATORS }
+// : C, CR ." COMMA: HERE=" HERE .D04 SPACE
+//         ." DATA=" DUP .D02 SPACE
+//     HERE C! 1 ALLOT ;
+// : , CR ." COMMA: HERE=" HERE .D04 SPACE
+//        ." DATA=" DUP .D04 SPACE
+//     HERE ! 2 ALLOT ;
+-->
+
+S{ Cassady 8080 Assembler with small changes                   }
+HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
+               ASSEMBLER DEFINITIONS
+4 CONSTANT H    5 CONSTANT L    7 CONSTANT A   6 CONSTANT PSW
+2 CONSTANT D    3 CONSTANT E    0 CONSTANT B   1 CONSTANT C
+6 CONSTANT M    6 CONSTANT SP
+: 1MI <BUILDS C, DOES> C@ C, ;
+: 2MI <BUILDS C, DOES> C@ + C, ;
+: 3MI <BUILDS C, DOES> C@ SWAP 8* + C, ;
+: 4MI <BUILDS C, DOES> C@ C, C, ;
+: 5MI <BUILDS C, DOES> C@ C, , ;
+-->
+
+S{ Cassady 8080 Assembler with small changes                   }
+00 1MI NOP      76 1MI HLT      F3 1MI DI       FB 1MI EI
+07 1MI RLC      0F 1MI RRC      17 1MI RAL      1F 1MI RAR
+E9 1MI PCHL     F9 1MI SPHL     E3 1MI XTHL     EB 1MI XCHG
+27 1MI DAA      2F 1MI CMA      37 1MI STC      3F 1MI CMC
+80 2MI ADD      88 2MI ADC      90 2MI SUB      98 2MI SBB
+A0 2MI ANA      A8 2MI XRA      B0 2MI ORA      B8 2MI CMP
+09 3MI DAD      C1 3MI POP      C5 3MI PUSH     02 3MI STAX
+0A 3MI LDAX     04 3MI INR      05 3MI DCR      03 3MI INX
+0B 3MI DCX      C7 3MI RST      D3 4MI OUT      DB 4MI IN
+C6 4MI ADI      CE 4MI ACI      D6 4MI SUI      DE 4MI SBI
+E6 4MI ANI      EE 4MI XRI      F6 4MI ORI      FE 4MI CPI
+22 5MI SHLD     2A 5MI LHLD     32 5MI STA      3A 5MI LDA
+CD 5MI CALL
+-->
+
+S{ Cassady 8080 Assembler with small changes                   }
+C9 1MI RET      C3 5MI JMP      C2 CONSTANT 0=  D2 CONSTANT CS
+E2 CONSTANT PE  F2 CONSTANT 0<  : NOT 8 + ;
+: MOV 8* 40 + + C, ;  : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
+: THEN HERE SWAP ! ;            : IF C, HERE 0 , ;
+: ELSE C3 IF SWAP THEN ;        : BEGIN HERE ;
+: UNTIL C, , ;                  : WHILE IF ;
+: REPEAT SWAP C3 C, , THEN ;
+
+FORTH DEFINITIONS ( END OF ASSEMBLER )
+-->
+
+S{ ASSEMBLER EQUATES AND LABELS                                }
+
+: EQUATE                  ( CREATE WORD THAT PRODUCES A VALUE *)
+  ?EXEC SETOLD CURRENT @ >R
+  [COMPILE] ASSEMBLER DEFINITIONS CONSTANT
+  R> CURRENT ! [COMPILE] FORTH ;               
+
+: LABEL                 ( CREATE WORD THAT RECALLS CURR RADDR *)
+  SETOLD DP*NEW* @ DELTA - EQUATE 
+  SETNEW [COMPILE] ASSEMBLER ; 
+-->
+
+S{ CREATE PAIRED HEADS IN OLD AND NEW DICT MEMORIES            }
+: CREATE-NF                             ( CREATE A NAME FIELD *)
+  BL WORD HERE DUP C@ WIDTH @ MIN 1+ ALLOT // this is a test of the comment facility
+  DUP 80 TOGGLE HERE 1 - 80 TOGGLE ;
+: CREATE-OLD                        ( CREATE HEAD IN OLD DICT *)
+  SETOLD CREATE-NF
+  [COMPILE] NEWFORTH DEFINITIONS
+  LATEST , CURRENT @ ! ;
+: CREATE-NEW                        ( CREATE HEAD IN NEW DICT *)
+  SETNEW CREATE-NF                                          // CREATE-NF RETURNED 8117
+  CR ." CREATED " DUP ID.
+  LAST @ DELTA - , LAST ! ;                                 // WRITE 0000, STORE 8117
+-->
+
+S{ CREATE CODE WORDS FOR TARGET SYSTEM                         }
+: CODE                   ( CREATE CODE WORD FOR TARGET SYSTEM *)
+  !CSP IN @ ?EXEC CREATE-NEW IN !
+  HERE DELTA - CREATE-OLD , SMUDGE                          // WROTE 411F
+  SETNEW HERE DELTA - 2 + ,                                 // HERE IS 811F, CFA IS 4121
+  [COMPILE] ASSEMBLER ;
+-->
+
+S{ CREATE WORDS TO USE DURING METACOMPILE                      }
+
+: NF:                 ( CREATE WORD TO USE DURING METACOMPILE *)
+  !CSP CREATE-OLD SMUDGE
+  [ ' QUIT CFA @ ] LITERAL ,
+  IMMEDIATE [COMPILE] FORTH ] ;
+
+: NF;                              ( END WORD BUILT USING NF: *)
+  ?CSP COMPILE ;S SMUDGE
+   [COMPILE] [ ; IMMEDIATE
+
+-->
+
+S{ FINISH CODE WORDS                                           }
+: C;                       ( END WORD STARTED WITH CODE ABOVE *)
+  ?EXEC ?CSP SMUDGE [COMPILE] FORTH ;
+-->
+
+S{ ENTRY POINT VECTOR, IDENT, AND INIT DATA                    }
+
+LABEL ORIGIN
+NOP HERE JMP               ( VECTOR TO COLD START AT 2 +ORIGIN )
+NOP HERE JMP               ( VECTOR TO COLD START AT 4 +ORIGIN )
+
+LABEL RETP	0000 ,
+
+-->
+
+S{ INNER INTERPRETER                                           }
+
+LABEL DPUSH     D PUSH
+LABEL HPUSH     H PUSH
+LABEL NEXT      B LDAX B INX A L MOV B LDAX B INX A H MOV
+LABEL NEXT1     M E MOV H INX M D MOV XCHG PCHL
+-->
+
+S{ NUCLEUS: DATA STACK MANAGEMENT                              }
+CODE LIT                 ( PUSH LIT FROM IP ONTO STACK ( -- n *)
+  B LDAX B INX A L MOV B LDAX B INX A H MOV        HPUSH JMP C;
+CODE DROP                   ( DROP TOP WORD FROM STACK ( n -- *)
+  D POP                                             NEXT JMP C;
+CODE SWAP      ( SWAP TOP TWO WORDS ON STACK ( n1 n2 -- n2 n1 *)
+  H POP XTHL                                       HPUSH JMP C;
+CODE OVER   ( PUSH COPY OF 2ND ONTO STACK ( n1 n2 -- n1 n2 n1 *)
+  H POP D POP H PUSH                               DPUSH JMP C;
+CODE DUP                  ( DUPLICATE TOP OF STACK ( n -- n n *)
+  H POP H PUSH                                     HPUSH JMP C;
+CODE 2DUP             ( DUPLICATE TOP DBL OF STACK ( d -- d d *)
+  H POP D POP D PUSH H PUSH                        DPUSH JMP C;
+CODE ROT              ( ROTATE 3 ITEMS ( n1 n2 n3 -- n2 n3 n1 *)
+  D POP H POP XTHL                                 DPUSH JMP C;
+// NOT IN fig-FORTH: PICK           n1 -- n2                      240
+// NOT IN fig-FORTH: ROLL           n --                          236
+// NOT IN fig-FORTH: DEPTH          -- n                          238
+-->
+
+S{ NUCLEUS: RETURN STACK MANAGEMENT                            }
+CODE >R                   ( TRANSFER N TO RETURN STACK ( n -- *)
+  D POP RETP LHLD H DCX H DCX RETP SHLD
+  E M MOV H INX D M MOV                             NEXT JMP C;
+CODE R>                  ( RECOVER N FROM RETURN STACK ( -- n *)
+  RETP LHLD M E MOV H INX M D MOV H INX RETP SHLD   NEXT JMP C;
+CODE R@                     ( COPY N FROM RETURN STACK ( -- n *)
+  RETP LHLD M E MOV H INX M D MOV                   NEXT JMP C;
+CODE I           ( COPY 1ST LOOP INDEX TO RETURN STACK ( -- n *)
+  RETP LHLD M E MOV H INX M D MOV                   NEXT JMP C;
+// NOT IN fig-FORTH: J              -- n                          C,225
+CODE LEAVE                  ( FORCE TERMIONATION OF A DO-LOOP *)
+  RETP LHLD M E MOV H INX M D MOV H INX
+            E M MOV H INX D M MOV                   NEXT JMP C;
+-->
+
+S{ REPORT MEMORY MAP                                           }
+SETNEW SETOLD FORTH DEFINITIONS ASSEMBLER
+DP*NEW* @ DUP DP*OLD* @
+                                                            CR
+                     U. ." DP*OLD*"                         CR
+                                                            CR
+           BASE-ADDR U. ." BASE-ADDR"                       CR
+              ORIGIN U. ." ORIGIN"                          CR
+                NEXT U. ." NEXT"                            CR
+             DELTA - U. ." DP*NEW* - DELTA"                 CR
+                                                            CR
+        COMPILE-ADDR U. ." COMPILE-ADDR"                    CR
+                     U. ." DP*NEW*"                         CR
+-->
+
+S{ HEX DUMP OF NEW DICTIONARY IMAGE                            }
+
+: HD-DICT DP*NEW* @ 100 BZERO
+  COMPILE-ADDR DP*NEW* @ OVER - HD ;
+HD-DICT
+FORGET HD-DICT
+
+( TODO: DECOMPILE WORDS IN NEW IMAGE )
+( TODO: DISASSEMBLE ASM CODE IN NEW IMAGE )

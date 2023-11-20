@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "simext/nap.h"
 
 typedef void       *pthread_fn(void *);
 
@@ -35,6 +36,8 @@ void cdev_init(Cdev d, Cstr name)
     d->DATA = NULL;
 
     d->conn = -1;
+
+    d->blocking = 0;
 }
 
 void cdev_close(Cdev d)
@@ -99,13 +102,19 @@ static void cdev_rdd(Cdev d)
 {
     cdev_invar(d);
 
-    if (cdev_can_rx(d)) {
-        Byte                b = cdev_rx(d);
-        data_to(d->DATA, b);
-    } else {
-        data_to(d->DATA, 0xFF);
+    while (!cdev_can_rx(d)) {
+        if (d->blocking) {
+            nap();
+        } else {
+            data_to(d->DATA, 0xFF);
+            return;
+        }
     }
+
+    Byte                b = cdev_rx(d);
+    data_to(d->DATA, b);
 }
+
 static void cdev_rdc(Cdev d)
 {
     cdev_invar(d);
@@ -119,20 +128,32 @@ static void cdev_rdc(Cdev d)
         b |= CDEV_STATUS_TXRDY;
     data_to(d->DATA, b);
 }
+
 static void cdev_wrd(Cdev d)
 {
     cdev_invar(d);
 
-    if (cdev_can_tx(d)) {
-        Byte                b = d->DATA->value;
-        cdev_tx(d, b);
+    while (!cdev_can_tx(d)) {
+        if (d->blocking) {
+            nap();
+        } else {
+            return;
+        }
     }
+    Byte                b = d->DATA->value;
+    cdev_tx(d, b);
 }
+
 static void cdev_wrc(Cdev d)
 {
     cdev_invar(d);
 
     Byte                b = d->DATA->value;
+    if (b == CDEV_MODE_SET_BLOCKING) {
+        d->blocking = 1;
+        return;
+    }
+
     STUB("wr ctrl %02X --> UNDEFINED BEHAVIOR", b);
 }
 

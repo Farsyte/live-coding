@@ -27,3 +27,26 @@ constructed for your target machine.
 
 Note that some bits are marked IMPLDEP, review these when tuning
 the code for your IMPL.
+
+## Forward References
+
+I am interested in working out if it is possible to produce a Forth
+that does not need forward references, aside from vectors stored in
+a vector table at a fixed location early in the image.
+
+I think this can be discovered from the model by extracting tuples of
+the form "word A references word B" and using "tsort" to detect
+circular dependencies and extract a potential ordering.
+
+Where a high level word definition uses an IMMEDIATE word, the
+dependency is not on the immedaite word, but on the references
+compiled into the target image by that word.
+
+Another way to check this is to attempt to construct FORTH in
+sections, carefully starting with code that has no dependencies, then
+adding sections that depend only on what has come before.
+
+This may lead to collecting most assembly code together near the start
+of the image, rather than allowing chunks in ";CODE" sections of
+otherwise portable defining words.
+

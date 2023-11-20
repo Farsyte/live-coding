@@ -1,4 +1,4 @@
-9
+309
 (  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
 DECIMAL 1 WARNING !
 : LOADI BASE @ DECIMAL OVER . BASE !    LOAD ;
@@ -7,11 +7,11 @@ DECIMAL 1 WARNING !
 : OBJECT ; ( USED ON SCREEN 12 )
 : MEM    ; ( USED ON SCREEN 12 )
                                                              -->
-10
+310
 (  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
 
                                                              -->
-11
+311
 (  fig-FORTH MODEL LOADER                       GLL 2023-11-10 )
   DECIMAL  201     LOAD ." PERSONAL stuff loaded." CR
   DECIMAL  120 125 LOADR ." Symbol Table loaded." CR

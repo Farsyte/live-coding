@@ -1,25 +1,25 @@
+
 201
 (  LOADER AND MY STARTUP STUFF                  GLL 2023-11-10 )
 DECIMAL 1 WARNING !
 : LOADS 1 + SWAP DO BASE @ DECIMAL I . BASE !
     I LOAD LOOP DECIMAL ;
-
-  DECIMAL 306 308 LOADS      ( Cassady Assembler from FD-V03N6 )
-( DECIMAL  75  75 LOADS                  ( working <# # #> etc )
-  DECIMAL  87  96 LOADS                         ( FORTH EDITOR )
-  DECIMAL 202 205 LOADS                     ( MY STARTUP WORDS )
+DECIMAL 306 LOAD           ( Cassady FD-V03N6 Assembler )
+-->
 202
 (  %nnD                                         GLL 2023-11-10 )
 FORTH DEFINITIONS HEX
 : .2D S->D <# # # #> TYPE ;       ( V --  PRINT V IN 2 DIGITS *)
 : .3D S->D <# # # # #> TYPE ;     ( V --  PRINT V IN 3 DIGITS *)
 : .4D S->D <# # # # # #> TYPE ;   ( V --  PRINT V IN 4 DIGITS *)
-: .S SP@ S0 @ SWAP DO
-        I @ .4D BL EMIT
-   ( CR I .4D BL EMIT I @ .4D BL EMIT  )
+: .S SP@ S0 @
+  2DUP < IF BASE @ >R HEX SWAP DO
+   (    I @ .4D BL EMIT )
+     CR I .4D BL EMIT I @ .4D BL EMIT
    ( CR I U. I @ U. )
-       ?TERMINAL IF LEAVE ENDIF 2 +LOOP CR ;
-;S
+       ?TERMINAL IF LEAVE ENDIF
+    2 +LOOP DROP DROP R> BASE ! ELSE ." EMPTY " ENDIF CR ;
+-->
 203
 (  HD:LINE  HD                                  GLL 2023-11-09 )
 HEX
@@ -30,17 +30,18 @@ HEX
   BASE @ HEX SWAP CR DUP .4D ."  "
   DUP HD:B ."  " DUP 8 + HD:B ."  | "
   DUP HD:S 8 + HD:S           ."  |" BASE ! ;
-: rd16 16 / 16 * ; : ru16 15 + rd16 ;
+: rd16 10 / 10 * ; : ru16 0F + rd16 ;
 : HD                 ( addr size -- dump memory in this range *)
   OVER + ru16 SWAP rd16 DO I HD:LINE
     ?TERMINAL IF LEAVE THEN 10 +LOOP CR ;
-: qd HEX SWAP DUP .4D ." : " DO I C@ BL EMIT .2D LOOP CR ;    ;S
+-->
 204
 (  DETECT GLOSSARY LINE                         GLL 2023-11-10 )
 HEX
 : GLOSS?                            ( DETECT IF GLOSSARY LINE *)
   (LINE) -TRAILING 2 MAX +
   DUP  1 - C@ 29 XOR SWAP 2 - C@ 2A XOR + 0= ;
+-->
 205
 (  DISPLAY GLOSSARY LINES                       GLL 2023-11-10 )
 HEX
@@ -53,7 +54,24 @@ HEX
   CR ." SCR LN : text ... "
   OVER + SWAP DO I GLOSS* 
              ?TERMINAL IF LEAVE THEN LOOP CR ;
-                                                              ;S
+-->
 206
-(                                               GLL 2023-11-10 )
-                                                              ;S
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+-->
+207
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+-->
+208
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+-->
+209
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+-->
+210
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+-->
+211
+(  MORE STUFF GOES HERE                         GLL 2023-11-10 )
+(  stock forth model starts in screen 212 )
+;S
+212

@@ -17,6 +17,7 @@
 #include "common/stepat.h"
 #include "common/subs.h"
 #include "common/timing.h"
+#include "simext/nap.h"
 #include "wa16/addr.h"
 
 int main_post()
@@ -24,6 +25,7 @@ int main_post()
     tau_post();
     bring_post();
     rtc_post();
+    nap_post();
     step_post();
     stepat_post();
     subs_post();
@@ -49,6 +51,7 @@ int main_bist(int argc, char **argv)
     (void)argv;         // not used to select BIST methods (yet)
 
     rtc_bist();
+    nap_bist();
     step_bist();
     stepat_bist();
     subs_bist();

@@ -1,4 +1,4 @@
-120
+320
 ;S ( Symbol with forward references )         ( GLL 2013-11-10 )
 
 Symbol table for assembler allowing forward references
@@ -8,7 +8,7 @@ Symbol table for assembler allowing forward references
 - each location to be patched links to the previous one
 - zero marks the end of the patch chain
 
-121
+321
 ;S ( NOTES ON <BUILDS ... DOES> )             ( GLL 2013-11-10 )
 
 : FOO <BUILDS
@@ -21,7 +21,7 @@ Symbol table for assembler allowing forward references
   point to the high level code after DOES (which is
   not executed when FOO is run).
 
-122
+322
 ( SYMBOL                                      ( GLL 2013-11-10 )
 
 : SYMBOL
@@ -35,7 +35,7 @@ Symbol table for assembler allowing forward references
       SWAP DROP                                         ( OLDV )
       DUP CR U. ." IS FINAL VALUE " CR
     ENDIF  ;                               ( not yet debugged. )
-123
+323
 ( ::                                          ( GLL 2013-11-10 )
 : :: -FIND IF DROP
     2 +                                                   ( &V )
@@ -52,4 +52,4 @@ Symbol table for assembler allowing forward references
     DROP
     CR " :: STACK NOW HAS " .S CR
   ELSE ." NOT FOUND" CR ENDIF ;            ( not yet debugged. )
-124
+324

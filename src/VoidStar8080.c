@@ -5,6 +5,7 @@
 #include "chip/i8080_status.h"
 #include "common/clock.h"
 #include "simext/mapdrive.h"
+#include "simext/nap.h"
 
 // VoidStar8080 boots with four drives connected.
 //
@@ -648,13 +649,15 @@ static void VoidStar8080_RESET_then_run_to_HLT(VoidStar8080 sys)
 
         // measure ΔRTC for each 10 seconds of simluated time
         Tau                 rtc0 = rtc_ns();
+        Tau                 nap0 = nap_total;
         clock_run_until(TAU + 180000000);
         Tau                 drtc = rtc_ns() - rtc0;
-        double              drtc_ms = drtc / 1000000.0;
-        double              ratio = 10000.0 / drtc_ms;
-        if (ratio < 4.0 || ratio > 6.0) {
-            fprintf(stderr, "<<running at %.1fx real time>>\n", 10000.0 / drtc_ms);
-        }
+        Tau                 dnap = nap_total - nap0;
+        double              drtc_ms = (drtc - dnap) / 1000000.0;
+        // double              ratio = 10000.0 / drtc_ms;
+        // if (ratio < 4.0 || ratio > 6.0) {
+        fprintf(stderr, "<<running at %.1fx real time>>\n", 10000.0 / drtc_ms);
+        // }
 
     }
 
@@ -688,6 +691,11 @@ static void VoidStar8080_debug(VoidStar8080 sys)
     }
     if (!trace) {
         trace = fopen("trace", "w");
+        if (!trace) {
+            STUB("not writing trace file");
+            debug_limit = 0;
+            return;
+        }
     }
 
     p8080               cpu = sys->cpu;

@@ -52,151 +52,273 @@
 #define SCR_LINES 	16      /* lines per screen */
 #define SCR_BYTES 	(LINE_BYTES*SCR_LINES)  /* bytes per screen */
 
-#define	TAB_BYTES 	8
+#define	TAB_WIDTH 	8
 
 #define	SEC_BYTES	128
 #define TRK_SECTS	52
 #define	TRK_BYTES	(TRK_SECTS*SEC_BYTES)
 
+int                 drive_number;
+pDriveData          drive_meta;
+int                 drive_data_offset;
+int                 drive_data_length;
+
+pByte               write_data_base;
+unsigned            screen_count;
+
+char                lbuf[LINE_BYTES + 1];
+int                 llen = 0;
+
+unsigned            scr = 0;
+unsigned            line = 0;
+
+Cstr                prog = 0;
+
+int                 debug = 0;
+int                 verbose = 0;
+int                 dryrun = 0;
+
+Cstr                input_fn = 0;
+int                 input_ln = 0;
+FILE               *input_fp = 0;
+Cstr                index_fn = "-";
+Cstr                gloss_fn = "-";
+FILE               *index_fp = 0;               /* todo open index file in append mode */
+FILE               *gloss_fp = 0;               /* todo open gloss file in append mode */
+
+static int          nextline();
+static void         seekpage();
+static void         emitline();
+static void         maybeindex();
+static void         maybegloss();
+
+#define DBG_D(var) if (debug) STUB("%16s = %lu", #var, (unsigned long)(var))
+#define DBG_S(var) if (debug) STUB("%16s = '%s'", #var, (Cstr)(var))
+
 int main(int argc, Cstr *argv)
 {
     Cstr                argp;
     char               *arge;
-    int                 drv;
-    pDriveData          drive;
-    int                 doff;
-    int                 dlen;
-    int                 escr;
-    int                 targ;
-    int                 wrto;
-    int                 last;
-    pByte               wbase;
-    char                pch;
-    char                ch;
-    int                 scr;
-    int                 cscr;
 
     assert(argc > 1);
+    prog = *argv++;
+    assert(NULL != prog);
+    assert('\0' != prog[0]);
 
-    argp = *++argv;
+    index_fp = stderr;  /* todo open index file in append mode */
+    gloss_fp = stderr;  /* todo open gloss file in append mode */
+
+    while ((NULL != argv[0]) && (argv[0][0] == '-')) {
+        argp = *argv++;
+        if (argp[1] != '-') {
+            while (*++argp)
+                switch (*argp) {
+                  case 'd':
+                      ++debug;
+                      break;
+                  case 'v':
+                      ++verbose;
+                      break;
+                  case 'n':
+                      ++dryrun;
+                      break;
+                  case 'i':
+                      index_fn = *argv++;
+                      assert(NULL != index_fn);
+                      assert('\0' != index_fn[0]);
+                      DBG_S(index_fn);
+                      index_fp = fopen(index_fn, "w");
+                      assert(NULL != index_fp);
+                      break;
+                  case 'g':
+                      gloss_fn = *argv++;
+                      assert(NULL != gloss_fn);
+                      assert('\0' != gloss_fn[0]);
+                      DBG_S(gloss_fn);
+                      gloss_fp = fopen(gloss_fn, "w");
+                      assert(NULL != gloss_fp);
+                      break;
+                }
+        } else if (!strcmp("--verbose", argp)) {
+            ++verbose;
+        } else if (!strcmp("--debug", argp)) {
+            ++debug;
+        } else if (!strcmp("--dryrun", argp)) {
+            ++dryrun;
+        }
+    }
+
+    ASSERT(0 == dryrun, "dryrun not yet implemented.");
+
+    argp = *argv++;
     assert(NULL != argp);
     assert('\0' != argp[0]);
-    drv = strtol(argp, &arge, 0);
+    drive_number = strtol(argp, &arge, 0);
+    DBG_D(drive_number);
     assert(argp < arge);
     assert('\0' == *arge);
 
-    drive = map_drive(drv);
-    ASSERT(NULL != drive,
+    drive_meta = map_drive(drive_number);
+    ASSERT(NULL != drive_meta,
            "Unable to access media in drive %c\n"
-           "map_drive indicates error %d: %s\n", 'A' + drv, errno, strerror(errno));
+           "map_drive indicates error %d: %s\n", 'A' + drive_number, errno, strerror(errno));
 
     // screen zero is at the start of the SECOND track.
-    doff = drive->data_offset + TRK_BYTES;
-    dlen = drive->data_length - TRK_BYTES;
-    wbase = (pByte)drive + doff;
+    drive_data_offset = drive_meta->data_offset + TRK_BYTES;
+    DBG_D(drive_data_offset);
+    drive_data_length = drive_meta->data_length - TRK_BYTES;
+    DBG_D(drive_data_length);
+    write_data_base = (pByte)drive_meta + drive_data_offset;
 
-    escr = dlen / SCR_BYTES;
+    screen_count = drive_data_length / SCR_BYTES;
+    DBG_D(screen_count);
 
-    cscr = -1;
-
-    scr = 0;
     for (;;) {
-        ch = getchar();
-        ASSERT(ch != EOF, "EOF while reading screen number");
-        if (ch == '\n')
+
+        input_fn = *argv++;
+        if (NULL == input_fn)
             break;
-        if ((scr == 0) && (ch == '\f'))
-            continue;
-        ASSERT(('0' <= ch) && (ch <= '9'), "first line must have only the screen number");
-        scr = scr * 10 + ch - '0';
-    }
-    ASSERT(scr < escr, "screen number %d invalid: drive capacity is %d screens", scr, escr);
-    wrto = scr * SCR_BYTES;
-    scr = 0;
+        if ('\0' == input_fn[0])
+            break;
+        input_fp = fopen(input_fn, "r");
+        ASSERT(NULL != input_fp,
+               "unable to open %s\nerror %d: %s", input_fn, errno, strerror(errno));
+        input_ln = 0;
 
-    pch = -1;
-    last = 0;
-    while (EOF != (ch = getchar())) {
+        if (verbose)
+            fprintf(stderr, "%s: reading %s\n", prog, input_fn);
 
-        if (pch == '\f') {
-            if (ch == '\n') {
-                if (scr != 0) {
-                    targ = scr * SCR_BYTES;
-                    ASSERT(last <= targ,
-                           "oops, trying to seek backwards by %d bytes to screen %d",
-                           last - targ, scr);
-                    wrto = targ;
-                }
-                pch = ch;
-                scr = 0;
-                continue;
-            }
-            if (('0' <= ch) && (ch <= '9')) {
-                scr = scr * 10 + ch - '0';
-                continue;
+        while (nextline()) {
+            if (lbuf[0] == '\f') {
+                seekpage();
+            } else {
+                emitline();
             }
         }
-
-        switch (ch) {
-
-          case '\t':
-
-              // tab: move to the next tab stop.
-
-              wrto = wrto + TAB_BYTES - (wrto % TAB_BYTES);
-              break;
-
-          case '\f':
-
-              // form-feed: End this screen. may be followed
-              // by a screen number and a newline. If followed
-              // by just a newline, moves to next screen.
-
-              wrto = wrto + SCR_BYTES - (wrto % SCR_BYTES);
-              scr = 0;
-              break;
-
-          case '\n':
-
-              // newlines are ignored if we are exactly at
-              // the start of a screen.
-
-              if (0 == (wrto % SCR_BYTES))
-                  break;
-
-              // newlines are ignored at the start of a line
-              // if we wrapped around, which is true if the
-              // previous character was not a newline.
-
-              if ((0 == (wrto % LINE_BYTES)) && (pch != '\n'))
-                  break;
-
-              wrto = wrto + LINE_BYTES - (wrto % LINE_BYTES);
-              break;
-
-          default:
-
-              // Nearly everything else: put it on the FORTH screen.
-
-              ASSERT((ch >= ' ') && (ch <= '~'),
-                     "input file has unexpected character 0x%02X", ch);
-              if (cscr != (wrto / SCR_BYTES)) {
-                  // clear each screen before we write to it.
-                  cscr = wrto / SCR_BYTES;
-                  ASSERT(cscr < escr, "Attempting to write screen %d on a %d-screen drive",
-                         cscr, escr);
-                  memset(wbase + cscr * SCR_BYTES, ' ', SCR_BYTES);
-                  // STUB("precleared screen %d (will write line %d col %d)",
-                  //      cscr, (wrto / 64) % 16, wrto % 64);
-              }
-
-              last = wrto;
-              wbase[wrto++] = ch;
-              break;
-        }
-        pch = ch;
     }
 
-    free_drive(drive);
+    DBG_D(screen_count);
+    free_drive(drive_meta);
+
+    if (verbose)
+        fprintf(stderr, "%s: done\n", prog);
+
     return 0;
+}
+
+static int nextline()
+{
+    int pp = ' ';
+    int                 pc = ' ';
+    int                 ch = ' ';
+    int                 skiptoeol = 0;
+    int                 ignorenl = 0;
+
+    llen = 0;
+    memset(lbuf, '\0', sizeof(lbuf));
+    input_ln++;
+    for (;;) {
+        pp = pc;
+        pc = ch;
+        ch = fgetc(input_fp);
+        if (ch == EOF) {
+            return lbuf[0] != '\0';
+        } else if ((ch == '/') && (pc == '/') && (pp == ' ')) {
+            if (debug)
+                fprintf(stderr, "comment noted at scr %d line %d llen %d\n", scr, line, llen);
+            do {
+                lbuf[--llen] = '\0';
+            } while ((llen > 0) && (lbuf[llen-1] == ' '));
+            skiptoeol = 1;
+            if (llen < 1)
+                ignorenl = 1;
+        } else if (ch == '\n') {
+            if (!ignorenl)
+                return 1;
+            ignorenl = 0;
+            skiptoeol = 0;
+            pp = ' ';
+            pc = ' ';
+            ch = ' ';
+        } else if (skiptoeol) {
+            ;
+        } else if (ch == '\t') {
+            do {
+                ASSERT(llen < 64, "line too long\n%s:%d: %-*.*s...",
+                       input_fn, input_ln, llen, llen, lbuf);
+                // STUB("store %02Xh (%c) at pos %d", ' ', ' ', llen);
+                lbuf[llen++] = ' ';
+            } while (0 != (llen % TAB_WIDTH));
+        } else {
+            ASSERT(llen < 64, "line too long\n%s:%d: %-*.*s...",
+                   input_fn, input_ln, llen, llen, lbuf);
+            // STUB("store %02Xh (%c) at pos %d", ch, ch, llen);
+            lbuf[llen++] = ch;
+        }
+    }
+}
+
+static void seekpage()
+{
+    // we get here if lbuf[0] is form-feed.
+    if (lbuf[1] == '\0') {
+        scr++;
+        DBG_D(scr);
+    } else {
+        scr = 0;
+        for (int i = 1; i < llen; ++i) {
+            int                 ch = lbuf[i];
+            ASSERT(('0' <= ch) && (ch <= '9'), "non-digit after form-feed");
+            scr = scr * 10 + ch - '0';
+        }
+    }
+    ASSERT(scr < screen_count,
+           "screen number %d invalid: drive capacity is %d screens", scr, screen_count);
+    line = 0;
+}
+
+static void emitline()
+{
+    pByte               op = write_data_base + scr * SCR_BYTES + line * LINE_BYTES;
+    memset(op, ' ', line ? LINE_BYTES : SCR_BYTES);
+
+    while ((llen > 0) && ((' ' == lbuf[llen - 1]) || ('\0' == lbuf[llen - 1])))
+        --llen;
+    lbuf[llen] = '\0';
+
+    if (llen > 0) {
+        memcpy(op, lbuf, llen);
+        maybeindex();
+        maybegloss();
+    }
+
+    line++;
+}
+
+static void maybeindex()
+{
+    if (NULL == index_fp)
+        return;
+    if (line != 0)
+        return;
+
+    // index is all first lines that are not blank.
+    if (llen < 1)
+        return;
+    fprintf(index_fp, "%3d    %-*.*s\n", scr, llen, llen, lbuf);
+}
+
+static void maybegloss()
+{
+    if (NULL == gloss_fp)
+        return;
+
+    // original gloss form:
+    //   lines ending with *)
+    // revised gloss form:
+    //   any line containing \*
+
+    if (((llen >= 3) &&
+         (lbuf[llen - 1] == ')') && (lbuf[llen - 2] == '*')) || (NULL != strstr(lbuf, "\\*")))
+        fprintf(gloss_fp, "%3d %2d %-*.*s\n", scr, line, llen, llen, lbuf);
 }

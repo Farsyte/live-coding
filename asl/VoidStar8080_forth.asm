@@ -3206,8 +3206,8 @@ WARM	DW	DOCOL
 	DW	MTBUF
 	DW	ABORT
 ;
-CLD	LXI	B,CLD1
-	LHLD	ORIG+12H
+CLD	LXI	B,CLD1          ;INITIAL INTERPRET POINTER
+	LHLD	ORIG+12H        ;INITIAL DATA STACK POINTER
 	SPHL
 	JMP	NEXT
 CLD1	DW	COLD
@@ -4217,9 +4217,10 @@ CSTAT	IN	TTYC
 	;; VoidStar8080 CIN: A=next char from console
 	;; if no char available, wait for one
 	;; do not modify BC
-CIN	IN	TTYC
-        ANI     CDEV_RX
-	JZ	CIN		;WAIT FOR DATA AVAILABLE
+CIN
+;;	IN	TTYC
+;;      ANI     CDEV_RX
+;;	JZ	CIN		;WAIT FOR DATA AVAILABLE
 	IN	TTYD
 	ANI	7FH		;STRIP THE PARITY BIT
 	RET			;RETURN WITH CHAR IN (A)
@@ -4228,9 +4229,10 @@ CIN	IN	TTYC
 	;; === === === === === === === === === === === ===
 	;; VoidStar8080 COUT: send (C) to the console outputC
 	;; if necessary, wait until the channel is available
-COUT	IN	TTYC
-        ANI     CDEV_TX
-	JZ	COUT
+COUT
+;;	IN	TTYC
+;;      ANI     CDEV_TX
+;;	JZ	COUT
 	MOV	A,C
         ANI     7Fh
 	OUT	TTYD

@@ -10,6 +10,8 @@
 #define CDEV_STATUS_RXRDY	0x02
 #define CDEV_STATUS_TXRDY	0x04
 
+#define CDEV_MODE_SET_BLOCKING  0x00
+
 typedef struct sCdev {
     Cstr                name;
     Bring               rx;
@@ -20,17 +22,17 @@ typedef struct sCdev {
     // RD[0] - read the data port.
     //    returns the next byte of data from the input ring,
     //    or 0xFF if the input ring is empty.
+    //    OPTIONAL: pause sim until ring is ready.
     // WR[0] - write the data port.
     //    stores the data to the output ring if it is not empty.
+    //    OPTIONAL: pause sim until ring is ready.
     //
     // RD[1] - read the status port.
     //    bit 0: true if the device is connected
     //    bit 1: true if the rx ring has data
     //    bit 2: true if the tx ring can accept data
     // WR[1] - write the control port.
-    //    data is a command byte
-    //    00: disconnect (UNIMP)
-    //    01: reconnect (UNIMP)
+    //    00: set data ports to BLOCKING mode
     //    behavior is undefined for all commands not matched above.
 
     Edge                rd[2];                  // read strobes, active low
@@ -43,6 +45,7 @@ typedef struct sCdev {
     int                 conn;                   // data socket
     pthread_t           thread;                 // service thread
 
+    int                 blocking;               // if true, RD accesses can pause sim
 }                  *pCdev, Cdev[1];
 
 extern void         cdev_init(Cdev, Cstr name);

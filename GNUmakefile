@@ -125,6 +125,7 @@ MMAP_FILES	:= ${MMAP_BASES:%=${BDEVDIR}%.mmap}
 
 ${MMAP_FILES}:
 	$C ${BINDIR}fmt.sh
+	$C ${BINDIR}scr.sh 0 .
 
 voidstar8080:	${MACHDIR}/live-coding ${HEXS} ${MMAP_FILES}
 	${MACHDIR}live-coding VoidStar8080 ROM=VoidStar8080_rom

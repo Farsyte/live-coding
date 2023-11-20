@@ -24,8 +24,13 @@
 //      after assuring that the destination is large enough, and updating
 //      the header.
 
+int                 debug = 0;
+int                 verbose = 0;
+int                 dryrun = 0;
+
 int main(int argc, Cstr *argv)
 {
+    Cstr                program;
     Cstr                argp;
     char               *arge;
     int                 drv;
@@ -40,24 +45,58 @@ int main(int argc, Cstr *argv)
 
     assert(argc > 2);
 
-    argp = *++argv;
+    program = *argv++;
+
+    while ((NULL != argv[0]) && (argv[0][0] == '-')) {
+        argp = *argv++;
+        if (argp[1] != '-') {
+            while (*++argp)
+                switch (*argp) {
+                  case 'd':
+                      ++debug;
+                      break;
+                  case 'v':
+                      ++verbose;
+                      break;
+                  case 'n':
+                      ++dryrun;
+                      break;
+                }
+        } else if (!strcmp("--verbose", argp)) {
+            ++verbose;
+        } else if (!strcmp("--debug", argp)) {
+            ++debug;
+        } else if (!strcmp("--dryrun", argp)) {
+            ++dryrun;
+        }
+    }
+
+    ASSERT(0 == dryrun, "dryrun not yet implemented.");
+
+    argp = *argv++;
     assert(NULL != argp);
     assert('\0' != argp[0]);
     drv = strtol(argp, &arge, 0);
     assert(argp < arge);
     assert('\0' == *arge);
+    if (debug)
+        STUB("drv = %d", drv);
 
     drive = map_drive(drv);
     ASSERT(NULL != drive,
            "Unable to access media in drive %c\n"
            "map_drive indicates error %d: %s\n", 'A' + drv, errno, strerror(errno));
 
-    argp = *++argv;
+    argp = *argv++;
     assert(NULL != argp);
     assert('\0' != argp[0]);
     basename = argp;
+    if (debug)
+        STUB("basename = '%s'", basename);
 
     imagepath = drive_image_path(basename);
+    if (debug)
+        STUB("imagepath = '%s'", imagepath);
 
     filed = open(imagepath, O_RDONLY);
 
@@ -66,7 +105,11 @@ int main(int argc, Cstr *argv)
            "  error %d: %s\n", imagepath, errno, strerror(errno));
 
     doff = drive->data_offset;
+    if (debug)
+        STUB("doff = %lu", (unsigned long)doff);
     dlen = drive->data_length;
+    if (debug)
+        STUB("dlen = %lu", (unsigned long)dlen);
 
     FIN(hrrv, read, filed, &sdd, sizeof(sdd));
     ASSERT(dlen == (int)sdd.data_length,
@@ -82,15 +125,19 @@ int main(int argc, Cstr *argv)
     FIN(drrv, read, filed, dst, dlen);
     drive->write_protect = sdd.write_protect;
 
-    ASSERT(drrv == dlen,
-           "Transfer error: only %d bytes copied to drive %c\n"
-           "  from media file %s", drrv, 'A' + drv, imagepath);
+    if (debug)
+        STUB("drrv = %d", drrv);
 
     close(filed);
     free_drive(drive);
 
-    fprintf(stderr, "Loaded %d bytes of data\n"
-            "  into drive %c from file %s\n", drrv, 'A' + drv, imagepath);
+    ASSERT(drrv == dlen,
+           "%s: only %d bytes copied to drive %c\n"
+           "  from file %s", program, drrv, 'A' + drv, imagepath);
+
+    if (verbose)
+        fprintf(stderr, "%s: Loaded %d bytes of data into drive %c\n"
+                "  from file %s\n", program, drrv, 'A' + drv, imagepath);
 
     return 0;
 }

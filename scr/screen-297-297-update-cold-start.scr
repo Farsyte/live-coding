@@ -1,4 +1,4 @@
-97
+297
 (  UPDATE INITIALIZER DATA                                     )
 
 FORTH DEFINITIONS DECIMAL
@@ -8,4 +8,4 @@ FORTH DEFINITIONS DECIMAL
   HERE   30 +ORIGIN !                                     ( DP )
   ' EDITOR 6 + 32 +ORIGIN !                         ( VOC-LINK )
   HERE FENCE !
-98
+298

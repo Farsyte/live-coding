@@ -1,4 +1,4 @@
-12
+212
 (  COLD AND WRM ENTRY,  USER PARAMETERS            WFR-79APR29 )
 ASSEMBLER OBJECT MEM HEX
 NOP     HERE JMP                 ( WORD ALIGNED VECTOR TO COLD )
@@ -15,7 +15,7 @@ NOP     HERE JMP                 ( WORD ALIGNED VECTOR TO WARM )
 0200 ,                                         ( INITIAL FENCE )
 0000 ,                               ( COLD START VALUE FOR DP )
 0000 ,                  ( COLD START VALUIE FOR VOC-LINK )    ;S
-13
+213
 (  START OF NUCLEUS: DPUSH HPUSH NEXT LIT          WFR-78DEC26 )
 HEX
 CODE LIT                                ( PUSH {IP+} TO STACK *)
@@ -31,7 +31,7 @@ LABEL NEXT                                 ( W=*IP++; PC=*W++ *)
                                                     C; ( TODO *)
 HERE CR ." NEXT: " qd
                                                               ;S
-14
+214
 (  EXECUTE                                          WFR-790225 )
 
 ( ORIGINAL HAS "SETUP" CODE HERE. )                 C; ( TODO *)
@@ -40,7 +40,7 @@ CODE EXECUTE               ( EXECUTE A WORD BY ITS CODE FIELD *)
                                        ( ADDRESS ON THE STACK *)
                                                     C; ( TODO *)
                                                               ;S
-15
+215
 (  BRANCH 0BRANCH       W/16-BIT OFFSET            WFR-79APR01 )
 
 CODE BRANCH            ( ADJUST IP BY IN-LINE 16-BIT LIETERAL *)
@@ -50,7 +50,7 @@ CODE 0BRANCH            ( IF BOT IS ZERO, BRANCH FROM LITERAL *)
                                                     C; ( TODO *)
 
                                                               ;S
-16
+216
 (  LOOP CONTROL                                    WFR-79MAR20 )
 
 CODE (LOOP)       ( INCREMENT LOOP INDEX, LOOP UNTIL => LIMIT *)
@@ -59,7 +59,7 @@ CODE (LOOP)       ( INCREMENT LOOP INDEX, LOOP UNTIL => LIMIT *)
 CODE (+LOOP)             ( INCREMENT INDEX BY STACK VALUE +/0 *)
                                                     C; ( TODO *)
                                                               ;S
-17
+217
 (  {DO} I                                          WFR-79MAR30 )
 
 CODE (DO)              ( MOVE TWO STACK ITEMS TO RETURN STACK *)
@@ -69,7 +69,7 @@ CODE I                     ( COPY CURRENT LOOP INDEX TO STACK *)
                            ( THIS WILL LATER BE POINTED TO 'R' )
 
                                                               ;S
-18
+218
 (  DIGIT                                           WFR-79MAR30 )
 
 CODE DIGIT      ( CONVERT ASCII CHAR-SECOND, WITH BASE-BOTTOM *)
@@ -77,20 +77,20 @@ CODE DIGIT      ( CONVERT ASCII CHAR-SECOND, WITH BASE-BOTTOM *)
                                     ( OTHERWISE FALSE-BOTTOM. *)
                                                     C; ( TODO *)
                                                               ;S
-19
+219
 (  {FIND}                                          WFR-79MAR30 )
 
 CODE (FIND)   ( HERE, NFA ... PFA, LEN BYTE, TRUE; ELSE FALSE *)
                                                     C; ( TODO *)
                                                               ;S
-20
+220
 (  {ENCLOSE}                                       WFR-79MAR30 )
 
 CODE (ENCLOSE)   ( ENTER WITH ADDRESS-2, DELIM-1, RETURN WITH *)
     ( ADDR-4, AND OFFSET TO FIRST CH-3, END WORD-2, NEXT CH-1 *)
                                                     C; ( TODO *)
                                                               ;S
-21
+221
 (  TERMINAL VECTORS                                WFR-79MAR30 )
 (  SCREENS 63 AND 64 PATCH THE CFA OF THESE WORDS. )
 
@@ -106,26 +106,26 @@ CODE ?TERMINAL       ( 'BREAK' LEAVES 1 ON STACK; OTHERWISE 0 *)
 CODE CR          ( EXECURE CAR. RETURN, LINE FEED ON TERMINAL *)
                                                 C;
                                                               ;S
-22
+222
 (  CMOVE                                           WFR-79MAR20 )
 
 CODE CMOVE    ( WITHIN MEMORY; ENTER W/ FROM-3, TO-N2, QUAN-1 *)
                                                     C; ( TODO *)
 
                                                               ;S
-23
+223
 (  U*   UNSIGNED MULTIPLY FOR 16 BITS           RS-WFR-80AUG16 )
 CODE U*          ( 16 BIT MULTIPLICAND-2, 16 BIT MULTIPLIER-1 *)
               ( 32 BIT UNSIGNED PRODUCT: LO WORD-2, HI WORD-1 *)
                                                     C; ( TODO *)
                                                               ;S
-24
+224
 (  U/   UNSIGNED DIVIDE FOR 31 BITS                WFR-79APR29 )
 CODE U/             ( 31 BIT DIVIDEND-2, -3, 16 BIT DIVISOR-1 *)
                       ( 16 BIT REMAINDER-2, 16 BIT QUOTIENT-1 *)
                                                     C; ( TODO *)
                                                               ;S
-25
+225
 (  LOGICALS                                        WFR-79APR20 )
 
 CODE AND          ( LOGICAL BITWISE 'AND' OF BOTTOM TWO ITEMS *)
@@ -137,7 +137,7 @@ CODE OR            ( LOGICAL BITWISE 'OR' OF BOTTOM TWO ITEMS *)
 CODE XOR         ( LOGICAL 'EXCLUSIVE-OR' OF BOTTOM TWO ITEMS *)
                                                     C; ( TODO *)
                                                               ;S
-26
+226
 (  STACK INITIALIZATION                            WFR-79MAR30 )
 
 CODE SP@                       ( FETCH STACK POINTER TO STACK *)
@@ -152,7 +152,7 @@ CODE RP!                                  ( LOAD RP FROM 'R0' *)
 CODE ;S               ( RESTORE IP REGISTER FROM RETURN STACK *)
                                                     C; ( TODO *)
                                                               ;S
-27
+227
 (  RETURN STACK WORDS                              WFR-79MAR29 )
 
 CODE LEAVE           ( FORCE EXIT OF DO-LOOP BY SETTING LIMIT *)
@@ -167,7 +167,7 @@ CODE R>               ( MOVE FROM RETURN STACK TO COMP. STACK *)
 CODE R       ( COPY THE BOTTOM OF RETURN STACK TO COMP. STACK *)
                                                     C; ( TODO *)
                                                               ;S
-28
+228
 (  TESTS AND LOGICALS                              WFR-79MAR19 )
 
 CODE 0=            ( REVERSE LOGICAL STATE OF BOTTOM OF STACK *)
@@ -176,7 +176,7 @@ CODE 0=            ( REVERSE LOGICAL STATE OF BOTTOM OF STACK *)
 CODE 0<            ( LEAVE TRUE IF NEGATIVE; OTHERWISE FALSE. *)
                                                     C; ( TODO *)
                                                               ;S
-29
+229
 (  MATH                                            WFR-79MAR19 )
 
 CODE +          ( LEAVE THE SUM OF THE BOTTOM TWO STACK ITEMS *)
@@ -191,7 +191,7 @@ CODE MINUS          ( TWOS COMPLEMENT OF BOTTOM SINGLE NUMBER *)
 CODE D-             ( TWOS COMPLEMENT OF BOTTOM DOUBLE NUMBER *)
                                                     C; ( TODO *)
                                                               ;S
-30
+230
 (  STACK MANIPULATION                              WFR-79MAR29 )
 
 CODE OVER               ( DUPLICATE SECOND ITEM AS NEW BOTTOM *)
@@ -206,7 +206,7 @@ CODE SWAP         ( EXCHANGE BOTTOM AND SECOND ITEMS ON STACK *)
 CODE DUP                     ( DUPLICATE BOTTOM ITEM ON STACK *)
                                                     C; ( TODO *)
                                                               ;S
-31
+231
 (  MEMORY                                          WFR-79MAR30 )
 
 CODE +!    ( ADD SECOND TO MEMORY 16 BITS ADDRESSED BY BOTTOM *)
@@ -215,7 +215,7 @@ CODE +!    ( ADD SECOND TO MEMORY 16 BITS ADDRESSED BY BOTTOM *)
 CODE TOGGLE            ( BYTE AT ADDRESS-2, BIT PATTERN-1 ... *)
                                                     C; ( TODO *)
                                                               ;S
-32
+232
 (  MEMORY FETCH AND STORE                           WFR-781202 )
 
 CODE @                    ( REPLACE STACK ADDRESS WITH 16 BIT *)
@@ -231,7 +231,7 @@ CODE !          ( STORE SECOND AT 16 BITS ADDRESSED BY BOTTOM *)
 CODE C!            ( STORE SECOND AT BYTE ADDRESSED BY BOTTOM *)
                                                     C; ( TODO *)
                                                               ;S
-33
+233
 (  COLON AND SEMICOLON                             WFR-79MAR30 )
 
 :  :                  ( CREATE NEW COLON-DEFINITION UNTIL ';' *)
@@ -243,7 +243,7 @@ CODE C!            ( STORE SECOND AT BYTE ADDRESSED BY BOTTOM *)
    ?CSP COMPILE ;S
    SMUDGE [ ; IMMEDIATE
                                                               ;S
-34
+234
 (  CONSTANT, VARIABLE, USER                        WFR-79MAR30 )
 : CONSTANT               ( WORD WHICH LATER CREATES CONSTANTS *)
   CREATE SMUDGE , ;CODE
@@ -257,7 +257,7 @@ CODE C!            ( STORE SECOND AT BYTE ADDRESSED BY BOTTOM *)
   CONSTANT ;CODE
 ( ASSEMBLY CODE FOR user                                 TODO *)
                                                               ;S
-35
+235
 (  DEFINED CONSTANTS                               WFR-78MAR22 )
 HEX
 00  CONSTANT  0         01  CONSTANT 1
@@ -273,7 +273,7 @@ HEX
           00 +ORIGIN
 : +ORIGIN LITERAL + ;     ( LEAVES ADDRESS RELATIVE TO ORIGIN *)
                                                               ;S
-36
+236
 (  USER VARIABLES                                  WFR-YYmmmDD )
 HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 ( 06 USER  S0 )              ( TOP OF EMPTY COMPUTATION STACK *)
@@ -289,7 +289,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 1A   USER  OUT                      ( DISPLAY CURSOR POSITION *)
 1C   USER  SCR                               ( EDITING SCREEN *)
                                                               ;S
-37
+237
 (  USER VARIABLES, CONTINUED                       WFR-YYmmmDD )
 1E   USER  OFFSET                 ( POSSIBLY FOR OTEHR DRIVES *)
 20   USER  CONTEXT                ( VOCABULARY FIRST SEARCHED *)
@@ -302,7 +302,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 2E   USER  R#                       ( EDITING CURSOR POSITION *)
 30   USER  HLD         ( POINTS TO LAST CHARACTER HELD IN PAD *)
                                                               ;S
-38
+238
 (  HI-LEVEL MISC.                                  WFR-79APR29 )
 : 1+      1    +   ;          ( INCREMENT STACK NUMBER BY ONE *)
 : 2+      2    +   ;          ( INCREMENT STACK NUMBER BY TWO *)
@@ -318,7 +318,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : SPACE    BL EMIT ;                ( PRINT BLANK ON TERMINAL *)
 : -DUP     DUP IF DUP ENDIF ;            ( DUPLICATE NON-ZERO *)
                                                               ;S
-39
+239
 (  VARIABLE LENGTH NAME SUPPORT                    WFR-79MAR30 )
 : TRAVERSE                           ( MOVE ACROSS NAME FIELD *)
           ( ADDRESS-2, DIRECTION-1, I.E. -1=R TO L, +1=L TO R *)
@@ -335,7 +335,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : PFA     1 TRAVERSE 5 + ;        ( CONVET A WORDS NFA TO PFA *)
 
                                                               ;S
-40
+240
 (  ERROR PROCEDURES, PER SHIRA                     WFR-79MAR23 )
 : !CSP                         ( SAVE STACK POSITION IN 'CSP' *)
         SP@ CSP ! ; 
@@ -352,7 +352,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : ?LOADING                         ( VERIFY LOADING FROM DISC *)
         BLK @ 0= 16 ?ERROR ;
                                                               ;S
-41
+241
 (  COMPILE, SMUDGE, HEX, DECIMAL                   WFR-79APR20 )
 : COMPILE           ( COMPILE THE EXECUTION ADDRESS FOLLOWING *)
         ?COMP R> DUP 2+ >R @ , ;
@@ -367,7 +367,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : DECIMAL                      ( MAKE DECIMAL THE IN-OUT BASE *)
         0A BASE ! ;
                                                               ;S
-42
+242
 (  ;CODE                                           WFR-79APR20 )
 
 : (;CODE)      ( WRITE CODE FIELD POINTING TO CALLING ADDRESS *)
@@ -377,7 +377,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         ?CSP COMPILE (;CODE)
         [COMPILE] [ SMUDGE ; IMMEDIATE
                                                               ;S
-43
+243
 (  <BUILDS, DOES>                                  WFR-79MAR20 )
 
 : <BUILDS                     ( CREATE HADER FOR 'DOES>' WORD *)
@@ -388,7 +388,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         R> LATEST PFA ! ;CODE
 ( ASSEMBLY CODE FOR does                                 TODO *)
                                                               ;S
-44
+244
 (  TEXT OUTPUTS                                    WFR-79APR02 )
 : COUNT DUP 1+ SWAP C@ ;       ( LEAVE TEXT ADDR. CHAR. COUNT *)
 : TYPE             ( TYPE STRING FROM ADDRESS-2, CHAR.COUNT-1 *)
@@ -403,7 +403,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         IF COMPILE  (.") WORD HERE C@ 1+ ALLOT
         ELSE WORD HERE COUNT TYPE ENDIF ; IMMEDIATE
                                                               ;S
-45
+245
 (  TERMINAL INPUT                                  WFR-79APR29 )
 : EXPECT              ( TERMINAL INPUT MEMORY-2, CHAR LIMIT-1 *)
         OVER + OVER DO KEY DUP 0E +ORIGIN ( BS ) @ =
@@ -420,7 +420,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
       ELSE ( TERMINAL ) R> DROP
       ENDIF ; ! IMMEDIATE
                                                               ;S
-46
+246
 (  FILL, ERASE, BLANKS, HOLD, PAD                  WFR-79APR02 )
 
 : FILL                  ( FILL MEMORY BEGIN-3, QUAN-2, BYTE-1 *)
@@ -434,7 +434,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : PAD   HERE 44 + ;              ( PAD IS 68 BYTES ABOVE HERE *)
          ( DOWNWARD HAS NUMERIC OUTPUTS; UPWARD MAY HOLD TEXT *)
                                                               ;S
-47
+247
 (  WORD                                            WFR-79APR02 )
 : WORD          ( ENTER WITH DELIMITER, MOVE STRING TO 'HERE' *)
         BLK @ IF BLK @ BLOCK ELSE TIB @ ENDIF
@@ -447,7 +447,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         + HERE 1+
         R> CMOVE ;         ( MOVE STRING FROM BUFFER TO HERE+1 )
                                                               ;S
-48
+248
 (  {NUMBER} NUMBER -FIND                           WFR-79APR29 )
 
 : (NUMBER)     ( CONVERT DOUBLE NUMBER, LEAVING UNCONV. ADDR. *)
@@ -464,7 +464,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : -FIND        ( RETURN PFA-3, LEN BYTE-2, TRUE-1; ELSE FALSE *)
         BL WORD HERE CONTEXT @ @ (FIND)
         DUP 0= IF DROP HERE LATEST (FIND) ENDIF ;             ;S
-49
+249
 (  ERROR HANDLER                                   WFR-79APR20 )
 
 : (ABORT) ABORT ;                ( USER ALTERABLE ERROR ABORT *)
@@ -478,7 +478,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         PAD 020 5F FILL DUP PFA LFA OVER -
         PAD SWAP CMOVE PAD COUNT 01F AND TYPE SPACE ;
                                                               ;S
-50
+250
 (  CREATE                                          WFR-79APR28 )
 
 : CREATE               ( A SMUDGED CODE HEADER TO PARAM FIELD *)
@@ -492,7 +492,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
         LATEST , CURRENT @ !
         HERE 2+ , ;
                                                               ;S
-51
+251
 (  LITERAL DLITERAL [COMPILE] ?STACK               WFR-79APR29 )
 
 : [COMPILE]          ( FORCE COMPILATION OF AN IMMEDIATE WORD *)
@@ -506,7 +506,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
 : ?STACK           ( QUESTION UPON OVER OR UNDERFLOW OF STACK *)
         09E SP@ < 1 ?ERROR SP@ 020 < 7 ?ERROR ;
                                                               ;S
-52
+252
 (  INTERPRET                                       WFR-79APR18 )
 
 : INTERPRET    ( INTERPRET OR COMPILE SOURCE TEXT INPUT WORDS *)
@@ -521,7 +521,7 @@ HEX               ( 0 THRU 5 RESERVED,    REFERENCED TO $00A0 *)
           ENDIF
         AGAIN ;
                                                               ;S
-53
+253
 (  IMMEDIATE VOCAB DEFIN FORTH                 DJK-WFR-79APR29 )
 
 : IMMEDIATE         ( TOGGLE PREC. BIT OF LATEST CURRENT WORD *)
@@ -538,7 +538,7 @@ VOCABULARY FORTH IMMEDIATE             ( THE TRUNK VOCABULARY *)
 
 : (                      ( SKIP INPUT UNTIL RIGHT PARENTHESIS *)
         29 WORD ; IMMEDIATE                                   ;S
-54
+254
 (  QUIT ABORT                                      WFR-79APR29 )
 
 : QUIT                     ( RESTART, INTERPRET FROM TERMINAL *)
@@ -549,13 +549,13 @@ VOCABULARY FORTH IMMEDIATE             ( THE TRUNK VOCABULARY *)
 : ABORT                   ( WARM RESTART, INCLUDING REGISTERS *)
 
                                                               ;S
-55
+255
 (  COLD START                                      WFR-79APR29 )
 
 CODE COLD                ( COLD START, INITIALIZING USER AREA *)
                                                     C; ( TODO *)
                                                               ;S
-56
+256
 (  MATH UTILITY                                DJK-WFR-YYmmmDD )
 CODE S->D              ( EXTEND SINGLE INTEGER TO DOUBLE TODO *)
 
@@ -568,7 +568,7 @@ CODE S->D              ( EXTEND SINGLE INTEGER TO DOUBLE TODO *)
         OVER OVER > IF SWAP ENDIF DROP ;
 : MAX                           ( LEAVE LARGER OF TWO NUMBERS *)
         OVER OVER < IF SWAP ENDIF DROP ;                      ;S
-57
+257
 (  MATH PACKAGE                                DJK-WFR-79APR29 )
 : M*      ( LEAVE SIGNED DOUBLE PRODUCT OF TWO SINGLE NUMBERS *)
         OVER OVER XOR >R ABS SWAP ABS U* R> D+- ;
@@ -585,7 +585,7 @@ CODE S->D              ( EXTEND SINGLE INTEGER TO DOUBLE TODO *)
 : M/MOD        ( DOUBLE, SINGLE DIVISOR ... REMAINDER, DOUBLE *)
         >R 0 R U/ R> SWAP >R U/ R> ;
                                                               ;S
-58
+258
 (  DISC UTILITY, GENERAL USE                       WFR-79APR02 )
 FIRST  VARIABLE  USE            ( NEXT BUFFER TO USE, STALEST *)
 FIRST  VARIABLE  PREV        ( MOST RECENTLY REFERNCED BUFFER *)
@@ -602,7 +602,7 @@ FIRST  VARIABLE  PREV        ( MOST RECENTLY REFERNCED BUFFER *)
 
 : DR0     0 OFFSET ! ;                      ( SELECT DRIVE #0 *)
 : DR1  07D0 OFFSET ! ;                   ;S ( SELECT DRIVE #1 *)
-59
+259
 (  BUFFER                                          WFR-79APR02 )
 : BUFFER                  ( CONVERT BLOCK# TO STORAGE ADDRESS *)
    USE @ DUP >R                ( BUFFER ADDRESS TO BE ASSIGNED )
@@ -617,7 +617,7 @@ FIRST  VARIABLE  PREV        ( MOST RECENTLY REFERNCED BUFFER *)
    R PREV !                     ( ASSIGN THIS BUFFER AS 'PREV' )
    R> 2+ ;                          ( MOVE TO STORAGE LOCATION )
                                                               ;S
-60
+260
 (  BLOCK                                           WFR-79APR02 )
 : BLOCK          ( CONVERT BLOCK NUMBER TO ITS BUFFER ADDRESS *)
    OFFSET @ + >R              ( RETAIN BLOCK # ON RETURN STACK )
@@ -633,7 +633,7 @@ FIRST  VARIABLE  PREV        ( MOST RECENTLY REFERNCED BUFFER *)
       DUP PREV !
    ENDIF
    R> DROP 2+ ;                                               ;S
-61
+261
 (  TEXT OUTPUT FORMATTING                          WFR-79MAY03 )
 
 : (LINE)          ( LINE#, SCR#, ... BUFFER ADDRESS, 64 COUNT *)
@@ -649,7 +649,7 @@ FIRST  VARIABLE  PREV        ( MOST RECENTLY REFERNCED BUFFER *)
            -DUP IF 4 OFFSET @ B/SCR / - .LINE ENDIF
         ELSE ." MSG # " . ENDIF ;                             ;S
 note: screen 76 patches the forward ref to "." above.
-62
+262
 (  LOAD, -->                                       WFR-79APR02 )
 
 : LOAD                           ( INTERPRET SCREEN FROM DISC *)
@@ -659,7 +659,7 @@ note: screen 76 patches the forward ref to "." above.
 : -->                ( CONTINUE INTERPRETATION ON NEXT SCREEN *)
     ?LOADING 0 IN ! B/SCR BLK @ OVER
     MOD - BLK +! ; IMMEDIATE                                  ;S
-63
+263
 (  INSTALLATION DEPENDENT TERMINAL I-O             WFR-79APR26 )
 
 ( EMIT )                         ( SEND CHARACTER TO TERMINAL *)
@@ -671,7 +671,7 @@ note: screen 76 patches the forward ref to "." above.
                              ( ASM IMPLEMENTATION OF KEY TODO *)
 
                                                               ;S
-64
+264
 (  INSTALLATION DEPENDENT TERMINAL I-O             WFR-79APR02 )
 
 ( ?TERMINAL )                    ( CHECK FOR TERMINAL 'BREAK' *)
@@ -683,37 +683,37 @@ note: screen 76 patches the forward ref to "." above.
                               ( ASM IMPLEMENTATION OF CR TODO *)
 
                                                               ;S
-65
+265
 (  INSTALLATION DEPENDENT DISC INTERFACE           WFR-79APR02 )
 ;S                                                     ( TODO *)
-66
+266
 (  INSTALLATION DEPENDENT DISC INTERFACE           WFR-79APR02 )
 ;S                                                     ( TODO *)
-67
+267
 (  INSTALLATION DEPENDENT BLOCK-WRITE               WFR-790103 )
 
 CODE BLOCK-WRITE          ( SEND TO DISC FROM ADDR-2, COUNT-1 *)
                                                     C; ( TODO *)
                                                               ;S
-68
+268
 (  INSTALLATION DEPENDENT BLOCK-READ                WFR-790103 )
 
 CODE BLOCK-READ                                  ( BUF.ADDR-1 *)
                                                     C; ( TODO *)
                                                               ;S
-69
+269
 (  R/W                                             WFR-79MAY03 )
 CODE R/W
                                                               ;S
-70
+270
 (  FORWARD REFERENCES                              WFR-YYmmmDD )
                                                        ( TODO *)
                                                               ;S
-71
+271
 ( FORWARD REFERENCES                               WFR-YYmmmDD )
                                                        ( TODO *)
                                                               ;S
-72
+272
 (  ', FORGET                                   DJK-WFR-79DEC02 )
 HEX
 
@@ -730,7 +730,7 @@ HEX
     OVER 2 - ! @ -DUP 0= UNTIL                 ( end of list ? )
   R> DP ! ; 
                                                               ;S
-73
+273
 (  CONDITIONAL COMPILER, PER SHIRA                 WFR-79APR01 )
 : BACK     HERE - , ;               ( RESOLVE BACKWARD BRANCH *)
 : BEGIN    ?COMP HERE ! ;                           IMMEDIATE
@@ -741,7 +741,7 @@ HEX
 : +LOOP    3 ?PAIRS COMPILE (+LOOP) BACK ;          IMMEDIATE
 : UNTIL    1 ?PAIRS COMPILE 0BRANCH BACK ;          IMMEDIATE
                                                               ;S
-74
+274
 (  CONDITIONAL COMPILER                            WFR-79APR01 )
 : END      [COMPILE] UNTIL ;                        IMMEDIATE
 : AGAIN    1 ?PAIRS COMPILE BRANCH BACK ;           IMMEDIATE
@@ -752,7 +752,7 @@ HEX
            SWAP 2 [COMPILE] ENDIF 2 ;               IMMEDIATE
 : WHILE    [COMPILE] IF 2+ ;                        IMMEDIATE
                                                               ;S
-75
+275
 (  NUMERIC PRIMITIVES                              WFR-79APR01 )
 HEX
 : SPACES     0 MAX -DUP IF 0 DO SPACE LOOP ENDIF ;
@@ -763,7 +763,7 @@ HEX
          BASE @ M/MOD ROT 9 OVER < IF 7 + ENDIF 30 + HOLD ;
 : #S     BEGIN # OVER OVER + 0= UNTIL ;
                                                               ;S
-76
+276
 (  OUTPUT OPERATORS                                WFR-79APR01 )
 HEX
 : D.R         ( DOUBLE INTEGER OUTPUT, RIGHT ALIGNED IN FIELD *)
@@ -779,7 +779,7 @@ HEX
 : ?    @ . ;                       ( PRINT CONTENTS OF MEMORY *)
 ( UNCOMMENT TO PATCH MESSAGE TO PRINT MESSAGE NUMBER USING . )
 (  ' . CFA ' MESSAGE 2A + ! )                                 ;S
-77
+277
 (  PROGRAM DOCUMENTATION                           WFR-79APR01 )
 HEX
 : LIST                       ( LIST SCREEN BY NUMBER ON STACK *)
@@ -795,7 +795,7 @@ HEX
     0C EMIT ( FF ) 3 / 3 * 3 OVER + SWAP
     DO CR I LIST LOOP CR
     0F MESSAGE CR ; DECIMAL                                   ;S
-78
+278
 (  TOOLS                                           WFR-79APR20 )
 HEX
 : VLIST                             ( LIST CONTEXT VOCABULARY *)
@@ -804,7 +804,7 @@ HEX
           DUP ID. SPCE SPACE PFA LFA @
           DUP 0= ?TERMINAL OR UNTIL DROP ;
                                                               ;S
-79
+279
 (  TOOLS                                           WFR-79MAY03 )
 HEX ;S                    ( DISABLE THIS SCREEN FOR THE MOMENT )
 
@@ -817,4 +817,4 @@ DECIMAL
   HERE   30 +ORIGIN ! ( COLD START DP                          )
   LATEST 12 +ORIGIN ! ( TOPMOST WORD                           )
                                                               ;S
-80
+280
