@@ -4,5 +4,10 @@
 .*
 *.o
 *.m
+!.gitignore
 trace
 runlog
+trace
+index
+gloss
+trace_fetch

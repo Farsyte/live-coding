@@ -58,7 +58,7 @@ CLOSED: [2023-11-20 Mon 02:29]
               DO ... I ... LOOP   or
               DO ... I ... +LOOP
 
- **** DONE LEAVE                                        C,213
+**** DONE LEAVE                                        C,213
 CLOSED: [2023-11-20 Mon 02:30]
          Force  termination  of a DO-LOOP at the next LOOP or +LOOP  by
          setting  the  loop  limit equal to the current  value  of  the

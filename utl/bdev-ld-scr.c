@@ -66,7 +66,8 @@ int                 drive_data_length;
 pByte               write_data_base;
 unsigned            screen_count;
 
-char                lbuf[LINE_BYTES + 1];
+#define BMAX        512
+char                _lbuf[BMAX];
 int                 llen = 0;
 
 unsigned            scr = 0;
@@ -86,6 +87,8 @@ Cstr                gloss_fn = "-";
 FILE               *index_fp = 0;               /* todo open index file in append mode */
 FILE               *gloss_fp = 0;               /* todo open gloss file in append mode */
 
+static int          lbuf_get(int ix);
+static void         lbuf_set(int ix, int ch);
 static int          nextline();
 static void         seekpage();
 static void         emitline();
@@ -189,7 +192,7 @@ int main(int argc, Cstr *argv)
             fprintf(stderr, "%s: reading %s\n", prog, input_fn);
 
         while (nextline()) {
-            if (lbuf[0] == '\f') {
+            if (lbuf_get(0) == '\f') {
                 seekpage();
             } else {
                 emitline();
@@ -206,72 +209,84 @@ int main(int argc, Cstr *argv)
     return 0;
 }
 
+static int lbuf_get(int ix)
+{
+    if ((ix >= 0) && (ix < BMAX))
+        return _lbuf[ix];
+    return 0;
+}
+
+static void lbuf_set(int ix, int ch)
+{
+    if ((ix >= 0) && (ix < BMAX))
+        _lbuf[ix] = ch;
+}
+
 static int nextline()
 {
-    int pp = ' ';
+    int                 pp = ' ';
     int                 pc = ' ';
     int                 ch = ' ';
     int                 skiptoeol = 0;
-    int                 ignorenl = 0;
 
+    for (llen = 0; llen < BMAX; ++llen)
+        lbuf_set(llen, '\0');
     llen = 0;
-    memset(lbuf, '\0', sizeof(lbuf));
     input_ln++;
     for (;;) {
         pp = pc;
         pc = ch;
         ch = fgetc(input_fp);
         if (ch == EOF) {
-            return lbuf[0] != '\0';
+            return llen > 0;
         } else if ((ch == '/') && (pc == '/') && (pp == ' ')) {
             if (debug)
                 fprintf(stderr, "comment noted at scr %d line %d llen %d\n", scr, line, llen);
-            do {
-                lbuf[--llen] = '\0';
-            } while ((llen > 0) && (lbuf[llen-1] == ' '));
+            lbuf_set(--llen, '\0');
             skiptoeol = 1;
-            if (llen < 1)
-                ignorenl = 1;
         } else if (ch == '\n') {
-            if (!ignorenl)
+            while ((llen > 0) && ((lbuf_get(llen - 1) == ' ') || (lbuf_get(llen - 1) == 0)))
+                lbuf_set(--llen, '\0');
+            if (llen > 0) {
+                ASSERT(llen <= 64, "line too long\n%s:%d: %-*.*s...",
+                       input_fn, input_ln, llen, llen, _lbuf);
                 return 1;
-            ignorenl = 0;
+            }
             skiptoeol = 0;
             pp = ' ';
             pc = ' ';
             ch = ' ';
+            input_ln++;
         } else if (skiptoeol) {
             ;
         } else if (ch == '\t') {
             do {
-                ASSERT(llen < 64, "line too long\n%s:%d: %-*.*s...",
-                       input_fn, input_ln, llen, llen, lbuf);
-                // STUB("store %02Xh (%c) at pos %d", ' ', ' ', llen);
-                lbuf[llen++] = ' ';
+                lbuf_set(llen++, ' ');
             } while (0 != (llen % TAB_WIDTH));
         } else {
-            ASSERT(llen < 64, "line too long\n%s:%d: %-*.*s...",
-                   input_fn, input_ln, llen, llen, lbuf);
-            // STUB("store %02Xh (%c) at pos %d", ch, ch, llen);
-            lbuf[llen++] = ch;
+            lbuf_set(llen++, ch);
         }
     }
 }
 
 static void seekpage()
 {
-    // we get here if lbuf[0] is form-feed.
-    if (lbuf[1] == '\0') {
+    if (debug)
+        STUB("scr was %d", scr);
+    // we get here if lbuf_get(0) is form-feed.
+    if (lbuf_get(1) == '\0') {
         scr++;
         DBG_D(scr);
     } else {
         scr = 0;
         for (int i = 1; i < llen; ++i) {
-            int                 ch = lbuf[i];
+            int                 ch = lbuf_get(i);
             ASSERT(('0' <= ch) && (ch <= '9'), "non-digit after form-feed");
             scr = scr * 10 + ch - '0';
         }
+        DBG_D(scr);
     }
+    DBG_D(screen_count);
     ASSERT(scr < screen_count,
            "screen number %d invalid: drive capacity is %d screens", scr, screen_count);
     line = 0;
@@ -282,12 +297,15 @@ static void emitline()
     pByte               op = write_data_base + scr * SCR_BYTES + line * LINE_BYTES;
     memset(op, ' ', line ? LINE_BYTES : SCR_BYTES);
 
-    while ((llen > 0) && ((' ' == lbuf[llen - 1]) || ('\0' == lbuf[llen - 1])))
-        --llen;
-    lbuf[llen] = '\0';
+    while ((llen > 0) && ((' ' == lbuf_get(llen - 1)) || ('\0' == lbuf_get(llen - 1))))
+        lbuf_set(--llen, '\0');
+    lbuf_set(llen, '\0');
 
     if (llen > 0) {
-        memcpy(op, lbuf, llen);
+        ASSERT(llen <= 64, "line too long\n%s:%d: %-*.*s...",
+               input_fn, input_ln, llen, llen, _lbuf);
+        for (int i = 0; i < llen; ++i)
+            op[i] = lbuf_get(i);
         maybeindex();
         maybegloss();
     }
@@ -299,13 +317,18 @@ static void maybeindex()
 {
     if (NULL == index_fp)
         return;
+    DBG_D(line);
     if (line != 0)
         return;
+    DBG_D(llen);
 
     // index is all first lines that are not blank.
     if (llen < 1)
         return;
-    fprintf(index_fp, "%3d    %-*.*s\n", scr, llen, llen, lbuf);
+    fprintf(index_fp, "%3d    ", scr);
+    for (int i = 0; i < llen; ++i)
+        fprintf(index_fp, "%c", lbuf_get(i));
+    fprintf(index_fp, "\n");
 }
 
 static void maybegloss()
@@ -318,7 +341,10 @@ static void maybegloss()
     // revised gloss form:
     //   any line containing \*
 
-    if (((llen >= 3) &&
-         (lbuf[llen - 1] == ')') && (lbuf[llen - 2] == '*')) || (NULL != strstr(lbuf, "\\*")))
-        fprintf(gloss_fp, "%3d %2d %-*.*s\n", scr, line, llen, llen, lbuf);
+    if ((lbuf_get(llen - 1) == ')') && (lbuf_get(llen - 2) == '*')) {
+        fprintf(gloss_fp, "%3d %2d ", scr, line);
+        for (int i = 0; i < llen; ++i)
+            fprintf(gloss_fp, "%c", lbuf_get(i));
+        fprintf(gloss_fp, "\n");
+    }
 }

@@ -912,7 +912,7 @@ ANDD	DW	$+2	; (S1) <- (S1) AND (S2)
 ;
 	DB	82H	; OR
 	DB	'O'
-	DB	'V'+80H
+	DB	'R'+80H
 	DW	ANDD-6
 ORR	DW	$+2	; (S1) <- (S1) OR (S2)
 	POP	D

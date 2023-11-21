@@ -7,6 +7,8 @@
 // T3 samples Data to IR, releases DBIN
 // control delivered via cpu->m1t4[IR] for the T4 cycle
 
+static void         maybe_debug(i8080 cpu);
+
 static f8080State   i8080_state_pc_out_status;
 static f8080State   i8080_state_pc_inc;
 static f8080State   i8080_state_fetch_wait;
@@ -126,6 +128,7 @@ static void i8080_state_op_rd(i8080 cpu, int phase)
       case PHI2_RISE:
           DSET(IR, VAL(DATA));
           LOWER(DBIN);
+          maybe_debug(cpu);
           ATRI(ADDR);
           break;
       case PHI2_FALL:
@@ -147,4 +150,76 @@ static void i8080_state_nop(i8080 cpu, int phase)
       case PHI2_FALL:
           break;
     }
+}
+
+static FILE        *trace;
+static unsigned     debug_limit = 1000000;
+
+static void maybe_debug(i8080 cpu)
+{
+
+//    pAddr               PC = cpu->PC;
+//    pAddr               SP = cpu->SP;
+//
+//    pData               B = cpu->B;
+//    pData               C = cpu->C;
+//    pData               D = cpu->D;
+//    pData               E = cpu->E;
+//    pData               H = cpu->H;
+//    pData               L = cpu->L;
+//
+//    pData               A = cpu->A;
+//    pData               FLAGS = cpu->FLAGS;
+
+    Word                PC = cpu->PC->value - 1;
+    if ((pc < 0x4000) || (pc >= 0xC000))
+        return;
+
+    if (!debug_limit)
+        return;
+    --debug_limit;
+    if (!debug_limit) {
+        if (trace) {
+            fclose(trace);
+            trace = NULL;
+        }
+        return;
+    }
+
+    if (!trace) {
+        trace = fopen("trace_fetch", "w");
+        if (!trace) {
+            STUB("not writing trace file");
+            debug_limit = 0;
+            return;
+        }
+    }
+
+    Byte                op = cpu->IR->value;
+
+    Cstr                as = i8080_instruction_4asm(op);
+
+    fprintf(trace, "PC=%04X ", PC);
+    fprintf(trace, "%02X ", op);
+
+    if (as[0] == ' ')
+        fprintf(trace, "%s", as);
+    else if (as[4] == ' ')
+        fprintf(trace, "0x__%s", as + 4);
+    else
+        fprintf(trace, "0x____%s", as + 6);
+
+    fprintf(trace, "SP=%04X ", cpu->SP->value);
+    fprintf(trace, "BC=%02X%02X ", cpu->B->value, cpu->C->value);
+    fprintf(trace, "DE=%02X%02X ", cpu->D->value, cpu->E->value);
+    fprintf(trace, "HL=%02X%02X ", cpu->H->value, cpu->L->value);
+    fprintf(trace, "A=%02X ", cpu->A->value);
+
+    fprintf(trace, "FLAGS=%02X%s%s%s%s%s\n",
+            cpu->FLAGS->value,
+            cpu->FLAGS->value & FLAGS_CY ? " CY" : "",
+            cpu->FLAGS->value & FLAGS_P ? " P" : "",
+            cpu->FLAGS->value & FLAGS_AC ? " AC" : "",
+            cpu->FLAGS->value & FLAGS_Z ? " Z" : "", cpu->FLAGS->value & FLAGS_S ? " S" : "");
+    fflush(trace);
 }
