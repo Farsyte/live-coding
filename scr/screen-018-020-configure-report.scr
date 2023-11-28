@@ -1,0 +1,48 @@
+18
+S{ CONFIG: compile into 8100 to run at 4100..E000              }
+
+HEX FORTH DEFINITIONS
+
+E000 CONSTANT EM             ( END OF MEMORY FOR TARGET FORTH *)
+8100 CONSTANT COMPILE-ADDR                 ( AKA "base-caddr" *)
+4100 CONSTANT BASE-ADDR                    ( AKA "base-raddr" *)
+COMPILE-ADDR BASE-ADDR -
+     CONSTANT DELTA                     ( from raddr to caddr *)
+: +ORIGIN BASE-ADDR + ;
+
+
+S{ INITIAL: clear working area                                 }
+HEX HERE 100 + SP@ 100 -
+2DUP SWAP ." CLEAR FROM " .D04 ."  TO " .D04 CCR            ( *)
+                         BZERO-RANGE
+19
+S{ REPORT: Memory Map                                          }
+SETNEW SETOLD FORTH DEFINITIONS
+DP*NEW* @ DUP DP*OLD* @
+                                                           CCR
+                     U. ." curr-oaddr"                     CCR
+                                                           CCR
+           BASE-ADDR U. ." base-raddr"                     CCR
+            do*next* U. ." do*next*"                       CCR
+             DELTA - U. ." curr-raddr"                     CCR
+                                                           CCR
+        COMPILE-ADDR U. ." base-caddr"                     CCR
+                     U. ." curr-caddr"                     CCR
+
+20
+S{ REPORT: Hex Dump                                            }
+HEX FORTH DEFINITIONS
+   DP*NEW* @ 100 BZERO
+   COMPILE-ADDR DP*NEW* @ OVER - HD
+
+NEWFORTH DEFINITIONS FORTH
+CURRENT-WORDS 
+   FORTH DEFINITIONS
+
+( TODO: DECOMPILE WORDS IN NEW IMAGE )
+( TODO: DISASSEMBLE ASM CODE IN NEW IMAGE )
+
+//
+// Produce an error if we extend into screen 21.
+///
+21

@@ -1,0 +1,103 @@
+6
+S{ ASM8080: Modifed Cassady 8080 Assembler                     }
+HEX VOCABULARY ASM8080 IMMEDIATE
+
+// Add some utility words in FORTH that ASM8080 wants,
+// which I think may be generally useful.
+
+: 8* DUP + DUP + DUP + ;
+
+// Patch ;CODE in the running forth to use this assembler.
+' ASM8080 CFA ' ;CODE 8 + !
+
+ASM8080 DEFINITIONS
+
+// Constants for registers and register pairs
+
+0 CONSTANT b    1 CONSTANT c    0 CONSTANT bc
+2 CONSTANT d    3 CONSTANT e    2 CONSTANT de
+4 CONSTANT h    5 CONSTANT l    4 CONSTANT hl
+6 CONSTANT m    7 CONSTANT a    6 CONSTANT psw
+                                6 CONSTANT sp    
+// Helpers to construct opcode words.
+
+: 1OP: <BUILDS C, DOES> C@           C,    ; // no operands
+: 2OP: <BUILDS C, DOES> C@         + C,    ; // operand is from sss or rp
+: 3OP: <BUILDS C, DOES> C@ SWAP 8* + C,    ; // operand is into ddd or rp
+: 4OP: <BUILDS C, DOES> C@           C, C, ; // operand is imm8
+: 5OP: <BUILDS C, DOES> C@           C,  , ; // operand is imm16
+
+
+S{ ASM8080: Simple Instructions                                }
+
+// Operations with no operands
+00 1OP: nop,    76 1OP: hlt,    F3 1OP: di,     FB 1OP: ei,  
+07 1OP: rlc,    0F 1OP: rrc,    17 1OP: ral,    1F 1OP: rar,  
+E9 1OP: pchl,   F9 1OP: sphl,   E3 1OP: xthl,   EB 1OP: xchg,  
+27 1OP: daa,    2F 1OP: cma,    37 1OP: stc,    3F 1OP: cmc,  
+
+// Operations with a source register operand
+80 2OP: add,    88 2OP: adc,    90 2OP: sub,    98 2OP: sbb,  
+A0 2OP: ana,    A8 2OP: xra,    B0 2OP: ora,    B8 2OP: cmp,  
+
+// Operations with a destination register operand
+09 3OP: dad,    C1 3OP: pop,    C5 3OP: push,   02 3OP: stax,  
+0A 3OP: ldax,   04 3OP: inr,    05 3OP: dcr,    03 3OP: inx,  
+0B 3OP: dcx,    C7 3OP: rst,    
+
+// Operations with an 8-bit immediate value operand
+C6 4OP: adi,    CE 4OP: aci,    D6 4OP: sui,    DE 4OP: sbi,  
+E6 4OP: ani,    EE 4OP: xri,    F6 4OP: ori,    FE 4OP: cpi,  
+D3 4OP: out,    DB 4OP: in,  
+
+// Operations with a 16-bit immediate value operand
+22 5OP: shld,   2A 5OP: lhld,   32 5OP: sta,    3A 5OP: lda,  
+
+S{ ASM8080: CALL RET JMP etc                                   }
+
+// Call and Conditional Call instructions
+CD 5OP: call,   
+C4 5OP: cnz,    CC 5OP: cz,     D4 5OP: cnc,    DC 5OP: cc,
+E4 5OP: cpo,    EC 5OP: cpe,    F4 5OP: cp,     FC 5OP: cm,
+
+// Return and Conditional Return instructions
+C9 1OP: ret,    
+C0 1OP: rnz,    C8 1OP: rz,     D0 1OP: rnc,    D8 1OP: rc,
+E0 1OP: rpo,    E8 1OP: rpe,    F0 1OP: rp,     F8 1OP: rm,
+
+// Jump and Conditional Jump instructions
+C3 5OP: jmp,        
+C2 5OP: jnz,    CA 5OP: jz,     D2 5OP: jnc,    DA 5OP: jc,  
+E2 5OP: jpo,    EA 5OP: jpe,    F2 5OP: jp,     FA 5OP: jm,  
+
+S{ ASM8080: MOV MVI LXI                                        }
+: mov, 8* 40 + + C, ;
+: mvi, 8* 6 + C, C, ;
+: lxi, 8* 1+ C, , ;
+
+S{ ASM8080: building condition values for IF etc               }
+
+C2 CONSTANT 0=                                 ( USAGE: 0= IF *)
+D2 CONSTANT cs                                 ( USAGE: cs IF *)
+E2 CONSTANT pe                                 ( USAGE: pe IF *)
+F2 CONSTANT 0<                                 ( USAGE: 0< IF *)
+: not 8 + ;            ( ALLOW 0= not, cs not, pe not, 0< not *)
+
+
+S{ ASM8080: IF THEN ELSE BEGIN UNTIL WHILE REPEAT              }
+
+: if, C, HERE 0 , ;                        
+: then, HERE SWAP ! ;                     ( cond if code then *)
+: else, C3 if, SWAP then, ;     ( cond if code else code then *)
+
+: begin, HERE ;
+: until, C, , ;                       ( begin code cond until *)
+: while, if, ;            ( begin code cond while code repeat *)
+: repeat, SWAP C3 C, , then, ; 
+
+FORTH DEFINITIONS DECIMAL
+//
+// Allow the assembler to grow up to the end of screen 11.
+// Produce an error if we would grow into screen 12.
+//
+12

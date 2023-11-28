@@ -2,27 +2,31 @@
 ( Top Screen: Metacompiler development and testing             )
 EMPTY-BUFFERS HEX FORTH DEFINITIONS
 // Right margin for non-// stuff is here --------------------->|
-// 
+
 // Note that a character at the right margin is SOMETIMES
 // adjacent to the first character on the next line ...
-//
+
 1 WARNING !         ( Allow MESSAGE to use Screen 4 and 5 text )
-//
+
 : CCR                       ( CR if OUT is nonzero; clear OUT *)
    OUT @ IF 0 OUT ! CR ENDIF ;
-//
+
 // S{ -- my custom "start of screen" progress marker
 // When encountered, logs the screen number and the text
 // up to the closing } to the console.
-//
+
 : S{                            ( Comment to end of line ( -- *)
    CCR BASE @ DECIMAL BLK @ 8 / ." SCR " 3 .R BASE !
    ."  --- " 7D WORD HERE COUNT -TRAILING TYPE ."  --- " CCR
    ; IMMEDIATE
-//
+
 : LOADS               ( Load screens n1 through n2 ( n1 n2 -- *)
-   1 + SWAP DO I LOAD LOOP ;
-DECIMAL 6 26 LOADS
+   1 + SWAP DO I LOAD 
+   ?TERMINAL IF LEAVE ENDIF LOOP ;
+// LOADS: assembler, utilities, configure, compiler, model, report
+DECIMAL  6 11 LOADS             DECIMAL 12 17 LOADS
+DECIMAL 18 18 LOADS             DECIMAL 21 29 LOADS
+DECIMAL 30 99 LOADS             DECIMAL 19 20 LOADS
 4
 S{ Error Messages                               } 1 WARNING ! ;S
 EMPTY STACK
@@ -58,437 +62,234 @@ DECLARE VOCABULARY
 ..30..
 ..31..
 6
-S{ FIGFORTH 8080 ASSEMBLER 1             81AUG17   JJC 80MAR04 }
-HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-' ASSEMBLER CFA ' ;CODE 8 + !         ( PATCH ;CODE IN NUCLEUS )
-// YAGNI disposes of CODE and C; from stock assembler.
-// : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
-// : C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
-ASSEMBLER DEFINITIONS
-4 CONSTANT H    5 CONSTANT L    7 CONSTANT A   6 CONSTANT PSW
-2 CONSTANT D    3 CONSTANT E    0 CONSTANT B   1 CONSTANT C
-6 CONSTANT M    6 CONSTANT SP    
-: 1MI <BUILDS C, DOES> C@           C,    ; 
-: 2MI <BUILDS C, DOES> C@         + C,    ;
-: 3MI <BUILDS C, DOES> C@ SWAP 8* + C,    ;
-: 4MI <BUILDS C, DOES> C@           C, C, ;
-: 5MI <BUILDS C, DOES> C@           C,  , ;  
+S{ reserved for ASM8080 }
 7
-S{ FIGFORTH 8080 ASSEMBLER 2             81MAR22   JJC 80MAR04 }
-00 1MI NOP      76 1MI HLT      F3 1MI DI       FB 1MI EI
-07 1MI RLC      0F 1MI RRC      17 1MI RAL      1F 1MI RAR
-E9 1MI PCHL     F9 1MI SPHL     E3 1MI XTHL     EB 1MI XCHG
-27 1MI DAA      2F 1MI CMA      37 1MI STC      3F 1MI CMC
-80 2MI ADD      88 2MI ADC      90 2MI SUB      98 2MI SBB
-A0 2MI ANA      A8 2MI XRA      B0 2MI ORA      B8 2MI CMP
-09 3MI DAD      C1 3MI POP      C5 3MI PUSH     02 3MI STAX
-0A 3MI LDAX     04 3MI INR      05 3MI DCR      03 3MI INX
-0B 3MI DCX      C7 3MI RST      D3 4MI OUT      DB 4MI IN
-C6 4MI ADI      CE 4MI ACI      D6 4MI SUI      DE 4MI SBI
-E6 4MI ANI      EE 4MI XRI      F6 4MI ORI      FE 4MI CPI
-22 5MI SHLD     2A 5MI LHLD     32 5MI STA      3A 5MI LDA
-CD 5MI CALL
+S{ reserved for ASM8080 }
 8
-S{ FIGFORTH 8080 ASSEMBLER 3             81AUG17   JJC 80MAR04 }
-C9 1MI RET      C3 5MI JMP      C2 CONSTANT 0=  D2 CONSTANT CS
-E2 CONSTANT PE  F2 CONSTANT 0<     : NOT 8 + ;
-: MOV 8* 40 + + C, ;  : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
-: THEN HERE SWAP ! ;            : IF C, HERE 0 , ;
-: ELSE C3 IF SWAP THEN ;        : BEGIN HERE ;
-: UNTIL C, , ;                  : WHILE IF ;
-: REPEAT SWAP C3 C, , THEN ;
-FORTH DEFINITIONS DECIMAL
-
-S{ Output Formatting Helpers                                   }
-
-// Pring numbers in 2, 3, or 4 digits with leading zeros.
+S{ reserved for ASM8080 }
+9
+S{ reserved for ASM8080 }
+10
+S{ reserved for ASM8080 }
+11
+S{ reserved for ASM8080 }
+12
+S{ reserved for UTILITIES }
+13
+S{ reserved for UTILITIES }
+14
+S{ reserved for UTILITIES }
+15
+S{ reserved for UTILITIES }
+16
+S{ reserved for UTILITIES }
+17
+S{ reserved for UTILITIES }
+18
+S{ reserved for CONFIGURE }
+19
+S{ reserved for REPORT }
+20
+S{ reserved for REPORT }
+21
+S{ reserved for COMPILER }
+22
+S{ reserved for COMPILER }
+23
+S{ reserved for COMPILER }
+24
+S{ reserved for COMPILER }
+25
+S{ reserved for COMPILER }
+26
+S{ reserved for COMPILER }
+27
+S{ reserved for COMPILER }
+28
+S{ reserved for COMPILER }
+29
+S{ reserved for COMPILER }
+30
+S{ reserved for MODEL }
+31
+S{ reserved for MODEL }
+32
+S{ reserved for MODEL }
+33
+S{ reserved for MODEL }
+34
+S{ reserved for MODEL }
+35
+S{ reserved for MODEL }
+36
+S{ reserved for MODEL }
+37
+S{ reserved for MODEL }
+38
+S{ reserved for MODEL }
+39
+S{ reserved for MODEL }
+40
+S{ reserved for MODEL }
+41
+S{ reserved for MODEL }
+42
+S{ reserved for MODEL }
+43
+S{ reserved for MODEL }
+44
+S{ reserved for MODEL }
+45
+S{ reserved for MODEL }
+46
+S{ reserved for MODEL }
+47
+S{ reserved for MODEL }
+48
+S{ reserved for MODEL }
+49
+S{ reserved for MODEL }
+50
+S{ reserved for MODEL }
+51
+S{ reserved for MODEL }
+52
+S{ reserved for MODEL }
+53
+S{ reserved for MODEL }
+54
+S{ reserved for MODEL }
+55
+S{ reserved for MODEL }
+56
+S{ reserved for MODEL }
+57
+S{ reserved for MODEL }
+58
+S{ reserved for MODEL }
+59
+S{ reserved for MODEL }
+60
+S{ reserved for MODEL }
+61
+S{ reserved for MODEL }
+62
+S{ reserved for MODEL }
+63
+S{ reserved for MODEL }
+64
+S{ reserved for MODEL }
+65
+S{ reserved for MODEL }
+66
+S{ reserved for MODEL }
+67
+S{ reserved for MODEL }
+68
+S{ reserved for MODEL }
+69
+S{ reserved for MODEL }
+70
+S{ reserved for MODEL }
+71
+S{ reserved for MODEL }
+72
+S{ reserved for MODEL }
+73
+S{ reserved for MODEL }
+74
+S{ reserved for MODEL }
+75
+S{ reserved for MODEL }
+76
+S{ reserved for MODEL }
+77
+S{ reserved for MODEL }
+78
+S{ reserved for MODEL }
+79
+S{ reserved for MODEL }
+80
+S{ reserved for MODEL }
+81
+S{ reserved for MODEL }
+82
+S{ reserved for MODEL }
+83
+S{ reserved for MODEL }
+84
+S{ reserved for MODEL }
+85
+S{ reserved for MODEL }
+86
+S{ reserved for MODEL }
+87
+S{ reserved for MODEL }
+88
+S{ reserved for MODEL }
+89
+S{ reserved for MODEL }
+90
+S{ reserved for MODEL }
+91
+S{ reserved for MODEL }
+92
+S{ reserved for MODEL }
+93
+S{ reserved for MODEL }
+94
+S{ reserved for MODEL }
+95
+S{ reserved for MODEL }
+96
+S{ reserved for MODEL }
+97
+S{ reserved for MODEL }
+98
+S{ reserved for MODEL }
+99
+S{ reserved for MODEL }
+100
+S{ reserved for MODEL }
+101
+S{ reserved for MODEL }
+102
+S{ reserved for MODEL }
+103
+S{ reserved for MODEL }
+104
+S{ reserved for MODEL }
+105
+S{ reserved for MODEL }
+106
+S{ reserved for MODEL }
+107
+S{ reserved for MODEL }
+108
+S{ reserved for MODEL }
+109
+S{ reserved for MODEL }
+110
+S{ reserved for MODEL }
+111
+S{ reserved for MODEL }
+112
+S{ reserved for MODEL }
+113
+S{ reserved for MODEL }
+114
+S{ reserved for MODEL }
+115
+S{ reserved for MODEL }
+116
+S{ reserved for MODEL }
+117
+S{ reserved for MODEL }
+118
+S{ reserved for MODEL }
+119
+S{ reserved for MODEL }
 //
-: .D02 S->D     <# # # #> TYPE ;  ( V --  PRINT V IN 2 DIGITS *)
-: .D03 S->D   <# # # # #> TYPE ;  ( V --  PRINT V IN 3 DIGITS *)
-: .D04 S->D <# # # # # #> TYPE ;  ( V --  PRINT V IN 4 DIGITS *)
-
-
-S{ Memory Dump Utility                                         }
-HEX
-: HD:C            ( print char, clamped to ' '..'~' ( char -- *)
-   7F AND 20 MAX 7E MIN EMIT ;
-: HD:S          ( print 8 chars at addr using HD:C ( addr --  *)
-   DUP 8 + SWAP DO I C@ HD:C LOOP ;
-: HD:B           ( print 8 bytes at addr using .D02 ( addr -- *)
-   DUP 8 + SWAP DO I C@ BL EMIT .D02 LOOP ;
-: RD16 DUP 0F AND - ;           : RU16 0F + RD16 ;
-
-
-S{ Hex Dump Line And Range                                     }
-
-: HD:LINE                    ( one line of hex dump ( addr -- *)
-   BASE @ HEX SWAP CCR DUP .D04  ."  "
-   DUP HD:B ."  " DUP 8 + HD:B   ."  | "
-   DUP HD:S 8 + HD:S             ."  |" BASE ! ;
-
-: HD                 ( addr size -- dump memory in this range *)
-   OVER + RU16 SWAP RD16 DO I HD:LINE
-      ?TERMINAL IF LEAVE THEN 10 +LOOP CCR ;
-
-S{ Verbose Dictionary                                          }
-: (WORDS)
-   HEX @ @
-   BEGIN CCR
-      DUP .D04 SPACE
-      DUP PFA CFA @ .D04 SPACE
-      DUP ID.
-      PFA LFA @
-      DUP 0= ?TERMINAL OR
-      OVER @ A081 = OR
-   UNTIL DROP CCR ;
-: CURRENT-WORDS CURRENT (WORDS) ;
-: CONTEXT-WORDS CONTEXT (WORDS) ;
-
-S{ Memory Init Utility                                         }
-
-: BZERO-RANGE            ( clear memory range ( base limit -- *)
-   SWAP 2DUP > IF DO 0 I C! LOOP ENDIF ;
-
-: BZERO                 ( clear sized memory ( start bytes -- *)
-   OVER + BZERO-RANGE ;
-
-HEX HERE 100 +
-SP@ 100 -
-2DUP SWAP ." CLEAR FROM " .D04 ."  TO " .D04 CCR            ( *)
-BZERO-RANGE
-
-S{ Configure the Meta-Compilation                              }
-HEX
-
-E000 CONSTANT EM             ( END OF MEMORY FOR TARGET FORTH *)
-8100 CONSTANT COMPILE-ADDR                 ( AKA "base-caddr" *)
-4100 CONSTANT BASE-ADDR                    ( AKA "base-raddr" *)
-COMPILE-ADDR BASE-ADDR -
-     CONSTANT DELTA                     ( from raddr to caddr *)
-: +ORIGIN BASE-ADDR + ;
-
-S{ Newforth Vocabulary Management                              }
-
-VOCABULARY NEWFORTH IMMEDIATE          ( WORDS FOR THE TARGET *)
-
-: OF/NF              ( SEARCH FORTH BUT ADD WORDS TO NEWFORTH *)
-  [COMPILE] NEWFORTH DEFINITIONS [COMPILE] FORTH ;
-
-
-S{ State Storage for Old vs. New Dictionary Memory             }
-HEX
-0000            VARIABLE DP*OLD*           ( AKA "curr-oaddr" *)
-COMPILE-ADDR    VARIABLE DP*NEW*           ( AKA "curr-caddr" *)
-0000            VARIABLE O/N              ( 0=IN OLD 1=IN NEW *)
+// Error if we try to extend into screen 120.
 //
-// DELTA is subtracted from LAST when it is planted into the
-// link field of the words in target memory, so initialize it
-// to DELTA so the first word has a NULL link.
-DELTA           VARIABLE LAST      ( MEM ADDR OF TOP NEW DICT *)
-
-S{ Dictionary Switchers -- Running Vs Target                   }
-
-// There are rumors that these words will need to manipulate
-// LIT in some way. Cross that bridge when we get there.
-
-: SETOLD                        ( POINT DP AT OLD DICT MEMORY *)
-   O/N @ IF
-      0 O/N !
-      HERE DP*NEW* !
-      DP*OLD* @ DP !
-   ENDIF ;
-: SETNEW                        ( POINT DP AT NEW DICT MEMORY *)
-   O/N @ 0= IF
-      1 O/N !
-      HERE DP*OLD* !
-      DP*NEW* @ DP !  
-   ENDIF ;
-
-S{ Assembler Equates And Labels For Meta-Assembly              }
-//
-// EQUATE and LABEL symbols exist in local (not target) memory
-// and are linked into the FORTH vocabulary. When used,
-// they place the appropriate value onto the data stack.
-//
-// I considered linking these into ASSEMBLER but I want the
-// values to be available outside the assembler context.
-//
-: EQUATE                  ( Create WORD that produces a value *)
-   ?EXEC SETOLD CURRENT @ >R
-   [COMPILE] FORTH DEFINITIONS CONSTANT
-   R> CURRENT ! [COMPILE] FORTH ;               
-//
-// EQUATE receives its value from the stack when being defined,
-// while LABEL computes the current RADDR and uses that.
-//
-: LABEL                 ( Create WORD that recalls curr RADDR *)
-   SETOLD DP*NEW* @ DELTA - EQUATE 
-   SETNEW [COMPILE] ASSEMBLER ; 
-//
-// :M constructs a new high level word in the FORTH
-// vocabulary, stored in the host memory. The ASSEMBLER
-// vocabulary is available when defining the word.
-//
-: :M !CSP SETOLD 
-   [COMPILE] FORTH DEFINITIONS
-   CREATE -2 ALLOT [ ' QUIT CFA @ ] LITERAL ,
-   [COMPILE] ASSEMBLER LATEST 40 TOGGLE ] ;
-//
-// M; terminates a word started with :M
-//
-: M; ?CSP COMPILE ;S SMUDGE
-     [COMPILE] [ ; IMMEDIATE
-
-S{ Create Paired Heads In Old And New Dict Memories            }
-
-// CREATE-NF: The process to create a name field is the same
-// whether we are building the local part or the target part of
-// the word: accept input to DP, update DP, and turn on the
-// MSBit of the length byte and last byte.
-
-: CREATE-NF                             ( Create a NAME field *)
-   BL WORD HERE DUP C@ WIDTH @ MIN 1+ ALLOT
-   DUP 80 TOGGLE HERE 1 - 80 TOGGLE ;
-
-// CREATE-OLD: create a word head in local memory. The name
-// field comes from the input, and the LINK field links us onto
-// the NEWFORTH vocabulary.
-
-: CREATE-OLD                    ( Create HEAD in local memory *)
-   SETOLD CREATE-NF
-   [COMPILE] NEWFORTH DEFINITIONS
-   LATEST , CURRENT @ ! ;
-
-// CREATE-NEW: create a word head in target memory. The name
-// field comes from the input, and the LINK field contains
-// the RADDR of the previous word defined this way.
-
-: CREATE-NEW                   ( Create HEAD in target memory *)
-   SETNEW CREATE-NF
-   LAST @ DELTA - , LAST ! ;
-
-
-S{ Create CODE Words For Target System                         }
-
-// CODE creates heads in local and target memory. The raddr CFA
-// of the target word is stored in the CODE field of the local
-// word, and the raddr PFA of the target word is stored in the
-// CODE field of the target word. Leaves the ASSEMBLER active
-// and set up to write data to the target memory.
-
-: code                   ( Create CODE word for target system *)
-   !CSP IN @ ?EXEC CREATE-NEW IN !
-   HERE DELTA - CREATE-OLD , SMUDGE                          
-   SETNEW HERE DELTA - 2 + ,                                 
-   [COMPILE] ASSEMBLER ;
-
-// c; terminates words constructed using CODE. The word is
-// un-smudged; and the ASSEMBLER vocabulary is no longer
-// searched for incoming words.
-
-: c;                       ( END WORD STARTED WITH code ABOVE *)
-   ?EXEC ?CSP SMUDGE [COMPILE] FORTH ;
-
-
-S{ Entry Point Vector, Ident, And Init Data                    }
-
-LABEL origin
-NOP             origin JMP ( VECTOR TO COLD START AT 2 +ORIGIN )
-NOP             origin JMP ( VECTOR TO COLD START AT 4 +ORIGIN )
-
-LABEL retp      0000 ,      ( storage for return stack pointer )
-
-
-S{ Forth Inner Interpreter -- Next                             }
-HEX             00F0 EQUATE DPORT
-LABEL INTERPRETER
-//
-//
-// A Forth "high level" word is just a sequence of words to
-// be executed in sequence, which is stored as a sequence
-// of memory cells. The Forth Interpreter Pointer (IP) indicate
-// the next cell to execute; some words manipulate IP in order
-// to implement conditionals and loops.
-//
-// In this implementation, each word corresponds to a parameter
-// field in memory, preceeded by a cell containing the address
-// of the machine code implementing the word; normally this is
-// preceeded by a LINK to the next word in the vocabulary and
-// a name field. "Headless" words do not have names or links.
-//
-// The main task of the inner interpreter is to fetch the cell
-// indicated by IP into W (and increment IP), then fetch the
-// cell indicated by W (incrementing W), and turn control over
-// to the machine code at that address.
-//
-// This implementation stores the IP in the 8080 "BC" register
-// pair, and uses the 8080 "DE" register pair for "W". To save
-// one instruction during NEXT, the final increment of DE to
-// point it at the PFA of the next word is not done; the code
-// that runs for a word will increment DE to get the PFA of
-// the word.
-//
-// Conceptually, when the code for a word has completed its
-// task, it jumps to NEXT. It is most common for a word to
-// want to push a result (or two) onto the DATA stack, so
-// entry points are provided just before NEXT for pushing
-// one result from HL, or a result from DE then a result
-// from HL.
-//
-// The EXECUTE word is a special case; it wants to terminate
-// by branching into the middle of NEXT, with a W value in
-// hand obtained from somewhere other than IP.
-//
-  D PUSH                       ( PSH2: PUSH DATA FROM 8080 DE *)
-  H PUSH                       ( PSH1: PUSH DATA FROM 8080 HL *)
-LABEL do*next*
-  B LDAX B INX A L MOV B LDAX B INX A H MOV   ( NEXT: W=*IP++ *)
-  M E MOV H INX M D MOV XCHG DPORT OUT PCHL  ( NEXT1: PC=*W++ *)
-
-:M psh2 do*next* 2 - JMP M;
-:M psh1 do*next* 1 - JMP M;
-:M next do*next*     JMP M;
-:M nxt1 do*next* 6 + JMP M;
-
-
-S{ Nucleus: Data Stack Management                              }
-//
-// LIT            -- n
-//    Push the next word at IP onto the data stack.
-//
-code lit                 ( PUSH LIT FROM IP ONTO STACK ( -- n *)
-   B LDAX B INX A L MOV B LDAX B INX A H MOV            psh1 c;
-//
-// DROP           n --                          233
-//    Drop the top number from the stack.
-//
-code drop                   ( DROP TOP WORD FROM STACK ( n -- *)
-   D POP                                                next c;
-//
-// SWAP           n1 n2 -- n2 n1                230
-//    Exchange the top two stack values.
-//
-code swap      ( SWAP TOP TWO WORDS ON STACK ( n1 n2 -- n2 n1 *)
-   H POP XTHL                                           psh1 c;
-//
-// OVER           n1 n2 -- n1 n2 n1             170
-//    Leave a copy of the second number on the stack.
-//
-code over   ( PUSH COPY OF 2ND ONTO STACK ( n1 n2 -- n1 n2 n1 *)
-   H POP D POP H PUSH                                   psh2 c;
-//
-// DUP            n -- n n                      205             "dupe"
-//    Leave a copy of the top stack number.
-//
-code dup                  ( DUPLICATE TOP OF STACK ( n -- n n *)
-   H POP H PUSH                                         psh1 c;
-//
-// ?DUP           n -- n ( n )                  184       "query-dupe"
-//    Duplicate n if it is non-zero.
-//
-code 2dup             ( DUPLICATE TOP DBL OF STACK ( d -- d d *)
-   H POP D POP D PUSH H PUSH                            psh2 c;
-//
-// ROT            n1 n2 n3 -- n2 n3 n1          212             "rote"
-//    Rotate the top three values, bringing the deepest to the top.
-//
-code rot              ( ROTATE 3 ITEMS ( n1 n2 n3 -- n2 n3 n1 *)
-   D POP H POP XTHL                                     psh2 c;
-//
-// PICK           n1 -- n2                      240
-//
-//    NOT IN fig-FORTH ... implementation currently TBD.
-//
-//    Return the contents of the n1-th stack value,  not counting n1
-//    itself.  An error condition results for n less than one.
-//         2 PICK  is equivalent to OVER.  {1..n}
-//
-// ROLL           n --                          236
-//
-//    NOT IN fig-FORTH ... implementation currently TBD.
-//
-//    Extract  the  n-th stack value to the top of  the  stack,  not
-//    counting  n  itself,  moving  the remaining  values  into  the
-//    vacated position.   An error condition results for n less than
-//    one.  {1..n}
-//         3  ROLL  =  ROT
-//         1  ROLL  =  null operation
-//
-// DEPTH          -- n                          238
-//
-//    NOT IN fig-FORTH ... implementation currently TBD.
-//
-//    Leave the number of the quantity of 16-bit values contained in
-//    the data stack, before n added.
-//
-
-S{ Nucleus: Return Stack Management                            }
-//
-// >R             n --                          C,200           "to-r"
-//    Transfer n to the return stack.   Every >R must be balanced by
-//    a  R> in the same control structure nesting level of a  colon-
-//    definition.
-//
-code >r                   ( TRANSFER N TO RETURN STACK ( n -- *)
-   D POP retp LHLD H DCX H DCX retp SHLD
-   E M MOV H INX D M MOV                                next c;
-//
-// R>             -- n                          C,110         "r-from"
-//    Transfer n from the return stack to the data stack.
-//
-code r>                  ( RECOVER N FROM RETURN STACK ( -- n *)
-   retp LHLD M E MOV H INX M D MOV H INX retp SHLD      next c;
-//
-// R@             -- n                          C,228        "r-fetch"
-//    Copy the number on top of the return stack to the data stack.
-//
-code r@                     ( COPY N FROM RETURN STACK ( -- n *)
-   retp LHLD M E MOV H INX M D MOV                      next c;
-//
-// I              -- n                          C,136
-//    Copy the loop index onto the data stack.   May only be used in
-//    the form:
-//         DO ... I ... LOOP   or
-//         DO ... I ... +LOOP
-//
-code i           ( COPY 1ST LOOP INDEX TO RETURN STACK ( -- n *)
-   retp LHLD M E MOV H INX M D MOV                      next c;
-//
-// J              -- n                          C,225
-//
-//    NOT IN fig-FORTH ... implementation currently TBD.
-//
-//    Return  the index of the next outer loop.   May only  be  used
-//    within a nested DO-LOOP in the form:
-//         DO ... DO ... J ... LOOP ... LOOP
-//
-code leave                   ( force termination of a do loop *)
-   retp LHLD M E MOV H INX M D MOV H INX
-             E M MOV H INX D M MOV                      next c;
-
-
-S{ Report Memory Map                                           }
-SETNEW SETOLD FORTH DEFINITIONS
-DP*NEW* @ DUP DP*OLD* @
-                                                           CCR
-                     U. ." curr-oaddr"                     CCR
-                                                           CCR
-           BASE-ADDR U. ." base-raddr"                     CCR
-            do*next* U. ." do*next*"                       CCR
-             DELTA - U. ." curr-raddr"                     CCR
-                                                           CCR
-        COMPILE-ADDR U. ." base-caddr"                     CCR
-                     U. ." curr-caddr"                     CCR
-
-
-S{ Hex Dump Of New Dictionary Image                            }
-HEX FORTH DEFINITIONS
-   DP*NEW* @ 100 BZERO
-   COMPILE-ADDR DP*NEW* @ OVER - HD
-
-NEWFORTH DEFINITIONS FORTH
-CURRENT-WORDS 
-   FORTH DEFINITIONS
-
-( TODO: DECOMPILE WORDS IN NEW IMAGE )
-( TODO: DISASSEMBLE ASM CODE IN NEW IMAGE )
+120

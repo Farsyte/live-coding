@@ -1,0 +1,59 @@
+12
+S{ UTILITY: Output Formatting Helpers                          }
+
+// Pring numbers in 2, 3, or 4 digits with leading zeros.
+
+: .D02 S->D     <# # # #> TYPE ;  ( V --  PRINT V IN 2 DIGITS *)
+: .D03 S->D   <# # # # #> TYPE ;  ( V --  PRINT V IN 3 DIGITS *)
+: .D04 S->D <# # # # # #> TYPE ;  ( V --  PRINT V IN 4 DIGITS *)
+
+
+S{ UTILITY: Memory Dump Utility                                }
+HEX
+: HD:C            ( print char, clamped to ' '..'~' ( char -- *)
+   7F AND 20 MAX 7E MIN EMIT ;
+: HD:S          ( print 8 chars at addr using HD:C ( addr --  *)
+   DUP 8 + SWAP DO I C@ HD:C LOOP ;
+: HD:B           ( print 8 bytes at addr using .D02 ( addr -- *)
+   DUP 8 + SWAP DO I C@ BL EMIT .D02 LOOP ;
+: RD16 DUP 0F AND - ;           : RU16 0F + RD16 ;
+
+
+S{ UTILITY: Hex Dump Line And Range                            }
+
+: HD:LINE                    ( one line of hex dump ( addr -- *)
+   BASE @ HEX SWAP CCR DUP .D04  ."  "
+   DUP HD:B ."  " DUP 8 + HD:B   ."  | "
+   DUP HD:S 8 + HD:S             ."  |" BASE ! ;
+
+: HD                 ( addr size -- dump memory in this range *)
+   OVER + RU16 SWAP RD16 DO I HD:LINE
+      ?TERMINAL IF LEAVE THEN 10 +LOOP CCR ;
+
+S{ UTILITY: Verbose Dictionary                                 }
+: (WORDS)
+   HEX @ @
+   BEGIN CCR
+      DUP .D04 SPACE
+      DUP PFA CFA @ .D04 SPACE
+      DUP ID.
+      PFA LFA @
+      DUP 0= ?TERMINAL OR
+      OVER @ A081 = OR
+   UNTIL DROP CCR ;
+: CURRENT-WORDS CURRENT (WORDS) ;
+: CONTEXT-WORDS CONTEXT (WORDS) ;
+
+S{ UTILITY: Memory Init Utility                                }
+
+: BZERO-RANGE            ( clear memory range ( base limit -- *)
+   SWAP 2DUP > IF DO 0 I C! LOOP ENDIF ;
+
+: BZERO                 ( clear sized memory ( start bytes -- *)
+   OVER + BZERO-RANGE ;
+
+//
+// Allow the utilities to grow up to the end of screen 16.
+// Produce an error if we would grow into screen 17.
+//
+17

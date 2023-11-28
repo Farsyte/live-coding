@@ -4,11 +4,75 @@ The words of the Required Word Set are grouped to show like
 characteristics. No implementation requirements should be inferred
 from this grouping.
 
-** Runtime code for immediates
+** Special case Runtime code
 
 **** DONE LIT            -- n
 CLOSED: [2023-11-20 Mon 02:13]
          Push the next word at IP onto the data stack.
+
+** Run-Time Code for Compiling Words
+
+These lower case entries refer to just the run-time code corresponding
+to a compiling word.
+
+TBD if these are actual words that do something interesting when used
+during the compile process ...?
+
+*** DONE do*literal* ==> do*lit*
+CLOSED: [2023-11-27 Mon 13:33]
+
+*** DONE do*variable* ==> do*var*
+CLOSED: [2023-11-27 Mon 13:33]
+
+*** DONE do*constant* ==> do*con*
+CLOSED: [2023-11-27 Mon 13:33]
+
+*** DONE fig-FORTH adds do*usr*
+CLOSED: [2023-11-27 Mon 13:34]
+
+*** DONE fig-FORTH uses do*0br* not do*if*
+CLOSED: [2023-11-27 Mon 13:44]
+
+*** DONE fig-FORTH adds do*br* for do*else* and others
+CLOSED: [2023-11-27 Mon 13:44]
+
+*** DONE do*colon* ==> do*col*
+CLOSED: [2023-11-27 Mon 13:39]
+
+*** DONE do*semicolon* ==> do*sem*
+CLOSED: [2023-11-27 Mon 13:39]
+
+*** DONE do*if* ==> fig-FORTH do*0br*
+CLOSED: [2023-11-27 Mon 13:45]
+
+*** DONE do*else* ==> fig-FORTH do*br*
+CLOSED: [2023-11-27 Mon 13:45]
+
+*** DONE do*then* ==> no runtime code in fig-FORTH
+CLOSED: [2023-11-27 Mon 13:45]
+
+*** DONE do*begin* ==> no runtime code in fig-FORTH
+CLOSED: [2023-11-27 Mon 13:45]
+
+*** DONE do*do*
+CLOSED: [2023-11-27 Mon 13:48]
+
+*** DONE do*loop* ==> fig_forth do*loop* and do*+loop*
+CLOSED: [2023-11-27 Mon 14:03]
+
+*** DONE do*repeat* ==> fig-FORTH do*br*
+CLOSED: [2023-11-27 Mon 14:04]
+
+*** DONE do*while* ==> fig-FORTH do*br*
+CLOSED: [2023-11-27 Mon 14:04]
+
+*** DONE do*until* ==> fig-FORTH do*0br*
+CLOSED: [2023-11-27 Mon 14:04]
+
+*** DONE do*create* ==> no asm code in fig-FORTH
+CLOSED: [2023-11-27 Mon 14:06]
+
+*** TODO    do*does>* ==> fig-FORTH (;CODE) is high level
 
 ** Nucleus Words
 
@@ -29,9 +93,9 @@ CLOSED: [2023-11-20 Mon 02:13]
 CLOSED: [2023-11-20 Mon 02:16]
          Leave a copy of the top stack number.
 
-**** DONE ?DUP           n -- n ( n )                  184       "query-dupe"
-CLOSED: [2023-11-20 Mon 02:16]
-         Duplicate n if it is non-zero.
+**** DONE 2DUP           d -- d d                                  "two-dupe"
+CLOSED: [2023-11-21 Tue 16:23]
+         Leave a copy of the top stack double number.
 
 **** DONE ROT            n1 n2 n3 -- n2 n3 n1          212             "rote"
 CLOSED: [2023-11-20 Mon 02:18]
@@ -66,6 +130,12 @@ CLOSED: [2023-11-20 Mon 02:30]
          proceeds   normally   until  the  loop  terminating  word   is
          encountered.
 
+**** TODO ?DUP           n -- n ( n )                  184       "query-dupe"
+         Duplicate n if it is non-zero.
+
+         : -DUP DUP IF DUP ENDIF ; ( fig-FORTH )
+         : ?DUP DUP IF DUP ENDIF ; ( FORTH 79 )
+
 *** stack words, not in fig-FORTH
 
 **** TODO    PICK           n1 -- n2                      240
@@ -91,6 +161,39 @@ CLOSED: [2023-11-20 Mon 02:30]
               DO ... DO ... J ... LOOP ... LOOP
 
 *** arithmetic
+**** TODO NEGATE         n -- -n                       177
+         Leave the two's complement of a number,  i.e.,  the difference
+         of zero less n.
+
+         Known as MINUS in fig-FORTH.
+
+**** TODO    ABS            n1 -- n1                      108         "absolute"
+         Leave the absolute value of a number.
+
+**** TODO    +              n1 n2 -- n3                   121             "plus"
+         Leave the arithmetic sum of n1 plus n2.
+
+**** TODO    1+             n -- n+1                      107         "one-plus"
+         Increment n by one, according to the operation of + .
+
+**** TODO    2+             n -- n+2                      135         "two-plus"
+         Increment n by two, according to the operation of + .
+
+**** TODO    -              n1 n2 -- n3                   134            "minus"
+         Subtract n2 from n1 and leave the difference n3.
+
+**** TODO    1-             n -- n-1                      105        "one-minus"
+         Decrement n by one, according to the operation of - .
+
+**** TODO    2-             n -- n-1                      129        "two-minus"
+         Decrement n by two, according to the operation of - .
+
+**** TODO    MAX            n1 n2 -- n3                   218              "max"
+         Leave the greater of two numbers.
+
+**** TODO    MIN            n1 n2 -- n3                   127              "min"
+         Leave the lesser of two numbers.
+
 **** TODO    *              n1 n2 -- n3                   138            "times"
          Leave the arithmetic product of n1 times n2.
 
@@ -101,56 +204,22 @@ CLOSED: [2023-11-20 Mon 02:30]
          greater precision than the otherwise equivalent  sequence:  n1
          n2 * n3 /
 
-**** TODO    */MOD          n1 n2 n3 -- n4 n5             192 "times-divide-mod"
-         Multiply  n1  by  n2,  divide the result by n3 and  leave  the
-         remainder n4 and quotient n5.   A 32-bit intermediate  product
-         is used as for */ .  The remainder has the same sign as n1.
-
-**** TODO    +              n1 n2 -- n3                   121             "plus"
-         Leave the arithmetic sum of n1 plus n2.
-
-**** TODO    -              n1 n2 -- n3                   134            "minus"
-         Subtract n2 from n1 and leave the difference n3.
+**** TODO    /MOD           n1 n2 -- n3 n4                198       "divide-mod"
+         Divide  n1 by n2 and leave the remainder n3 and  quotient  n4.
+         n3 has the same sign as n1.
 
 **** TODO    /              n1 n2 -- n3                   178           "divide"
          Divide  n1  by n2 and leave the quotient n3.   n3  is  rounded
          toward zero.
 
-**** TODO    /MOD           n1 n2 -- n3 n4                198       "divide-mod"
-         Divide  n1 by n2 and leave the remainder n3 and  quotient  n4.
-         n3 has the same sign as n1.
-
-**** TODO    1+             n -- n+1                      107         "one-plus"
-         Increment n by one, according to the operation of + .
-
-**** TODO    1-             n -- n-1                      105        "one-minus"
-         Decrement n by one, according to the operation of - .
-
-**** TODO    2+             n -- n+2                      135         "two-plus"
-         Increment n by two, according to the operation of + .
-
-**** TODO    2-             n -- n-1                      129        "two-minus"
-         Decrement n by two, according to the operation of - .
-
-**** TODO    ABS            n1 -- n1                      108         "absolute"
-         Leave the absolute value of a number.
-
-**** TODO    DNEGATE        d -- -d                       245         "d-negate"
-         Leave the two's complement of a double number.
-
-**** TODO    MAX            n1 n2 -- n3                   218              "max"
-         Leave the greater of two numbers.
-
-**** TODO    MIN            n1 n2 -- n3                   127              "min"
-         Leave the lesser of two numbers.
-
 **** TODO    MOD            n1 n2 -- n3                   104
          Divide n1 by n2,  leaving the remainder n3, with the same sign
          as n1.
 
-**** TODO    NEGATE         n -- -n                       177
-         Leave the two's complement of a number,  i.e.,  the difference
-         of zero less n.
+**** TODO    */MOD          n1 n2 n3 -- n4 n5             192 "times-divide-mod"
+         Multiply  n1  by  n2,  divide the result by n3 and  leave  the
+         remainder n4 and quotient n5.   A 32-bit intermediate  product
+         is used as for */ .  The remainder has the same sign as n1.
 
 **** TODO    U*             un1 un2 -- ud3                242          "u-times"
          Perform an unsigned multiplication of un1 by un2,  leaving the
@@ -160,10 +229,11 @@ CLOSED: [2023-11-20 Mon 02:30]
          Perform  the  unsigned division of double number ud1  by  un2,
          leaving the remainder un3,  and the quotient un4.   All values
          are unsigned.
-
-**** TODO    U<             un1 un2 -- flag               150      "u-less-than"
-         Leave the flag representing the magnitude comparison of un1  <
-         un2 where un1 and un2 are treated as 16-bit unsigned integers.
+         
+**** TODO DNEGATE        d -- -d                       245         "d-negate"
+         Leave the two's complement of a double number.
+         
+         Known as DMINUS in fig-FORTH
 
 *** logical
 **** TODO    0<             n -- flag                     144        "zero-less"
@@ -174,6 +244,10 @@ CLOSED: [2023-11-20 Mon 02:30]
 
 **** TODO    0>             n -- flag                     118     "zero-greater"
          True if n is greater than zero.
+
+**** TODO    U<             un1 un2 -- flag               150      "u-less-than"
+         Leave the flag representing the magnitude comparison of un1  <
+         un2 where un1 and un2 are treated as 16-bit unsigned integers.
 
 **** TODO    <              n1 n2 -- flag                 139        "less-than"
          True if n1 is less than n2.
@@ -189,16 +263,6 @@ CLOSED: [2023-11-20 Mon 02:30]
 
 **** TODO    AND            n1 n2 -- n3                   183
          Leave the bitwise logical 'and' of n1 and n2.
-
-**** TODO    EXECUTE        addr --                       163
-
-         Execute the dictionary entry whose compilation address is on
-         the stack.
-
-**** TODO    EXIT                                         C,117
-         When compiled within a colon-definition,  terminate  execution
-         of that definition,  at that point.   May not be used within a
-         DO...LOOP.
 
 **** TODO    NOT            flag1 -- flag2                165
          Reverse the boolean value of flag1.  This is identical to 0=.
@@ -247,28 +311,6 @@ CLOSED: [2023-11-20 Mon 02:30]
          Move the specified quantity n of 16-bit memory cells beginning
          at addr1 into memory at addr2.  The contents of addr1 is moved
          first.  If n is negative or zero, nothing is moved.
-
-** Run-Time Code for Compiling Words
-
-These lower  case entries refer to just  the  run-time  code
-corresponding to a compiling word:
-
-*** TODO    begin
-*** TODO    colon
-*** TODO    constant
-*** TODO    create
-*** TODO    do
-*** TODO    does>
-*** TODO    else
-*** TODO    if
-*** TODO    literal
-*** TODO    loop
-*** TODO    repeat
-*** TODO    semicolon
-*** TODO    then
-*** TODO    until
-*** TODO    variable
-*** TODO    while
 
 ** Interpreter Words
 
@@ -380,6 +422,11 @@ corresponding to a compiling word:
 
 *** TODO    EMIT           char --                       207
          Transmit character to the current output device.
+
+
+*** TODO    EXECUTE        addr --                       163
+         Execute the dictionary entry whose compilation address is on
+         the stack.
 
 *** TODO    EXPECT         addr n --                     189
          Transfer  characters  from  the terminal  beginning  at  addr,
@@ -503,6 +550,11 @@ corresponding to a compiling word:
          vocabularies,  conversion and compilation of a literal  number
          is attempted,  with regard to the current BASE;  that failing,
          an error condition exists .
+
+*** TODO    EXIT                                         C,117
+         When compiled within a colon-definition,  terminate  execution
+         of that definition,  at that point.   May not be used within a
+         DO...LOOP.
 
 *** TODO    ;                                            I,C,196   "semi-colon"
          Terminate  a  colon  definition  and  stop  compilation.    If

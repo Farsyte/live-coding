@@ -1,0 +1,244 @@
+30
+S{ Entry Point Vector, Ident, And Init Data                    }
+
+label origin
+nop, origin jmp,              ( COLD START VECTOR AT 2 +ORIGIN )
+nop, origin jmp,              ( WARM START VECTOR AT 4 +ORIGIN )
+
+label usrp      0000 ,     ( storage for user variable pointer )
+label retp      0000 ,      ( storage for return stack pointer )
+
+
+S{ Forth IMPL Notes and Inner Interpreter -- next              }
+HEX             00F0 equate DPORT
+label INTERPRETER
+
+// FORTH code compiles to a sequence of cells containing
+// addresses of words -- specificaly, the address of the CODE
+// field of the word, which has the address of the machine code
+// implementing the word.
+
+// The FORTH Interpreter Pointer (IP) has the address of the next cell
+// to be interpreted. The core of the interpreter is the code at
+// do*next* here: load the working (W) register from the cell
+// indicated by IP, and increment IP; then transfer control to the
+// address contained in the cell W points to.
+
+// Alternate (convenience entry point) HERE at do*next* -2
+// pushes two cells (from 8080 "DE" and "HL" in that order) onto
+// the data stack before performing NEXT.
+
+  d push,                      ( psh2: PUSH DATA FROM 8080 DE *)
+
+// Alternate (convenience entry point) HERE at do*next* -1
+// pushes one cells (from 8080 "HL") onto the data stack before
+// performing NEXT.
+
+  h push,                      ( psh1: PUSH DATA FROM 8080 HL *)
+
+// Primary entry point HERE at do*next* loads W with the CFA
+// in the cell referred to by IP, incrementing IP, then turns
+// control over to the code refernced by the cell at W.
+
+// The 8080 "BC" register holds the FORTH "IP" and must be
+// retained (or restored) across machine code.
+
+// The 8080 "DE" register, if incremented, will point to the
+// PFA of the word being executed.
+
+// The 8080 "SP" register is the FORTH data stack pointer.
+
+label do*next*
+  b ldax, b inx, a l mov, 
+  b ldax, b inx, a h mov,                     ( NEXT: W=*IP++ *)
+
+// The EXECUTE word jumps to HERE, into the middle of this process, with
+// a CFA in the 8080 "DE" register; be sure to update EXECUTE
+// if any interesting change is made to do*next*.
+
+  m e mov, h inx, m d mov,
+  xchg, DPORT out, pchl,                     (  EXEC: PC=*W++ *)
+
+// Provide assembler macros that transition from machine
+// code back to the interpreter
+
+:M psh2, do*next* 2 - jmp, M;    ( PUSH 2 CELLS, THEN DO NEXT *)
+:M psh1, do*next* 1 - jmp, M;     ( PUSH 1 CELL, THEN DO NEXT *)
+:M next, do*next*     jmp, M;             ( W=*IP++; JMP *W++ *)
+:M exec, do*next* 6 + jmp, M;                      ( JMP *W++ *)
+
+
+S{ Run-Time Code for Compiling Words: do*lit|var|con|usr*      }
+//
+// do*lit*    -- n
+//    Push the next word at IP onto the data stack.
+//
+code do*lit*            ( push immediate data to stack ( -- n *)
+   b ldax, b inx, a l mov, 
+   b ldax, b inx, a h mov,                             psh1, c;
+code do*var*              ( push storage addr to stack ( -- a *)
+   d inx, d push,                                      next, c;
+code do*con*              ( push stored value to stack ( -- n *)
+   d inx, xchg, m e mov, h inx, m d mov, d push,       next, c;
+code do*usr*           ( push user var addr to stack ( n -- a *
+   d inx, xchg, m e mov, 0 d mvi, usrp lhld, d dad,    psh1, c;
+
+S{ Run-Time Code for Compiling Words: do*br|0br*               }
+//
+// do*br*     --
+//    Implement an unconditional relative branch: increment IP by the
+//    value at IP
+//
+code do*br*                      ( relative branch: IP += *IP *)
+label do_br
+  b h mov, c l mov, m e mov, h inx, m d mov, h dcx,
+  d dad, l c mov, h b mov,                             next, c;
+//
+// do*0br*    tf --
+//    Implement a conditional relative branch: increment IP by the
+//    value at IP if the top of stack is zero; otherwise, increment
+//    IP by two to get past the offset.
+//
+code do*0br*                         ( IP += *IP or 2 ( tf -- *)
+  h pop, l a mov, h ora, do_br jz, b inx, b inx,       next, c;
+
+S{ Run-Time Code for Compiling Words: do*+loop*                }
+code do*+loop*                 ( loop bottom, inc by n ( n -- *)
+    d pop,
+label do_+loop
+    retp lhld,
+    m a mov, e add, a m mov, h inx, a e mov,
+    m a mov, d adc, a m mov, h inx,
+    d inr, d dcr, a d mov,
+    0< not if, e a mov, m sub, d a mov, h inx, m sbb,
+    else, m a mov, e sub, h inx, m a mov, d sbb,
+    then, do_br jm, h inx, retp shld, b inx, b inx,    next, c;
+
+S{ Run-Time Code for Compiling Words: do*do|loop*              }
+code do*do*          ( start a counting loop ( limit start -- *)
+  retp lhld, h dcx, h dcx, h dcx, h dcx, retp shld,	
+        d pop, e m mov, h inx, d m mov, h inx,
+        d pop, e m mov, h inx, d m mov, 	       next, c;
+code do*loop*                    ( loop bottom, inc by 1 ( -- *)
+  1 d lxi,                                     do_+loop jmp, c;
+
+
+S{ Run-Time Code for Compiling Words: do*col|sem*              }
+code do*col*                         ( push IP; IP = *IP ( -- *)
+  retp lhld, h dcx, b m mov, h dcx, c m mov, retp shld,
+  d inx, e c mov, d b mov,                             next, c;
+code do*sem*                                    ( pop IP ( -- *)
+  retp lhld, m c mov, h inx, m b mov, h inx,
+  retp shld,                                           next, c;
+
+S{ Primatives                                                  }
+//
+// EXECUTE        addr --                       163
+//    Execute the dictionary entry whose compilation address is on
+//    the stack.
+//
+code execute                ( run word with this cfa ( cfa -- *)
+   h pop,                                              exec, c;
+
+S{ Nucleus: Data Stack Management                              }
+
+
+// drop           n --                          233
+//    Drop the top number from the stack.
+
+code drop                   ( DROP TOP WORD FROM STACK ( n -- *)
+   d pop,                                              next, c;
+
+// swap           n1 n2 -- n2 n1                230
+//    Exchange the top two stack values.
+
+code swap      ( SWAP TOP TWO WORDS ON STACK ( n1 n2 -- n2 n1 *)
+   h pop, xthl,                                        psh1, c;
+
+// over           n1 n2 -- n1 n2 n1             170
+//    Leave a copy of the second number on the stack.
+
+code over   ( PUSH COPY OF 2ND ONTO STACK ( n1 n2 -- n1 n2 n1 *)
+   h pop, d pop, h push,                               psh2, c;
+
+// dup            n -- n n                      205             "dupe"
+//    Leave a copy of the top stack number.
+
+code dup                  ( DUPLICATE TOP OF STACK ( n -- n n *)
+   h pop, h push,                                      psh1, c;
+
+// 2dup           d -- d d                                  "two-dupe"
+//    Duplicate the two-cell value "d"
+
+code 2dup             ( DUPLICATE TOP DBL OF STACK ( d -- d d *)
+   h pop, d pop, d push, h push,                       psh2, c;
+
+// rot            n1 n2 n3 -- n2 n3 n1          212             "rote"
+//    Rotate the top three values, bringing the deepest to the top.
+
+code rot              ( ROTATE 3 ITEMS ( n1 n2 n3 -- n2 n3 n1 *)
+   d pop, h pop, xthl,                                 psh2, c;
+
+
+S{ Nucleus: Return Stack Management                            }
+
+// >R             n --                          C,200           "to-r"
+//    Transfer n to the return stack.   Every >R must be balanced by
+//    a  R> in the same control structure nesting level of a  colon-
+//    definition.
+
+code >r                   ( TRANSFER N TO RETURN STACK ( n -- *)
+   d pop, retp lhld, h dcx, h dcx, retp shld,
+   e m mov, h inx, d m mov,                            next, c;
+
+// R>             -- n                          C,110         "r-from"
+//    Transfer n from the return stack to the data stack.
+
+code r>                  ( RECOVER N FROM RETURN STACK ( -- n *)
+   retp lhld, m e mov, h inx,     
+              m d mov, h inx, retp shld,               next, c;
+
+// R@             -- n                          C,228        "r-fetch"
+//    Copy the number on top of the return stack to the data stack.
+
+code r@                     ( COPY N FROM RETURN STACK ( -- n *)
+   retp lhld, m e mov, h inx, m d mov,                 next, c;
+
+
+S{ 16-bit Arithmetic                                           }
+code negate               ( 16 Bit Two'S Complement ( n -- -n *)
+   h pop, l a mov, cma, a l mov,
+          h a mov, cma, a h mov, h inx,                psh1, c;
+
+S{ 32-bit Arithmetic                                           }
+HEX
+code s->d              ( 16-bit to 32-bit conversion ( n -- d *)
+        d pop, 0 h lxi, d a mov, 80 ani,
+       0= not if, h dcx, then,                         psh2, c;
+
+code dnegate              ( 32 bit two's complement ( d -- -d *)
+       h pop, d pop, 	
+       a sub, e sub, a e mov, 0 a mvi, d sbb, a d mov, 	
+     0 a mvi, l sbb, a l mov, 0 a mvi, h sbb, a h mov, psh2, c;
+
+S{ Logical                                                     }
+
+S{ Memory Access                                               }
+
+S{ Interpreter                                                 }
+
+S{ Compiler                                                    }
+
+S{ Device                                                      }
+
+S{ Assembler                                                   }
+
+S{ Reference                                                   }
+
+S{ More from Forth-79                                          }
+
+
+//
+// Allow us to grow up to but not into screen 120.
+//
+120

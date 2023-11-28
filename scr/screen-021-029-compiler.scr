@@ -1,0 +1,130 @@
+21
+S{ COMPILE: Newforth Vocabulary Management                     }
+
+VOCABULARY NEWFORTH IMMEDIATE          ( WORDS FOR THE TARGET *)
+
+: OF/NF              ( SEARCH FORTH BUT ADD WORDS TO NEWFORTH *)
+  [COMPILE] NEWFORTH DEFINITIONS [COMPILE] FORTH ;
+
+
+S{ COMPILE: State Storage for Old vs. New Dictionary Memory    }
+HEX
+0000            VARIABLE DP*OLD*           ( AKA "curr-oaddr" *)
+COMPILE-ADDR    VARIABLE DP*NEW*           ( AKA "curr-caddr" *)
+0000            VARIABLE O/N              ( 0=IN OLD 1=IN NEW *)
+
+// DELTA is subtracted from LAST when it is planted into the
+// link field of the words in target memory, so initialize it
+// to DELTA so the first word has a NULL link.
+DELTA           VARIABLE LAST      ( MEM ADDR OF TOP NEW DICT *)
+
+S{ COMPILE: Dictionary Switchers -- Running Vs Target          }
+
+// There are rumors that these words will need to manipulate
+// LIT in some way. Cross that bridge when we get there.
+
+: SETOLD                        ( POINT DP AT OLD DICT MEMORY *)
+   O/N @ IF
+      0 O/N !
+      HERE DP*NEW* !
+      DP*OLD* @ DP !
+   ENDIF ;
+: SETNEW                        ( POINT DP AT NEW DICT MEMORY *)
+   O/N @ 0= IF
+      1 O/N !
+      HERE DP*OLD* !
+      DP*NEW* @ DP !  
+   ENDIF ;
+
+S{ COMPILE: Assembler Equates And Labels For Meta-Assembly     }
+
+// EQUATE and LABEL symbols exist in local (not target) memory
+// and are linked into the FORTH vocabulary. When used,
+// they place the appropriate value onto the data stack.
+
+// I considered linking these into ASM8080 but I want the
+// values to be available outside the assembler context.
+
+: equate                  ( Create WORD that produces a value *)
+   ?EXEC SETOLD CURRENT @ >R
+   [COMPILE] FORTH DEFINITIONS CONSTANT
+   R> CURRENT ! [COMPILE] FORTH ;               
+
+// EQUATE receives its value from the stack when being defined,
+// while LABEL computes the current RADDR and uses that.
+
+: label                 ( Create WORD that recalls curr RADDR *)
+   SETOLD DP*NEW* @ DELTA - equate 
+   SETNEW [COMPILE] ASM8080 ; 
+
+// :M constructs a new high level word in the FORTH
+// vocabulary, stored in the host memory. The ASM8080
+// vocabulary is available when defining the word.
+
+: :M !CSP SETOLD 
+   [COMPILE] FORTH DEFINITIONS
+   CREATE -2 ALLOT [ ' QUIT CFA @ ] LITERAL ,
+   [COMPILE] ASM8080 LATEST 40 TOGGLE ] ;
+
+// M; terminates a word started with :M
+
+: M; ?CSP COMPILE ;S SMUDGE
+     [COMPILE] [ ; IMMEDIATE
+
+S{ COMPILE: Create Paired Heads In Old And New Dict Memories   }
+
+// CREATE-NF: The process to create a name field is the same
+// whether we are building the local part or the target part of
+// the word: accept input to DP, update DP, and turn on the
+// MSBit of the length byte and last byte.
+
+: CREATE-NF                             ( Create a NAME field *)
+   BL WORD HERE DUP C@ WIDTH @ MIN 1+ ALLOT
+   DUP 80 TOGGLE HERE 1 - 80 TOGGLE ;
+
+// CREATE-OLD: create a word head in local memory. The name
+// field comes from the input, and the LINK field links us onto
+// the NEWFORTH vocabulary.
+
+: CREATE-OLD                    ( Create HEAD in local memory *)
+   SETOLD CREATE-NF
+   [COMPILE] NEWFORTH DEFINITIONS
+   LATEST , CURRENT @ ! ;
+
+// CREATE-NEW: create a word head in target memory. The name
+// field comes from the input, and the LINK field contains
+// the RADDR of the previous word defined this way.
+
+: CREATE-NEW                   ( Create HEAD in target memory *)
+   SETNEW CREATE-NF
+   LAST @ DELTA - , LAST ! ;
+
+
+S{ COMPILE: Create CODE Words For Target System                }
+
+// CODE creates heads in local and target memory. The raddr CFA
+// of the target word is stored in the CODE field of the local
+// word, and the raddr PFA of the target word is stored in the
+// CODE field of the target word. Leaves the ASM8080 active
+// and set up to write data to the target memory.
+
+: code                   ( Create CODE word for target system *)
+   !CSP IN @ ?EXEC CREATE-NEW IN !
+   HERE DELTA - CREATE-OLD , SMUDGE                          
+   SETNEW HERE DELTA - 2 + ,                                 
+   [COMPILE] ASM8080 ;
+
+// c; terminates words constructed using CODE. The word is
+// un-smudged; and the ASM8080 vocabulary is no longer
+// searched for incoming words.
+
+: c;                       ( END WORD STARTED WITH code ABOVE *)
+   ?EXEC ?CSP SMUDGE [COMPILE] FORTH ;
+
+//
+// Allow the compiler to grow up to the end of screen 29.
+// Produce an error if we would grow into screen 30.
+//
+29
+S{ COMPILE: last reserved screen                               }
+30

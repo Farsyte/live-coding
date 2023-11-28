@@ -73,6 +73,8 @@ int                 llen = 0;
 unsigned            scr = 0;
 unsigned            line = 0;
 
+unsigned            offset_hwm = 0;
+
 Cstr                prog = 0;
 
 int                 debug = 0;
@@ -191,6 +193,8 @@ int main(int argc, Cstr *argv)
         if (verbose)
             fprintf(stderr, "%s: reading %s\n", prog, input_fn);
 
+        offset_hwm = 0;
+
         while (nextline()) {
             if (lbuf_get(0) == '\f') {
                 seekpage();
@@ -290,12 +294,28 @@ static void seekpage()
     ASSERT(scr < screen_count,
            "screen number %d invalid: drive capacity is %d screens", scr, screen_count);
     line = 0;
+
+    unsigned offset = scr * SCR_BYTES + line * LINE_BYTES;
+
+    ASSERT(offset_hwm <= offset,
+           "attempt to rewind output cursor detected\n%s:%d: %-*.*s...",
+               input_fn, input_ln, llen, llen, _lbuf);
+    offset_hwm = offset;
 }
 
 static void emitline()
 {
-    pByte               op = write_data_base + scr * SCR_BYTES + line * LINE_BYTES;
+    unsigned offset = scr * SCR_BYTES + line * LINE_BYTES;
+
+    ASSERT(offset_hwm <= offset,
+           "attempt to rewind output cursor detected\n%s:%d: %-*.*s...",
+               input_fn, input_ln, llen, llen, _lbuf);
+
+    offset_hwm = offset + LINE_BYTES;
+
+    pByte               op = write_data_base + offset;
     memset(op, ' ', line ? LINE_BYTES : SCR_BYTES);
+
 
     while ((llen > 0) && ((' ' == lbuf_get(llen - 1)) || ('\0' == lbuf_get(llen - 1))))
         lbuf_set(--llen, '\0');
@@ -311,6 +331,15 @@ static void emitline()
     }
 
     line++;
+    if (line < 16)
+        return;
+
+    scr ++;
+    DBG_D(scr);
+    DBG_D(screen_count);
+    ASSERT(scr < screen_count,
+           "screen number %d invalid: drive capacity is %d screens", scr, screen_count);
+    line = 0;
 }
 
 static void maybeindex()

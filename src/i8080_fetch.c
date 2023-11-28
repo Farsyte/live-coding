@@ -172,7 +172,7 @@ static void maybe_debug(i8080 cpu)
 //    pData               FLAGS = cpu->FLAGS;
 
     Word                PC = cpu->PC->value - 1;
-    if ((pc < 0x4000) || (pc >= 0xC000))
+    if ((PC < 0x4000) || (PC >= 0xC000))
         return;
 
     if (!debug_limit)
